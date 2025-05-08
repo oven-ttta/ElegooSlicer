@@ -2,6 +2,14 @@
 @echo off
 set WP=%CD%
 
+if not defined WindowsSdkDir (
+    call get_vs2022_sdk.bat
+)
+
+
+echo WindowsSdkDir=%WindowsSdkDir%
+echo WindowsSDKVersion=%WindowsSDKVersion%
+
 @REM Pack deps
 if "%1"=="pack" (
     setlocal ENABLEDELAYEDEXPANSION 
