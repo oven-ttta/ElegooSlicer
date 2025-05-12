@@ -458,6 +458,14 @@ void PrintConfigDef::init_common_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionPoints{ Vec2d(0, 0), Vec2d(200, 0), Vec2d(200, 200), Vec2d(0, 200) });
 
+    def           = this->add("number_of_giga_printheads", coInt);
+    def->label    = L("Number of Giga printheads");
+    def->tooltip  = L("Setting the number of printheads on the OrangeStorm Giga printer quickly configures all related settings.");
+    def->mode     = comAdvanced;
+    def->min      = 1;
+    def->max      = 4;
+    def->set_default_value(new ConfigOptionInt{1});
+
     //BBS: add "bed_exclude_area"
     def = this->add("bed_exclude_area", coPoints);
     def->label = L("Bed exclude area");
@@ -1651,6 +1659,12 @@ void PrintConfigDef::init_fff_params()
     def->min = 0;
     def->mode = comDevelop;
     def->set_default_value(new ConfigOptionFloat(2.5));
+
+    def          = this->add("bed_mesh_local", coBool);
+    def->label   = L("Adaptive leveling");
+    def->tooltip = L("");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(false));
 
     def          = this->add("bed_mesh_min", coPoint);
     def->label   = L("Bed mesh min");

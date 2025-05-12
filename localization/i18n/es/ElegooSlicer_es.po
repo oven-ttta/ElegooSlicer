@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-12 11:13+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Carlos Fco. Caruncho Serrano <puzzlero@gmail.com>\n"
 "Language-Team: \n"
@@ -9529,6 +9529,14 @@ msgstr "Procesamiento fallido de la plantilla filename_format."
 msgid "Printable area"
 msgstr "Área imprimible"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Área excluida de la cama"
 
@@ -10674,6 +10682,9 @@ msgstr "Altura de la boquilla"
 
 msgid "The height of nozzle tip."
 msgstr "La altura de la punta de la boquilla."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr "Malla de cama mínimo"

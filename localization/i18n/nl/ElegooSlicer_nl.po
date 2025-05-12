@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-12 11:13+0800\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9414,6 +9414,14 @@ msgstr "Verwerking van het sjabloon \"bestandsnaam_formaat\" is mislukt."
 msgid "Printable area"
 msgstr "Gebeid waarbinnen geprint kan worden"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Uitgesloten printbed gebied"
 
@@ -10516,6 +10524,9 @@ msgstr "Hoogte van het mondstuk"
 
 msgid "The height of nozzle tip."
 msgstr "De hoogte van de mondstukpunt."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr ""

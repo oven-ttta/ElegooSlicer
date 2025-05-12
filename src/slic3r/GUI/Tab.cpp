@@ -1655,6 +1655,38 @@ void Tab::on_value_change(const std::string& opt_key, const boost::any& value)
         wxGetApp().preset_bundle->export_selections(*wxGetApp().app_config);
     }
 
+    if (opt_key == "number_of_giga_printheads") {
+        auto preset_bundle = wxGetApp().preset_bundle;
+        auto model_id      = preset_bundle->printers.get_edited_preset().get_printer_type(preset_bundle);
+        if (model_id == "Elegoo-OS-Giga") {
+            auto     number_of_giga_printheads = boost::any_cast<int>(value);
+            auto     field                    = this->get_field("bed_exclude_area");
+            wxString value;
+            switch (number_of_giga_printheads) {
+            case 1: {
+                value = wxString("");
+                break;
+            }
+            case 2: {
+                value = wxString("400x0, 810x0, 810x805, 400x805");
+                break;
+            }
+            case 4:
+            case 3: {
+                value = wxString("200x0, 810x0, 810x805, 200x805");
+                break;
+            }
+            default: {
+                break;
+            }
+            }
+            if (field) {
+                field->set_value(value, true);
+                field->propagate_value();
+            }
+        }
+    }
+
     if (m_postpone_update_ui) {
         // It means that not all values are rolled to the system/last saved values jet.
         // And call of the update() can causes a redundant check of the config values,
@@ -3742,6 +3774,7 @@ void TabPrinter::build_fff()
         create_line_with_widget(optgroup.get(), "printable_area", "custom-svg-and-png-bed-textures_124612", [this](wxWindow* parent) {
            return 	create_bed_shape_widget(parent);
         });
+        optgroup->append_single_option_line("number_of_giga_printheads");
         Option option = optgroup->get_option("bed_exclude_area");
         option.opt.full_width = true;
         optgroup->append_single_option_line(option);
@@ -3817,6 +3850,7 @@ void TabPrinter::build_fff()
         optgroup->append_single_option_line("extruder_clearance_height_to_lid");
 
         optgroup = page->new_optgroup(L("Adaptive bed mesh"), "param_adaptive_mesh");
+        optgroup->append_single_option_line("bed_mesh_local");
         optgroup->append_single_option_line("bed_mesh_min", "adaptive-bed-mesh");
         optgroup->append_single_option_line("bed_mesh_max", "adaptive-bed-mesh");
         optgroup->append_single_option_line("bed_mesh_probe_distance", "adaptive-bed-mesh");
@@ -4517,7 +4551,7 @@ void TabPrinter::toggle_options()
         auto preset_bundle = wxGetApp().preset_bundle;
         auto model_id = m_preset_bundle->printers.get_edited_preset().get_printer_type(preset_bundle);
         toggle_line("gcode_flavor", !(model_id == "Elegoo-CC" || model_id == "Elegoo-C"));
-        
+        toggle_line("number_of_giga_printheads", model_id == "Elegoo-OS-Giga");
     }
 
     if (m_active_page->title() == L("Multimaterial")) {

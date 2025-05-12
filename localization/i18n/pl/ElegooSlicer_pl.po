@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer 2.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-12 11:13+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Krzysztof Morga <tlumaczeniebs@gmail.com>\n"
 "Language-Team: \n"
@@ -9516,6 +9516,14 @@ msgstr "Niepowodzenie przetwarzania szablonu filename_format."
 msgid "Printable area"
 msgstr "Obszar druku"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Obszar wykluczony z druku"
 
@@ -10833,6 +10841,9 @@ msgstr "Wysokość dyszy"
 
 msgid "The height of nozzle tip."
 msgstr "Wysokość końcówki dyszy."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr "Min. obszar skanowania stołu"

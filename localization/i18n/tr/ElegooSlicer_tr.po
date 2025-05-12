@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-12 11:13+0800\n"
 "PO-Revision-Date: 2024-07-11 00:22+0300\n"
 "Last-Translator: Olcay ÖREN\n"
 "Language-Team: \n"
@@ -9384,6 +9384,14 @@ msgstr "Dosyaadı_format şablonunun işlenmesi başarısız oldu."
 msgid "Printable area"
 msgstr "Yazdırılabilir alan"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Yatak hariç alan"
 
@@ -10503,6 +10511,9 @@ msgstr "Nozul yüksekliği"
 
 msgid "The height of nozzle tip."
 msgstr "Nozul ucunun yüksekliği."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr "Minimum yatak ağı"

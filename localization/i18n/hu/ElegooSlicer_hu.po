@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-12 11:13+0800\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9291,6 +9291,14 @@ msgstr "Nem sikerült feldolgozni a fájlnév_formátum sablont."
 msgid "Printable area"
 msgstr "Nyomtatható terület"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Asztal kizárási terület"
 
@@ -10377,6 +10385,9 @@ msgstr "Fúvóka magassága"
 
 msgid "The height of nozzle tip."
 msgstr "A fúvókacsúcs magassága."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr ""

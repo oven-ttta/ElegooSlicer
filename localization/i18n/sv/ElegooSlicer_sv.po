@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-12 11:13+0800\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9205,6 +9205,14 @@ msgstr "Skapande av filnamn_format template misslyckades."
 msgid "Printable area"
 msgstr "Utskriftsbar yta"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Utesluten yta av byggplattan"
 
@@ -10280,6 +10288,9 @@ msgstr "Nozzel höjd"
 
 msgid "The height of nozzle tip."
 msgstr "Höjden på nozzel spetsen."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr ""
