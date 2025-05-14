@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -1362,6 +1362,9 @@ msgstr "配置包已被加载，但部分数值未被识别。"
 msgid ""
 "Configuration file \"%1%\" was loaded, but some values were not recognized."
 msgstr "配置文件“%1%”已被加载，但部分数值未被识别。"
+
+msgid "Based on OrcaSlicer"
+msgstr "基于OrcaSlicer"
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5712,6 +5715,18 @@ msgstr ""
 "有一些未知型号的材料，映射到通用预设。请更新或者重启 ElegooSlicer，以检查系统"
 "预设有没有更新。"
 
+msgid "Smooth Build Plate (Side B)"
+msgstr "光面打印板(B面)"
+
+msgid "Textured Build Plate (Side A)"
+msgstr "纹理打印板(A面)"
+
+msgid "Smooth Cool Plate"
+msgstr "光滑的低温打印床"
+
+msgid "Textured PEI Plate"
+msgstr "纹理PEI热床"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "是否保存修改到“%1%”？"
@@ -7400,24 +7415,12 @@ msgstr "喷嘴"
 msgid "Nozzle temperature when printing"
 msgstr "打印时的喷嘴温度"
 
-msgid "Cool plate"
-msgstr "低温打印热床"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
 msgstr "安装低温打印热床时的热床温度。0值表示这个耗材丝不支持低温打印热床"
 
-msgid "Textured Cool plate"
-msgstr "纹理低温打印热床"
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-"安装纹理低温打印热床时的热床温度。0值表示这个耗材丝不支持纹理低温打印热床"
-
-msgid "Engineering plate"
+msgid "Engineering Plate"
 msgstr "工程材料热床"
 
 msgid ""
@@ -7425,8 +7428,8 @@ msgid ""
 "filament does not support to print on the Engineering Plate"
 msgstr "安装工程材料热床时的热床温度。0值表示这个耗材丝不支持工程材料热床"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "光滑PEI板/高温板"
+msgid "Smooth High Temp Plate"
+msgstr "光滑高温打印热床"
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7436,13 +7439,19 @@ msgstr ""
 "使用光滑PEI热床或高温打印热床时的床温。值0表示耗材不支持在光滑PEI热床或高温打"
 "印热床上打印"
 
-msgid "Textured PEI Plate"
-msgstr "纹理PEI热床"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr "安装纹理PEI热床时的热床温度。0值表示这个耗材丝不支持纹理PEI热床"
+
+msgid "Textured Cool Plate"
+msgstr "纹理的低温打印床"
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
+"安装纹理低温打印热床时的热床温度。0值表示这个耗材丝不支持纹理低温打印热床"
 
 msgid "Volumetric speed limitation"
 msgstr "体积速度限制"
@@ -9207,18 +9216,6 @@ msgstr "首层热床温度。0值表示这个耗材丝不支持纹理PEI热床"
 
 msgid "Bed types supported by the printer"
 msgstr "打印机所支持的热床类型"
-
-msgid "Smooth Cool Plate"
-msgstr "光滑的低温打印床"
-
-msgid "Engineering Plate"
-msgstr "工程材料热床"
-
-msgid "Smooth High Temp Plate"
-msgstr "光滑高温打印热床"
-
-msgid "Textured Cool Plate"
-msgstr "纹理的低温打印床"
 
 msgid "First layer print sequence"
 msgstr "第一层打印顺序"
@@ -14497,12 +14494,6 @@ msgstr "延时摄影"
 msgid "Heated Bed Leveling"
 msgstr "热床调平"
 
-msgid "Textured Build Plate (Side A)"
-msgstr "纹理打印板(A面)"
-
-msgid "Smooth Build Plate (Side B)"
-msgstr "光面打印板(B面)"
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "无法对所选部件执行布尔运算"
 
@@ -15884,6 +15875,18 @@ msgid ""
 msgstr ""
 "避免翘曲\n"
 "您知道吗？打印ABS这类易翘曲材料时，适当提高热床温度可以降低翘曲的概率。"
+
+#~ msgid "Cool plate"
+#~ msgstr "低温打印热床"
+
+#~ msgid "Textured Cool plate"
+#~ msgstr "纹理低温打印热床"
+
+#~ msgid "Engineering plate"
+#~ msgstr "工程材料热床"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "光滑PEI板/高温板"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

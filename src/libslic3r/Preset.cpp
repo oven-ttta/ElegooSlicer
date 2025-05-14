@@ -747,11 +747,19 @@ BedType Preset::get_default_bed_type(PresetBundle* preset_bundle)
         return BedType::btPC;
     } else if (model_id == "C11") {
         return BedType::btPEI;
-    }else if (model_id == "Elegoo-CC" || model_id == "Elegoo-C") {//set default bed type to PTE for Elegoo-CC
+    } else if (is_elegoo_cc_printer()) { // set default bed type to PTE for Elegoo-CC
         return BedType::btPTE;
     }
     return BedType::btPEI;
 }
+
+ bool Preset::is_elegoo_cc_printer() {
+     std::string printer_model = this->config.opt_string("printer_model");
+     if (printer_model == "Elegoo Centauri Carbon" || printer_model == "Elegoo Centauri") { 
+         return true;
+     }
+     return false;
+ }
 
 bool Preset::has_cali_lines(PresetBundle* preset_bundle)
 {

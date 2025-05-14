@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1405,6 +1405,9 @@ msgid ""
 msgstr ""
 "Il file di configurazione \"%1%\" è stato caricato, ma alcuni valori non "
 "sono stati riconosciuti."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5978,6 +5981,18 @@ msgstr ""
 "ElegooSlicer o riavvia ElegooSlicer per verificare se è presente un "
 "aggiornamento delle impostazioni di sistema."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "Textured PEI Plate"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Vuoi salvare le modifiche a \"%1%\"?"
@@ -7806,9 +7821,6 @@ msgstr "Ugello"
 msgid "Nozzle temperature when printing"
 msgstr "Temperatura del nozzle durante la stampa"
 
-msgid "Cool plate"
-msgstr "Cool plate"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7816,16 +7828,8 @@ msgstr ""
 "Temperatura del piano quando è installato il piatto Cool Plate. Il valore 0 "
 "significa che il filamento non supporta la stampa su piatto Cool Plate."
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
-msgstr "Engineering plate"
+msgid "Engineering Plate"
+msgstr "Engineering Plate"
 
 msgid ""
 "Bed temperature when engineering plate is installed. Value 0 means the "
@@ -7834,8 +7838,8 @@ msgstr ""
 "Temperatura del piano quando è installato il piatto Engineering. Il valore 0 "
 "significa che il filamento non supporta la stampa su piatto Engineering."
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Piastra PEI liscia / piastra ad alta temperatura"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7846,15 +7850,20 @@ msgstr ""
 "alta temperatura. Il valore 0 indica che il filamento non supporta la stampa "
 "sulla piastra PEI liscia/piastra ad alta temperatura"
 
-msgid "Textured PEI Plate"
-msgstr "Textured PEI Plate"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "Temperatura del piano quando è installato il piatto Textured PEI. Il valore "
 "0 significa che il filamento non è supportato sul piatto Textured PEI"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Limitazione velocità volumetrica"
@@ -9776,18 +9785,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Tipi di piatti supportati dalla stampante"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "Engineering Plate"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "Sequenza di stampa del primo strato"
@@ -15605,12 +15602,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Impossibile eseguire un'operazione booleana sulle parti selezionate"
 
@@ -17123,6 +17114,15 @@ msgstr ""
 "Sapevi che quando si stampano materiali soggetti a deformazioni come l'ABS, "
 "aumentare in modo appropriato la temperatura del piano riscaldato può "
 "ridurre la probabilità di deformazione."
+
+#~ msgid "Cool plate"
+#~ msgstr "Cool plate"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Engineering plate"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Piastra PEI liscia / piastra ad alta temperatura"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

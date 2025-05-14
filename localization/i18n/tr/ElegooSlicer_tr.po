@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2024-07-11 00:22+0300\n"
 "Last-Translator: Olcay ÖREN\n"
 "Language-Team: \n"
@@ -1381,6 +1381,9 @@ msgstr "Yapılandırma paketi yüklendi ancak bazı değerler tanınamadı."
 msgid ""
 "Configuration file \"%1%\" was loaded, but some values were not recognized."
 msgstr "\"%1%\" yapılandırma dosyası yüklendi ancak bazı değerler tanınamadı."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5900,6 +5903,18 @@ msgid ""
 "system presets."
 msgstr ""
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "Dokulu PEI Plaka"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "\"%1%\" dosyasındaki değişiklikleri kaydetmek istiyor musunuz?"
@@ -7703,9 +7718,6 @@ msgstr "Nozul"
 msgid "Nozzle temperature when printing"
 msgstr "Yazdırma sırasında nozul sıcaklığı"
 
-msgid "Cool plate"
-msgstr "Soğuk plaka"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7713,16 +7725,8 @@ msgstr ""
 "Soğutma plakası takıldığında yatak sıcaklığı. 0 değeri, filamentin Cool "
 "Plate üzerine yazdırmayı desteklemediği anlamına gelir"
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
-msgstr "Mühendislik plakası"
+msgid "Engineering Plate"
+msgstr "Mühendislik Plakası"
 
 msgid ""
 "Bed temperature when engineering plate is installed. Value 0 means the "
@@ -7731,8 +7735,8 @@ msgstr ""
 "Mühendislik plakası takıldığında yatak sıcaklığı. Değer 0, filamentin "
 "Mühendislik Plakasına yazdırmayı desteklemediği anlamına gelir"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Düz PEI Plakası / Yüksek Sıcaklık Plakası"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7743,15 +7747,20 @@ msgstr ""
 "Değeri, filamentin Düz PEI Plakası/Yüksek Sıcaklık Plakası üzerin de baskı "
 "yapmayı desteklemediği anlamına gelir."
 
-msgid "Textured PEI Plate"
-msgstr "Dokulu PEI Plaka"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "Dokulu PEI Plaka takıldığın da yatak sıcaklığı. 0 Değeri, filamentin Dokulu "
 "PEI Plaka üzerine yazdırmayı desteklemediği anlamına gelir"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Hacimsel Hız Sınırlaması"
@@ -9648,18 +9657,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Yazıcının desteklediği yatak türleri"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "Mühendislik Plakası"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "İlk katman yazdırma sırası"
@@ -15281,12 +15278,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Seçilen parçalarda bölme işlemi gerçekleştirilemiyor"
 
@@ -16792,6 +16783,15 @@ msgstr ""
 "ABS gibi bükülmeye yatkın malzemelere baskı yaparken, ısıtma yatağı "
 "sıcaklığının uygun şekilde arttırılmasının bükülme olasılığını "
 "azaltabileceğini biliyor muydunuz?"
+
+#~ msgid "Cool plate"
+#~ msgstr "Soğuk plaka"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Mühendislik plakası"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Düz PEI Plakası / Yüksek Sıcaklık Plakası"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

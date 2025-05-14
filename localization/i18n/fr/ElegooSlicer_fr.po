@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Guislain Cyril, Thomas Lété\n"
@@ -1409,6 +1409,9 @@ msgid ""
 msgstr ""
 "Le fichier de configuration \"%1%\" a été chargé, mais certaines valeurs "
 "n'ont pas été reconnues."
+
+msgid "Based on OrcaSlicer"
+msgstr "Basé sur OrcaSlicer"
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -6027,6 +6030,18 @@ msgstr ""
 "Veuillez mettre à jour ou redémarrer ElegooSlicer pour vérifier s'il existe "
 "une mise à jour des préréglages système."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr "Plateau texturé (côté B)"
+
+msgid "Textured Build Plate (Side A)"
+msgstr "Plateau texturé (côté A)"
+
+msgid "Smooth Cool Plate"
+msgstr "Plaque Cool plate lisse"
+
+msgid "Textured PEI Plate"
+msgstr "Plaque PEI texturée"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Voulez-vous enregistrer les modifications apportées à \"%1%\" ?"
@@ -7909,9 +7924,6 @@ msgstr "Buse"
 msgid "Nozzle temperature when printing"
 msgstr "Température de la buse lors de l'impression"
 
-msgid "Cool plate"
-msgstr "Plaque Cool plate"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7920,18 +7932,7 @@ msgstr ""
 "\") est installé. Une valeur à 0 signifie que ce filament ne peut pas être "
 "imprimé sur le plateau Cool plate"
 
-msgid "Textured Cool plate"
-msgstr "Plaque Cool plate texturée"
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-"Température du plateau lorsque la plaque Cool plate est installée. La valeur "
-"0 signifie que le filament ne peut pas être imprimé sur la plaque Cool plate "
-"texturée."
-
-msgid "Engineering plate"
+msgid "Engineering Plate"
 msgstr "Plaque Engineering"
 
 msgid ""
@@ -7942,8 +7943,8 @@ msgstr ""
 "installée. Une valeur à 0 signifie que ce filament ne peut pas être imprimé "
 "sur le plateau Engineering."
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Plateau PEI lisse / Plateau haute température"
+msgid "Smooth High Temp Plate"
+msgstr "Plaque lisse haute température"
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7954,9 +7955,6 @@ msgstr ""
 "installé. Une valeur à 0 signifie que le filament ne prend pas en charge "
 "l'impression sur le plateau PEI lisse/haute température"
 
-msgid "Textured PEI Plate"
-msgstr "Plaque PEI texturée"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
@@ -7964,6 +7962,17 @@ msgstr ""
 "Température du plateau lorsque la plaque PEI texturée est installée. La "
 "valeur 0 signifie que le filament n'est pas supporté par la plaque PEI "
 "texturée"
+
+msgid "Textured Cool Plate"
+msgstr "Plaque Cool plate texturée"
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
+"Température du plateau lorsque la plaque Cool plate est installée. La valeur "
+"0 signifie que le filament ne peut pas être imprimé sur la plaque Cool plate "
+"texturée."
 
 msgid "Volumetric speed limitation"
 msgstr "Limitation de la vitesse volumétrique"
@@ -9959,18 +9968,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Types de plateaux pris en charge par l'imprimante"
-
-msgid "Smooth Cool Plate"
-msgstr "Plaque Cool plate lisse"
-
-msgid "Engineering Plate"
-msgstr "Plaque Engineering"
-
-msgid "Smooth High Temp Plate"
-msgstr "Plaque lisse haute température"
-
-msgid "Textured Cool Plate"
-msgstr "Plaque Cool plate texturée"
 
 msgid "First layer print sequence"
 msgstr "Séquence d’impression de la première couche"
@@ -16268,12 +16265,6 @@ msgstr "Timelapse"
 msgid "Heated Bed Leveling"
 msgstr "Mise à niveau du plateau chauffant"
 
-msgid "Textured Build Plate (Side A)"
-msgstr "Plateau texturé (côté A)"
-
-msgid "Smooth Build Plate (Side B)"
-msgstr "Plateau texturé (côté B)"
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr ""
 "Impossible d’effectuer une opération booléenne sur les pièces sélectionnées"
@@ -17867,6 +17858,18 @@ msgstr ""
 "Saviez-vous que lors de l’impression de matériaux susceptibles de se "
 "déformer, tels que l’ABS, une augmentation appropriée de la température du "
 "plateau chauffant peut réduire la probabilité de déformation."
+
+#~ msgid "Cool plate"
+#~ msgstr "Plaque Cool plate"
+
+#~ msgid "Textured Cool plate"
+#~ msgstr "Plaque Cool plate texturée"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Plaque Engineering"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Plateau PEI lisse / Plateau haute température"
 
 #~ msgid ""
 #~ "Please input valid values :\n"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2024-05-31 23:33+0900\n"
 "Last-Translator: Hotsolidinfill <138652683+Hotsolidinfill@users.noreply."
 "github.com>, crwusiz <crwusiz@gmail.com>\n"
@@ -1375,6 +1375,9 @@ msgstr "구성 패키지가 로드되었지만, 일부 값이 인식되지 않�
 msgid ""
 "Configuration file \"%1%\" was loaded, but some values were not recognized."
 msgstr "구성 파일 \"%1%\"이(가) 로드되었지만 일부 값이 인식되지 않았습니다."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5824,6 +5827,18 @@ msgstr ""
 "트하거나 ElegooSlicer를 다시 시작하여 시스템 사전 설정에 대한 업데이트가 있는"
 "지 확인하세요."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr "부드러운 쿨 플레이트"
+
+msgid "Textured PEI Plate"
+msgstr "텍스처 PEI 플레이트"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "변경 사항을 \"%1%\"에 저장하시겠습니까?"
@@ -7575,9 +7590,6 @@ msgstr "노즐"
 msgid "Nozzle temperature when printing"
 msgstr "출력 시 노즐 온도"
 
-msgid "Cool plate"
-msgstr "쿨 플레이트"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7585,17 +7597,7 @@ msgstr ""
 "쿨 플레이트 설치 시 베드 온도. 값 0은 필라멘트가 쿨 플레이트에 출력하는 것을 "
 "지원하지 않음을 의미합니다"
 
-msgid "Textured Cool plate"
-msgstr "텍스처 쿨 플레이트"
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-"쿨 플레이트가 설치되었을 때의 베드 온도입니다. 값 0은 필라멘트가 텍스처드 쿨 "
-"플레이트에서 인쇄를 지원하지 않음을 의미합니다"
-
-msgid "Engineering plate"
+msgid "Engineering Plate"
 msgstr "엔지니어링 플레이트"
 
 msgid ""
@@ -7605,8 +7607,8 @@ msgstr ""
 "엔지니어링 플레이트가 설치 시 베드 온도. 값 0은 필라멘트가 엔지니어링 플레이"
 "트에 출력하는 것을 지원하지 않음을 의미합니다"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "부드러운 PEI 플레이트 / 고온 플레이트"
+msgid "Smooth High Temp Plate"
+msgstr "부드러운 고온 플레이트"
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7616,15 +7618,22 @@ msgstr ""
 "부드러운 PEI 플레이트/고온 플레이트 설치 시 베드 온도. 값 0은 필라멘트가 부드"
 "러운 PEI 플레이트/고온 플레이트 출력을 지원하지 않음을 의미합니다"
 
-msgid "Textured PEI Plate"
-msgstr "텍스처 PEI 플레이트"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "텍스처 PEI 플레이트가 설치된 경우 베드 온도. 값 0은 필라멘트가 텍스처 PEI 플"
 "레이트에 출력하는 것을 지원하지 않음을 의미합니다"
+
+msgid "Textured Cool Plate"
+msgstr "텍스처 쿨 플레이트"
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
+"쿨 플레이트가 설치되었을 때의 베드 온도입니다. 값 0은 필라멘트가 텍스처드 쿨 "
+"플레이트에서 인쇄를 지원하지 않음을 의미합니다"
 
 msgid "Volumetric speed limitation"
 msgstr "체적 속도 제한"
@@ -9497,18 +9506,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "프린터가 지원하는 베드 유형"
-
-msgid "Smooth Cool Plate"
-msgstr "부드러운 쿨 플레이트"
-
-msgid "Engineering Plate"
-msgstr "엔지니어링 플레이트"
-
-msgid "Smooth High Temp Plate"
-msgstr "부드러운 고온 플레이트"
-
-msgid "Textured Cool Plate"
-msgstr "텍스처 쿨 플레이트"
 
 msgid "First layer print sequence"
 msgstr "첫 레이어 출력 순서"
@@ -15310,12 +15307,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "선택한 부품에서 부울 연산을 수행할 수 없습니다"
 
@@ -16768,6 +16759,18 @@ msgstr ""
 "뒤틀림 방지\n"
 "ABS와 같이 뒤틀림이 발생하기 쉬운 소재를 출력할 때, 히트베드 온도를 적절하게 "
 "높이면 뒤틀림 가능성을 줄일 수 있다는 사실을 알고 계셨나요?"
+
+#~ msgid "Cool plate"
+#~ msgstr "쿨 플레이트"
+
+#~ msgid "Textured Cool plate"
+#~ msgstr "텍스처 쿨 플레이트"
+
+#~ msgid "Engineering plate"
+#~ msgstr "엔지니어링 플레이트"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "부드러운 PEI 플레이트 / 고온 플레이트"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1369,6 +1369,9 @@ msgid ""
 msgstr ""
 "Configuratiebestand “%1%” werd geladen, maar sommige waarden werden niet "
 "herkend."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5912,6 +5915,18 @@ msgid ""
 "system presets."
 msgstr ""
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "Getextureerde PEI-plaat"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Wilt u de wijzigingen opslaan in \"%1%\"?"
@@ -7757,9 +7772,6 @@ msgstr "Mondstuk"
 msgid "Nozzle temperature when printing"
 msgstr "Mondstuk temperatuur tijdens printen"
 
-msgid "Cool plate"
-msgstr "Koudeplaat"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7767,16 +7779,8 @@ msgstr ""
 "Dit is de bedtemperatuur wanneer de koelplaat is geïnstalleerd. Een waarde "
 "van 0 betekent dat het filament printen op de Cool Plate niet ondersteunt."
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
-msgstr "Engineering plaat"
+msgid "Engineering Plate"
+msgstr "Engineering plate (technisch printbed)"
 
 msgid ""
 "Bed temperature when engineering plate is installed. Value 0 means the "
@@ -7786,8 +7790,8 @@ msgstr ""
 "waarde van 0 betekent dat het filament afdrukken op de Engineering Plate "
 "niet ondersteunt."
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Gladde PEI-plaat / Hoge temperatuurplaat"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7798,9 +7802,6 @@ msgstr ""
 "geïnstalleerd. Waarde 0 betekent dat het filament niet geschikt is voor "
 "afdrukken op de gladde PEI-plaat/hoge temperatuurplaat."
 
-msgid "Textured PEI Plate"
-msgstr "Getextureerde PEI-plaat"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
@@ -7808,6 +7809,14 @@ msgstr ""
 "Bedtemperatuur wanneer een getextureerde PEI-plaat is geïnstalleerd. 0 "
 "betekent dat het filament niet wordt ondersteund op de getextureerde PEI-"
 "plaat"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Volumetrische snelheidsbeperking"
@@ -9682,18 +9691,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Printbedden ondersteund door de printer"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "Engineering plate (technisch printbed)"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "Afdrukvolgorde van de eerste laag"
@@ -15027,12 +15024,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Kan geen booleaanse bewerking uitvoeren op geselecteerde onderdelen"
 
@@ -16550,6 +16541,15 @@ msgstr ""
 "Wist je dat bij het printen van materialen die gevoelig zijn voor "
 "kromtrekken, zoals ABS, een juiste verhoging van de temperatuur van het "
 "warmtebed de kans op kromtrekken kan verkleinen?"
+
+#~ msgid "Cool plate"
+#~ msgstr "Koudeplaat"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Engineering plaat"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Gladde PEI-plaat / Hoge temperatuurplaat"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

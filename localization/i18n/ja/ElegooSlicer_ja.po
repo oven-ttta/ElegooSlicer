@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1373,6 +1373,9 @@ msgstr "構成パッケージをロードしましたが、一部認識できな
 msgid ""
 "Configuration file \"%1%\" was loaded, but some values were not recognized."
 msgstr "構成ファイル %1% がロードされましたが、一部の値が認識できませんでした"
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5782,6 +5785,18 @@ msgid ""
 "system presets."
 msgstr "不明なフィラメントがあります、ElegooSlicerを更新してください。"
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "PEIプレート"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "変更を\"%1%\"に保存しますか？"
@@ -7519,9 +7534,6 @@ msgstr "ノズル"
 msgid "Nozzle temperature when printing"
 msgstr "ノズル温度"
 
-msgid "Cool plate"
-msgstr "常温プレート"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7529,15 +7541,7 @@ msgstr ""
 "常温プレートが装着時のベッド温度です。値が0の場合、フィラメントが常温プレート"
 "に使用できない意味です。"
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
+msgid "Engineering Plate"
 msgstr "エンジニアリングプレート"
 
 msgid ""
@@ -7547,8 +7551,8 @@ msgstr ""
 "エンジニアリングプレートが装着時のベッド温度です。値が0の場合、フィラメントが"
 "エンジニアリングプレートに使用できない意味です。"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Smooth PEI Plate / High Temp Plate"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7558,9 +7562,6 @@ msgstr ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
 "Value 0 means the filament does not support to print on the Smooth PEI Plate/"
 "High Temp Plate"
-
-msgid "Textured PEI Plate"
-msgstr "PEIプレート"
 
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
@@ -7568,6 +7569,14 @@ msgid ""
 msgstr ""
 "PEIプレートを使用時のベッド温度。値が0の場合、フィラメントがPEIプレートをサ"
 "ポートしない意味です。"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "体積速度制限"
@@ -9365,18 +9374,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "適応ベッド種類"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "エンジニアリングプレート"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "First layer print sequence"
@@ -14556,12 +14553,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Unable to perform boolean operation on selected parts"
 
@@ -15997,6 +15988,15 @@ msgstr ""
 "Did you know that when printing materials that are prone to warping such as "
 "ABS, appropriately increasing the heatbed temperature can reduce the "
 "probability of warping?"
+
+#~ msgid "Cool plate"
+#~ msgstr "常温プレート"
+
+#~ msgid "Engineering plate"
+#~ msgstr "エンジニアリングプレート"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Smooth PEI Plate / High Temp Plate"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2023-09-30 15:15+0200\n"
 "Last-Translator: René Mošner <Renemosner@seznam.cz>\n"
 "Language-Team: \n"
@@ -1382,6 +1382,9 @@ msgid ""
 msgstr ""
 "Konfigurační soubor \" %1% \" byl načten, ale některé hodnoty nebyly "
 "rozpoznány."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5865,6 +5868,18 @@ msgstr ""
 "Aktualizujte prosím ElegooSlicer nebo restartujte ElegooSlicer a "
 "zkontrolujte, zda existuje aktualizace systému předvolby."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "Textured PEI Podložka"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Chcete uložit změny do \"%1%\"?"
@@ -7617,9 +7632,6 @@ msgstr "Tryska"
 msgid "Nozzle temperature when printing"
 msgstr "Teplota trysky při tisku"
 
-msgid "Cool plate"
-msgstr "Cool podložka"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7627,16 +7639,8 @@ msgstr ""
 "Toto je teplota podložky, když je Cool podložka. Hodnota 0 znamená, že "
 "filament nepodporuje tisk na Cool Podložku"
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
-msgstr "Engineering podložka"
+msgid "Engineering Plate"
+msgstr "Engineering Podložka"
 
 msgid ""
 "Bed temperature when engineering plate is installed. Value 0 means the "
@@ -7645,8 +7649,8 @@ msgstr ""
 "Teplota podložky při instalaci Engineering podložky. Hodnota 0 znamená "
 "filament nepodporuje tisk na Engineering Podložku"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Smooth PEI Podložka / High Temp Podložka"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7657,15 +7661,20 @@ msgstr ""
 "Podložka. Hodnota 0 znamená, že filament není podporován pro tisk na Smooth "
 "PEI Podložka/High temperature Podložka"
 
-msgid "Textured PEI Plate"
-msgstr "Textured PEI Podložka"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "Teplota podložky při instalaci Textured PEI Podložky. Hodnota 0 znamená "
 "filament nepodporuje tisk na Textured PEI Podložku"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Omezení objemové rychlosti"
@@ -9496,18 +9505,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Typy podložek podporované tiskárnou"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "Engineering Podložka"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "Sekvence tisku první vrstvy"
@@ -14956,12 +14953,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Nelze provést booleovskou operaci na vybraných částech"
 
@@ -16276,6 +16267,15 @@ msgid ""
 "ABS, appropriately increasing the heatbed temperature can reduce the "
 "probability of warping."
 msgstr ""
+
+#~ msgid "Cool plate"
+#~ msgstr "Cool podložka"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Engineering podložka"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Smooth PEI Podložka / High Temp Podložka"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

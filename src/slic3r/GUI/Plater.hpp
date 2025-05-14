@@ -190,6 +190,8 @@ public:
     Search::OptionsSearcher&        get_searcher();
     std::string&                    get_search_line();
 
+    void update_bed_list_text();
+
 private:
     struct priv;
     std::unique_ptr<priv> p;

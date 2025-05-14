@@ -795,6 +795,7 @@ Sidebar::Sidebar(Plater *parent)
                 m_bed_type_list->AppendString(_L(item));
             }
         }
+        update_bed_list_text();
 
         bed_type_title->Bind(wxEVT_ENTER_WINDOW, [bed_type_title, this](wxMouseEvent &e) {
             e.Skip();
@@ -2028,6 +2029,22 @@ std::string& Sidebar::get_search_line()
     return p->searcher.search_string();
 }
 
+void Sidebar::update_bed_list_text()
+{
+    auto       preset_bundle = wxGetApp().preset_bundle;
+    auto       model_id      = preset_bundle->printers.get_edited_preset().get_printer_type(preset_bundle);
+    if (model_id == "Elegoo-CC" || model_id == "Elegoo-C") {
+        if(m_bed_type_list==nullptr){
+            return;
+        }
+        m_bed_type_list->SetString(btPC - 1, _L("Smooth Build Plate (Side B)"));
+        m_bed_type_list->SetString(btPTE - 1, _L("Textured Build Plate (Side A)"));
+        
+    }else{
+        m_bed_type_list->SetString(btPC-1, _L("Smooth Cool Plate"));
+        m_bed_type_list->SetString(btPTE-1, _L("Textured PEI Plate"));
+    }
+}
 void Sidebar::auto_calc_flushing_volumes(const int modify_id)
 {
     auto& preset_bundle = wxGetApp().preset_bundle;
@@ -6617,6 +6634,8 @@ void Plater::priv::on_select_preset(wxCommandEvent &evt)
         for (size_t idx = 0; idx < filament_size; ++idx)
             wxGetApp().plater()->sidebar().auto_calc_flushing_volumes(idx);
 #endif
+
+        this->sidebar->update_bed_list_text();
     }
 
 #ifdef __WXMSW__

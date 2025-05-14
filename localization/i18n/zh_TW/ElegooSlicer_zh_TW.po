@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 11:13+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2023-11-06 14:37+0800\n"
 "Last-Translator: ablegods <ablegods@gmail.com>\n"
 "Language-Team: \n"
@@ -1381,6 +1381,9 @@ msgstr "設定檔已被載入，但部分數值未被識別。"
 msgid ""
 "Configuration file \"%1%\" was loaded, but some values were not recognized."
 msgstr "設定檔 “%1%” 已被載入，但部分數值未被識別。"
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 #, fuzzy
 msgid ""
@@ -5903,6 +5906,19 @@ msgstr ""
 "有一些未知型號的線材，映射到通用預設檔。請更新或者重啟 ElegooSlicer，以檢查系"
 "統預設檔有沒有更新。"
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+#, fuzzy
+msgid "Textured PEI Plate"
+msgstr "金屬紋理 PEI 列印板"
+
 #, fuzzy, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "是否儲存修改到 \"%1%\"？"
@@ -7666,25 +7682,13 @@ msgid "Nozzle temperature when printing"
 msgstr "列印時的噴嘴溫度"
 
 #, fuzzy
-msgid "Cool plate"
-msgstr "低溫列印板"
-
-#, fuzzy
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
 msgstr "使用低溫列印板時的熱床溫度。0 值表示這個線材不支援低溫列印板"
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
 #, fuzzy
-msgid "Engineering plate"
+msgid "Engineering Plate"
 msgstr "工程高溫列印板"
 
 #, fuzzy
@@ -7693,9 +7697,8 @@ msgid ""
 "filament does not support to print on the Engineering Plate"
 msgstr "使用工程高溫列印板時的熱床溫度。0 值表示這個線材不支援工程高溫列印板"
 
-#, fuzzy
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "光滑面 PEI 列印板/高溫列印板"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 #, fuzzy
 msgid ""
@@ -7707,16 +7710,20 @@ msgstr ""
 "印板/高溫列印板"
 
 #, fuzzy
-msgid "Textured PEI Plate"
-msgstr "金屬紋理 PEI 列印板"
-
-#, fuzzy
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "使用金屬紋理 PEI 列印板時的熱床溫度。0 值表示這個線材不支援金屬紋理 PEI 列印"
 "板"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "體積流量速度限制"
@@ -9543,19 +9550,6 @@ msgstr "首層熱床溫度。0 值表示這個線材不支援金屬紋理 PEI �
 #, fuzzy
 msgid "Bed types supported by the printer"
 msgstr "列印設備所支援的列印板類型"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-#, fuzzy
-msgid "Engineering Plate"
-msgstr "工程高溫列印板"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "首層列印順序"
@@ -14815,12 +14809,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 #, fuzzy
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "無法對所選零件執行布林運算"
@@ -16122,6 +16110,18 @@ msgid ""
 "ABS, appropriately increasing the heatbed temperature can reduce the "
 "probability of warping."
 msgstr ""
+
+#, fuzzy
+#~ msgid "Cool plate"
+#~ msgstr "低溫列印板"
+
+#, fuzzy
+#~ msgid "Engineering plate"
+#~ msgstr "工程高溫列印板"
+
+#, fuzzy
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "光滑面 PEI 列印板/高溫列印板"
 
 #, fuzzy
 #~ msgid ""

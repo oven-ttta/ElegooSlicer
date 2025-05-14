@@ -3362,35 +3362,38 @@ void TabFilament::build()
         optgroup->append_line(line);
 
         optgroup = page->new_optgroup(L("Bed temperature"), L"param_bed_temp");
-        line = { L("Cool plate"), L("Bed temperature when cool plate is installed. Value 0 means the filament does not support to print on the Cool Plate") };
+        line = { L("Smooth Cool Plate"), L("Bed temperature when cool plate is installed. Value 0 means the filament does not support to print on the Cool Plate") };
         line.append_option(optgroup->get_option("cool_plate_temp_initial_layer"));
         line.append_option(optgroup->get_option("cool_plate_temp"));
         optgroup->append_line(line);
 
-        line = { L("Textured Cool plate"), L("Bed temperature when cool plate is installed. Value 0 means the filament does not support to print on the Textured Cool Plate") };
-        line.append_option(optgroup->get_option("textured_cool_plate_temp_initial_layer"));
-        line.append_option(optgroup->get_option("textured_cool_plate_temp"));
-        optgroup->append_line(line);
-
-        line = { L("Engineering plate"), L("Bed temperature when engineering plate is installed. Value 0 means the filament does not support to print on the Engineering Plate") };
+        line = {L("Engineering Plate"), L("Bed temperature when engineering plate is installed. Value 0 means the filament does not "
+                                          "support to print on the Engineering Plate")};
         line.append_option(optgroup->get_option("eng_plate_temp_initial_layer"));
         line.append_option(optgroup->get_option("eng_plate_temp"));
         optgroup->append_line(line);
 
-        line = {L("Smooth PEI Plate / High Temp Plate"), L("Bed temperature when Smooth PEI Plate/High temperature plate is installed. Value 0 means the filament does not support to print on the Smooth PEI Plate/High Temp Plate") };
+        line = {L("Smooth High Temp Plate"),
+                L("Bed temperature when Smooth PEI Plate/High temperature plate is installed. Value 0 means the filament does not support "
+                  "to print on the Smooth PEI Plate/High Temp Plate")};
         line.append_option(optgroup->get_option("hot_plate_temp_initial_layer"));
         line.append_option(optgroup->get_option("hot_plate_temp"));
         optgroup->append_line(line);
 
-        line = {L("Textured PEI Plate"), L("Bed temperature when Textured PEI Plate is installed. Value 0 means the filament does not support to print on the Textured PEI Plate")};
+        line = {L("Textured PEI Plate"), L("Bed temperature when Textured PEI Plate is installed. Value 0 means the filament does not "
+                                           "support to print on the Textured PEI Plate")};
         line.append_option(optgroup->get_option("textured_plate_temp_initial_layer"));
         line.append_option(optgroup->get_option("textured_plate_temp"));
+        optgroup->append_line(line);
+
+        line = { L("Textured Cool Plate"), L("Bed temperature when cool plate is installed. Value 0 means the filament does not support to print on the Textured Cool Plate") };
+        line.append_option(optgroup->get_option("textured_cool_plate_temp_initial_layer"));
+        line.append_option(optgroup->get_option("textured_cool_plate_temp"));
         optgroup->append_line(line);
 
         optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value)
         {
             DynamicPrintConfig& filament_config = wxGetApp().preset_bundle->filaments.get_edited_preset().config;
-
             update_dirty();
             /*if (opt_key == "cool_plate_temp" || opt_key == "cool_plate_temp_initial_layer") {
                 m_config_manipulation.check_bed_temperature_difference(BedType::btPC, &filament_config);
@@ -3669,6 +3672,21 @@ void TabFilament::toggle_options()
         bool is_pellet_printer = cfg.opt_bool("pellet_modded_printer");
         toggle_line("pellet_flow_coefficient", is_pellet_printer);
         toggle_line("filament_diameter", !is_pellet_printer);
+
+        {
+            auto       is_elegoo_cc_printer      = wxGetApp().preset_bundle->printers.get_edited_preset().is_elegoo_cc_printer();
+            auto line_cool_plate = this->get_line("cool_plate_temp_initial_layer");
+            auto line_textured_plate_temp = this->get_line("textured_plate_temp_initial_layer");
+            if (line_cool_plate && line_textured_plate_temp) {
+                if (is_elegoo_cc_printer) {
+                    line_cool_plate->setLabel(_L("Smooth Build Plate (Side B)"));
+                    line_textured_plate_temp->setLabel(_L("Textured Build Plate (Side A)"));
+                } else {
+                    line_cool_plate->setLabel(_L("Smooth Cool Plate"));
+                    line_textured_plate_temp->setLabel(_L("Textured PEI Plate"));
+                }
+            }
+        }
     }
     if (m_active_page->title() == L("Setting Overrides"))
         update_filament_overrides_page(&cfg);
@@ -4550,7 +4568,8 @@ void TabPrinter::toggle_options()
 
         auto preset_bundle = wxGetApp().preset_bundle;
         auto model_id = m_preset_bundle->printers.get_edited_preset().get_printer_type(preset_bundle);
-        toggle_line("gcode_flavor", !(model_id == "Elegoo-CC" || model_id == "Elegoo-C"));
+        auto is_elegoo_cc_printer = m_preset_bundle->printers.get_edited_preset().is_elegoo_cc_printer();
+        toggle_line("gcode_flavor", !(is_elegoo_cc_printer));
         toggle_line("number_of_giga_printheads", model_id == "Elegoo-OS-Giga");
     }
 
