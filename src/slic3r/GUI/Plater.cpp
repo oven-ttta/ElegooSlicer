@@ -2031,9 +2031,8 @@ std::string& Sidebar::get_search_line()
 
 void Sidebar::update_bed_list_text()
 {
-    auto       preset_bundle = wxGetApp().preset_bundle;
-    auto       model_id      = preset_bundle->printers.get_edited_preset().get_printer_type(preset_bundle);
-    if (model_id == "Elegoo-CC" || model_id == "Elegoo-C") {
+    auto       is_elegoo_cc_printer      = wxGetApp().preset_bundle->printers.get_edited_preset().is_elegoo_cc_printer();
+    if (is_elegoo_cc_printer) {
         if(m_bed_type_list==nullptr){
             return;
         }
@@ -12638,13 +12637,12 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
 
     {
         //ELE
-        auto        preset_bundle = wxGetApp().preset_bundle;
-        auto model_id      = preset_bundle->printers.get_edited_preset().get_printer_type(preset_bundle);
+        auto       is_elegoo_cc_printer      = wxGetApp().preset_bundle->printers.get_edited_preset().is_elegoo_cc_printer();
         const auto  opt           = physical_printer_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
         const auto  host_type     = opt != nullptr ? opt->value : htElegooLink;
         auto        config        = get_app_config();
 
-        if ((model_id == "Elegoo-CC" || model_id == "Elegoo-C") && host_type == htElegooLink){
+        if (is_elegoo_cc_printer && host_type == htElegooLink){
            
             ElegooPrintHostSendDialog dlg(default_output_file, upload_job.printhost->get_post_upload_actions(), groups, storage_paths,
                                           storage_names, config->get_bool("open_device_tab_post_upload"));
