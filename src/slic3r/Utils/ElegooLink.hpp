@@ -17,13 +17,6 @@ class Http;
 
 class ElegooLink : public OctoPrint
 {
-    struct UploadParams
-    {
-        int timeLapse{0};
-        int heatedBedLeveling{0};
-        int bedType{0};
-    };
-
 public:
     ElegooLink(DynamicPrintConfig *config);
     ~ElegooLink() override = default;
@@ -35,6 +28,9 @@ public:
     bool has_auto_discovery() const override { return false; }
     bool can_test() const override { return true; }
     PrintHostPostUploadActions get_post_upload_actions() const override { return PrintHostPostUploadAction::StartPrint; }
+    bool connect_websocket();
+    PrintAmsInfo get_ams(const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids) override;
+    
 protected:
 #ifdef WIN32
     virtual bool upload_inner_with_resolved_ip(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn, const boost::asio::ip::address& resolved_addr) const;
@@ -53,7 +49,9 @@ private:
                std::string       timeLapse,
                std::string       heatedBedLeveling,
                std::string       bedType,
-               const std::string filename, ErrorFn error_fn) const;
+               const std::string filename, 
+               std::string       filamentAmsMapping,
+               ErrorFn           error_fn) const;
     bool checkResult(WebSocketClient&  client,
                ErrorFn           error_fn) const;
 
@@ -73,6 +71,12 @@ private:
                     ProgressFn        prorgess_fn,
                     ErrorFn           error_fn,
                     InfoFn            info_fn) const;
+    std::map<std::string, std::string> getAttributes(WebSocketClient& client) const;
+    //std::map<std::string, const Slic3r::Preset*> getAmsConfigMap(const std::map<std::string, const Slic3r::Preset*>& compatible_filaments) const;
+    std::string buildAmsDataString(const std::string& filamentAmsMapping) const;
+    // void fillTrayConfigFromMap(PrintAmsTray& tray, const std::map<std::string, const Preset*>& amsConfigMap);
+    void getTrayFilamentMapping(PrintAmsTray& tray, const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids);
+    PrintAmsInfo amsVirtualTestData(const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids);
 };
 }
 

@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Cache-Control" content="max-age=7200" />
+    <title>Model</title>
+
+    <script type="text/javascript" src="../include/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../include/json2.js"></script>
+    <script type="text/javascript" src="../include/globalapi.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../include/swiper/swiper-bundle.min.css" />
+    <script type="text/javascript" src="../include/swiper/swiper-bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../include/viewer/viewer.min.css" />
+    <script type="text/javascript" src="../include/viewer/viewer-jquery.min.js"></script>
+    <script type="text/javascript" src="../data/text.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="printsend.css" />
+    <link rel="stylesheet" type="text/css" href="./css/dark.css" />
+
+    <script type="text/javascript" src="printsend.js"></script>
+</head>
+
+<body onLoad="OnInit()">
+    <div class="print-task-dialog">
+        <div class="print-task-content">
+            <div class="model-name-edit">
+                <input class="model-name" id="model-name" type="text" readonly />
+                <button class="edit-name-btn" id="edit-name-btn" title="Edit name">
+                    <img src="img/edit.svg" alt="Edit" />
+                </button>
+            </div>
+            <div class="model-preview">
+                <img id="model-image" src="" class="model-image">
+            </div>
+            <div class="print-info">
+                <div class="info-group">
+                    <img src="img/clock.svg" class="info-icon">
+                    <span id="print-time">00:00:00</span>
+                </div>
+                <div class="info-group">
+                    <img src="img/layer-num.svg" class="info-icon">
+                    <span id="print-layer">0 Layers</span>
+                </div>
+                <div class="info-group">
+                    <img src="img/est-weight.svg" class="info-icon">
+                    <span id="print-weight">0.0g</span>
+                </div>
+            </div>
+            <div class="filament-info">
+                <div class="all-container">
+                    <div class="header-container">
+                        <!-- <button class="icon-btn"><img src="img/help.svg" alt="help" /></button> -->
+                        <div class="btn-container">
+                            <input type="checkbox" id="option_auto_refill">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Auto Refill</span>
+                        </div>
+                        <div class="btn-container">
+                            <button class="icon-btn" id="prev-page"><img src="img/prev.svg" /></button>
+                            <span id="filament-page">1/1</span>
+                            <button class="icon-btn" id="next-page"><img src="img/next.svg" /></button>
+                        </div>
+                    </div>
+                    <div class="filament-container" id="filament-list">
+                        <!-- JS fills tray cards -->
+                    </div>
+                    <div class="note">
+                        <span>Please select the corresponding CANVAS slot for the filament material</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Print bed selection -->
+            <div class="print-bed-options">
+                <button class="bed-btn selected" data-bed="A" id="bedA">Textured Bed A</button>
+                <button class="bed-btn" data-bed="B" id="bedB">Smooth Bed B</button>
+            </div>
+            <!-- Print options -->
+            <div class="print-options">
+                <label class="target-checkbox">
+                    <input type="checkbox" id="option_canvas">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Enable CANVAS</span>
+                </label>
+                <label class="target-checkbox">
+                    <input type="checkbox" id="option_timelapse">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Timelapse</span>
+                </label>
+                <label class="target-checkbox">
+                    <input type="checkbox" id="option_bedlevel">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Bed Leveling</span>
+                </label>
+                <label class="target-checkbox">
+                    <input type="checkbox" id="option_upload">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Upload and Print</span>
+                </label>
+                <label class="target-checkbox">
+                    <input type="checkbox" id="option_switch_to_device_tab">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Switch to Device Tab</span>
+                </label>
+            </div>
+        </div>
+        <div id="status-tip" class="status-tip"></div>
+        <div class="bottom-container">
+            <button class="cancel-btn" id="btn_cancel">Cancel</button>
+            <button class="print-btn" id="btn_print">Print</button>
+        </div>
+    </div>
+</body>
+
+</html>

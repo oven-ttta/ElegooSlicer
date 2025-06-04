@@ -704,6 +704,44 @@ std::string Preset::get_current_printer_type(PresetBundle *preset_bundle)
     return "";
 }
 
+// std::map<std::string, const Preset*> Preset::get_current_printer_compatible_filaments(PresetBundle *preset_bundle)
+// {
+//     std::map<std::string, const Preset*> compatible_filaments;
+
+//     Preset system_printer_preset;
+//     if(preset_bundle->printers.get_edited_preset().is_system)
+//     {
+//         system_printer_preset = preset_bundle->printers.get_edited_preset();
+//     }
+//     else
+//     {
+//         std::string base_id = preset_bundle->printers.get_edited_preset().base_id;
+//         auto& printer_presets = preset_bundle->printers.get_presets();
+//         for (auto& preset : printer_presets) {
+//         if (preset.is_user())
+//                 continue;
+//            if(preset.setting_id == base_id)
+//            {
+//                 system_printer_preset = preset;
+//                 break;
+//            }
+//         } 
+//     }
+//     if (system_printer_preset.name.empty()) {
+//         return compatible_filaments;
+//     }
+
+//     const auto& filament_presets = preset_bundle->filaments.get_presets();
+//     for (const auto& preset : filament_presets) {
+//         auto opt = preset.config.option<ConfigOptionStrings>("compatible_printers");
+//         if (opt && std::find(opt->values.begin(), opt->values.end(), system_printer_preset.name) != opt->values.end()) {
+//             compatible_filaments.emplace(preset.name, &preset);
+//         }
+//     }
+    
+//     return compatible_filaments;
+// }
+
 bool Preset::has_lidar(PresetBundle *preset_bundle)
 {
     bool has_lidar = false;
@@ -2281,6 +2319,11 @@ void PresetCollection::save_current_preset(const std::string &new_name, bool det
         preset.is_system   = false;
         preset.is_external = false;
         preset.file        = this->path_for_preset(preset);
+        if (curr_preset.is_system) {
+            preset.base_id = curr_preset.setting_id;
+        } else {
+            preset.base_id = curr_preset.base_id;
+        }
         // The newly saved preset will be activated -> make it visible.
         preset.is_visible  = true;
         // Just system presets have aliases

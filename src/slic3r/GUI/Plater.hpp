@@ -147,6 +147,10 @@ public:
     void on_bed_type_change(BedType bed_type);
     void load_ams_list(std::string const & device, MachineObject* obj);
     std::map<int, DynamicPrintConfig> build_filament_ams_list(MachineObject* obj);
+
+    void load_ams_list();
+    std::map<int, DynamicPrintConfig> build_filament_ams_list(std::string const &device_id);
+
     void sync_ams_list();
     // Orca
     void show_SEMM_buttons(bool bshow);

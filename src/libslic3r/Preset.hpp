@@ -312,7 +312,7 @@ public:
     std::string get_filament_type(std::string &display_filament_type);
     std::string get_printer_type(PresetBundle *preset_bundle); // get edited preset type
     std::string get_current_printer_type(PresetBundle *preset_bundle); // get current preset type
-
+    //std::map<std::string, const Preset*> get_current_printer_compatible_filaments(PresetBundle *preset_bundle);
     bool has_lidar(PresetBundle *preset_bundle);
     bool is_custom_defined();
 

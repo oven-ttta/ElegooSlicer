@@ -566,6 +566,10 @@ set(SLIC3R_GUI_SOURCES
     GUI/Jobs/OAuthJob.hpp
     Utils/SimplyPrint.cpp
     Utils/SimplyPrint.hpp
+    
+    GUI/ElegooPrintSend.cpp
+    GUI/ElegooPrintSend.hpp
+
 )
 
 if (WIN32)

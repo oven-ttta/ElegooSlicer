@@ -332,7 +332,7 @@ namespace Slic3r {
 
     wxString ElegooLink::get_test_ok_msg() const
     {
-        return _L("Connection to ElegooLink works correctly.");
+        return _L("Connection to ElegooLink is working correctly.");
     }
 
     wxString ElegooLink::get_test_failed_msg(wxString& msg) const
@@ -566,21 +566,18 @@ namespace Slic3r {
                 std::string timeLapse = "0";
                 std::string heatedBedLeveling = "0";
                 std::string bedType           = "0";
-
-                if (!upload_data.other.has_value()) {
-                    BOOST_LOG_TRIVIAL(error) << "ElegooLink: upload data does not contain other data";
-                } else {
-                    auto s = std::any_cast<std::map<std::string, std::string>>(upload_data.other);
-                   
-                    timeLapse         = s["timeLapse"];
-                    heatedBedLeveling = s["heatedBedLeveling"];
-                    bedType           = s["bedType"];
+                timeLapse         = upload_data.extended_info["timeLapse"];
+                heatedBedLeveling = upload_data.extended_info["heatedBedLeveling"];
+                bedType           = upload_data.extended_info["bedType"];
+                std::string filamentAmsMapping = "";
+                if (upload_data.extended_info.find("filamentAmsMapping") != upload_data.extended_info.end()) {
+                     filamentAmsMapping = upload_data.extended_info["filamentAmsMapping"];   
                 }
                 std::this_thread::sleep_for(std::chrono::seconds(1));
                 if (checkResult(client, error_fn)) {
                     // send print command
                     std::this_thread::sleep_for(std::chrono::seconds(1));
-                    res = print(client, timeLapse, heatedBedLeveling, bedType, upload_filename, error_fn);
+                    res = print(client, timeLapse, heatedBedLeveling, bedType, upload_filename, filamentAmsMapping, error_fn);
                 }else{
                     res = false;
                 }
@@ -657,6 +654,7 @@ namespace Slic3r {
                            std::string       heatedBedLeveling,
                            std::string       bedType,
                            const std::string filename,
+                           std::string       filamentAmsMapping,
                            ErrorFn           error_fn) const
     {
 
@@ -677,22 +675,26 @@ namespace Slic3r {
             auto now = std::chrono::system_clock::now();
             auto duration = now.time_since_epoch();
             auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-            std::string timestamp = std::to_string(milliseconds);     
-            std::string jsonString = R"({
-                                        "Id":"",
-                                        "Data":{
-                                            "Cmd":)"+std::to_string(ElegooLinkCommand::ELEGOO_START_PRINT)+R"(,
-                                            "Data":{
-                                                "Filename":"/local/)" + filename + R"(",
+            std::string timestamp = std::to_string(milliseconds);   
+            std::string amsData = buildAmsDataString(filamentAmsMapping);
+            std::string cmdData = R"({"Filename":"/local/)" + filename + R"(",
                                                 "StartLayer":0,
                                                 "Calibration_switch":)" + heatedBedLeveling + R"(,
                                                 "PrintPlatformType":)" + bedType + R"(,
-                                                "Tlp_Switch":)" + timeLapse + R"(
-                                            },
-                                            "RequestID":")"+ uuid_string + R"(",
-                                            "MainboardID":"",
-                                            "TimeStamp":)" + timestamp + R"(,
-                                            "From":1
+                                                "Tlp_Switch":)" + timeLapse;
+            if (!amsData.empty()) {
+                cmdData += "," + amsData;
+            }
+            cmdData += R"(})";
+            std::string jsonString = R"({
+                                        "Id":"",
+                                            "Data":{
+                                                "Cmd":)"+std::to_string(ElegooLinkCommand::ELEGOO_START_PRINT)+R"(,
+                                                "Data":)" + cmdData + R"(,
+                                                "RequestID":")"+ uuid_string + R"(",
+                                                "MainboardID":"",
+                                                "TimeStamp":)" + timestamp + R"(,
+                                                "From":1
                                         }
                                     })";
                     std::cout << "send: " << jsonString << std::endl;
@@ -866,4 +868,391 @@ namespace Slic3r {
         }
         return res;
     }
+
+
+    std::map<std::string, std::string> ElegooLink::getAttributes(WebSocketClient& client) const
+    {
+        std::map<std::string, std::string> attributes;
+        // create a random UUID generator
+        boost::uuids::random_generator generator;
+        // generate a UUID
+        boost::uuids::uuid uuid        = generator();
+        std::string        uuid_string = to_string(uuid);
+        try {
+            std::string requestID    = uuid_string;
+            auto        now          = std::chrono::system_clock::now();
+            auto        duration     = now.time_since_epoch();
+            auto        milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+            std::string timestamp    = std::to_string(milliseconds);
+            std::string jsonString   = R"({
+                                        "Id":"",
+                                        "Data":{
+                                            "Cmd":)" +
+                                     std::to_string(ElegooLinkCommand::ELEGOO_GET_PROPERTIES) + R"(,
+                                            "Data":{},
+                                            "RequestID":")" +
+                                     uuid_string + R"(",
+                                            "MainboardID":"",
+                                            "TimeStamp":)" +
+                                     timestamp + R"(,
+                                            "From":1
+                                        }
+                                    })";
+            std::cout << "send: " << jsonString << std::endl;
+            BOOST_LOG_TRIVIAL(info) << "start print, param: " << jsonString;
+            bool needWrite = true;
+            // wait 60s
+            auto start_time = std::chrono::steady_clock::now();
+            do {
+                if (needWrite) {
+                    client.send(jsonString);
+                    needWrite = false;
+                }
+                std::string response = client.receive();
+                std::cout << "Received: " << response << std::endl;
+                BOOST_LOG_TRIVIAL(info) << "Received: " << response;
+                pt::ptree          root;
+                std::istringstream is(response);
+                pt::read_json(is, root);
+                auto attr = root.get_child_optional("Attributes");
+                if (attr) {
+                    auto machineName = attr->get_child_optional("MachineName");
+                    if (machineName) {
+                        attributes["MachineName"] = machineName->get_value<std::string>();
+                    }
+ 
+                }
+            } while (std::chrono::steady_clock::now() - start_time < std::chrono::seconds(60));
+            if (std::chrono::steady_clock::now() - start_time >= std::chrono::seconds(60)) {
+                BOOST_LOG_TRIVIAL(error) << "get attributes timeout";
+                return attributes;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "start print error: " << e.what();
+            return attributes;
+        }
+        return attributes;
     }
+
+
+    // std::map<std::string, const Preset*> ElegooLink::getAmsConfigMap(const std::map<std::string, const Preset*>& compatible_filaments) const
+    // {
+
+    //     std::map<std::string, const Preset*> ams_config_map;  
+    //     for (const auto& [filament_name, filament_config] : compatible_filaments) {
+    //         std::string name = filament_name;
+    
+    //         boost::replace_all(name, "Elegoo", "");
+    //         size_t at_pos = name.find("@");
+    //         if (at_pos != std::string::npos)
+    //             name = name.substr(0, at_pos);
+    //         boost::trim(name);
+    //         boost::replace_all(name, " ", "-");
+    //         boost::to_upper(name);
+    //         ams_config_map.emplace(name, filament_config);
+    //     }
+    //     return ams_config_map;
+    // }
+
+    // void ElegooLink::getFilamentMapping(PrintAmsTray& tray, std::vector<Preset*>& filaments)
+    // {
+    //     // std::string name = tray.filament_name;
+    //     // boost::replace_all(name, "Elegoo", "");
+    //     // size_t at_pos = name.find("@");
+    //     // if (at_pos != std::string::npos)
+    //     //     name = name.substr(0, at_pos);
+    //     // boost::trim(name);hh
+
+    //     // for (const auto& filament : filaments) {
+    //     //   std::string vendor = filament->config.option<ConfigOptionString>("filament_vendor")->value;
+    //     //   std::transform(vendor.begin(), vendor.end(), vendor.begin(), ::toupper);
+    //     //    if (vendor  == "ELEGOO") {
+    //     //         //获取打印机型号
+    //     //         std::string printer_model = filament->config.option<ConfigOptionString>("printer_model")->value;
+    //     //         //获取打印机型号
+    //     //         std::string printer_model = filament->config.option<ConfigOptionString>("printer_model")->value;
+    //     //         //获取打印机型号
+    //     //         std::string printer_model = filament->config.option<ConfigOptionString>("printer_model")->value;
+    //     //         tray.filament_type = filament->filament_type;
+    //     //         tray.filament_color = filament->filament_color;
+    //     //         tray.filament_name = filament->filament_name;
+    //     //    }
+    //     // }
+        
+    // }
+    void ElegooLink::getTrayFilamentMapping(PrintAmsTray& tray, const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids)
+    {
+        std::string  brand = boost::to_upper_copy(tray.brand);
+        std::string filament_name = boost::to_upper_copy(tray.filament_name);
+        std::string  filament_type = boost::to_upper_copy(tray.filament_type);
+        std::string  filament_id = "";
+        if(brand == "ELEGOO"){
+            auto it = vendor_filament_type_filament_ids.find(filament_name);
+            if(it != vendor_filament_type_filament_ids.end()){
+                filament_id = it->second;
+                tray.filament_id = filament_id;
+                return;
+            } else {
+                it = vendor_filament_type_filament_ids.find(filament_type);
+                if (it != vendor_filament_type_filament_ids.end()) {
+                    filament_id      = it->second;
+                    tray.filament_id = filament_id;
+                    return;
+                }           
+            }
+        }
+        auto it = generic_filament_type_filament_ids.find(filament_name);
+        if(it != generic_filament_type_filament_ids.end()){
+            filament_id = it->second;
+            tray.filament_id = filament_id;
+            return;
+        } else {
+            it = generic_filament_type_filament_ids.find(filament_type);
+            if (it != generic_filament_type_filament_ids.end()) {
+                filament_id      = it->second;
+                tray.filament_id = filament_id;
+                return;
+            }
+        }
+        BOOST_LOG_TRIVIAL(error) << "ElegooLink::getTrayFilamentMapping: not found filament_id " << brand << " " << filament_name;
+        return;
+    }
+
+    PrintAmsInfo ElegooLink::get_ams(const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids)
+    {
+        return amsVirtualTestData(vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+
+        if (m_host.empty()) {
+            return PrintAmsInfo();
+        }
+
+        PrintAmsInfo ams_info;
+        std::string     machine = "";
+        WebSocketClient client;
+        try {
+            std::string wsUrl = get_host_from_url_no_port(m_host);
+            client.connect(wsUrl, "3030", "/websocket");
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << "Error getting attributes: " << e.what();
+            return ams_info;
+        }
+
+        try {
+            // Subscribe to AMS status topic
+            std::string subscribe_msg = R"({
+                "Id":"",
+                "Data":{
+                    "Cmd":0,
+                    "Data":{},
+                    "RequestID":"",
+                    "MainboardID":"",
+                    "TimeStamp":0,
+                    "From":1
+                },
+                "Topic":"sdcp/ams/+/status"
+            })";
+
+            BOOST_LOG_TRIVIAL(info) << "Subscribing to AMS status: " << subscribe_msg;
+            client.send(subscribe_msg);
+
+            // Wait for response with timeout
+            auto start_time = std::chrono::steady_clock::now();
+            while (std::chrono::steady_clock::now() - start_time < std::chrono::seconds(10)) {
+                std::string response = client.receive();
+                BOOST_LOG_TRIVIAL(info) << "Received AMS status: " << response;
+
+                pt::ptree          root;
+                std::istringstream is(response);
+                pt::read_json(is, root);
+
+                // Check if this is an AMS status message
+                auto topic = root.get_optional<std::string>("Topic");
+                if (!topic || topic->find("sdcp/ams/") == std::string::npos || topic->find("/status") == std::string::npos) {
+                    continue;
+                }
+
+                auto data = root.get_child_optional("Data");
+                if (!data)
+                    continue;
+
+                auto ams_data = data->get_child_optional("Data");
+                if (!ams_data)
+                    continue;
+
+                // Parse AMS connection status
+                ams_info.ams_connect_status     = ams_data->get<bool>("ams_connect_status", false);
+                ams_info.ams_type               = ams_data->get<std::string>("ams_type", "");
+                ams_info.ams_connect_num        = ams_data->get<int>("ams_connect_num", 0);
+                ams_info.nozzle_filament_status = ams_data->get<bool>("nozzle_filament_status", false);
+
+                auto ams_list = ams_data->get_child_optional("ams_list");
+                if (ams_list) {
+                    for (const auto& ams_obj : *ams_list) {
+                        PrintAms ams;
+                        ams.ams_id      = ams_obj.second.get<std::string>("ams_id", "");
+                        ams.temperature = ams_obj.second.get<double>("temperature", 0.0);
+                        ams.humidity    = ams_obj.second.get<int>("humidity", 0);
+
+                        // Parse trays
+                        auto trays = ams_obj.second.get_child_optional("tray_list");
+                        if (trays) {
+                            for (const auto& tray_obj : *trays) {
+                                PrintAmsTray tray;
+                                tray.tray_id           = tray_obj.second.get<std::string>("tray_id", "");
+                                tray.from              = tray_obj.second.get<std::string>("from", "");
+                                tray.brand             = tray_obj.second.get<std::string>("brand", "");
+                                tray.serial_number     = tray_obj.second.get<int>("serial_number", 0);
+                                tray.filament_type     = tray_obj.second.get<std::string>("filament_type", "");
+                                tray.filament_name     = tray_obj.second.get<std::string>("filament_name", "");
+                                tray.filament_color    = tray_obj.second.get<std::string>("filament_color", "");
+                                tray.filament_diameter = tray_obj.second.get<std::string>("filament_diameter", "");
+                                tray.min_nozzle_temp   = tray_obj.second.get<int>("min_nozzle_temp", 0);
+                                tray.max_nozzle_temp   = tray_obj.second.get<int>("max_nozzle_temp", 0);
+                                tray.min_bed_temp      = tray_obj.second.get<int>("min_bed_temp", 0);
+                                tray.max_bed_temp      = tray_obj.second.get<int>("max_bed_temp", 0);
+                                tray.enabled           = tray_obj.second.get<bool>("enabled", false);
+                                getTrayFilamentMapping(tray, vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+                                ams.tray_list.push_back(tray);
+                            }
+                        }
+
+                        ams_info.ams_list.push_back(ams);
+                    }
+                }
+
+                // Parse virtual tray
+                auto vt_tray_obj = ams_data->get_child_optional("vt_tray");
+                if (vt_tray_obj) {
+                    PrintAmsTray vt_tray;
+                    vt_tray.tray_id           = vt_tray_obj->get<std::string>("tray_id", "");
+                    vt_tray.from              = vt_tray_obj->get<std::string>("from", "");
+                    vt_tray.brand             = vt_tray_obj->get<std::string>("brand", "");
+                    vt_tray.serial_number     = vt_tray_obj->get<int>("serial_number", 0);
+                    vt_tray.filament_type     = vt_tray_obj->get<std::string>("filament_type", "");
+                    vt_tray.filament_name     = vt_tray_obj->get<std::string>("filament_name", "");
+                    vt_tray.filament_color    = vt_tray_obj->get<std::string>("filament_color", "");
+                    vt_tray.filament_diameter = vt_tray_obj->get<std::string>("filament_diameter", "");
+                    vt_tray.min_nozzle_temp   = vt_tray_obj->get<int>("min_nozzle_temp", 0);
+                    vt_tray.max_nozzle_temp   = vt_tray_obj->get<int>("max_nozzle_temp", 0);
+                    vt_tray.min_bed_temp      = vt_tray_obj->get<int>("min_bed_temp", 0);
+                    vt_tray.max_bed_temp      = vt_tray_obj->get<int>("max_bed_temp", 0);
+                    vt_tray.enabled           = vt_tray_obj->get<bool>("enabled", false);
+                    getTrayFilamentMapping(vt_tray, vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+                    ams_info.vt_tray = vt_tray;
+                }
+
+                break;
+            }
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << "Error getting AMS status: " << e.what();
+        }
+
+        return ams_info;
+    }
+
+    std::string ElegooLink::buildAmsDataString(const std::string& filamentAmsMapping) const
+    {
+        if (filamentAmsMapping.empty())
+            return "";
+
+        nlohmann::json amsMapping = nlohmann::json::parse(filamentAmsMapping);
+        std::string    colorMapping;
+        const auto&    filamentList = amsMapping["filamentList"];
+        int            colorNum     = amsMapping.value("colorNum", 0);
+        int            amsNum       = amsMapping.value("amsNum", 0);
+
+        for (const auto& filament : filamentList) {
+            std::string color        = filament.value("filamentColor", "");
+            std::string amsId        = filament.value("amsId", "");
+            std::string trayId       = filament.value("trayId", "");
+            std::string filamentType = filament.value("filamentType", "");
+            colorMapping += R"({"color":")" + color + R"(","ams_id":")" + amsId + R"(","tray_id":")" + trayId + R"(","filament_type":")" +
+                            filamentType + R"("},)";
+        }
+        if (!colorMapping.empty() && colorMapping.back() == ',')
+            colorMapping.pop_back();
+
+        return R"("ColorNum":)" + std::to_string(colorNum) + R"(,"AmsNum":)" + std::to_string(amsNum) + R"(,"ColorMapping":[)" +
+               colorMapping + R"(])";
+    }
+
+    PrintAmsInfo ElegooLink::amsVirtualTestData(const std::map<std::string, std::string>& vendor_filament_type_filament_ids,
+                                                const std::map<std::string, std::string>& generic_filament_type_filament_ids)
+    {
+        PrintAmsInfo ams_info;
+        ams_info.ams_connect_status     = true;
+        ams_info.ams_type               = "0302";
+        ams_info.ams_connect_num        = 1;
+        ams_info.nozzle_filament_status = true;
+
+        PrintAms ams;
+        ams.ams_id      = "0";
+        ams.temperature = 25.5;
+        ams.humidity    = 45;
+
+        PrintAmsTray tray;
+        tray.tray_id           = "0";
+        tray.brand             = "Elegoo";
+        tray.serial_number     = 0;
+        tray.filament_type     = "PLA";
+        tray.filament_name     = "PLA";
+        tray.filament_color    = "#FFFFFF";
+        tray.filament_diameter = "1.75";
+        tray.min_nozzle_temp   = 180;
+        tray.max_nozzle_temp   = 220;
+        tray.min_bed_temp      = 0;
+        tray.max_bed_temp      = 60;
+        tray.enabled           = true;
+
+        getTrayFilamentMapping(tray, vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+        ams.tray_list.push_back(tray);
+
+        PrintAmsTray tray2;
+        tray2.tray_id           = "1";
+        tray2.from              = "ams";
+        tray2.brand             = "Elegoo";
+        tray2.serial_number     = 1;
+        tray2.filament_type     = "PLA";
+        tray2.filament_name     = "PLA+";
+        tray2.filament_color    = "#000000";
+        tray2.filament_diameter = "1.75";
+        tray2.min_nozzle_temp   = 180;
+        tray2.max_nozzle_temp   = 220;
+        tray2.min_bed_temp      = 0;
+        tray2.max_bed_temp      = 60;
+        tray2.enabled           = true;
+
+        getTrayFilamentMapping(tray2, vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+        ams.tray_list.push_back(tray2);
+
+        PrintAmsTray tray3;
+        tray3.tray_id        = "2";
+        tray3.from           = "ams";
+        tray3.brand          = "Elegoo";
+        tray3.serial_number  = 2;
+        tray3.filament_type  = "PLA";
+        tray3.filament_name  = "PLA";
+        tray3.filament_color = "#FF0000";
+
+        getTrayFilamentMapping(tray3, vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+        ams.tray_list.push_back(tray3);
+
+        PrintAmsTray tray4;
+        tray4.tray_id        = "3";
+        tray4.from           = "ams";
+        tray4.brand          = "Elegoo";
+        tray4.serial_number  = 3;
+        tray4.filament_type  = "PLA";
+        tray4.filament_name  = "PLA";
+        tray4.filament_color = "#808080";
+
+        getTrayFilamentMapping(tray4, vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+        ams.tray_list.push_back(tray4);
+
+        if (ams.tray_list.size() > 0) {
+            ams_info.ams_list.push_back(ams);
+        }
+        return ams_info;
+    }
+}

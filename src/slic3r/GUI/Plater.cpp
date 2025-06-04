@@ -152,6 +152,8 @@
 #include "CreatePresetsDialog.hpp"
 #include "FileArchiveDialog.hpp"
 
+#include "ElegooPrintSend.hpp"
+
 using boost::optional;
 namespace fs = boost::filesystem;
 using Slic3r::_3DScene;
@@ -1266,10 +1268,15 @@ void Sidebar::update_all_preset_comboboxes()
         }
 
         p_mainframe->load_printer_url(url, apikey);
-
-
         p_mainframe->set_print_button_to_default(print_btn_type);
 
+
+        wxTheApp->CallAfter([this]() {
+            load_ams_list();
+            if(wxGetApp().preset_bundle->filament_ams_list.size() > 0)
+                ams_btn->Show();          
+        });           
+       
     }
 
     if (cfg.opt_bool("pellet_modded_printer")) {
@@ -1749,9 +1756,87 @@ void Sidebar::load_ams_list(std::string const &device, MachineObject* obj)
     for (auto c : p->combos_filament)
         c->update();
 }
+std::map<int, DynamicPrintConfig> Sidebar::build_filament_ams_list(const std::string& device_id)
+{
+    std::map<int, DynamicPrintConfig> filament_ams_list;
+    auto preset_bundle = wxGetApp().preset_bundle;
+    DynamicPrintConfig cfg = preset_bundle->printers.get_edited_preset().config;
+    std::unique_ptr<PrintHost> host(PrintHost::get_print_host(&cfg));
+    if (host) {
+        std::map<std::string, std::string> vendor_filament_type_filament_ids;
+        std::map<std::string, std::string> generic_filament_type_filament_ids;
+        PrinterTechnology tech;
+        const auto opt = cfg.option<ConfigOptionEnum<PrinterTechnology>>("printer_technology");
+        if (opt != nullptr) {
+            tech = opt->value;
+        }
+        const auto& filaments = preset_bundle->materials(tech == ptFFF ? ptFFF : ptSLA);
+        const auto& filaments_presets = filaments.get_presets();
+
+        for(const auto& filaments_preset : filaments_presets) {
+            if(!filaments_preset.is_system) {
+                continue;
+            }
+            auto* filament_type_opt = dynamic_cast<const ConfigOptionStrings*>(filaments_preset.config.option("filament_type"));
+            if(filament_type_opt == nullptr || filament_type_opt->values.size() == 0){
+                continue;
+            }
+            std::string filament_type = filament_type_opt->values[0];
+            if(filaments_preset.alias.empty() || filament_type.empty() || filaments_preset.filament_id.empty()) {
+                continue;
+            }
+            // std::string vendor  = filaments_preset.vendor->name;
+            std::string alias = filaments_preset.alias;
+            alias = boost::algorithm::to_upper_copy(alias);
+            if(alias.find("GENERIC") != std::string::npos) {
+                generic_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
+            }
+            else {
+                vendor_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
+            }
+        }
+
+        auto ams_info = host->get_ams(vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+        for (const auto& ams : ams_info.ams_list) {
+            for (const auto& tray : ams.tray_list) {
+                DynamicPrintConfig filament_config;
+                filament_config.set_key_value("filament_id", new ConfigOptionStrings{ tray.filament_id });
+                filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filament_type });
+                filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filament_name });
+                filament_config.set_key_value("tray_name", new ConfigOptionStrings{ ams.ams_id + "-" + tray.tray_id });
+                filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filament_color});
+                filament_config.set_key_value("filament_exist", new ConfigOptionBools{ true });
+                filament_config.set_key_value("tray_id", new ConfigOptionStrings{ tray.tray_id });
+                filament_config.set_key_value("ams_id", new ConfigOptionStrings{ ams.ams_id });
+                filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
+                filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filament_color);
+               
+                int filament_index = (std::stoi(ams.ams_id) * 4) + std::stoi(tray.tray_id);
+                filament_ams_list.emplace(filament_index, std::move(filament_config));
+            }
+        }
+    }
+    return filament_ams_list;
+}
+
+void Sidebar::load_ams_list()
+{
+    std::string device_id = wxGetApp().preset_bundle->printers.get_edited_preset().base_id;
+    //wxGetApp().preset_bundle->printers
+    std::map<int, DynamicPrintConfig> filament_ams_list = build_filament_ams_list(device_id);
+
+    p->ams_list_device = device_id;
+    if (wxGetApp().preset_bundle->filament_ams_list == filament_ams_list)
+        return;
+    wxGetApp().preset_bundle->filament_ams_list = filament_ams_list;
+
+    for (auto c : p->combos_filament)
+        c->update();
+}
 
 void Sidebar::sync_ams_list()
-{
+{ 
+    load_ams_list();
     auto & list = wxGetApp().preset_bundle->filament_ams_list;
     if (list.empty()) {
         MessageDialog dlg(this,
@@ -7182,7 +7267,7 @@ void Plater::priv::on_action_print_plate(SimpleEvent&)
         m_select_machine_dlg->ShowModal();
         record_start_print_preset("print_plate");
     } else {
-        q->send_gcode_legacy(PLATE_CURRENT_IDX, nullptr, true);
+        q->send_gcode_legacy(partplate_list.get_curr_plate_index(), nullptr, true);
     }
 }
 
@@ -12617,58 +12702,44 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
         }
     }
 
-    {
-        //ELE
+      {
         auto        preset_bundle = wxGetApp().preset_bundle;
-        auto model_id      = preset_bundle->printers.get_edited_preset().get_printer_type(preset_bundle);
         const auto  opt           = physical_printer_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
         const auto  host_type     = opt != nullptr ? opt->value : htElegooLink;
         auto        config        = get_app_config();
 
-        if ((model_id == "Elegoo-CC" || model_id == "Elegoo-C") && host_type == htElegooLink){
-           
-            ElegooPrintHostSendDialog dlg(default_output_file, upload_job.printhost->get_post_upload_actions(), groups, storage_paths,
-                                          storage_names, config->get_bool("open_device_tab_post_upload"));
-            if (dlg.ShowModal() != wxID_OK) {
-                return;
-            }
-            config->set_bool("open_device_tab_post_upload", dlg.switch_to_device_tab());
-            // PrintHostUpload upload_data;
-            upload_job.switch_to_device_tab    = dlg.switch_to_device_tab();
-            upload_job.upload_data.upload_path = dlg.filename();
-            upload_job.upload_data.post_action = dlg.post_action();
-            upload_job.upload_data.group       = dlg.group();
-            upload_job.upload_data.storage     = dlg.storage();
-
-            std::map<std::string, std::string> other;
-            other["bedType"] = std::to_string(dlg.bedType());
-            other["timeLapse"] = std::to_string(dlg.timeLapse());
-            other["heatedBedLeveling"] = std::to_string(dlg.heatedBedLeveling());
-            // Elegoo specific
-            upload_job.upload_data.other = other;
-        }else{
-            PrintHostSendDialog dlg(default_output_file, upload_job.printhost->get_post_upload_actions(), groups, storage_paths,
-                                    storage_names, config->get_bool("open_device_tab_post_upload"));
-            if (dlg.ShowModal() != wxID_OK) {
-                return;
-            }
-            config->set_bool("open_device_tab_post_upload", dlg.switch_to_device_tab());
-            // PrintHostUpload upload_data;
-            upload_job.switch_to_device_tab    = dlg.switch_to_device_tab();
-            upload_job.upload_data.upload_path = dlg.filename();
-            upload_job.upload_data.post_action = dlg.post_action();
-            upload_job.upload_data.group       = dlg.group();
-            upload_job.upload_data.storage     = dlg.storage();
+        std::unique_ptr<PrintHostSendDialog> pDlg;
+        if (host_type == htElegooLink) {
+            pDlg = std::make_unique<ElegooPrintSend>(this, get_partplate_list().get_curr_plate_index(), default_output_file, upload_job.printhost->get_post_upload_actions(), groups,
+                                                               storage_paths, storage_names,
+                                                               config->get_bool("open_device_tab_post_upload"), wxGetApp().preset_bundle->filament_ams_list);
+        } else {
+            pDlg = std::make_unique<PrintHostSendDialog>(default_output_file, upload_job.printhost->get_post_upload_actions(), groups,
+                                                         storage_paths, storage_names, config->get_bool("open_device_tab_post_upload"));
         }
+
+        pDlg->init();
+        if (pDlg->ShowModal() != wxID_OK) {
+            return;
+        }
+
+        config->set_bool("open_device_tab_post_upload", pDlg->switch_to_device_tab());
+        // PrintHostUpload upload_data;
+        upload_job.switch_to_device_tab    = pDlg->switch_to_device_tab();
+        upload_job.upload_data.upload_path = pDlg->filename();
+        upload_job.upload_data.post_action = pDlg->post_action();
+        upload_job.upload_data.group       = pDlg->group();
+        upload_job.upload_data.storage     = pDlg->storage();
+        upload_job.upload_data.extended_info = pDlg->extendedInfo();
     }
-        // Show "Is printer clean" dialog for PrusaConnect - Upload and print.
-        if (std::string(upload_job.printhost->get_name()) == "PrusaConnect" && upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+    // Show "Is printer clean" dialog for PrusaConnect - Upload and print.
+     if (std::string(upload_job.printhost->get_name()) == "PrusaConnect" && upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
             GUI::MessageDialog dlg(nullptr, _L("Is the printer ready? Is the print sheet in place, empty and clean?"), _L("Upload and Print"), wxOK | wxCANCEL);
             if (dlg.ShowModal() != wxID_OK)
                 return;
         }
 
-        if (use_3mf) {
+    if (use_3mf) {
             // Process gcode
             const int result = send_gcode(plate_idx, nullptr);
 
@@ -12681,7 +12752,7 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
             upload_job.upload_data.source_path = p->m_print_job_data._3mf_path;
         }
 
-        p->export_gcode(fs::path(), false, std::move(upload_job));
+        p->export_gcode(fs::path(), false, std::move(upload_job));           
     
 }
 int Plater::send_gcode(int plate_idx, Export3mfProgressFn proFn)

@@ -364,7 +364,6 @@ bool PresetBundle::use_bbl_device_tab() {
     // Use bbl device tab if printhost webui url is not set 
     return cfg.opt_string("print_host_webui").empty();
 }
-
 //BBS: load project embedded presets
 PresetsConfigSubstitutions PresetBundle::load_project_embedded_presets(std::vector<Preset*> project_presets, ForwardCompatibilitySubstitutionRule substitution_rule)
 {
