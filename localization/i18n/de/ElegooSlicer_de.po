@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Heiko Liebscher <hliebschergmail.com>\n"
 "Language-Team: \n"
@@ -1397,6 +1397,9 @@ msgid ""
 msgstr ""
 "Konfigurationsdatei \"%1%\" wurde geladen, aber einige Werte wurden nicht "
 "erkannt."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -6045,6 +6048,18 @@ msgstr ""
 "ElegooSlicer neu, um zu überprüfen, ob es ein Update für "
 "Systemvoreinstellungen gibt."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr "Glatte kalte Druckplatte"
+
+msgid "Textured PEI Plate"
+msgstr "Texturierte PEI-Platte"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Möchten Sie die Änderungen unter \" %1% \" speichern?"
@@ -7897,9 +7912,6 @@ msgstr "Düse"
 msgid "Nozzle temperature when printing"
 msgstr "Düsentemperatur beim Drucken"
 
-msgid "Cool plate"
-msgstr "Kalte Druckplatte"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7908,18 +7920,7 @@ msgstr ""
 "Wert von 0 bedeutet, dass das Filament auf der kalten Druckplatte nicht "
 "unterstützt."
 
-msgid "Textured Cool plate"
-msgstr "Texturierte kalte Druckplatte"
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-"Dies ist die Betttemperatur, wenn die kalte Druckplatte installiert ist. Ein "
-"Wert von 0 bedeutet, dass das Filament auf der texturierten kalten "
-"Druckplatte nicht unterstützt wird."
-
-msgid "Engineering plate"
+msgid "Engineering Plate"
 msgstr "Technische Druckplatte"
 
 msgid ""
@@ -7930,8 +7931,8 @@ msgstr ""
 "wird. Ein Wert von 0 bedeutet, dass das Filament auf der technischen "
 "Druckplatte nicht unterstützt wird."
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Glatte PEI-Platte / Hochtemperaturplatte"
+msgid "Smooth High Temp Plate"
+msgstr "Glatte Hochtemperatur-Druckplatte"
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7942,15 +7943,23 @@ msgstr ""
 "Wert von 0 bedeutet, dass das Filament auf der glatten PEI-/Hochtemperatur "
 "Platte nicht unterstützt wird."
 
-msgid "Textured PEI Plate"
-msgstr "Texturierte PEI-Platte"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "Betttemperatur, wenn die texturierte PEI-Platte installiert ist. 0 bedeutet, "
 "dass das Filament nicht auf der texturierten PEI-Platte unterstützt wird."
+
+msgid "Textured Cool Plate"
+msgstr "Strukturierte kalte Druckplatte"
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
+"Dies ist die Betttemperatur, wenn die kalte Druckplatte installiert ist. Ein "
+"Wert von 0 bedeutet, dass das Filament auf der texturierten kalten "
+"Druckplatte nicht unterstützt wird."
 
 msgid "Volumetric speed limitation"
 msgstr "Volumetrische Geschwindigkeitsbegrenzung"
@@ -9632,6 +9641,14 @@ msgstr "Verarbeitung der Vorlage filename_format fehlgeschlagen."
 msgid "Printable area"
 msgstr "Druckbarer Bereich"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "ausgenommene Druckbettfläche"
 
@@ -9902,18 +9919,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Vom Drucker unterstützte Druckbettypen"
-
-msgid "Smooth Cool Plate"
-msgstr "Glatte kalte Druckplatte"
-
-msgid "Engineering Plate"
-msgstr "Technische Druckplatte"
-
-msgid "Smooth High Temp Plate"
-msgstr "Glatte Hochtemperatur-Druckplatte"
-
-msgid "Textured Cool Plate"
-msgstr "Strukturierte kalte Druckplatte"
 
 msgid "First layer print sequence"
 msgstr "Erste Schicht Druckreihenfolge"
@@ -10965,6 +10970,9 @@ msgstr "Düsenhöhe"
 
 msgid "The height of nozzle tip."
 msgstr "Die Höhe der Düsenspitze."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr "Bett Min Abtastbereich"
@@ -16131,12 +16139,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr ""
 "Die boolesche Operation kann auf den ausgewählten Teilen nicht durchgeführt "
@@ -17675,6 +17677,18 @@ msgstr ""
 "Wussten Sie, dass beim Drucken von Materialien, die zu Verwerfungen neigen, "
 "wie z.B. ABS, durch eine entsprechende Erhöhung der Heizbetttemperatur die "
 "Wahrscheinlichkeit von Verwerfungen verringert werden kann."
+
+#~ msgid "Cool plate"
+#~ msgstr "Kalte Druckplatte"
+
+#~ msgid "Textured Cool plate"
+#~ msgstr "Texturierte kalte Druckplatte"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Technische Druckplatte"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Glatte PEI-Platte / Hochtemperaturplatte"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

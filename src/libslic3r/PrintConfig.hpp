@@ -1174,6 +1174,7 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionBool,               reduce_crossing_wall))
     ((ConfigOptionFloatOrPercent,     max_travel_detour_distance))
     ((ConfigOptionPoints,             printable_area))
+    ((ConfigOptionInt,             number_of_giga_printheads))
     //BBS: add bed_exclude_area
     ((ConfigOptionPoints,             bed_exclude_area))
     ((ConfigOptionPoints,             head_wrap_detect_zone))
@@ -1311,6 +1312,7 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     
     // Orca: support adaptive bed mesh
     ((ConfigOptionFloat,               preferred_orientation))
+    ((ConfigOptionBool,                bed_mesh_local))
     ((ConfigOptionPoint,               bed_mesh_min))
     ((ConfigOptionPoint,               bed_mesh_max))
     ((ConfigOptionPoint,               bed_mesh_probe_distance))
@@ -1318,7 +1320,7 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
 
 
 )
-
+ 
 // This object is mapped to Perl as Slic3r::Config::Full.
 PRINT_CONFIG_CLASS_DERIVED_DEFINE0(
     FullPrintConfig,

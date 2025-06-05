@@ -357,6 +357,7 @@ void OptionsGroup::activate_line(Line& line)
             if (label != nullptr && line.label_tooltip != "")
                 label->SetToolTip(line.label_tooltip);
         }
+        line.setLabelWidget(label);
     }
 
 	// If there's a widget, build it and add the result to the sizer.

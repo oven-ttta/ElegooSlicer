@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2024-07-07 18:43+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1397,6 +1397,9 @@ msgid ""
 msgstr ""
 "Ha estat carregat el fitxer de configuració \"%1%\", però alguns valors no "
 "s'han pogut reconèixer."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5989,6 +5992,18 @@ msgstr ""
 "ElegooSlicer o reinicieu ElegooSlicer per comprovar si hi ha una "
 "actualització dels perfils del sistema."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "Base PEI amb Textura"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Vols desar els canvis a \"%1%\"?"
@@ -7822,9 +7837,6 @@ msgstr "Broquet( nozzle )"
 msgid "Nozzle temperature when printing"
 msgstr "Temperatura del broquet en imprimir"
 
-msgid "Cool plate"
-msgstr "Base Freda"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7832,16 +7844,8 @@ msgstr ""
 "Temperatura del llit quan s'instal·la la Base Freda. El valor 0 significa "
 "que el filament no admet imprimir a la Base Freda"
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
-msgstr "Base d'enginyeria"
+msgid "Engineering Plate"
+msgstr "Base d'Enginyeria"
 
 msgid ""
 "Bed temperature when engineering plate is installed. Value 0 means the "
@@ -7850,8 +7854,8 @@ msgstr ""
 "Temperatura del llit quan s'instal·la la Base d'Enginyeria. El valor 0 "
 "significa que el filament no admet imprimir a la Base d'Enginyeria"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Base PEI Llisa / Base d'Alta Temperatura"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7862,15 +7866,20 @@ msgstr ""
 "Temperatura. El valor 0 significa que el filament no admet imprimir a la "
 "Base PEI Llisa/Base d'Alta Temperatura"
 
-msgid "Textured PEI Plate"
-msgstr "Base PEI amb Textura"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "Temperatura del llit quan s'instal·la la placa PEI amb Textura. El valor 0 "
 "significa que el filament no admet imprimir a la placa PEI amb Textura"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Limitació de la velocitat volumètrica"
@@ -9529,6 +9538,14 @@ msgstr "Error en el processament de la plantilla filename_format."
 msgid "Printable area"
 msgstr "Àrea imprimible"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Zona d'exclusió de la placa"
 
@@ -9787,18 +9804,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Tipus de llit suportats per la impressora"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "Base d'Enginyeria"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "Seqüència d'impressió de primera capa"
@@ -10717,6 +10722,9 @@ msgstr "Alçada del broquet"
 
 msgid "The height of nozzle tip."
 msgstr "L'alçada de la punta del broquet."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr "Malla de llit mínim"
@@ -15701,12 +15709,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "No es pot realitzar una operació booleana amb les peces seleccionades"
 
@@ -17242,6 +17244,15 @@ msgstr ""
 "Sabíeu que quan imprimiu materials propensos a deformar-se, com ara l'ABS, "
 "augmentar adequadament la temperatura del llit pot reduir la probabilitat de "
 "deformació."
+
+#~ msgid "Cool plate"
+#~ msgstr "Base Freda"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Base d'enginyeria"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Base PEI Llisa / Base d'Alta Temperatura"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

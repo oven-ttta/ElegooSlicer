@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer V2.0.0 Official Release\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2024-06-19 16:50+0700\n"
 "Last-Translator: \n"
 "Language-Team: Andylg <andylg@yandex.ru>\n"
@@ -1402,6 +1402,9 @@ msgid ""
 msgstr ""
 "Файл конфигурации \"%1%\" был загружен, но некоторые значения не были "
 "распознаны."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -6042,6 +6045,18 @@ msgstr ""
 "Обновите или перезапустите ElegooSlicer, чтобы проверить наличие обновлений "
 "системных профилей."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr "Не нагреваемая гладкая пластина Bambu"
+
+msgid "Textured PEI Plate"
+msgstr "Текстурированная PEI пластина"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Вы хотите сохранить изменения в \"%1%\"?"
@@ -7893,9 +7908,6 @@ msgstr "Сопло"
 msgid "Nozzle temperature when printing"
 msgstr "Температура сопла при печати"
 
-msgid "Cool plate"
-msgstr "Не нагреваемая пластина"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7903,19 +7915,7 @@ msgstr ""
 "Температура стола при установленной не нагреваемой пластине. 0 означает, что "
 "пластиковая нить не поддерживает печать на этой печатной пластине."
 
-# ??????? Текстурированная не нагреваемая пластина Bambu, Текстурированная пластина Bambu
-msgid "Textured Cool plate"
-msgstr "Не нагреваемая текстур. пластина Bambu"
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-"Температура стола при установленной не нагреваемой текстурированной пластине "
-"Bambu. 0 означает, что пластиковая нить не поддерживает печать на этой "
-"печатной пластине."
-
-msgid "Engineering plate"
+msgid "Engineering Plate"
 msgstr "Инженерная пластина"
 
 msgid ""
@@ -7926,8 +7926,8 @@ msgstr ""
 "означает, что пластиковая нить не поддерживает печать на этой печатной "
 "пластине."
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Гладкая PEI/высокотемп. пластина"
+msgid "Smooth High Temp Plate"
+msgstr "Высокотемп. гладкая пластина"
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7938,15 +7938,23 @@ msgstr ""
 "пластине. 0 означает, что пластиковая нить не поддерживает печать на этой "
 "печатной пластине."
 
-msgid "Textured PEI Plate"
-msgstr "Текстурированная PEI пластина"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "Температура стола при установленной текстурированной пластите с PEI "
 "покрытием. 0 означает, что пластиковая нить не поддерживает печать на этой "
+"печатной пластине."
+
+msgid "Textured Cool Plate"
+msgstr "Не нагреваемая текстур. пластина Bambu"
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
+"Температура стола при установленной не нагреваемой текстурированной пластине "
+"Bambu. 0 означает, что пластиковая нить не поддерживает печать на этой "
 "печатной пластине."
 
 msgid "Volumetric speed limitation"
@@ -9642,6 +9650,14 @@ msgstr "Ошибка обработки шаблона filename_format."
 msgid "Printable area"
 msgstr "Область печати"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Область исключения"
 
@@ -9901,18 +9917,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Типы столов, поддерживаемые принтером"
-
-msgid "Smooth Cool Plate"
-msgstr "Не нагреваемая гладкая пластина Bambu"
-
-msgid "Engineering Plate"
-msgstr "Инженерная пластина"
-
-msgid "Smooth High Temp Plate"
-msgstr "Высокотемп. гладкая пластина"
-
-msgid "Textured Cool Plate"
-msgstr "Не нагреваемая текстур. пластина Bambu"
 
 msgid "First layer print sequence"
 msgstr "Последовательность печати первого слоя"
@@ -10955,6 +10959,9 @@ msgstr "Высота сопла"
 
 msgid "The height of nozzle tip."
 msgstr "Высота кончика сопла."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr "Мин. сетка стола"
@@ -16177,12 +16184,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Невозможно выполнить булевую операцию над выбранными элементами."
 
@@ -17695,6 +17696,19 @@ msgstr ""
 "Знаете ли вы, что при печати материалами, склонными к короблению, таких как "
 "ABS, повышение температуры подогреваемого стола может снизить эту "
 "вероятность?"
+
+#~ msgid "Cool plate"
+#~ msgstr "Не нагреваемая пластина"
+
+# ??????? Текстурированная не нагреваемая пластина Bambu, Текстурированная пластина Bambu
+#~ msgid "Textured Cool plate"
+#~ msgstr "Не нагреваемая текстур. пластина Bambu"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Инженерная пластина"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Гладкая PEI/высокотемп. пластина"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

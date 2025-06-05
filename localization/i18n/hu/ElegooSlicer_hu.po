@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1357,6 +1357,9 @@ msgid ""
 msgstr ""
 "A(z) \"%1%\" konfigurációs csomag betöltődött, de néhány értéket nem "
 "sikerült felismerni."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5858,6 +5861,18 @@ msgid ""
 "system presets."
 msgstr ""
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "Textured PEI Plate"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Szeretnéd elmenteni \"%1%\" változásait?"
@@ -7650,9 +7665,6 @@ msgstr "Fúvóka"
 msgid "Nozzle temperature when printing"
 msgstr "Fúvóka hőmérséklete nyomtatáskor"
 
-msgid "Cool plate"
-msgstr "Cool plate"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7660,16 +7672,8 @@ msgstr ""
 "Asztalhőmérséklet a hideg tálca használatával. A 0 érték azt jelenti, hogy a "
 "filament nem támogatja a Cool Plate-re történő nyomtatást"
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
-msgstr "Engineering plate"
+msgid "Engineering Plate"
+msgstr "Engineering Plate"
 
 msgid ""
 "Bed temperature when engineering plate is installed. Value 0 means the "
@@ -7678,8 +7682,8 @@ msgstr ""
 "Asztalhőmérséklet a mérnöki tálca használatával. A 0 érték azt jelenti, hogy "
 "a filament nem támogatja az Engineering Plate-re történő nyomtatást"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Smooth PEI Plate / High Temp Plate"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7690,9 +7694,6 @@ msgstr ""
 "0 érték azt jelenti, hogy a filament nem támogatja Smooth PEI / High "
 "Temperature tálcára történő nyomtatást"
 
-msgid "Textured PEI Plate"
-msgstr "Textured PEI Plate"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
@@ -7700,6 +7701,14 @@ msgstr ""
 "Asztalhőmérséklet a texturált PEI tálca használatával. A 0 érték azt "
 "jelenti, hogy a filament nem támogatja a High Temp Plate-re történő "
 "nyomtatást"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Volumetrikus sebességhatár"
@@ -9291,6 +9300,14 @@ msgstr "Nem sikerült feldolgozni a fájlnév_formátum sablont."
 msgid "Printable area"
 msgstr "Nyomtatható terület"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Asztal kizárási terület"
 
@@ -9543,18 +9560,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Nyomtató által támogatott asztaltípusok"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "Engineering Plate"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "Az első réteg nyomtatási sorrendje"
@@ -10377,6 +10382,9 @@ msgstr "Fúvóka magassága"
 
 msgid "The height of nozzle tip."
 msgstr "A fúvókacsúcs magassága."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr ""
@@ -14831,12 +14839,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Nem lehet logikai műveletet végrehajtani a kiválasztott tárgyakon"
 
@@ -16296,6 +16298,15 @@ msgstr ""
 "Vetemedés elkerülése\n"
 "Tudtad, hogy a vetemedésre hajlamos anyagok (például ABS) nyomtatásakor a "
 "tárgyasztal hőmérsékletének növelése csökkentheti a vetemedés valószínűségét?"
+
+#~ msgid "Cool plate"
+#~ msgstr "Cool plate"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Engineering plate"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Smooth PEI Plate / High Temp Plate"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

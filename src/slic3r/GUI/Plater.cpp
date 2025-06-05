@@ -797,6 +797,7 @@ Sidebar::Sidebar(Plater *parent)
                 m_bed_type_list->AppendString(_L(item));
             }
         }
+        update_bed_list_text();
 
         bed_type_title->Bind(wxEVT_ENTER_WINDOW, [bed_type_title, this](wxMouseEvent &e) {
             e.Skip();
@@ -2113,6 +2114,21 @@ std::string& Sidebar::get_search_line()
     return p->searcher.search_string();
 }
 
+void Sidebar::update_bed_list_text()
+{
+    auto       is_elegoo_cc_printer      = wxGetApp().preset_bundle->printers.get_edited_preset().is_elegoo_cc_printer();
+    if (is_elegoo_cc_printer) {
+        if(m_bed_type_list==nullptr){
+            return;
+        }
+        m_bed_type_list->SetString(btPC - 1, _L("Smooth Build Plate (Side B)"));
+        m_bed_type_list->SetString(btPTE - 1, _L("Textured Build Plate (Side A)"));
+        
+    }else{
+        m_bed_type_list->SetString(btPC-1, _L("Smooth Cool Plate"));
+        m_bed_type_list->SetString(btPTE-1, _L("Textured PEI Plate"));
+    }
+}
 void Sidebar::auto_calc_flushing_volumes(const int modify_id)
 {
     auto& preset_bundle = wxGetApp().preset_bundle;
@@ -6702,6 +6718,8 @@ void Plater::priv::on_select_preset(wxCommandEvent &evt)
         for (size_t idx = 0; idx < filament_size; ++idx)
             wxGetApp().plater()->sidebar().auto_calc_flushing_volumes(idx);
 #endif
+
+        this->sidebar->update_bed_list_text();
     }
 
 #ifdef __WXMSW__
@@ -12702,17 +12720,18 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
         }
     }
 
-      {
-        auto        preset_bundle = wxGetApp().preset_bundle;
-        const auto  opt           = physical_printer_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
-        const auto  host_type     = opt != nullptr ? opt->value : htElegooLink;
-        auto        config        = get_app_config();
+    {
+        auto       preset_bundle = wxGetApp().preset_bundle;
+        const auto opt           = physical_printer_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
+        const auto host_type     = opt != nullptr ? opt->value : htElegooLink;
+        auto       config        = get_app_config();
 
         std::unique_ptr<PrintHostSendDialog> pDlg;
         if (host_type == htElegooLink) {
-            pDlg = std::make_unique<ElegooPrintSend>(this, get_partplate_list().get_curr_plate_index(), default_output_file, upload_job.printhost->get_post_upload_actions(), groups,
-                                                               storage_paths, storage_names,
-                                                               config->get_bool("open_device_tab_post_upload"), wxGetApp().preset_bundle->filament_ams_list);
+            pDlg = std::make_unique<ElegooPrintSend>(this, get_partplate_list().get_curr_plate_index(), default_output_file,
+                                                     upload_job.printhost->get_post_upload_actions(), groups, storage_paths, storage_names,
+                                                     config->get_bool("open_device_tab_post_upload"),
+                                                     wxGetApp().preset_bundle->filament_ams_list);
         } else {
             pDlg = std::make_unique<PrintHostSendDialog>(default_output_file, upload_job.printhost->get_post_upload_actions(), groups,
                                                          storage_paths, storage_names, config->get_bool("open_device_tab_post_upload"));
@@ -12725,20 +12744,20 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
 
         config->set_bool("open_device_tab_post_upload", pDlg->switch_to_device_tab());
         // PrintHostUpload upload_data;
-        upload_job.switch_to_device_tab    = pDlg->switch_to_device_tab();
-        upload_job.upload_data.upload_path = pDlg->filename();
-        upload_job.upload_data.post_action = pDlg->post_action();
-        upload_job.upload_data.group       = pDlg->group();
-        upload_job.upload_data.storage     = pDlg->storage();
+        upload_job.switch_to_device_tab      = pDlg->switch_to_device_tab();
+        upload_job.upload_data.upload_path   = pDlg->filename();
+        upload_job.upload_data.post_action   = pDlg->post_action();
+        upload_job.upload_data.group         = pDlg->group();
+        upload_job.upload_data.storage       = pDlg->storage();
         upload_job.upload_data.extended_info = pDlg->extendedInfo();
     }
+
     // Show "Is printer clean" dialog for PrusaConnect - Upload and print.
      if (std::string(upload_job.printhost->get_name()) == "PrusaConnect" && upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
             GUI::MessageDialog dlg(nullptr, _L("Is the printer ready? Is the print sheet in place, empty and clean?"), _L("Upload and Print"), wxOK | wxCANCEL);
             if (dlg.ShowModal() != wxID_OK)
                 return;
         }
-
     if (use_3mf) {
             // Process gcode
             const int result = send_gcode(plate_idx, nullptr);

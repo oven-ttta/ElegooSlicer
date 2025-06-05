@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2024-06-30 23:05+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1392,6 +1392,9 @@ msgid ""
 msgstr ""
 "Файл конфігурації “%1%” був завантажений, але деякі значення не були "
 "розпізнані."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5970,6 +5973,18 @@ msgstr ""
 "ласка, оновіть ElegooSlicer або перезапустіть ElegooSlicer, щоб перевірити, "
 "чи є оновлення для системи пресети."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "Текстурована пластина PEI"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Ви хочете зберегти зміни в \\%1%\\?"
@@ -7787,9 +7802,6 @@ msgstr "Сопло"
 msgid "Nozzle temperature when printing"
 msgstr "Температура сопла під час друку"
 
-msgid "Cool plate"
-msgstr "Холодний стіл"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7798,16 +7810,8 @@ msgstr ""
 "філамент\n"
 "не підтримує друк на Холодному столі"
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
-msgstr "Інженерний стіл"
+msgid "Engineering Plate"
+msgstr "Інженерна пластина"
 
 msgid ""
 "Bed temperature when engineering plate is installed. Value 0 means the "
@@ -7816,8 +7820,8 @@ msgstr ""
 "Температура стола при встановленій інженерній плиті. Значення 0 означає \n"
 "Філамент не підтримує друк на інженерній пластині"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Гладка ПЕІ пластина / Високотемпературна пластина"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7828,15 +7832,20 @@ msgstr ""
 "пластина. Значення 0 означає, що філамент не підтримує друк на Гладкій ПЕІ "
 "пластині / Високотемпературній пластині"
 
-msgid "Textured PEI Plate"
-msgstr "Текстурована пластина PEI"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "Температура шару під час встановлення плити Textured PEI Plate. Значення 0 "
 "означає Філамент не підтримує друк на текстурованій пластині PEI"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Об'ємне обмеження швидкості"
@@ -9479,6 +9488,14 @@ msgstr "Не вдалося обробити шаблон filename_format."
 msgid "Printable area"
 msgstr "Область друку"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Площа виключення столу"
 
@@ -9732,18 +9749,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Типи ліжок, які підтримує принтер"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "Інженерна пластина"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "Послідовність друку першого шару"
@@ -10636,6 +10641,9 @@ msgstr "Висота насадки"
 
 msgid "The height of nozzle tip."
 msgstr "Висота кінчика насадки."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr "Сітка для стола min"
@@ -15491,12 +15499,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Не вдається виконати булеву операцію на вибраних частинах"
 
@@ -17015,6 +17017,15 @@ msgstr ""
 "Чи знаєте ви, що при друку матеріалами, схильними до деформації, такими як "
 "ABS, відповідне підвищення температури гарячого ліжка може зменшити "
 "ймовірність деформації."
+
+#~ msgid "Cool plate"
+#~ msgstr "Холодний стіл"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Інженерний стіл"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Гладка ПЕІ пластина / Високотемпературна пластина"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

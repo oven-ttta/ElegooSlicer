@@ -353,6 +353,8 @@ public:
     // BBS: move constructor to public
     Preset(Type type, const std::string &name, bool is_default = false) : type(type), is_default(is_default), name(name) {}
 
+    bool is_elegoo_cc_printer();
+
 protected:
     Preset() = default;
 

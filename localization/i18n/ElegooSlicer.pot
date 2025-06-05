@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1352,6 +1352,9 @@ msgstr ""
 #, possible-boost-format
 msgid ""
 "Configuration file \"%1%\" was loaded, but some values were not recognized."
+msgstr ""
+
+msgid "Based on OrcaSlicer"
 msgstr ""
 
 msgid ""
@@ -5580,6 +5583,18 @@ msgid ""
 "system presets."
 msgstr ""
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr ""
+
 #, possible-boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr ""
@@ -7189,23 +7204,12 @@ msgstr ""
 msgid "Nozzle temperature when printing"
 msgstr ""
 
-msgid "Cool plate"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
 msgstr ""
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
+msgid "Engineering Plate"
 msgstr ""
 
 msgid ""
@@ -7213,7 +7217,7 @@ msgid ""
 "filament does not support to print on the Engineering Plate"
 msgstr ""
 
-msgid "Smooth PEI Plate / High Temp Plate"
+msgid "Smooth High Temp Plate"
 msgstr ""
 
 msgid ""
@@ -7222,12 +7226,17 @@ msgid ""
 "High Temp Plate"
 msgstr ""
 
-msgid "Textured PEI Plate"
-msgstr ""
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
+msgstr ""
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
 msgstr ""
 
 msgid "Volumetric speed limitation"
@@ -8703,6 +8712,14 @@ msgstr ""
 msgid "Printable area"
 msgstr ""
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr ""
 
@@ -8911,18 +8928,6 @@ msgid ""
 msgstr ""
 
 msgid "Bed types supported by the printer"
-msgstr ""
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr ""
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
 msgstr ""
 
 msgid "First layer print sequence"
@@ -9681,6 +9686,9 @@ msgid "Nozzle height"
 msgstr ""
 
 msgid "The height of nozzle tip."
+msgstr ""
+
+msgid "Adaptive leveling"
 msgstr ""
 
 msgid "Bed mesh min"
@@ -13716,12 +13724,6 @@ msgid "Time-lapse"
 msgstr ""
 
 msgid "Heated Bed Leveling"
-msgstr ""
-
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
 msgstr ""
 
 msgid "Unable to perform boolean operation on selected parts"

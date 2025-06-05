@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 18:03+0800\n"
+"POT-Creation-Date: 2025-05-14 11:50+0800\n"
 "PO-Revision-Date: 2024-06-01 21:51-0300\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese, Brazilian\n"
@@ -1396,6 +1396,9 @@ msgid ""
 msgstr ""
 "O arquivo de configuração \"%1%\" foi carregado, mas alguns valores não "
 "foram reconhecidos."
+
+msgid "Based on OrcaSlicer"
+msgstr ""
 
 msgid ""
 "ElegooSlicer will terminate because of running out of memory.It may be a "
@@ -5973,6 +5976,18 @@ msgstr ""
 "favor, atualize o ElegooSlicer ou reinicie o ElegooSlicer para verificar se "
 "há uma atualização para presets do sistema."
 
+msgid "Smooth Build Plate (Side B)"
+msgstr ""
+
+msgid "Textured Build Plate (Side A)"
+msgstr ""
+
+msgid "Smooth Cool Plate"
+msgstr ""
+
+msgid "Textured PEI Plate"
+msgstr "Mesa PEI Texturizada"
+
 #, boost-format
 msgid "Do you want to save changes to \"%1%\"?"
 msgstr "Deseja salvar as alterações em \"%1%\"?"
@@ -7803,9 +7818,6 @@ msgstr "Bico"
 msgid "Nozzle temperature when printing"
 msgstr "Temperatura do bico ao imprimir"
 
-msgid "Cool plate"
-msgstr "Mesa fria"
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7813,16 +7825,8 @@ msgstr ""
 "Temperatura da mesa quando a cool plate (mesa fria) está instalada. Valor 0 "
 "significa que o filamento não suporta impressão na cool plate"
 
-msgid "Textured Cool plate"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Textured Cool Plate"
-msgstr ""
-
-msgid "Engineering plate"
-msgstr "Mesa de engenharia"
+msgid "Engineering Plate"
+msgstr "Engenharia Plate"
 
 msgid ""
 "Bed temperature when engineering plate is installed. Value 0 means the "
@@ -7831,8 +7835,8 @@ msgstr ""
 "Temperatura da mesa quando a mesa de engenharia está instalada. Valor 0 "
 "significa que o filamento não suporta impressão na Mesa de Engenharia"
 
-msgid "Smooth PEI Plate / High Temp Plate"
-msgstr "Mesa PEI lisa / Mesa de alta temperatura"
+msgid "Smooth High Temp Plate"
+msgstr ""
 
 msgid ""
 "Bed temperature when Smooth PEI Plate/High temperature plate is installed. "
@@ -7843,15 +7847,20 @@ msgstr ""
 "instalada. O valor 0 significa que o filamento não suporta a impressão na "
 "Mesa PEI lisa/Mesa de Alta Temperatura"
 
-msgid "Textured PEI Plate"
-msgstr "Mesa PEI Texturizada"
-
 msgid ""
 "Bed temperature when Textured PEI Plate is installed. Value 0 means the "
 "filament does not support to print on the Textured PEI Plate"
 msgstr ""
 "Temperatura da mesa quando a mesa PEI texturizada está instalada. O valor 0 "
 "significa que o filamento não suporta impressão na mesa PEI texturizada"
+
+msgid "Textured Cool Plate"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Textured Cool Plate"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Limitação de fluxo volumétrico"
@@ -9482,6 +9491,14 @@ msgstr "Falha no processamento do modelo filename_format."
 msgid "Printable area"
 msgstr "Área de impressão"
 
+msgid "Number of Giga printheads"
+msgstr ""
+
+msgid ""
+"Setting the number of printheads on the OrangeStorm Giga printer quickly "
+"configures all related settings."
+msgstr ""
+
 msgid "Bed exclude area"
 msgstr "Área de exclusão da mesa"
 
@@ -9739,18 +9756,6 @@ msgstr ""
 
 msgid "Bed types supported by the printer"
 msgstr "Tipos de mesa suportadas pela impressora"
-
-msgid "Smooth Cool Plate"
-msgstr ""
-
-msgid "Engineering Plate"
-msgstr "Engenharia Plate"
-
-msgid "Smooth High Temp Plate"
-msgstr ""
-
-msgid "Textured Cool Plate"
-msgstr ""
 
 msgid "First layer print sequence"
 msgstr "Sequência de impressão da primeira camada"
@@ -10662,6 +10667,9 @@ msgstr "Altura do bico"
 
 msgid "The height of nozzle tip."
 msgstr "Altura da ponta do bico."
+
+msgid "Adaptive leveling"
+msgstr ""
 
 msgid "Bed mesh min"
 msgstr "Mínimo do bed mesh"
@@ -15551,12 +15559,6 @@ msgstr ""
 msgid "Heated Bed Leveling"
 msgstr ""
 
-msgid "Textured Build Plate (Side A)"
-msgstr ""
-
-msgid "Smooth Build Plate (Side B)"
-msgstr ""
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Não é possível realizar operação booleana nas peças selecionadas"
 
@@ -17072,6 +17074,15 @@ msgstr ""
 "Você sabia que ao imprimir materiais propensos ao empenamento, como ABS, "
 "aumentar adequadamente a temperatura da mesa aquecida pode reduzir a "
 "probabilidade de empenamento?"
+
+#~ msgid "Cool plate"
+#~ msgstr "Mesa fria"
+
+#~ msgid "Engineering plate"
+#~ msgstr "Mesa de engenharia"
+
+#~ msgid "Smooth PEI Plate / High Temp Plate"
+#~ msgstr "Mesa PEI lisa / Mesa de alta temperatura"
 
 #~ msgid ""
 #~ "Failed to download the plug-in. Please check your firewall settings and "

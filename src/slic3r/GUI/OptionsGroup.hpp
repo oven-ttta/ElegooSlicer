@@ -87,9 +87,19 @@ public:
     const std::vector<widget_t>&	get_extra_widgets() const {return m_extra_widgets;}
     const std::vector<Option>&		get_options() const { return m_options; }
 
+	void setLabel(wxString label) { 
+		this->label = label;
+        if (m_labelWidget) {
+            m_labelWidget->SetLabelText(label);
+        }
+	}
+    void setLabelWidget(wxStaticText* w){ m_labelWidget = w;}
+
 private:
 	std::vector<Option>		m_options;//! {std::vector<Option>()};
     std::vector<widget_t>	m_extra_widgets;//! {std::vector<widget_t>()};
+
+	wxStaticText* m_labelWidget = nullptr;
 };
 
 using column_t = std::function<wxWindow*(wxWindow* parent, const Line&)>;
