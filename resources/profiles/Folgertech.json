@@ -1,6 +1,6 @@
 {
     "name": "Folgertech",
-    "version": "01.01.08.01",
+    "version":  "02.03.00.03",
     "force_update": "0",
     "description": "Folgertech configurations",
     "machine_model_list": [
@@ -79,92 +79,7 @@
             "sub_path": "process/0.42mm Extra Draft @FT 0.6 nozzle.json"
         }
     ],
-    "filament_list": [
-        {
-            "name": "fdm_filament_common",
-            "sub_path": "filament/fdm_filament_common.json"
-        },
-        {
-            "name": "fdm_filament_pla",
-            "sub_path": "filament/fdm_filament_pla.json"
-        },
-        {
-            "name": "fdm_filament_tpu",
-            "sub_path": "filament/fdm_filament_tpu.json"
-        },
-        {
-            "name": "fdm_filament_pet",
-            "sub_path": "filament/fdm_filament_pet.json"
-        },
-        {
-            "name": "fdm_filament_abs",
-            "sub_path": "filament/fdm_filament_abs.json"
-        },
-        {
-            "name": "fdm_filament_pc",
-            "sub_path": "filament/fdm_filament_pc.json"
-        },
-        {
-            "name": "fdm_filament_asa",
-            "sub_path": "filament/fdm_filament_asa.json"
-        },
-        {
-            "name": "fdm_filament_pva",
-            "sub_path": "filament/fdm_filament_pva.json"
-        },
-        {
-            "name": "fdm_filament_pa",
-            "sub_path": "filament/fdm_filament_pa.json"
-        },
-        {
-            "name": "Folgertech Generic ABS",
-            "sub_path": "filament/Folgertech Generic ABS.json"
-        },
-        {
-            "name": "Folgertech Generic ASA",
-            "sub_path": "filament/Folgertech Generic ASA.json"
-        },
-        {
-            "name": "Folgertech Generic PA",
-            "sub_path": "filament/Folgertech Generic PA.json"
-        },
-        {
-            "name": "Folgertech Generic PA-CF",
-            "sub_path": "filament/Folgertech Generic PA-CF.json"
-        },
-        {
-            "name": "Folgertech Generic PC",
-            "sub_path": "filament/Folgertech Generic PC.json"
-        },
-        {
-            "name": "Folgertech Generic PETG",
-            "sub_path": "filament/Folgertech Generic PETG.json"
-        },
-        {
-            "name": "Folgertech Generic PETG-CF",
-            "sub_path": "filament/Folgertech Generic PETG-CF.json"
-        },
-        {
-            "name": "Folgertech Generic PLA",
-            "sub_path": "filament/Folgertech Generic PLA.json"
-        },
-        {
-            "name": "Folgertech Generic PLA Silk",
-            "sub_path": "filament/Folgertech Generic PLA Silk.json"
-        },
-        {
-            "name": "Folgertech Generic PLA-CF",
-            "sub_path": "filament/Folgertech Generic PLA-CF.json"
-        },
-        {
-            "name": "Folgertech Generic TPU",
-            "sub_path": "filament/Folgertech Generic TPU.json"
-        },
-        {
-            "name": "Folgertech Generic PVA",
-            "sub_path": "filament/Folgertech Generic PVA.json"
-        }
-    ],
+    "filament_list": [],
     "machine_list": [
         {
             "name": "fdm_machine_common",

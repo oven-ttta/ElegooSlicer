@@ -222,7 +222,7 @@ AboutDialog::AboutDialog()
     std::string icon_path = (boost::format("%1%/images/ElegooSlicerTitle.ico") % resources_dir()).str();
     SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
 
-    wxPanel *m_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(560), FromDIP(237)), wxTAB_TRAVERSAL);
+    wxPanel* m_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(560), FromDIP(125)), wxTAB_TRAVERSAL);
 
     wxBoxSizer *panel_versizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *vesizer  = new wxBoxSizer(wxVERTICAL);
@@ -234,6 +234,8 @@ AboutDialog::AboutDialog()
 	auto main_sizer = new wxBoxSizer(wxVERTICAL);
     main_sizer->Add(m_panel, 1, wxEXPAND | wxALL, 0);
     main_sizer->Add(ver_sizer, 0, wxEXPAND | wxALL, 0);
+
+	bool is_dark = wxGetApp().app_config->get("dark_color_mode") == "1";
 
     // logo
     m_logo_bitmap = ScalableBitmap(this, "ElegooSlicer_about", 250);
@@ -254,11 +256,11 @@ AboutDialog::AboutDialog()
         bs_version->SetFont(Label::Body_12);
         wxFont version_font = GetFont();
         #ifdef __WXMSW__
-        version_font.SetPointSize(version_font.GetPointSize()-1);
+			version_font.SetPointSize(version_font.GetPointSize()-1);
         #else
             version_font.SetPointSize(11);
         #endif
-        version_font.SetPointSize(FromDIP(16));
+        version_font.SetPointSize(FromDIP(20));
         version->SetFont(version_font);
         version->SetForegroundColour(wxColour("#FFFFFD"));
         bs_version->SetForegroundColour(wxColour("#FFFFFD"));

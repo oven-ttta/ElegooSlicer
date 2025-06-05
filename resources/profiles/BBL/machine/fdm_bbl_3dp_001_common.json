@@ -100,7 +100,7 @@
         "0",
         "0"
     ],
-    "retract_lift_below": [
+    "retract_lift_below":[
         "249"
     ],
     "extruder_clearance_radius": "57",
@@ -108,7 +108,7 @@
     "extruder_clearance_height_to_lid": "90",
     "nozzle_volume": "107",
     "printer_structure": "corexy",
-    "best_object_pos": "0.5x0.5",
+    "best_object_pos":"0.5x0.5",
     "retraction_minimum_travel": [
         "1"
     ],

@@ -1,6 +1,6 @@
 {
     "name": "FlyingBear",
-    "version": "01.01.08.01",
+    "version":  "02.03.00.03",
     "force_update": "1",
     "description": "FlyingBear configurations",
     "machine_model_list": [
@@ -41,7 +41,7 @@
         {
             "name": "0.16mm Optimal @FlyingBear Reborn3",
             "sub_path": "process/0.16mm Optimal @FlyingBear Reborn3.json"
-        },
+        },       
         {
             "name": "0.20mm Standard @FlyingBear Reborn3",
             "sub_path": "process/0.20mm Standard @FlyingBear Reborn3.json"
@@ -50,6 +50,7 @@
             "name": "0.24mm Draft @FlyingBear Reborn3",
             "sub_path": "process/0.24mm Draft @FlyingBear Reborn3.json"
         },
+
         {
             "name": "0.12mm Fine @FlyingBear Ghost 6 0.4 nozzle",
             "sub_path": "process/0.12mm Fine @FlyingBear Ghost 6 0.4 nozzle.json"
@@ -66,6 +67,7 @@
             "name": "0.24mm Draft @FlyingBear Ghost 6 0.4 nozzle",
             "sub_path": "process/0.24mm Draft @FlyingBear Ghost 6 0.4 nozzle.json"
         },
+
         {
             "name": "fdm_process_common_S1",
             "sub_path": "process/S1/fdm_process_common_S1.json"
@@ -90,6 +92,7 @@
             "name": "0.24mm Draft @FlyingBear S1",
             "sub_path": "process/S1/0.24mm Draft @FlyingBear S1.json"
         }
+
     ],
     "filament_list": [
         {
@@ -120,7 +123,7 @@
             "name": "fdm_filament_pa",
             "sub_path": "filament/fdm_filament_pa.json"
         },
-        {
+		        {
             "name": "FlyingBear Generic PLA",
             "sub_path": "filament/FlyingBear Generic PLA.json"
         },
@@ -144,6 +147,7 @@
             "name": "FlyingBear Generic PA-CF",
             "sub_path": "filament/FlyingBear Generic PA-CF.json"
         },
+
         {
             "name": "fdm_filament_pla_Hyper",
             "sub_path": "filament/fdm_filament_pla_Hyper.json"
@@ -152,6 +156,8 @@
             "name": "FlyingBear PLA Hyper",
             "sub_path": "filament/FlyingBear PLA Hyper.json"
         },
+
+
         {
             "name": "fdm_filament_common_S1",
             "sub_path": "filament/S1/fdm_filament_common_S1.json"
@@ -268,17 +274,21 @@
             "name": "Other TPU @S1",
             "sub_path": "filament/S1/Other TPU @S1.json"
         }
+
+
+
+
     ],
     "machine_list": [
-        {
+	    {
             "name": "fdm_marlin_common",
             "sub_path": "machine/fdm_marlin_common.json"
         },
-        {
+	    {
             "name": "fdm_machine_common",
             "sub_path": "machine/fdm_machine_common.json"
         },
-        {
+		{
             "name": "fdm_klipper_common",
             "sub_path": "machine/fdm_klipper_common.json"
         },

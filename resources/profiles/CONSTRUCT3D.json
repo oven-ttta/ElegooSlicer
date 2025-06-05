@@ -1,6 +1,6 @@
 {
     "name": "CONSTRUCT3D",
-    "version": "01.01.08.01",
+    "version":  "02.03.00.03",
     "force_update": "0",
     "description": "Construct3D configurations",
     "machine_model_list": [
@@ -8,7 +8,7 @@
             "name": "Construct 1 XL",
             "sub_path": "machine/Construct 1 XL.json"
         },
-        {
+		{
             "name": "Construct 1",
             "sub_path": "machine/Construct 1.json"
         }
@@ -30,11 +30,11 @@
             "name": "0.30mm Standard @Construct 1 XL",
             "sub_path": "process/0.30mm Standard @Construct 1 XL.json"
         },
-        {
+		{
             "name": "0.38mm Draft @Construct 1 XL",
             "sub_path": "process/0.38mm Draft @Construct 1 XL.json"
         },
-        {
+		{
             "name": "0.14mm Quality @Construct 1",
             "sub_path": "process/0.14mm Quality @Construct 1.json"
         },
@@ -46,7 +46,7 @@
             "name": "0.22mm Standard @Construct 1",
             "sub_path": "process/0.22mm Standard @Construct 1.json"
         },
-        {
+		{
             "name": "0.30mm Draft @Construct 1 XL",
             "sub_path": "process/0.30mm Draft @Construct 1.json"
         }
@@ -86,7 +86,7 @@
             "name": "Construct 1 XL 0.6 nozzle",
             "sub_path": "machine/Construct 1 XL 0.6 nozzle.json"
         },
-        {
+		        {
             "name": "Construct 1 0.4 nozzle",
             "sub_path": "machine/Construct 1 0.4 nozzle.json"
         }

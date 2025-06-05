@@ -12,6 +12,7 @@
 #include <libslic3r/enum_bitmask.hpp>
 #include "Http.hpp"
 #include "libslic3r/Preset.hpp"
+#include <map>
 class wxArrayString;
 
 namespace Slic3r {

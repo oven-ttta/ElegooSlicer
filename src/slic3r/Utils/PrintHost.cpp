@@ -27,6 +27,7 @@
 #include "Obico.hpp"
 #include "Flashforge.hpp"
 #include "SimplyPrint.hpp"
+#include "ElegooLink.hpp"
 
 namespace fs = boost::filesystem;
 using boost::optional;

@@ -1,6 +1,6 @@
 {
     "name": "Geeetech",
-    "version": "01.01.08.01",
+    "version":  "02.03.00.03",
     "force_update": "0",
     "description": "Geeetech configurations",
     "machine_model_list": [
@@ -427,84 +427,7 @@
             "sub_path": "process/0.44mm Draft @Geeetech M1 0.8 nozzle.json"
         }
     ],
-    "filament_list": [
-        {
-            "name": "fdm_filament_common",
-            "sub_path": "filament/fdm_filament_common.json"
-        },
-        {
-            "name": "fdm_filament_abs",
-            "sub_path": "filament/fdm_filament_abs.json"
-        },
-        {
-            "name": "fdm_filament_asa",
-            "sub_path": "filament/fdm_filament_asa.json"
-        },
-        {
-            "name": "fdm_filament_pa",
-            "sub_path": "filament/fdm_filament_pa.json"
-        },
-        {
-            "name": "fdm_filament_pc",
-            "sub_path": "filament/fdm_filament_pc.json"
-        },
-        {
-            "name": "fdm_filament_pet",
-            "sub_path": "filament/fdm_filament_pet.json"
-        },
-        {
-            "name": "fdm_filament_pva",
-            "sub_path": "filament/fdm_filament_pva.json"
-        },
-        {
-            "name": "fdm_filament_pla",
-            "sub_path": "filament/fdm_filament_pla.json"
-        },
-        {
-            "name": "fdm_filament_tpu",
-            "sub_path": "filament/fdm_filament_tpu.json"
-        },
-        {
-            "name": "Generic ABS @Geeetech",
-            "sub_path": "filament/Generic ABS @Geeetech.json"
-        },
-        {
-            "name": "Generic ASA @Geeetech",
-            "sub_path": "filament/Generic ASA @Geeetech.json"
-        },
-        {
-            "name": "Generic PA @Geeetech",
-            "sub_path": "filament/Generic PA @Geeetech.json"
-        },
-        {
-            "name": "Generic PC @Geeetech",
-            "sub_path": "filament/Generic PC @Geeetech.json"
-        },
-        {
-            "name": "Generic PETG @Geeetech",
-            "sub_path": "filament/Generic PETG @Geeetech.json"
-        },
-        {
-            "name": "Generic PLA @Geeetech",
-            "sub_path": "filament/Generic PLA @Geeetech.json"
-        },
-        {
-            "name": "Generic PLA @Geeetech_FastSpeed",
-            "sub_path": "filament/Generic PLA @Geeetech_FastSpeed.json"
-        },
-        {
-            "name": "Generic PLA-CF @Geeetech",
-            "sub_path": "filament/Generic PLA-CF @Geeetech.json"
-        },
-        {
-            "name": "Generic PVA @Geeetech",
-            "sub_path": "filament/Generic PVA @Geeetech.json"
-        },
-        {
-            "name": "Generic TPU @Geeetech",
-            "sub_path": "filament/Generic TPU @Geeetech.json"
-        }
-    ],
+    "filament_list": [],
     "machine_list": [
         {
             "name": "fdm_machine_common",

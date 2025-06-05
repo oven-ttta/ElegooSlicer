@@ -741,6 +741,7 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
                                  gcodegen.config().filament_multitool_ramming.get_at(tcr.initial_tool));
         const bool should_travel_to_tower = !tcr.priming && (tcr.force_travel     // wipe tower says so
                                                              || !needs_toolchange // this is just finishing the tower with no toolchange
+                                                             || will_go_down // Make sure to move to prime tower before moving down
                                                              || is_ramming);
 
         if (should_travel_to_tower || gcodegen.m_need_change_layer_lift_z) {
@@ -1201,14 +1202,23 @@ std::vector<GCode::LayerToPrint> GCode::collect_layers_to_print(const PrintObjec
             // Allow empty support layers, as the support generator may produce no extrusions for non-empty support regions.
             || (layer_to_print.support_layer /* && layer_to_print.support_layer->has_extrusions() */)) {
             double top_cd = object.config().support_top_z_distance;
-            double bottom_cd = object.config().support_bottom_z_distance;
-
+            double bottom_cd = object.config().support_bottom_z_distance == 0. ? top_cd : object.config().support_bottom_z_distance;
+            //if (!object.print()->config().independent_support_layer_height)
+            { // the actual support gap may be larger than the configured one due to rounding to layer height for organic support, regardless of independent support layer height
+                top_cd    = std::ceil(top_cd / object.config().layer_height) * object.config().layer_height;
+                bottom_cd = std::ceil(bottom_cd / object.config().layer_height) * object.config().layer_height;
+            }
             double extra_gap = (layer_to_print.support_layer ? bottom_cd : top_cd);
 
             // raft contact distance should not trigger any warning
-            if(last_extrusion_layer && last_extrusion_layer->support_layer)
+            if (last_extrusion_layer && last_extrusion_layer->support_layer) {
+                double raft_gap = object.config().raft_contact_distance.value;
+                //if (!object.print()->config().independent_support_layer_height)
+                {
+                    raft_gap = std::ceil(raft_gap / object.config().layer_height) * object.config().layer_height;
+                }
                 extra_gap = std::max(extra_gap, object.config().raft_contact_distance.value);
-
+            }
             double maximal_print_z = (last_extrusion_layer ? last_extrusion_layer->print_z() : 0.)
                 + layer_to_print.layer()->height
                 + std::max(0., extra_gap);
@@ -1792,6 +1802,7 @@ enum BambuBedType {
     bbtEngineeringPlate = 2,
     bbtHighTemperaturePlate = 3,
     bbtTexturedPEIPlate         = 4,
+    bbtSuperTackPlate = 5,
 };
 
 static BambuBedType to_bambu_bed_type(BedType type)
@@ -1807,6 +1818,8 @@ static BambuBedType to_bambu_bed_type(BedType type)
         bambu_bed_type = bbtTexturedPEIPlate;
     else if (type == btPCT)
         bambu_bed_type = bbtCoolPlate;
+    else if (type == btSuperTack)
+        bambu_bed_type = bbtSuperTackPlate;
 
     return bambu_bed_type;
 }
@@ -1825,6 +1838,7 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
     m_max_layer_z  = 0.f;
     m_last_width = 0.f;
     m_is_overhang_fan_on = false;
+    m_is_internal_bridge_fan_on = false;
     m_is_supp_interface_fan_on = false;
 #if ENABLE_GCODE_VIEWER_DATA_CHECKING
     m_last_mm3_per_mm = 0.;
@@ -1899,112 +1913,118 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
         m_small_area_infill_flow_compensator = make_unique<SmallAreaInfillFlowCompensator>(print.config());
     
 
-
-
-    std::function create_thumbnail = [&thumbnail_cb, &file, &print]() {
-         // generate the thumbnails
-         auto [thumbnails, errors] = GCodeThumbnails::make_and_check_thumbnail_list(print.full_print_config());
-
-         if (errors != enum_bitmask<ThumbnailError>()) {
-             std::string error_str = format("Invalid thumbnails value:");
-             error_str += GCodeThumbnails::get_error_string(errors);
-             throw Slic3r::ExportError(error_str);
-         }
-
-         if (!thumbnails.empty())
-             GCodeThumbnails::export_thumbnails_to_file(
-                 thumbnail_cb, print.get_plate_index(), thumbnails, [&file](const char* sz) { file.write(sz); },
-                 [&print]() { print.throw_if_canceled(); });
-    };
-
     const auto& printer_model     = print.config().printer_model.value;
     bool is_elegoo_neptune = printer_model.find("Elegoo Neptune") != std::string::npos ||
-                                 printer_model.find("Elegoo OrangeStorm Giga") != std::string::npos;
+                                    printer_model.find("Elegoo OrangeStorm Giga") != std::string::npos;
 
-    // elegoo neptune printer must add thumbnail at the beginning of the file to display thumbnail on the printer
-    if (is_elegoo_neptune){
-        create_thumbnail();
-        file.write_format("\n\n");
-    }
-    file.write_format("; HEADER_BLOCK_START\n");
-    // Write information on the generator.
-    file.write_format("; generated by %s on %s\n", Slic3r::header_slic3r_generated().c_str(), Slic3r::Utils::local_timestamp().c_str());
-    if (is_bbl_printers)
-        file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Estimated_Printing_Time_Placeholder).c_str());
-    //BBS: total layer number
-    file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Total_Layer_Number_Placeholder).c_str());
-    m_enable_exclude_object = config().exclude_object;
-    //Orca: extra check for bbl printer
-    if (is_bbl_printers) {
-        if (print.calib_params().mode == CalibMode::Calib_None) { // Don't support skipping in cali mode
-            // list all label_object_id with sorted order here
-            m_enable_exclude_object = true;
-            m_label_objects_ids.clear();
-            m_label_objects_ids.reserve(print.num_object_instances());
-            for (const PrintObject *print_object : print.objects())
-                for (const PrintInstance &print_instance : print_object->instances())
-                    m_label_objects_ids.push_back(print_instance.model_instance->get_labeled_id());
+    std::function create_thumbnail = [&thumbnail_cb, &file, &print]() {
+        // generate the thumbnails
+        auto [thumbnails, errors] = GCodeThumbnails::make_and_check_thumbnail_list(print.full_print_config());
 
-            std::sort(m_label_objects_ids.begin(), m_label_objects_ids.end());
-
-            std::string objects_id_list = "; model label id: ";
-            for (auto it = m_label_objects_ids.begin(); it != m_label_objects_ids.end(); it++)
-                objects_id_list += (std::to_string(*it) + (it != m_label_objects_ids.end() - 1 ? "," : "\n"));
-            file.writeln(objects_id_list);
-        } else {
-            m_enable_exclude_object = false;
-            m_label_objects_ids.clear();
+        if (errors != enum_bitmask<ThumbnailError>()) {
+            std::string error_str = format("Invalid thumbnails value:");
+            error_str += GCodeThumbnails::get_error_string(errors);
+            throw Slic3r::ExportError(error_str);
         }
-    }
 
-    coordf_t max_height_z = -1;
+        if (!thumbnails.empty())
+            GCodeThumbnails::export_thumbnails_to_file(
+                thumbnail_cb, print.get_plate_index(), thumbnails, [&file](const char* sz) { file.write(sz); },
+                [&print]() { print.throw_if_canceled(); });
+    };
 
-    {
-        std::string filament_density_list = "; filament_density: ";
-        (filament_density_list+=m_config.filament_density.serialize()) +='\n';
-        file.writeln(filament_density_list);
-
-        std::string filament_diameter_list = "; filament_diameter: ";
-        (filament_diameter_list += m_config.filament_diameter.serialize()) += '\n';
-        file.writeln(filament_diameter_list);
-
-        for (const auto& object : print.objects())
-            max_height_z = std::max(object->layers().back()->print_z, max_height_z);
-
-        std::ostringstream max_height_z_tip;
-        max_height_z_tip<<"; max_z_height: " << std::fixed << std::setprecision(2) << max_height_z << '\n';
-        file.writeln(max_height_z_tip.str());
-
-        std::ostringstream bed_mesh_local;
-        bed_mesh_local << "; bed_mesh_local: " << std::fixed << print.config().bed_mesh_local.value << '\n';
-        file.writeln(bed_mesh_local.str());
-    }
-
-    file.write_format("; HEADER_BLOCK_END\n\n");
-
+    // Orca: Don't output Header block if BTT thumbnail is identified in the list
+    // Get the thumbnails value as a string
+    std::string thumbnails_value = print.config().option<ConfigOptionString>("thumbnails")->value;
+    // search string for the BTT_TFT label
+    bool has_BTT_thumbnail = (thumbnails_value.find("BTT_TFT") != std::string::npos);
     
-    {
-        // ELE
-        const auto& printer_model = print.config().printer_model.value;
-        if (is_elegoo_neptune) {
-            // Add the Cura_SteamEngine tag to the Gcode file so that some printers think it is Gcode generated by Cura
-            // Fix the problem that the thumbnail does not display for these models
+    if(!has_BTT_thumbnail){   
 
-            file.write(";CURA_COMPATIBLE_HEADER_BLOCK_START\n");
-            file.write(";Add the Cura tag to the Gcode file so that some printers think it is Gcode generated by Cura\n");
-            file.write_format(";Cura_SteamEngine %s\n", Slic3r::header_slic3r_generated().c_str());
-            file.write_format(";CURA_TIME_PLACEHOLDER\n");
-            file.write_format(";CURA_FILAMENT_USED_PLACEHOLDER\n");
-            file.write_format(";CURA_FILAMENT_WEIGHT_PLACEHOLDER\n");
-            file.write_format(";Layer height: %.2f\n", m_config.layer_height.value);
-            file.write_format(";LAYER_COUNT:%d\n", m_layer_count);
-            file.write_format(";MAXZ:%.2f\n", max_height_z);
-            file.write_format(";MINZ:%.2f\n", print.config().initial_layer_print_height.value);
-            file.write(";CURA_COMPATIBLE_HEADER_BLOCK_END\n\n");
+        // elegoo neptune printer must add thumbnail at the beginning of the file to display thumbnail on the printer
+        if (is_elegoo_neptune){
+            create_thumbnail();
+            file.write_format("\n\n");
+        }
+
+        file.write_format("; HEADER_BLOCK_START\n");
+        // Write information on the generator.
+        file.write_format("; generated by %s on %s\n", Slic3r::header_slic3r_generated().c_str(), Slic3r::Utils::local_timestamp().c_str());
+        if (is_bbl_printers)
+            file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Estimated_Printing_Time_Placeholder).c_str());
+        //BBS: total layer number
+        file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Total_Layer_Number_Placeholder).c_str());
+        m_enable_exclude_object = config().exclude_object;
+        //Orca: extra check for bbl printer
+        if (is_bbl_printers) {
+            if (print.calib_params().mode == CalibMode::Calib_None) { // Don't support skipping in cali mode
+                // list all label_object_id with sorted order here
+                m_enable_exclude_object = true;
+                m_label_objects_ids.clear();
+                m_label_objects_ids.reserve(print.num_object_instances());
+                for (const PrintObject *print_object : print.objects())
+                    for (const PrintInstance &print_instance : print_object->instances())
+                        m_label_objects_ids.push_back(print_instance.model_instance->get_labeled_id());
+  
+                std::sort(m_label_objects_ids.begin(), m_label_objects_ids.end());
+  
+                std::string objects_id_list = "; model label id: ";
+                for (auto it = m_label_objects_ids.begin(); it != m_label_objects_ids.end(); it++)
+                    objects_id_list += (std::to_string(*it) + (it != m_label_objects_ids.end() - 1 ? "," : "\n"));
+                file.writeln(objects_id_list);
+            } else {
+                m_enable_exclude_object = false;
+                m_label_objects_ids.clear();
+            }
+        }
+    
+        coordf_t max_height_z = -1;
+
+        {
+            std::string filament_density_list = "; filament_density: ";
+            (filament_density_list+=m_config.filament_density.serialize()) +='\n';
+            file.writeln(filament_density_list);
+
+            std::string filament_diameter_list = "; filament_diameter: ";
+            (filament_diameter_list += m_config.filament_diameter.serialize()) += '\n';
+            file.writeln(filament_diameter_list);
+
+            for (const auto& object : print.objects())
+                max_height_z = std::max(object->layers().back()->print_z, max_height_z);
+
+            std::ostringstream max_height_z_tip;
+            max_height_z_tip<<"; max_z_height: " << std::fixed << std::setprecision(2) << max_height_z << '\n';
+            file.writeln(max_height_z_tip.str());
+
+            std::ostringstream bed_mesh_local;
+            bed_mesh_local << "; bed_mesh_local: " << std::fixed << print.config().bed_mesh_local.value << '\n';
+            file.writeln(bed_mesh_local.str());
+        }
+
+        file.write_format("; HEADER_BLOCK_END\n\n");
+
+        {
+            // ELE
+            const auto& printer_model = print.config().printer_model.value;
+            if (is_elegoo_neptune) {
+                // Add the Cura_SteamEngine tag to the Gcode file so that some printers think it is Gcode generated by Cura
+                // Fix the problem that the thumbnail does not display for these models
+
+                file.write(";CURA_COMPATIBLE_HEADER_BLOCK_START\n");
+                file.write(";Add the Cura tag to the Gcode file so that some printers think it is Gcode generated by Cura\n");
+                file.write_format(";Cura_SteamEngine %s\n", Slic3r::header_slic3r_generated().c_str());
+                file.write_format(";CURA_TIME_PLACEHOLDER\n");
+                file.write_format(";CURA_FILAMENT_USED_PLACEHOLDER\n");
+                file.write_format(";CURA_FILAMENT_WEIGHT_PLACEHOLDER\n");
+                file.write_format(";Layer height: %.2f\n", m_config.layer_height.value);
+                file.write_format(";LAYER_COUNT:%d\n", m_layer_count);
+                file.write_format(";MAXZ:%.2f\n", max_height_z);
+                file.write_format(";MINZ:%.2f\n", print.config().initial_layer_print_height.value);
+                file.write(";CURA_COMPATIBLE_HEADER_BLOCK_END\n\n");
+            }
         }
     }
-
-
+    
       // BBS: write global config at the beginning of gcode file because printer
       // need these config information
       // Append full config, delimited by two 'phony' configuration keys
@@ -2932,6 +2952,12 @@ void GCode::process_layers(
                 return in.gcode;
             return cooling_buffer.process_layer(std::move(in.gcode), in.layer_id, in.cooling_buffer_flush);
         });
+    const auto pa_processor_filter = tbb::make_filter<std::string, std::string>(slic3r_tbb_filtermode::serial_in_order,
+        [&pa_processor = *this->m_pa_processor](std::string in) -> std::string {
+            return pa_processor.process_layer(std::move(in));
+        }
+    );
+    
     const auto output = tbb::make_filter<std::string, void>(slic3r_tbb_filtermode::serial_in_order,
         [&output_stream](std::string s) { output_stream.write(s); }
     );
@@ -2960,9 +2986,9 @@ void GCode::process_layers(
     else if (m_spiral_vase)
     	tbb::parallel_pipeline(12, generator & spiral_mode & cooling & fan_mover & output);
     else if	(m_pressure_equalizer)
-        tbb::parallel_pipeline(12, generator & pressure_equalizer & cooling & fan_mover & output);
+        tbb::parallel_pipeline(12, generator & pressure_equalizer & cooling & fan_mover & pa_processor_filter & output);
     else
-    	tbb::parallel_pipeline(12, generator & cooling & fan_mover & output);
+    	tbb::parallel_pipeline(12, generator & cooling & fan_mover & pa_processor_filter & output);
 }
 
 std::string GCode::placeholder_parser_process(const std::string &name, const std::string &templ, unsigned int current_extruder_id, const DynamicConfig *config_override)
@@ -3224,7 +3250,7 @@ void GCode::_print_first_layer_extruder_temperatures(GCodeOutputStream &file, Pr
             // Set temperatures of all the printing extruders.
             for (unsigned int tool_id : print.extruders()) {
                 int temp = print.config().nozzle_temperature_initial_layer.get_at(tool_id);
-                if (print.config().ooze_prevention.value) {
+                if (m_ooze_prevention.enable && tool_id != first_printing_extruder_id) {
                     if (print.config().idle_temperature.get_at(tool_id) == 0)
                         temp += print.config().standby_temperature_delta.value;
                     else
@@ -3557,7 +3583,19 @@ std::string GCode::generate_skirt(const Print &print,
         m_avoid_crossing_perimeters.use_external_mp();
         Flow layer_skirt_flow = print.skirt_flow().with_height(float(m_skirt_done.back() - (m_skirt_done.size() == 1 ? 0. : m_skirt_done[m_skirt_done.size() - 2])));
         double mm3_per_mm = layer_skirt_flow.mm3_per_mm();
-        for (size_t i = first_layer ? loops.first : loops.second - 1; i < loops.second; ++i) {
+        // Decide where to start looping:
+        // - If it’s the first layer or if we do NOT want a single-wall draft shield,
+        //   start from loops.first (all loops).
+        // - Otherwise, if single_loop_draft_shield == true and draft_shield == true (and not the first layer),
+        //   start from loops.second - 1 (just one loop).
+        bool single_loop_draft_shield = print.m_config.single_loop_draft_shield &&
+                                    (print.m_config.draft_shield == dsEnabled);
+        const size_t start_idx = (first_layer || !single_loop_draft_shield)
+                                 ? loops.first
+                                 : (loops.second - 1);
+
+        // Loop over the skirt loops and extrude
+        for (size_t i = start_idx; i < loops.second; ++i) {
             // Adjust flow according to this layer's layer height.
             ExtrusionLoop loop = *dynamic_cast<const ExtrusionLoop*>(skirt.entities[i]);
             for (ExtrusionPath &path : loop.paths) {
@@ -3571,8 +3609,10 @@ std::string GCode::generate_skirt(const Print &print,
 
             //FIXME using the support_speed of the 1st object printed.
             gcode += this->extrude_loop(loop, "skirt", m_config.support_speed.value);
-            if (!first_layer)
+            // If we only want a single wall on non-first layers, break now
+            if (!first_layer && single_loop_draft_shield) {
                 break;
+            }
         }
         m_avoid_crossing_perimeters.use_external_mp(false);
         // Allow a straight travel move to the first object point if this is the first layer (but don't in next layers).
@@ -3882,10 +3922,16 @@ LayerResult GCode::process_layer(
         return next_extruder;
     };
     
-    if (m_config.enable_overhang_speed && !m_config.overhang_speed_classic) {
-        for (const auto &layer_to_print : layers) {
-            m_extrusion_quality_estimator.prepare_for_new_layer(layer_to_print.original_object,
-                                                                layer_to_print.object_layer);
+    for (const auto &layer_to_print : layers) {
+        if (layer_to_print.object_layer) {
+            const auto& regions = layer_to_print.object_layer->regions();
+            const bool  enable_overhang_speed = std::any_of(regions.begin(), regions.end(), [](const LayerRegion* r) {
+                return r->has_extrusions() && r->region().config().enable_overhang_speed && !r->region().config().overhang_speed_classic;
+            });
+            if (enable_overhang_speed) {
+                m_extrusion_quality_estimator.prepare_for_new_layer(layer_to_print.original_object,
+                                                                    layer_to_print.object_layer);
+            }
         }
     }
 
@@ -4249,8 +4295,11 @@ LayerResult GCode::process_layer(
                     }
                 }
 
-                if (m_config.enable_overhang_speed && !m_config.overhang_speed_classic)
-                    m_extrusion_quality_estimator.set_current_object(&instance_to_print.print_object);
+                // Orca(#7946): set current obj regardless of the `enable_overhang_speed` value, because
+                // `enable_overhang_speed` is a PrintRegionConfig and here we don't have a region yet.
+                // And no side effect doing this even if `enable_overhang_speed` is off, so don't bother
+                // checking anything here.
+                m_extrusion_quality_estimator.set_current_object(&instance_to_print.print_object);
 
                 // When starting a new object, use the external motion planner for the first travel move.
                 const Point &offset = instance_to_print.print_object.instances()[instance_to_print.instance_id].shift;
@@ -4323,7 +4372,6 @@ LayerResult GCode::process_layer(
                     m_last_obj_copy = this_object_copy;
                     this->set_origin(unscale(offset));
                     //FIXME the following code prints regions in the order they are defined, the path is not optimized in any way.
-                    bool is_infill_first =m_config.is_infill_first;
 
                     auto has_infill = [](const std::vector<ObjectByExtruder::Island::Region> &by_region) {
                         for (auto region : by_region) {
@@ -4332,10 +4380,9 @@ LayerResult GCode::process_layer(
                         }
                         return false;
                     };
-
-                    //BBS: for first layer, we always print wall firstly to get better bed adhesive force
-                    //This behaviour is same with cura
-                    if (is_infill_first && !first_layer) {
+                    {
+                        // Print perimeters of regions that has is_infill_first == false
+                        gcode += this->extrude_perimeters(print, by_region_specific, first_layer, false);
                         if (!has_wipe_tower && need_insert_timelapse_gcode_for_traditional && !has_insert_timelapse_gcode && has_infill(by_region_specific)) {
                             gcode += this->retract(false, false, LiftType::NormalLift);
 
@@ -4352,27 +4399,10 @@ LayerResult GCode::process_layer(
 
                             has_insert_timelapse_gcode = true;
                         }
+                        // Then print infill
                         gcode += this->extrude_infill(print, by_region_specific, false);
-                        gcode += this->extrude_perimeters(print, by_region_specific);
-                    } else {
-                        gcode += this->extrude_perimeters(print, by_region_specific);
-                        if (!has_wipe_tower && need_insert_timelapse_gcode_for_traditional && !has_insert_timelapse_gcode && has_infill(by_region_specific)) {
-                            gcode += this->retract(false, false, LiftType::NormalLift);
-
-                            std::string timepals_gcode = insert_timelapse_gcode();
-                            gcode += timepals_gcode;
-                            m_writer.set_current_position_clear(false);
-                            //BBS: check whether custom gcode changes the z position. Update if changed
-                            double temp_z_after_timepals_gcode;
-                            if (GCodeProcessor::get_last_z_from_gcode(timepals_gcode, temp_z_after_timepals_gcode)) {
-                                Vec3d pos = m_writer.get_position();
-                                pos(2) = temp_z_after_timepals_gcode;
-                                m_writer.set_position(pos);
-                            }
-
-                            has_insert_timelapse_gcode = true;
-                        }
-                        gcode += this->extrude_infill(print,by_region_specific, false);
+                        // Then print perimeters of regions that has is_infill_first == true
+                        gcode += this->extrude_perimeters(print, by_region_specific, first_layer, true);
                     }
                     // ironing
                     gcode += this->extrude_infill(print,by_region_specific, true);
@@ -4635,8 +4665,8 @@ std::string GCode::extrude_loop(ExtrusionLoop loop, std::string description, dou
         // if spiral vase, we have to ensure that all contour are in the same orientation.
         loop.make_counter_clockwise();
     }
-    if (loop.loop_role() == elrSkirt && (this->m_layer->id() % 2 == 1))
-        loop.reverse();
+    //if (loop.loop_role() == elrSkirt && (this->m_layer->id() % 2 == 1))
+    //    loop.reverse();
 
     // find the point of the loop that is closest to the current extruder position
     // or randomize if requested
@@ -4970,12 +5000,17 @@ std::string GCode::extrude_path(ExtrusionPath path, std::string description, dou
 }
 
 // Extrude perimeters: Decide where to put seams (hide or align seams).
-std::string GCode::extrude_perimeters(const Print &print, const std::vector<ObjectByExtruder::Island::Region> &by_region)
+std::string GCode::extrude_perimeters(const Print &print, const std::vector<ObjectByExtruder::Island::Region> &by_region, bool is_first_layer, bool is_infill_first)
 {
     std::string gcode;
     for (const ObjectByExtruder::Island::Region &region : by_region)
         if (! region.perimeters.empty()) {
             m_config.apply(print.get_print_region(&region - &by_region.front()).config());
+            // BBS: for first layer, we always print wall firstly to get better bed adhesive force
+            // This behaviour is same with cura
+            const bool should_print = is_first_layer ? !is_infill_first
+                : (m_config.is_infill_first == is_infill_first);
+            if (!should_print) continue;
 
             for (const ExtrusionEntity* ee : region.perimeters)
                 gcode += this->extrude_entity(*ee, "perimeter", -1., region.perimeters);
@@ -5374,11 +5409,12 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                 ref_speed = std::min(ref_speed, m_config.scarf_joint_speed.get_abs_value(ref_speed));
             }
             
-            ConfigOptionPercents         overhang_overlap_levels({75, 50, 25, 13, 12.99, 0});
+            ConfigOptionPercents         overhang_overlap_levels({90, 75, 50, 25, 13, 0});
 
             if (m_config.slowdown_for_curled_perimeters){
                 ConfigOptionFloatsOrPercents dynamic_overhang_speeds(
-                    {(m_config.get_abs_value("overhang_1_4_speed", ref_speed) < 0.5) ?
+                    {FloatOrPercent{100, true},
+                     (m_config.get_abs_value("overhang_1_4_speed", ref_speed) < 0.5) ?
                          FloatOrPercent{100, true} :
                          FloatOrPercent{m_config.get_abs_value("overhang_1_4_speed", ref_speed) * 100 / ref_speed, true},
                      (m_config.get_abs_value("overhang_2_4_speed", ref_speed) < 0.5) ?
@@ -5387,9 +5423,6 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                      (m_config.get_abs_value("overhang_3_4_speed", ref_speed) < 0.5) ?
                          FloatOrPercent{100, true} :
                          FloatOrPercent{m_config.get_abs_value("overhang_3_4_speed", ref_speed) * 100 / ref_speed, true},
-                     (m_config.get_abs_value("overhang_4_4_speed", ref_speed) < 0.5) ?
-                         FloatOrPercent{100, true} :
-                         FloatOrPercent{m_config.get_abs_value("overhang_4_4_speed", ref_speed) * 100 / ref_speed, true},
                      (m_config.get_abs_value("overhang_4_4_speed", ref_speed) < 0.5) ?
                          FloatOrPercent{100, true} :
                          FloatOrPercent{m_config.get_abs_value("overhang_4_4_speed", ref_speed) * 100 / ref_speed, true},
@@ -5401,7 +5434,8 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                                                                               ref_speed, speed, m_config.slowdown_for_curled_perimeters);
         	}else{
                 ConfigOptionFloatsOrPercents dynamic_overhang_speeds(
-                    {(m_config.get_abs_value("overhang_1_4_speed", ref_speed) < 0.5) ?
+                                                                     {FloatOrPercent{100, true},
+                     (m_config.get_abs_value("overhang_1_4_speed", ref_speed) < 0.5) ?
                          FloatOrPercent{100, true} :
                          FloatOrPercent{m_config.get_abs_value("overhang_1_4_speed", ref_speed) * 100 / ref_speed, true},
                      (m_config.get_abs_value("overhang_2_4_speed", ref_speed) < 0.5) ?
@@ -5410,10 +5444,9 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                      (m_config.get_abs_value("overhang_3_4_speed", ref_speed) < 0.5) ?
                          FloatOrPercent{100, true} :
                          FloatOrPercent{m_config.get_abs_value("overhang_3_4_speed", ref_speed) * 100 / ref_speed, true},
-                     (m_config.get_abs_value("overhang_4_4_speed", ref_speed) < 0.5) ?
-                         FloatOrPercent{100, true} :
-                         FloatOrPercent{m_config.get_abs_value("overhang_4_4_speed", ref_speed) * 100 / ref_speed, true},
-                     FloatOrPercent{m_config.get_abs_value("bridge_speed") * 100 / ref_speed, true},
+                      (m_config.get_abs_value("overhang_4_4_speed", ref_speed) < 0.5) ?
+                            FloatOrPercent{100, true} :
+                            FloatOrPercent{m_config.get_abs_value("overhang_4_4_speed", ref_speed) * 100 / ref_speed, true},
                      FloatOrPercent{m_config.get_abs_value("bridge_speed") * 100 / ref_speed, true}});
 
                 new_points = m_extrusion_quality_estimator.estimate_extrusion_quality(path, overhang_overlap_levels, dynamic_overhang_speeds,
@@ -5554,7 +5587,7 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
     //    { "75%", Overhang_threshold_4_4 },
     //    { "95%", Overhang_threshold_bridge }
     auto check_overhang_fan = [&overhang_fan_threshold](float overlap, ExtrusionRole role) {
-      if (is_bridge(role)) {
+      if (role == erBridgeInfill || role == erOverhangPerimeter) { // ORCA: Split out bridge infill to internal and external to apply separate fan settings
         return true;
       }
       switch (overhang_fan_threshold) {
@@ -5647,7 +5680,8 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                     int overhang_threshold = overhang_fan_threshold == Overhang_threshold_none ? Overhang_threshold_none
                     : overhang_fan_threshold - 1;
                     if ((overhang_fan_threshold == Overhang_threshold_none && is_external_perimeter(path.role())) ||
-                        (path.get_overhang_degree() > overhang_threshold || is_bridge(path.role()))) {
+                        (path.get_overhang_degree() > overhang_threshold ||
+                         (path.role() == erBridgeInfill || path.role() == erOverhangPerimeter))) { // ORCA: Add support for separate internal bridge fan speed control
                         if (!m_is_overhang_fan_on) {
                             gcode += ";_OVERHANG_FAN_START\n";
                             m_is_overhang_fan_on = true;
@@ -5656,6 +5690,17 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                         if (m_is_overhang_fan_on) {
                             m_is_overhang_fan_on = false;
                             gcode += ";_OVERHANG_FAN_END\n";
+                        }
+                    }
+                    if (path.role() == erInternalBridgeInfill) { // ORCA: Add support for separate internal bridge fan speed control
+                        if (!m_is_internal_bridge_fan_on) {
+                            gcode += ";_INTERNAL_BRIDGE_FAN_START\n";
+                            m_is_internal_bridge_fan_on = true;
+                        }
+                    } else {
+                        if (m_is_internal_bridge_fan_on) {
+                            m_is_internal_bridge_fan_on = false;
+                            gcode += ";_INTERNAL_BRIDGE_FAN_END\n";
                         }
                     }
                 }
@@ -5792,6 +5837,9 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
         bool cur_fan_enabled = false;
         if( m_enable_cooling_markers && enable_overhang_bridge_fan)
             pre_fan_enabled = check_overhang_fan(new_points[0].overlap, path.role());
+        
+        if(path.role() == erInternalBridgeInfill) // ORCA: Add support for separate internal bridge fan speed control
+            pre_fan_enabled = true;
 
         double path_length = 0.;
         for (size_t i = 1; i < new_points.size(); i++) {
@@ -5815,6 +5863,19 @@ std::string GCode::_extrude(const ExtrusionPath &path, std::string description, 
                     }
                     pre_fan_enabled = cur_fan_enabled;
                 }
+                // ORCA: Add support for separate internal bridge fan speed control
+                if (path.role() == erInternalBridgeInfill) {
+                    if (!m_is_internal_bridge_fan_on) {
+                        gcode += ";_INTERNAL_BRIDGE_FAN_START\n";
+                        m_is_internal_bridge_fan_on = true;
+                    }
+                } else {
+                    if (m_is_internal_bridge_fan_on) {
+                        gcode += ";_INTERNAL_BRIDGE_FAN_END\n";
+                        m_is_internal_bridge_fan_on = false;
+                    }
+                }
+                
                 if (supp_interface_fan_speed >= 0 && path.role() == erSupportMaterialInterface) {
                     if (!m_is_supp_interface_fan_on) {
                         gcode += ";_SUPP_INTERFACE_FAN_START\n";
@@ -6049,7 +6110,7 @@ std::string GCode::travel_to(const Point& point, ExtrusionRole role, std::string
             m_wipe.reset_path();*/
 
         Point last_post_before_retract = this->last_pos();
-        gcode += this->retract(false, false, lift_type);
+        gcode += this->retract(false, false, lift_type, role);
         // When "Wipe while retracting" is enabled, then extruder moves to another position, and travel from this position can cross perimeters.
         // Because of it, it is necessary to call avoid crossing perimeters again with new starting point after calling retraction()
         // FIXME Lukas H.: Try to predict if this second calling of avoid crossing perimeters will be needed or not. It could save computations.
@@ -6251,7 +6312,7 @@ bool GCode::needs_retraction(const Polyline &travel, ExtrusionRole role, LiftTyp
     return true;
 }
 
-std::string GCode::retract(bool toolchange, bool is_last_retraction, LiftType lift_type)
+std::string GCode::retract(bool toolchange, bool is_last_retraction, LiftType lift_type, ExtrusionRole role)
 {
     std::string gcode;
 
@@ -6269,7 +6330,8 @@ std::string GCode::retract(bool toolchange, bool is_last_retraction, LiftType li
         (the extruder might be already retracted fully or partially). We call these
         methods even if we performed wipe, since this will ensure the entire retraction
         length is honored in case wipe path was too short.  */
-    gcode += toolchange ? m_writer.retract_for_toolchange() : m_writer.retract();
+    if (role != erTopSolidInfill || EXTRUDER_CONFIG(retract_on_top_layer))
+        gcode += toolchange ? m_writer.retract_for_toolchange() : m_writer.retract();
 
     gcode += m_writer.reset_e();
     // Orca: check if should + can lift (roughly from SuperSlicer)
