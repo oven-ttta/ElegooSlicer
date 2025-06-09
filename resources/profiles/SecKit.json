@@ -1,6 +1,6 @@
 {
     "name": "SecKit",
-    "version":  "02.03.00.03",
+    "version": "01.02.00.01",
     "force_update": "0",
     "description": "SecKit configurations",
     "machine_model_list": [
@@ -8,7 +8,7 @@
             "name": "SecKit SK-Tank",
             "sub_path": "machine/SecKit SK-Tank.json"
         },
-	  {
+        {
             "name": "Seckit Go3",
             "sub_path": "machine/Seckit Go3.json"
         }
@@ -146,5 +146,5 @@
             "name": "SecKit Go3 0.4 nozzle",
             "sub_path": "machine/SecKit Go3 0.4 nozzle.json"
         }
-	]
+    ]
 }

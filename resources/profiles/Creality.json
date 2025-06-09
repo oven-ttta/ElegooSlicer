@@ -1,6 +1,6 @@
 {
     "name": "Creality",
-    "version":  "02.03.00.03",
+    "version": "01.02.00.01",
     "force_update": "0",
     "description": "Creality configurations",
     "machine_model_list": [
@@ -466,15 +466,15 @@
             "name": "0.16mm Optimal @Creality CR10SE 0.8",
             "sub_path": "process/0.16mm Optimal @Creality CR10SE 0.8.json"
         },
-	{
+        {
             "name": "0.16mm Optimal @Creality CR-6 0.2",
             "sub_path": "process/0.16mm Optimal @Creality CR-6 0.2.json"
         },
-	{
+        {
             "name": "0.16mm Optimal @Creality CR-6 0.4",
             "sub_path": "process/0.16mm Optimal @Creality CR-6 0.4.json"
         },
-	{
+        {
             "name": "0.16mm Optimal @Creality CR-6 0.6",
             "sub_path": "process/0.16mm Optimal @Creality CR-6 0.6.json"
         },

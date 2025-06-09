@@ -1,6 +1,6 @@
 {
     "name": "Prusa",
-    "version":  "02.03.00.03",
+    "version": "01.02.00.01",
     "force_update": "0",
     "description": "Prusa configurations",
     "machine_model_list": [
@@ -842,7 +842,6 @@
             "name": "0.55mm STRUCTURAL @MK4S HF0.8",
             "sub_path": "process/0.55mm STRUCTURAL @MK4S HF0.8.json"
         }
-
     ],
     "filament_list": [
         {

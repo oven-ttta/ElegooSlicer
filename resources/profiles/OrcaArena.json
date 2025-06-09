@@ -1,7 +1,7 @@
 {
     "name": "Orca Arena Printer",
     "url": "",
-    "version":  "02.03.00.03",
+    "version": "01.02.00.01",
     "force_update": "0",
     "description": "Orca Arena configuration files",
     "machine_model_list": [
@@ -72,8 +72,8 @@
             "sub_path": "process/0.20mm Standard @Arena X1C.json"
         },
         {
-            "name":"0.20mm Strength @Arena X1C",
-            "sub_path":"process/0.20mm Strength @Arena X1C.json"
+            "name": "0.20mm Strength @Arena X1C",
+            "sub_path": "process/0.20mm Strength @Arena X1C.json"
         },
         {
             "name": "0.24mm Draft @Arena X1C",
@@ -192,8 +192,8 @@
             "sub_path": "process/0.56mm Standard @Arena X1C 0.8 nozzle.json"
         },
         {
-            "name":"0.30mm Strength @Arena X1C 0.6 nozzle",
-            "sub_path":"process/0.30mm Strength @Arena X1C 0.6 nozzle.json"
+            "name": "0.30mm Strength @Arena X1C 0.6 nozzle",
+            "sub_path": "process/0.30mm Strength @Arena X1C 0.6 nozzle.json"
         }
     ],
     "filament_list": [
@@ -542,36 +542,36 @@
             "sub_path": "filament/PolyLite PLA @Arena X1C 0.2 nozzle.json"
         },
         {
-            "name":"OrcaArena Generic PETG @0.2 nozzle",
-            "sub_path":"filament/OrcaArena Generic PETG @0.2 nozzle.json"
+            "name": "OrcaArena Generic PETG @0.2 nozzle",
+            "sub_path": "filament/OrcaArena Generic PETG @0.2 nozzle.json"
         },
         {
-            "name":"Arena PLA Metal @Arena X1C 0.2 nozzle",
-            "sub_path":"filament/Arena PLA Metal @Arena X1C 0.2 nozzle.json"
+            "name": "Arena PLA Metal @Arena X1C 0.2 nozzle",
+            "sub_path": "filament/Arena PLA Metal @Arena X1C 0.2 nozzle.json"
         },
         {
-            "name":"Arena PLA Metal @Arena X1C",
-            "sub_path":"filament/Arena PLA Metal @Arena X1C.json"
+            "name": "Arena PLA Metal @Arena X1C",
+            "sub_path": "filament/Arena PLA Metal @Arena X1C.json"
         },
         {
-            "name":"Arena PLA-CF @base",
-            "sub_path":"filament/Arena PLA-CF @base.json"
+            "name": "Arena PLA-CF @base",
+            "sub_path": "filament/Arena PLA-CF @base.json"
         },
         {
-            "name":"Arena PLA-CF @Arena X1C 0.8 nozzle",
-            "sub_path":"filament/Arena PLA-CF @Arena X1C 0.8 nozzle.json"
+            "name": "Arena PLA-CF @Arena X1C 0.8 nozzle",
+            "sub_path": "filament/Arena PLA-CF @Arena X1C 0.8 nozzle.json"
         },
         {
-            "name":"Arena PLA-CF @Arena X1C",
-            "sub_path":"filament/Arena PLA-CF @Arena X1C.json"
+            "name": "Arena PLA-CF @Arena X1C",
+            "sub_path": "filament/Arena PLA-CF @Arena X1C.json"
         },
         {
-            "name":"Arena PAHT-CF @base",
-            "sub_path":"filament/Arena PAHT-CF @base.json"
+            "name": "Arena PAHT-CF @base",
+            "sub_path": "filament/Arena PAHT-CF @base.json"
         },
         {
-            "name":"Arena PAHT-CF @Arena X1C",
-            "sub_path":"filament/Arena PAHT-CF @Arena X1C.json"
+            "name": "Arena PAHT-CF @Arena X1C",
+            "sub_path": "filament/Arena PAHT-CF @Arena X1C.json"
         }
     ],
     "machine_list": [

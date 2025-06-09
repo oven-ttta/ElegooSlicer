@@ -1,6 +1,6 @@
 {
     "name": "Blocks",
-    "version":  "02.03.00.03",
+    "version": "01.02.00.01",
     "force_update": "0",
     "description": "Blocks configurations",
     "machine_model_list": [
@@ -16,7 +16,6 @@
             "name": "BLOCKS RF50",
             "sub_path": "machine/BLOCKS RF50.json"
         }
-
     ],
     "process_list": [
         {
@@ -284,7 +283,7 @@
         {
             "name": "Blocks Generic PLA-CF",
             "sub_path": "filament/Blocks Generic PLA-CF.json"
-        }  
+        }
     ],
     "machine_list": [
         {

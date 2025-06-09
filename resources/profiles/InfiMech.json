@@ -1,6 +1,6 @@
 {
     "name": "InfiMech",
-    "version":  "02.03.00.03",
+    "version": "01.02.00.01",
     "force_update": "1",
     "description": "InfiMech configurations",
     "machine_model_list": [
@@ -8,7 +8,6 @@
             "name": "InfiMech TX",
             "sub_path": "machine/InfiMech TX.json"
         },
-
         {
             "name": "InfiMech TX Hardened Steel Nozzle",
             "sub_path": "machine/HSN/InfiMech TX Hardened Steel Nozzle.json"
@@ -39,8 +38,6 @@
             "name": "0.16mm Optimal @InfiMech TX",
             "sub_path": "process/0.16mm Optimal @InfiMech TX.json"
         },
-
-
         {
             "name": "fdm_process_common_HSN",
             "sub_path": "process/HSN/fdm_process_common_HSN.json"
@@ -65,7 +62,6 @@
             "name": "0.16mm Optimal @InfiMech TX HSN",
             "sub_path": "process/HSN/0.16mm Optimal @InfiMech TX HSN.json"
         }
-
     ],
     "filament_list": [
         {
@@ -96,7 +92,7 @@
             "name": "fdm_filament_pa",
             "sub_path": "filament/fdm_filament_pa.json"
         },
-		        {
+        {
             "name": "InfiMech Generic PLA",
             "sub_path": "filament/InfiMech Generic PLA.json"
         },
@@ -120,16 +116,14 @@
             "name": "InfiMech Generic PA-CF",
             "sub_path": "filament/InfiMech Generic PA-CF.json"
         },
-	    
         {
             "name": "fdm_filament_pla_other",
             "sub_path": "filament/fdm_filament_pla_other.json"
         },
-	    {
+        {
             "name": "Other PLA",
             "sub_path": "filament/Other PLA.json"
         },
-
         {
             "name": "fdm_filament_tpu_other",
             "sub_path": "filament/fdm_filament_tpu_other.json"
@@ -138,7 +132,6 @@
             "name": "Other TPU",
             "sub_path": "filament/Other TPU.json"
         },
-
         {
             "name": "fdm_filament_pa_other",
             "sub_path": "filament/fdm_filament_pa_other.json"
@@ -147,7 +140,6 @@
             "name": "Other PA-CF",
             "sub_path": "filament/Other PA-CF.json"
         },
-        
         {
             "name": "fdm_filament_pet_other",
             "sub_path": "filament/fdm_filament_pet_other.json"
@@ -156,7 +148,6 @@
             "name": "Other PETG",
             "sub_path": "filament/Other PETG.json"
         },
-
         {
             "name": "fdm_filament_pc_other",
             "sub_path": "filament/fdm_filament_pc_other.json"
@@ -165,7 +156,6 @@
             "name": "Other PC",
             "sub_path": "filament/Other PC.json"
         },
-
         {
             "name": "fdm_filament_abs_other",
             "sub_path": "filament/fdm_filament_abs_other.json"
@@ -174,7 +164,6 @@
             "name": "Other ABS",
             "sub_path": "filament/Other ABS.json"
         },
-        
         {
             "name": "fdm_filament_pla_Hyper_other",
             "sub_path": "filament/fdm_filament_pla_Hyper_other.json"
@@ -183,7 +172,6 @@
             "name": "Other PLA Hyper",
             "sub_path": "filament/Other PLA Hyper.json"
         },
-        
         {
             "name": "fdm_filament_pla_Hyper",
             "sub_path": "filament/fdm_filament_pla_Hyper.json"
@@ -192,14 +180,10 @@
             "name": "InfiMech PLA Hyper",
             "sub_path": "filament/InfiMech PLA Hyper.json"
         },
-
-  
-
         {
             "name": "fdm_filament_common_HSN",
             "sub_path": "filament/HSN/fdm_filament_common_HSN.json"
         },
-
         {
             "name": "fdm_filament_pla @HSN",
             "sub_path": "filament/HSN/fdm_filament_pla @HSN.json"
@@ -248,7 +232,6 @@
             "name": "InfiMech ABS @HSN",
             "sub_path": "filament/HSN/InfiMech ABS @HSN.json"
         },
-
         {
             "name": "fdm_filament_pla_other @HSN",
             "sub_path": "filament/HSN/fdm_filament_pla_other @HSN.json"
@@ -257,7 +240,6 @@
             "name": "Other PLA @HSN",
             "sub_path": "filament/HSN/Other PLA @HSN.json"
         },
-        
         {
             "name": "fdm_filament_tpu_other @HSN",
             "sub_path": "filament/HSN/fdm_filament_tpu_other @HSN.json"
@@ -266,7 +248,6 @@
             "name": "Other TPU @HSN",
             "sub_path": "filament/HSN/Other TPU @HSN.json"
         },
-        
         {
             "name": "fdm_filament_pa_other @HSN",
             "sub_path": "filament/HSN/fdm_filament_pa_other @HSN.json"
@@ -275,7 +256,6 @@
             "name": "Other PA-CF @HSN",
             "sub_path": "filament/HSN/Other PA-CF @HSN.json"
         },
-        
         {
             "name": "fdm_filament_pet_other @HSN",
             "sub_path": "filament/HSN/fdm_filament_pet_other @HSN.json"
@@ -284,7 +264,6 @@
             "name": "Other PETG @HSN",
             "sub_path": "filament/HSN/Other PETG @HSN.json"
         },
-        
         {
             "name": "fdm_filament_pc_other @HSN",
             "sub_path": "filament/HSN/fdm_filament_pc_other @HSN.json"
@@ -301,7 +280,6 @@
             "name": "Other ABS @HSN",
             "sub_path": "filament/HSN/Other ABS @HSN.json"
         },
-        
         {
             "name": "fdm_filament_pla_Hyper_other @HSN",
             "sub_path": "filament/HSN/fdm_filament_pla_Hyper_other @HSN.json"
@@ -310,7 +288,6 @@
             "name": "Other PLA Hyper @HSN",
             "sub_path": "filament/HSN/Other PLA Hyper @HSN.json"
         },
-        
         {
             "name": "fdm_filament_pla_Hyper @HSN",
             "sub_path": "filament/HSN/fdm_filament_pla_Hyper @HSN.json"
@@ -319,14 +296,13 @@
             "name": "InfiMech PLA Hyper @HSN",
             "sub_path": "filament/HSN/InfiMech PLA Hyper @HSN.json"
         }
-	    
     ],
     "machine_list": [
-	    {
+        {
             "name": "fdm_machine_common",
             "sub_path": "machine/fdm_machine_common.json"
         },
-		{
+        {
             "name": "fdm_klipper_common",
             "sub_path": "machine/fdm_klipper_common.json"
         },
@@ -334,22 +310,17 @@
             "name": "InfiMech TX 0.4 nozzle",
             "sub_path": "machine/InfiMech TX 0.4 nozzle.json"
         },
-
-
-
-	    {
+        {
             "name": "fdm_machine_common",
             "sub_path": "machine/HSN/fdm_machine_common.json"
         },
-		{
+        {
             "name": "fdm_klipper_common",
             "sub_path": "machine/HSN/fdm_klipper_common.json"
         },
-
         {
             "name": "InfiMech TX HSN 0.4 nozzle",
             "sub_path": "machine/HSN/InfiMech TX HSN 0.4 nozzle.json"
         }
-
     ]
 }

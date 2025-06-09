@@ -1,7 +1,7 @@
 {
     "name": "Lulzbot",
     "url": "https://ohai.lulzbot.com/group/taz-6/",
-    "version":  "02.03.00.03",
+    "version": "01.02.00.01",
     "force_update": "0",
     "description": "Lulzbot configurations",
     "machine_model_list": [
@@ -43,8 +43,8 @@
             "name": "0.18mm High Detail @Lulzbot Taz Pro Dual",
             "sub_path": "process/0.18mm High Detail @Lulzbot Taz Pro Dual.json"
         },
-		{
-			"name": "0.25mm Standard @Lulzbot Taz Pro S",
+        {
+            "name": "0.25mm Standard @Lulzbot Taz Pro S",
             "sub_path": "process/0.25mm Standard @Lulzbot Taz Pro S.json"
         },
         {
