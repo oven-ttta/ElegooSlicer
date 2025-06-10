@@ -1,21 +1,15 @@
 {
     "type": "filament",
-    "name": "Generic PLA+ @base",
+    "filament_id": "GPLABM00",
+    "name": "Generic PLA Matte @base",
     "inherits": "fdm_filament_pla",
     "from": "system",
-    "filament_id": "GPLAPLUSB00",
-    "instantiation": "false",
-    "filament_type": [
-        "PLA+"
-    ],
+    "instantiation": "true",
     "filament_cost": [
         "0"
     ],
     "filament_density": [
         "1.25"
-    ],
-    "filament_max_volumetric_speed": [
-        "16"
     ],
     "filament_start_gcode": [
         "; filament start gcode\n"
