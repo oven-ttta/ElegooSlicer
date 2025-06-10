@@ -1068,6 +1068,14 @@
             "name": "Generic PLA @base",
             "sub_path": "filament/BASE/Generic PLA @base.json"
         },
+		{
+            "name": "Generic PLA Matte @base",
+            "sub_path": "filament/BASE/Generic PLA Matte @base.json"
+        },
+		{
+            "name": "Generic PETG PRO @base",
+            "sub_path": "filament/BASE/Generic PETG PRO @base.json"
+        },			
         {
             "name": "Generic PLA+ @base",
             "sub_path": "filament/BASE/Generic PLA+ @base.json"
@@ -1441,49 +1449,66 @@
             "sub_path": "filament/EOSGIGA/Elegoo RAPID PLA+ @EOS Giga.json"
         },
         {
-            "name": "Generic ABS",
-            "sub_path": "filament/Generic/Generic ABS.json"
+            "name": "Generic ABS @Elegoo",
+            "sub_path": "filament/Generic/Generic ABS @Elegoo.json"
         },
         {
-            "name": "Generic ABS-CF",
-            "sub_path": "filament/Generic/Generic ABS-CF.json"
+            "name": "Generic ABS-CF @Elegoo",
+            "sub_path": "filament/Generic/Generic ABS-CF @Elegoo.json"
         },
         {
-            "name": "Generic PC",
-            "sub_path": "filament/Generic/Generic PC.json"
+            "name": "Generic PC @Elegoo",
+            "sub_path": "filament/Generic/Generic PC @Elegoo.json"
         },
         {
-            "name": "Generic PC-CF",
-            "sub_path": "filament/Generic/Generic PC-CF.json"
+            "name": "Generic PC-CF @Elegoo",
+            "sub_path": "filament/Generic/Generic PC-CF @Elegoo.json"
         },
         {
-            "name": "Generic PET",
-            "sub_path": "filament/Generic/Generic PET.json"
+            "name": "Generic PET @Elegoo",
+            "sub_path": "filament/Generic/Generic PET @Elegoo.json"
         },
         {
-            "name": "Generic PET-CF",
-            "sub_path": "filament/Generic/Generic PET-CF.json"
+            "name": "Generic PET-CF @Elegoo",
+            "sub_path": "filament/Generic/Generic PET-CF @Elegoo.json"
         },
         {
-            "name": "Generic PA",
-            "sub_path": "filament/Generic/Generic PA.json"
+            "name": "Generic PA @Elegoo",
+            "sub_path": "filament/Generic/Generic PA @Elegoo.json"
+        },
+		{
+            "name": "Generic ASA @Elegoo",
+            "sub_path": "filament/Generic/Generic ASA @Elegoo.json"
         },
         {
-            "name": "Generic ASA-CF",
-            "sub_path": "filament/Generic/Generic ASA-CF.json"
+            "name": "Generic ASA-CF @Elegoo",
+            "sub_path": "filament/Generic/Generic ASA-CF @Elegoo.json"
         },
         {
-            "name": "Generic PA6-CF",
-            "sub_path": "filament/Generic/Generic PA6-CF.json"
+            "name": "Generic PA6-CF @Elegoo",
+            "sub_path": "filament/Generic/Generic PA6-CF @Elegoo.json"
+        },
+		{
+            "name": "Generic PETG @Elegoo",
+            "sub_path": "filament/Generic/Generic PETG @Elegoo.json"
+        },
+		{
+            "name": "Generic PETG PRO @Elegoo",
+            "sub_path": "filament/Generic/Generic PETG PRO @Elegoo.json"
         },
         {
-            "name": "Generic PETG-CF",
-            "sub_path": "filament/Generic/Generic PETG-CF.json"
+            "name": "Generic PETG-CF @Elegoo",
+            "sub_path": "filament/Generic/Generic PETG-CF @Elegoo.json"
         },
         {
-            "name": "Generic PLA",
-            "sub_path": "filament/Generic/Generic PLA.json"
+            "name": "Generic PLA @Elegoo",
+            "sub_path": "filament/Generic/Generic PLA @Elegoo.json"
+        },
+        {
+            "name": "Generic PLA Matte @Elegoo",
+            "sub_path": "filament/Generic/Generic PLA Matte @Elegoo.json"
         }
+		
     ],
     "machine_list": [
         {
