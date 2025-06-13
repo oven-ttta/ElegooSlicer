@@ -11,7 +11,7 @@ html, body {
 }
 
 body {
-    background: #202124;
+    background: #f3f0f0;
     font-family: "Source Han Sans", "Microsoft YaHei", Arial, sans-serif;
     height: 100vh;
     width: 100vw;
@@ -20,7 +20,7 @@ body {
 .dialog-mask {
     position: fixed;
     left: 0; top: 0; right: 0; bottom: 0;
-    background: rgba(30,30,30,0.7);
+    background: rgba(0,0,0,0.15);
     z-index: 999;
 }
 
@@ -29,12 +29,11 @@ body {
     min-height: 100vh;
     margin: 0;
     border-radius: 0;
-    box-shadow: none;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    background: #232324;
     width: 446px;
     padding: 0;
 }
@@ -46,7 +45,7 @@ body {
     align-items: center;
     width: 100%;
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.85);
+    color: #222;
 }
 
 .model-name-edit {
@@ -55,7 +54,7 @@ body {
     align-items: center;
 }
 
-.model-name {
+#model-name {
     min-width: 80px;
     max-width: 90vw;
     width: auto;
@@ -70,10 +69,10 @@ body {
     text-overflow: ellipsis;
     display: block;
     margin: 0 auto;
-    color: #fff;
+    color: #222;
 }
 
-.edit-name-btn img {
+#edit-name-btn img {
     width: 14px;
     height: 14px;
 }
@@ -81,12 +80,12 @@ body {
 .model-preview {
     margin-bottom: 10px;
 }
-.model-image {
+#model-image {
     max-width: 100px;
     max-height: 100px;
     object-fit: contain;
     border-radius: 10px;
-    background: #232323;
+    background: #f0f2f5;
 }
 
 .print-info {
@@ -115,11 +114,10 @@ body {
     justify-content: center;
     align-items: center;
     padding: 10px;
-    background-color: #232323;
     border-radius: 6px;
     gap: 10px;
     width: 100%;
-    max-width: 320px;
+    max-width: 400px;
 }
 .edit-name-btn {
     background: none;
@@ -132,31 +130,37 @@ body {
 }
 .bed-btn {
     min-width: 165px !important;
-    width: 180px;
+    width: 200px;
     height: 32px;
     border-radius: 0;
-    font-size: 14px;
-    padding: 0 32px;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 8 15px;
     margin: 0 8px;
     box-sizing: border-box;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: #232323;
-    color: #fff;
-    border: 2px solid #444;
+    text-align: center;
+    background: #ffffff;
+    color: #222;
+    border: 2px solid #eee6e6;
     transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 .bed-btn.selected, .bed-btn:active {
     background: #00bfff;
     color: #fff;
-    box-shadow: 0 2px 8px #00bfff44;
     border: 2px solid #00bfff;
 }
 .bed-btn:active {
     filter: brightness(0.96);
 }
-.print-btn, .cancel-btn {
+.note {
+    font-size: 12px;
+    color: #888;
+    margin-top: 10px;
+    text-align: center;
+}
+#upload-btn, #cancel-btn {
     width: 90px;
     min-width: 90px;
     max-width: 120px;
@@ -167,21 +171,16 @@ body {
     padding: 0;
     margin: 0 8px;
     box-sizing: border-box;
+    background: #ffffff;
+    color: #222;
+    border: 2px solid #eee6e6;
     transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
-.cancel-btn {
-    background: #232323;
-    color: #bbb;
-    border: 2px solid #444;
-}
-.print-btn {
+
+#upload-btn:active, #cancel-btn:active {
     background: #00bfff;
     color: #fff;
-    border: none;
-}
-.print-btn:active, .cancel-btn:active {
-    filter: brightness(0.96);
-    box-shadow: 0 2px 8px #00bfff33;
+    border: 2px solid #00bfff;
 }
 
 .bottom-container {
@@ -201,7 +200,7 @@ body {
     height: 45px;
     border: none;
     font-size: 16px;
-    background-color: #383838;
+    background-color: #f7f7f9;
     margin: 0;
 }
 
@@ -220,10 +219,10 @@ body {
 }
 
 .all-container {
-    background: #18191b;
+    background: #fff;
     border-radius: 0px;
-    box-shadow: 0 2px 8px #0004;
-    border: 1px solid #2a2a2a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e0e0e0;
     padding: 8px 8px 8px 8px;
     margin-top: 0px;
     min-height: 240px;
@@ -263,7 +262,7 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #e0e0e0;
+    color: #222;
 }
 
 .mapping-container {
@@ -292,7 +291,7 @@ body {
     align-items: center;
     justify-content: center;
     margin-bottom: 4px;
-    box-shadow: 0 2px 8px #0002;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .tray-arrow {
@@ -313,7 +312,7 @@ body {
     align-items: center;
     font-size: 12px;
     font-weight: bold;
-    box-shadow: 0 1px 4px #0002;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     position: relative;
     margin-top: 2px;
     margin-bottom: 24px;
@@ -353,21 +352,9 @@ body {
     bottom: 2px;
 }
 
-/* 移除老样式影响 */
 .slot-type, .slot-id-container, .slot-filament, .slot-id {
     display: none !important;
 }
-
-.note {
-    color: #9E9E9E;
-    font-size: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-bottom: 0;
-	margin-bottom: 0;
-}
-
 /* AMS Popup Styles */
 .ams-popup {
     position: fixed;
@@ -383,7 +370,7 @@ body {
 }
 
 .ams-popup-content {
-    background: #232323;
+    background: #fff;
     border-radius: 10px;
     padding: 20px;
     min-width: 300px;
@@ -393,7 +380,7 @@ body {
 }
 
 .ams-popup-title {
-    color: #e0e0e0;
+    color: #222;
     font-size: 16px;
     font-weight: bold;
     margin-bottom: 16px;
@@ -407,8 +394,8 @@ body {
 }
 
 .ams-tray-btn {
-    background: #333;
-    color: #e0e0e0;
+    background: #f0f2f5;
+    color: #222;
     border: none;
     border-radius: 6px;
     padding: 12px;
@@ -418,19 +405,20 @@ body {
 }
 
 .ams-tray-btn:hover {
-    background: #444;
+    background: #e6f7ff;
 }
 
 .ams-popover {
     position: absolute;
     z-index: 2000;
-    background: #333;
+    background: #fff;
     padding: 5px 5px;
     min-width: 120px;
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
     animation: popover-fade-in 0.18s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 @keyframes popover-fade-in {
     from { opacity: 0; transform: translateX(-50%) scale(0.95); }
@@ -451,8 +439,8 @@ body {
     width: 16px;
     height: 16px;
     background: #fff;
-    border-left: 1px solid #ccc;
-    border-top: 1px solid #ccc;
+    border-left: 1px solid #e0e0e0;
+    border-top: 1px solid #e0e0e0;
     transform: rotate(45deg);
     position: absolute;
     top: 4px;
@@ -471,24 +459,9 @@ body {
     transition: background 0.2s;
 }
 .ams-popover-btn:hover {
-    background: #f0f0f0;
+    background: #f0f2f5;
 }
 
-
-.cancel-btn, .print-btn {
-    width: 90px !important;
-    min-width: 90px !important;
-    max-width: 120px !important;
-    height: 32px !important;
-    border-radius: 0 !important;
-    font-size: 15px !important;
-    font-weight: 500;
-    padding: 0 !important;
-    margin: 0 8px !important;
-    box-sizing: border-box;
-}
-
-/* 其它按钮通用直角 */
 button, .btn, .icon-btn {
     border-radius: 0 !important;
 }
@@ -534,4 +507,40 @@ button, .btn, .icon-btn {
 .status-tip.hide {
     opacity: 0;
     transition: opacity 0.2s;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.theme-toggle img {
+    width: 18px;
+    height: 18px;
+    filter: none;
+}
+
+/* Light theme specific styles */
+body[data-theme="light"] .theme-toggle {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+}
+
+body[data-theme="light"] .theme-toggle img {
+    filter: none;
 }

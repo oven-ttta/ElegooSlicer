@@ -1,6 +1,7 @@
 var mPrintTask = null;
 let currentPage = 1;
 const pageSize = 4;
+var hasAmsInfo = false;
 
 function OnInit() {
 	TranslatePage();
@@ -44,30 +45,30 @@ function UpdatePrintInfo()
 	$('#print-weight').text((printInfo.totalWeight).toFixed(2) + 'g');
 	$('#print-layer').text(printInfo.layerCount);
 
-	$('#option_canvas').prop('checked', printInfo.canvas);
-	$('#option_timelapse').prop('checked', printInfo.timeLapse);
-	$('#option_bedlevel').prop('checked', printInfo.heatedBedLeveling);
-	$('#option_upload').prop('checked', printInfo.uploadAndPrint);
-	$('#option_switch_to_device_tab').prop('checked', printInfo.switchToDeviceTab);
-	$('#option_auto_refill').prop('checked', printInfo.autoRefill);
+	$('#option-enable-ams').prop('checked', printInfo.enableAms);
+	$('#option-timelapse').prop('checked', printInfo.timeLapse);
+	$('#option-bedlevel').prop('checked', printInfo.heatedBedLeveling);
+	$('#option-upload-and-print').prop('checked', printInfo.uploadAndPrint);
+	$('#option-switch-to-device-tab').prop('checked', printInfo.switchToDeviceTab);
+	$('#option-auto-refill').prop('checked', printInfo.autoRefill);
 
 	if (printInfo.bedType == "btPC") {
 		$('#bedB').prop('checked', true);
 	} else {
 		$('#bedA').prop('checked', true);
 	}
-	if (!amsInfo.trayFilamentList || amsInfo.trayFilamentList.length === 0) {
-		document.querySelector('.filament-info').style.display = 'none';
-		document.querySelector('.option_canvas').style.display = 'none';
-		document.querySelector('.checkmark').style.display = 'none';
-		document.querySelector('.label-text').style.display = 'none';
-	} else {
+	if (amsInfo.trayFilamentList && amsInfo.trayFilamentList.length > 0) {
 		renderFilamentMapping(printInfo.filamentList, amsInfo.trayFilamentList);
+		hasAmsInfo = true;
+	} else {
+		hasAmsInfo = false;
 	}
+	updateDisplay();
 }
 
 function getContrastColor(hexColor) {
 	hexColor = hexColor.replace('#', '');
+
 	if (hexColor.length === 3) {
 		hexColor = hexColor.split('').map(x => x + x).join('');
 	}
@@ -207,39 +208,34 @@ function initEventHandlers() {
 		}
 	});
 
-	$('#btn_cancel').on('click', function() {
+	$('#cancel-btn').on('click', function() {
 		SendWXMessage(JSON.stringify({
 			command: 'cancel_print',
 			sequence_id: Math.round(new Date() / 1000)
 		}));
 	});
 
-	$('#btn_print').on('click', function() {
-		mPrintTask.printInfo.canvas = $('#option_canvas').prop('checked');
-		mPrintTask.printInfo.timeLapse = $('#option_timelapse').prop('checked');
-		mPrintTask.printInfo.heatedBedLeveling = $('#option_bedlevel').prop('checked');
-		mPrintTask.printInfo.uploadAndPrint = $('#option_upload').prop('checked');
-		mPrintTask.printInfo.switchToDeviceTab = $('#option_switch_to_device_tab').prop('checked');
-		mPrintTask.printInfo.autoRefill = $('#option_auto_refill').prop('checked');
+	$('#upload-btn').on('click', function() {
+		mPrintTask.printInfo.enableAms = $('#option-enable-ams').prop('checked');
+		mPrintTask.printInfo.timeLapse = $('#option-timelapse').prop('checked');
+		mPrintTask.printInfo.heatedBedLeveling = $('#option-bedlevel').prop('checked');
+		mPrintTask.printInfo.uploadAndPrint = $('#option-upload-and-print').prop('checked');
+		mPrintTask.printInfo.switchToDeviceTab = $('#option-switch-to-device-tab').prop('checked');
+		mPrintTask.printInfo.autoRefill = $('#option-auto-refill').prop('checked');
 
 		if ($('#bedA').hasClass('selected')) {
 			mPrintTask.printInfo.bedType = 'btPC';
 		} else if ($('#bedB').hasClass('selected')) {
 			mPrintTask.printInfo.bedType = 'btPEI';
 		}
-
-		const selectedBed = $('.bed-btn.selected').data('bed');
-		if (!selectedBed) {
-			alert('Please select a print bed');
-			return;
+		if (hasAmsInfo && $('#option-enable-ams').prop('checked')) {
+			if (!checkFilamentMapping(mPrintTask.printInfo.filamentList)) {
+				showStatusTip(getTranslation('some_filaments_not_mapped'));
+				return;
+			}
 		}
-		if (!checkFilamentMapping(mPrintTask.printInfo.filamentList)) {
-			showStatusTip('Some filaments are not mapped, please edit the mapping information first!');
-			return;
-		}
-
 		SendWXMessage(JSON.stringify({
-			command: 'start_print',
+			command: 'start_upload',
 			sequence_id: Math.round(new Date() / 1000),
 			data: mPrintTask
 		}));
@@ -286,6 +282,14 @@ function initEventHandlers() {
 		}
 	});
 
+	$('#option-upload-and-print').on('change', function() {
+		updateDisplay();
+	});
+
+	$('#option-enable-ams').on('change', function() {
+		updateDisplay();
+	});
+
 	$('#model-name').on('input', adjustModelNameWidth);
 	$(function() { adjustModelNameWidth(); });
 }
@@ -300,6 +304,33 @@ function adjustModelNameWidth() {
 	document.body.appendChild(span);
 	input.style.width = (span.offsetWidth + 20) + 'px';
 	document.body.removeChild(span);
+}
+
+function updateDisplay() {
+	if ($('#option-upload-and-print').prop('checked')) {
+		document.querySelector('[data-option="option-timelapse"]').style.display = 'block';
+		document.querySelector('[data-option="option-bedlevel"]').style.display = 'block';
+		document.querySelector('#bedA').style.display = 'block';
+		document.querySelector('#bedB').style.display = 'block';
+		if (hasAmsInfo) {
+			document.querySelector('[data-option="option-enable-ams"]').style.display = 'block';
+			if (!$('#option-enable-ams').prop('checked')) {
+				document.querySelector('.filament-info').style.display = 'none';
+			} else {
+				document.querySelector('.filament-info').style.display = 'block';
+			}
+		} else {
+			document.querySelector('[data-option="option-enable-ams"]').style.display = 'none';
+			document.querySelector('.filament-info').style.display = 'none';
+		}
+	} else {
+		document.querySelector('[data-option="option-enable-ams"]').style.display = 'none';
+		document.querySelector('[data-option="option-timelapse"]').style.display = 'none';
+		document.querySelector('[data-option="option-bedlevel"]').style.display = 'none';
+		document.querySelector('.filament-info').style.display = 'none';
+		document.querySelector('#bedA').style.display = 'none';
+		document.querySelector('#bedB').style.display = 'none';
+	}
 }
 
 function checkFilamentMapping(filamentList) {
@@ -332,3 +363,22 @@ document.getElementById('model-name').addEventListener('input', adjustModelNameW
 
 document.getElementById('model-name').value = modelName;
 adjustModelNameWidth();
+
+function getTranslation(key) {
+	// Ensure LangText is loaded
+	if (typeof LangText === 'undefined') {
+		console.warn('Translation system not initialized');
+		return key;
+	}
+	
+	// Get current language
+	const currentLang = localStorage.getItem(LANG_COOKIE_NAME) || 'en';
+	
+	// Check if translation exists
+	if (!LangText[currentLang] || !LangText[currentLang][key]) {
+		console.warn(`Translation missing for key: ${key} in language: ${currentLang}`);
+		return LangText['en'][key] || key;
+	}
+	
+	return LangText[currentLang][key];
+}

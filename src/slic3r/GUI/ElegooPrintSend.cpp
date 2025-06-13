@@ -37,7 +37,7 @@ static const char* CONFIG_KEY_UPLOADANDPRINT    = "elegoolink_upload_and_print";
 static const char* CONFIG_KEY_TIMELAPSE         = "elegoolink_timelapse";
 static const char* CONFIG_KEY_HEATEDBEDLEVELING = "elegoolink_heated_bed_leveling";
 static const char* CONFIG_KEY_BEDTYPE           = "elegoolink_bed_type";
-static const char* CONFIG_KEY_CANVAS            = "elegoolink_canvas";
+static const char* CONFIG_KEY_ENABLE_AMS        = "elegoolink_enable_ams";
 static const char* CONFIG_KEY_AUTO_REFILL       = "elegoolink_auto_refill";
 
 using namespace nlohmann;
@@ -107,7 +107,7 @@ void ElegooPrintSend::init() {
     CenterOnParent();
 
     
-   std::string uploadAndPrint = app_config->get("recent", CONFIG_KEY_UPLOADANDPRINT);
+    std::string uploadAndPrint = app_config->get("recent", CONFIG_KEY_UPLOADANDPRINT);
     if (!uploadAndPrint.empty())
         post_upload_action = static_cast<PrintHostPostUploadAction>(std::stoi(uploadAndPrint));
     std::string timeLapse = app_config->get("recent", CONFIG_KEY_TIMELAPSE);
@@ -119,9 +119,9 @@ void ElegooPrintSend::init() {
     std::string bedType = app_config->get("recent", CONFIG_KEY_BEDTYPE);
     if (!bedType.empty())
         mBedType = static_cast<BedType>(std::stoi(bedType));
-    std::string canvas = app_config->get("recent", CONFIG_KEY_CANVAS);
-    if (!canvas.empty())
-        mCanvas = std::stoi(canvas);
+    std::string enableAms = app_config->get("recent", CONFIG_KEY_ENABLE_AMS);
+    if (!enableAms.empty())
+        mEnableAms = std::stoi(enableAms);
 
     std::string autoRefill = app_config->get("recent", CONFIG_KEY_AUTO_REFILL);
     if (!autoRefill.empty())
@@ -198,7 +198,7 @@ void ElegooPrintSend::onScriptMessage(wxWebViewEvent &evt) {
         else if (strCmd == "cancel_print") {
             onCancel();
         }
-        else if (strCmd == "start_print") {
+        else if (strCmd == "start_upload") {
             json printInfo = j["data"]["printInfo"];
             onPrint(printInfo);
         }
@@ -259,7 +259,7 @@ nlohmann::json ElegooPrintSend::preparePrintTask()
     printInfo["modelName"] = modelName;
     printInfo["timeLapse"] = mTimeLapse == 1;
     printInfo["heatedBedLeveling"] = mHeatedBedLeveling == 1;
-    printInfo["canvas"] = mCanvas == 1;
+    printInfo["enableAms"] = mEnableAms == 1;
     printInfo["switchToDeviceTab"] = m_switch_to_device_tab;
     printInfo["uploadAndPrint"] = post_upload_action == PrintHostPostUploadAction::StartPrint;
     printInfo["autoRefill"] = mAutoRefill == 1;
@@ -602,21 +602,15 @@ wxColour ElegooPrintSend::adjustColorForRender(const wxColour &color)
 void ElegooPrintSend::onPrint(const nlohmann::json &printInfo)
 {
     try {  
-        bool canvas = printInfo["canvas"].get<bool>();
+        bool enableAms = printInfo["enableAms"].get<bool>();
         bool timeLapse = printInfo["timeLapse"].get<bool>();
         bool heatedBedLeveling = printInfo["heatedBedLeveling"].get<bool>();
         bool uploadAndPrint = printInfo["uploadAndPrint"].get<bool>();
         bool switchToDeviceTab = printInfo["switchToDeviceTab"].get<bool>();
         bool auto_refill = printInfo["autoRefill"].get<bool>();
-        nlohmann::json filamentList = json::array();
-        for (size_t i = 0; i < printInfo["filamentList"].size(); i++) {
-            nlohmann::json filament = printInfo["filamentList"][i];
-            filamentList.push_back(filament);
-        }
-        mFilamentAmsMapping["amsNum"] = 1;
-        mFilamentAmsMapping["colorNum"]  = filamentList.size();
-        mFilamentAmsMapping["filamentList"] = filamentList;
-        mCanvas = canvas ? 1 : 0;
+
+
+        mEnableAms = enableAms ? 1 : 0;
         mTimeLapse = timeLapse ? 1 : 0;
         mHeatedBedLeveling = heatedBedLeveling ? 1 : 0;
         post_upload_action = uploadAndPrint ? PrintHostPostUploadAction::StartPrint : PrintHostPostUploadAction::None;
@@ -628,9 +622,36 @@ void ElegooPrintSend::onPrint(const nlohmann::json &printInfo)
             modelName += ".gcode";
         }
         txt_filename->SetValue(modelName);
-
-        saveFilamentAmsMapping(filamentList);
-
+        if (uploadAndPrint && enableAms && mFilamentAmsList.size() > 0) {
+            nlohmann::json filamentList = json::array(); 
+            bool hasMapped = false;
+            std::set<std::string> amsIdSet;
+            for (size_t i = 0; i < printInfo["filamentList"].size(); i++) {
+                nlohmann::json filament = printInfo["filamentList"][i];
+                filamentList.push_back(filament);
+                std::string color        = filament.value("filamentColor", "");
+                std::string amsId        = filament.value("amsId", "");
+                std::string trayId       = filament.value("trayId", "");
+                std::string filamentType = filament.value("filamentType", "");
+                hasMapped                = true;
+                amsIdSet.insert(amsId);
+                if (amsId.empty() || color.empty() || trayId.empty() || filamentType.empty()) {
+                    hasMapped = false;
+                    break;
+                }
+            }
+            if (hasMapped) {
+                mFilamentAmsMapping = nlohmann::json::object();
+                mFilamentAmsMapping["amsNum"] = amsIdSet.size();
+                mFilamentAmsMapping["colorNum"]  = filamentList.size();
+                mFilamentAmsMapping["filamentList"] = filamentList;
+                saveFilamentAmsMapping(filamentList);
+            } else {
+                wxMessageBox("Some filaments are not mapped!", "Error", wxOK | wxICON_ERROR);
+                EndModal(wxID_CANCEL);
+                return;
+            }
+        }    
         EndModal(wxID_OK);    
     } catch (std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "Print Error: " << e.what();
@@ -722,7 +743,7 @@ void ElegooPrintSend::EndModal(int ret)
         app_config->set("recent", CONFIG_KEY_TIMELAPSE, std::to_string(mTimeLapse));
         app_config->set("recent", CONFIG_KEY_HEATEDBEDLEVELING, std::to_string(mHeatedBedLeveling));
         app_config->set("recent", CONFIG_KEY_BEDTYPE, std::to_string(static_cast<int>(mBedType)));
-        app_config->set("recent", CONFIG_KEY_CANVAS, std::to_string(mCanvas));
+        app_config->set("recent", CONFIG_KEY_ENABLE_AMS, std::to_string(mEnableAms));
         app_config->set("recent", CONFIG_KEY_AUTO_REFILL, std::to_string(mAutoRefill));
     }
 

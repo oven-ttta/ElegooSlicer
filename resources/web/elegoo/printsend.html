@@ -4,48 +4,42 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Cache-Control" content="max-age=7200" />
-    <title>Model</title>
 
-    <script type="text/javascript" src="../include/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="../include/json2.js"></script>
-    <script type="text/javascript" src="../include/globalapi.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="../include/swiper/swiper-bundle.min.css" />
-    <script type="text/javascript" src="../include/swiper/swiper-bundle.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="../include/viewer/viewer.min.css" />
-    <script type="text/javascript" src="../include/viewer/viewer-jquery.min.js"></script>
-    <script type="text/javascript" src="../data/text.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="printsend.css" />
+    <link rel="stylesheet" type="text/css" href="./css/light.css" />
     <link rel="stylesheet" type="text/css" href="./css/dark.css" />
 
+    <script type="text/javascript" src="../include/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="../include/json2.js"></script>
+    <script type="text/javascript" src="../include/globalapi.js"></script>
+    <script type="text/javascript" src="../data/text.js"></script>
     <script type="text/javascript" src="printsend.js"></script>
+
 </head>
 
 <body onLoad="OnInit()">
     <div class="print-task-dialog">
         <div class="print-task-content">
             <div class="model-name-edit">
-                <input class="model-name" id="model-name" type="text" readonly />
+                <input id="model-name" type="text" readonly />
                 <button class="edit-name-btn" id="edit-name-btn" title="Edit name">
                     <img src="img/edit.svg" alt="Edit" />
                 </button>
             </div>
             <div class="model-preview">
-                <img id="model-image" src="" class="model-image">
+                <img id="model-image" src="" />
             </div>
             <div class="print-info">
                 <div class="info-group">
-                    <img src="img/clock.svg" class="info-icon">
+                    <img class="info-icon" src="img/clock.svg" />
                     <span id="print-time">00:00:00</span>
                 </div>
                 <div class="info-group">
-                    <img src="img/layer-num.svg" class="info-icon">
-                    <span id="print-layer">0 Layers</span>
+                    <img class="info-icon" src="img/layer-num.svg" />
+                    <span id="print-layer-count">0</span>
                 </div>
                 <div class="info-group">
-                    <img src="img/est-weight.svg" class="info-icon">
-                    <span id="print-weight">0.0g</span>
+                    <img class="info-icon" src="img/est-weight.svg" />
+                    <span id="print-weight">0.0</span>
                 </div>
             </div>
             <div class="filament-info">
@@ -53,9 +47,8 @@
                     <div class="header-container">
                         <!-- <button class="icon-btn"><img src="img/help.svg" alt="help" /></button> -->
                         <div class="btn-container">
-                            <input type="checkbox" id="option_auto_refill">
-                            <span class="checkmark"></span>
-                            <span class="label-text">Auto Refill</span>
+                            <input type="checkbox" id="option-auto-refill">
+                            <span class="label-text trans" tid="auto_refill">Auto Refill</span>
                         </div>
                         <div class="btn-container">
                             <button class="icon-btn" id="prev-page"><img src="img/prev.svg" /></button>
@@ -67,48 +60,44 @@
                         <!-- JS fills tray cards -->
                     </div>
                     <div class="note">
-                        <span>Please select the corresponding CANVAS slot for the filament material</span>
+                        <span class="trans" tid="filament_note">Please select the CANVAS slot for the filament</span>
                     </div>
                 </div>
             </div>
+
             <!-- Print bed selection -->
             <div class="print-bed-options">
-                <button class="bed-btn selected" data-bed="A" id="bedA">Textured Bed A</button>
-                <button class="bed-btn" data-bed="B" id="bedB">Smooth Bed B</button>
+                <button class="bed-btn selected trans" data-bed="A" tid="textured_build_plate" id="bedA">Textured Build Plate(Side A)</button>
+                <button class="bed-btn trans" data-bed="B" tid="smooth_build_plate" id="bedB">Smooth Build Plate(Side B)</button>
             </div>
             <!-- Print options -->
             <div class="print-options">
-                <label class="target-checkbox">
-                    <input type="checkbox" id="option_canvas">
-                    <span class="checkmark"></span>
-                    <span class="label-text">Enable CANVAS</span>
+                <label class="target-checkbox" data-option="option-upload-and-print">
+                    <input type="checkbox" id="option-upload-and-print">
+                    <span class="label-text trans" tid="upload_and_print">Upload and Print</span>
                 </label>
-                <label class="target-checkbox">
-                    <input type="checkbox" id="option_timelapse">
-                    <span class="checkmark"></span>
-                    <span class="label-text">Timelapse</span>
+                <label class="target-checkbox" data-option="option-switch-to-device-tab">
+                    <input type="checkbox" id="option-switch-to-device-tab">
+                    <span class="label-text trans" tid="switch_to_device_tab">Switch to Device Tab</span>
                 </label>
-                <label class="target-checkbox">
-                    <input type="checkbox" id="option_bedlevel">
-                    <span class="checkmark"></span>
-                    <span class="label-text">Bed Leveling</span>
+                <label class="target-checkbox" data-option="option-timelapse">
+                    <input type="checkbox" id="option-timelapse">
+                    <span class="label-text trans" tid="time_lapse">Timelapse</span>
                 </label>
-                <label class="target-checkbox">
-                    <input type="checkbox" id="option_upload">
-                    <span class="checkmark"></span>
-                    <span class="label-text">Upload and Print</span>
+                <label class="target-checkbox" data-option="option-bedlevel">
+                    <input type="checkbox" id="option-bedlevel">                  
+                    <span class="label-text trans" tid="heated_bed_leveling">Auto Bed Leveling</span>
                 </label>
-                <label class="target-checkbox">
-                    <input type="checkbox" id="option_switch_to_device_tab">
-                    <span class="checkmark"></span>
-                    <span class="label-text">Switch to Device Tab</span>
+                <label class="target-checkbox" data-option="option-enable-ams">
+                    <input type="checkbox" id="option-enable-ams">
+                    <span class="label-text trans" tid="enable_ams">Enable CANVAS</span>
                 </label>
             </div>
         </div>
         <div id="status-tip" class="status-tip"></div>
         <div class="bottom-container">
-            <button class="cancel-btn" id="btn_cancel">Cancel</button>
-            <button class="print-btn" id="btn_print">Print</button>
+            <button id="cancel-btn" class="trans" tid="cancel">Cancel</button>
+            <button id="upload-btn" class="trans" tid="upload">Upload</button>
         </div>
     </div>
 </body>
