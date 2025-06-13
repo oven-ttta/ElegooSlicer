@@ -835,7 +835,8 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
         std::string gcode_out;
         std::string line;
         Vec2f pos = tcr.start_pos;
-        Vec2f transformed_pos = pos;
+        auto  trans_pos = [wt_rot = Eigen::Rotation2Df(angle), &translation](const Vec2f& p) -> Vec2f { return wt_rot * p + translation; };
+        Vec2f transformed_pos = trans_pos(pos);
         Vec2f old_pos(-1000.1f, -1000.1f);
 
         while (gcode_str) {
@@ -844,9 +845,10 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
             // All G1 commands should be translated and rotated. X and Y coords are
             // only pushed to the output when they differ from last time.
             // WT generator can override this by appending the never_skip_tag
-            if (line.find("G1 ") == 0) {
-                bool never_skip = false;
-                auto it = line.find(WipeTower::never_skip_tag());
+            if (line.find("G1 ") == 0 || line.find("G2 ") == 0 || line.find("G3 ") == 0) {
+                std::string cur_gcode_start = line.find("G1 ") == 0 ? "G1 " : (line.find("G2 ") == 0 ? "G2 " : "G3 ");
+                bool        never_skip      = false;
+                auto        it              = line.find(WipeTower::never_skip_tag());
                 if (it != std::string::npos) {
                     // remove the tag and remember we saw it
                     never_skip = true;
@@ -854,7 +856,7 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
                 }
                 std::ostringstream line_out;
                 std::istringstream line_str(line);
-                line_str >> std::noskipws;  // don't skip whitespace
+                line_str >> std::noskipws; // don't skip whitespace
                 char ch = 0;
                 while (line_str >> ch) {
                     if (ch == 'X' || ch == 'Y')
@@ -863,18 +865,18 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
                         line_out << ch;
                 }
 
-                transformed_pos = Eigen::Rotation2Df(angle) * pos + translation;
+                transformed_pos = trans_pos(pos);
 
                 if (transformed_pos != old_pos || never_skip) {
                     line = line_out.str();
                     std::ostringstream oss;
-                    oss << std::fixed << std::setprecision(3) << "G1 ";
+                    oss << std::fixed << std::setprecision(3) << cur_gcode_start;
                     if (transformed_pos.x() != old_pos.x() || never_skip)
                         oss << " X" << transformed_pos.x() - extruder_offset.x();
                     if (transformed_pos.y() != old_pos.y() || never_skip)
                         oss << " Y" << transformed_pos.y() - extruder_offset.y();
                     oss << " ";
-                    line.replace(line.find("G1 "), 3, oss.str());
+                    line.replace(line.find(cur_gcode_start), 3, oss.str());
                     old_pos = transformed_pos;
                 }
             }
