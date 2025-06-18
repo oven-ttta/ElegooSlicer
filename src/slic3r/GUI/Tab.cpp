@@ -4311,6 +4311,7 @@ if (is_marlin_flavor)
             });
         };
         optgroup->append_single_option_line("manual_filament_change", "semm#manual-filament-change");
+        optgroup->append_single_option_line("auto_toolchange_command");
 
         optgroup = page->new_optgroup(L("Wipe tower"), "param_tower");
         optgroup->append_single_option_line("purge_in_prime_tower", "semm");
