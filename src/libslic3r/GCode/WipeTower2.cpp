@@ -555,7 +555,69 @@ static float length_to_volume(float length, float line_width, float layer_height
 	return std::max(0.f, length * layer_height * (line_width - layer_height * (1.f - float(M_PI) / 4.f)));
 }
 
+static Vec2f calc_rib_wall_size(const DynamicPrintConfig* config, Vec3f box){
+    float rib_width = dynamic_cast<const ConfigOptionFloat*>(config->option("wipe_tower_rib_width"))->value;
+    float extra_rib_length = dynamic_cast<const ConfigOptionFloat*>(config->option("wipe_tower_extra_rib_length"))->value;
+    float w                = box(0);
+    float l                = box(1);
+    // Calculate actual rib length based on diagonal plus extra length
+    float diagonal_length = sqrt(w * w + l * l);
+    float rib_length      = std::max(0.f, diagonal_length + extra_rib_length);
 
+    // Constrain rib width to be at most half the minimum dimension
+    rib_width = std::min(rib_width, std::min(w, l) / 2.f);
+
+    // Calculate extension needed at layer 0 (maximum extension)
+    float   diagonal_extra_length = std::max(0.f, rib_length - diagonal_length) / 2.f;
+    coord_t diagonal_width        = scaled(rib_width) / 2;
+
+    // Create diagonal lines and extend them
+    Line line_1(Point::new_scale(Vec2f{0, 0}), Point::new_scale(Vec2f{w, l}));
+    Line line_2(Point::new_scale(Vec2f{w, 0}), Point::new_scale(Vec2f{0, l}));
+
+    line_1.extend(double(scaled(diagonal_extra_length)));
+    line_2.extend(double(scaled(diagonal_extra_length)));
+
+    // Generate rectangles along diagonals and base rectangle
+    Polygon poly_1 = generate_rectange(line_1, diagonal_width);
+    Polygon poly_2 = generate_rectange(line_2, diagonal_width);
+
+    Polygon base_poly;
+    base_poly.points = {Point::new_scale(Vec2f{0, 0}), Point::new_scale(Vec2f{w, 0}), Point::new_scale(Vec2f{w, l}),
+                        Point::new_scale(Vec2f{0, l})};
+
+    // Union the polygons and get the bounding box directly
+    Polygons    result = union_({poly_1, poly_2, base_poly});
+    BoundingBox bbox   = get_extents(result.front());
+
+    // Calculate size and ensure it's at least 0
+    Vec2f size(std::max(std::ceil(unscaled<float>(bbox.size().x())), 0.f), std::max(std::ceil(unscaled<float>(bbox.size().y())), 0.f));
+
+    return size;
+}
+static Vec2f calc_cone_wall_size(const DynamicPrintConfig* config, Vec3f box)
+{
+    float depth = box(1);
+    float h = box(2);
+    float cone_angle = dynamic_cast<const ConfigOptionFloat*>(config->option("wipe_tower_cone_angle"))->value;
+    //(depth > 20 ? 20 : depth) is to ensure that the base length is not too small
+    float base_length = h * std::tan(Geometry::deg2rad(cone_angle / 2.0f)) * 2 + (depth > 20 ? 20 : depth);
+
+    return Vec2f(std::ceil(std::max(box(0), 0.f)), std::ceil(std::max(base_length, 0.f)));
+}
+Vec2f WipeTower2::calc_wipetower_wall_size(const DynamicPrintConfig* config, Vec3f box)
+{
+    WipeTowerWallType rib_type = config->option<ConfigOptionEnum<WipeTowerWallType>>("wipe_tower_wall_type")->value;
+ 
+    if (rib_type== wtwRib){
+       return calc_rib_wall_size(config, box);
+    } else if (rib_type == wtwCone) {
+       return calc_cone_wall_size(config, box);
+    }
+    else {
+        return Vec2f(box.x(), box.y());
+    }
+}
 
 
 class WipeTowerWriter2

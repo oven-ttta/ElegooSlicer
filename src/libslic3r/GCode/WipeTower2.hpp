@@ -17,14 +17,14 @@ namespace Slic3r
 
 class WipeTowerWriter2;
 class PrintRegionConfig;
-
+class DynamicPrintConfig;
 class WipeTower2
 {
 public:
     static const std::string never_skip_tag() { return "_GCODE_WIPE_TOWER_NEVER_SKIP_TAG"; }
 	static std::pair<double, double> get_wipe_tower_cone_base(double width, double height, double depth, double angle_deg);
 	static std::vector<std::vector<float>> extract_wipe_volumes(const PrintConfig& config);
-
+    static Vec2f calc_wipetower_wall_size(const DynamicPrintConfig* config, Vec3f box);
     
     // Construct ToolChangeResult from current state of WipeTower2 and WipeTowerWriter2.
     // WipeTowerWriter2 is moved from !

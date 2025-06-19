@@ -2721,17 +2721,28 @@ void GLCanvas3D::reload_scene(bool refresh_immediately, bool force_full_scene_re
                 const DynamicPrintConfig &print_cfg   = wxGetApp().preset_bundle->prints.get_edited_preset().config;
                 Vec3d wipe_tower_size = ppl.get_plate(plate_id)->estimate_wipe_tower_size(print_cfg, w, wipe_tower_data.depth);
 
-                const float   margin     = WIPE_TOWER_MARGIN + tower_brim_width;
+                float xMargin = WIPE_TOWER_MARGIN + tower_brim_width;
+                float yMargin = WIPE_TOWER_MARGIN + tower_brim_width;
+                
+                if (wipe_tower_size(0) > 0 && wipe_tower_size(1) > 0) {
+                    Vec2f  wallSize = WipeTower2::calc_wipetower_wall_size(m_config, Vec3f(w, wipe_tower_size(1), wipe_tower_size(2)));
+                    float ox = wallSize.x() - wipe_tower_size(0);
+                    float oy = wallSize.y() - wipe_tower_size(1);
+                    if (ox < 0) ox = 0;
+                    if (oy < 0) oy = 0;
+                    xMargin = xMargin + ox / 2;
+                    yMargin = yMargin + oy / 2;
+                }              
+
                 BoundingBoxf3 plate_bbox = wxGetApp().plater()->get_partplate_list().get_plate(plate_id)->get_bounding_box();
                 coordf_t plate_bbox_x_max_local_coord = plate_bbox.max(0) - plate_origin(0);
                 coordf_t plate_bbox_y_max_local_coord = plate_bbox.max(1) - plate_origin(1);
                 bool need_update = false;
-                if (x + margin + wipe_tower_size(0) > plate_bbox_x_max_local_coord) {
-                    x = plate_bbox_x_max_local_coord - wipe_tower_size(0) - margin;
+                if (x + xMargin + wipe_tower_size(0) > plate_bbox_x_max_local_coord) {
+                    x = plate_bbox_x_max_local_coord - wipe_tower_size(0) - xMargin;
                     need_update = true;
-                }
-                else if (x < margin) {
-                    x = margin;
+                } else if (x < xMargin) {
+                    x = xMargin;
                     need_update = true;
                 }
                 if (need_update) {
@@ -2740,12 +2751,11 @@ void GLCanvas3D::reload_scene(bool refresh_immediately, bool force_full_scene_re
                     need_update = false;
                 }
 
-                if (y + margin + wipe_tower_size(1) > plate_bbox_y_max_local_coord) {
-                    y = plate_bbox_y_max_local_coord - wipe_tower_size(1) - margin;
+                if (y + yMargin + wipe_tower_size(1) > plate_bbox_y_max_local_coord) {
+                    y = plate_bbox_y_max_local_coord - wipe_tower_size(1) - yMargin;
                     need_update = true;
-                }
-                else if (y < margin) {
-                    y = margin;
+                } else if (y < yMargin) {
+                    y = yMargin;
                     need_update = true;
                 }
                 if (need_update) {
