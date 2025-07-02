@@ -1,10 +1,13 @@
 {
     "type": "filament",
     "name": "Elegoo PLA+ @ECC",
-    "inherits": "Elegoo PLA+ @base",
+    "inherits": "Elegoo PLA @base",
     "from": "system",
     "setting_id": "EPLAPLUSECC",
     "instantiation": "true",
+    "filament_type": [
+        "PLA+"
+    ],
     "filament_max_volumetric_speed": [
       "20"
     ],
