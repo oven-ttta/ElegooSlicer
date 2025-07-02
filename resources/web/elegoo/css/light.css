@@ -280,18 +280,45 @@ body {
 
 }
 
-.filament-circle {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
+.filament-rect {
+    width: 50px;
+    min-height: 60px;
     color: #fff;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     margin-bottom: 4px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.filament-name {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    margin-top: 4px;
+}
+
+.filament-dash {
+    width: 100%;
+    height: 1px;
+    background-color: currentColor;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+
+.filament-type {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.filament-weight {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 2px;
 }
 
 .tray-arrow {
@@ -304,7 +331,7 @@ body {
 }
 
 .tray-rect {
-    width: 40px;
+    width: 45px;
     min-height: 80px;
     background: #FFA726;
     display: flex;
@@ -326,9 +353,11 @@ body {
 }
 
 .tray-dash {
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 2px;
+    width: 100%;
+    height: 1px;
+    background-color: currentColor;
+    margin-bottom: 6px;
+    margin-top: 6px;
 }
 
 .tray-filament-type {

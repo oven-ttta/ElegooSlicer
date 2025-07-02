@@ -83,7 +83,6 @@ private:
     int     mTimeLapse;
     int     mHeatedBedLeveling;
     BedType mBedType;
-    int    mEnableAms;
     int    mAutoRefill;
     std::string mProjectName;
     std::map<int, DynamicPrintConfig> mFilamentAmsList;

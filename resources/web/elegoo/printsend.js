@@ -43,9 +43,8 @@ function UpdatePrintInfo()
 
 	$('#print-time').text(printInfo.printTime);
 	$('#print-weight').text((printInfo.totalWeight).toFixed(2) + 'g');
-	$('#print-layer').text(printInfo.layerCount);
+	$('#print-layer-count').text(printInfo.layerCount);
 
-	$('#option-enable-ams').prop('checked', printInfo.enableAms);
 	$('#option-timelapse').prop('checked', printInfo.timeLapse);
 	$('#option-bedlevel').prop('checked', printInfo.heatedBedLeveling);
 	$('#option-upload-and-print').prop('checked', printInfo.uploadAndPrint);
@@ -96,11 +95,15 @@ function renderFilamentMapping(filamentList, amsTrayFilamentList) {
 		const filamentDiv = document.createElement('div');
 		filamentDiv.className = 'mapping-container';
 		filamentDiv.innerHTML = `
-			<div class="filament-circle" style="background:${filamentColor};color:${circleTextColor};">${filament.filamentType}</div>
+			<div class="filament-rect" style="background:${filamentColor};color:${circleTextColor}; border:1px solid ${circleTextColor};" title="${filament.filamentName}">
+				<div class="filament-type">${filament.filamentType}</div>
+				<div class="filament-dash"></div>
+				<div class="filament-weight">${filament.filamentWeight}</div>
+			</div>
 			<div class="tray-arrow"></div>
-			<div class="tray-rect" style="background:${amsColor};color:${amsTextColor};">
+			<div class="tray-rect" style="background:${amsColor};color:${amsTextColor}; border:1px solid ${amsTextColor};">
 				<div class="tray-index">${filament.trayIndex || '?'}</div>
-				<div class="tray-dash">&mdash;</div>
+				<div class="tray-dash"></div>
 				<div class="tray-filament-type">${filament.amsFilamentType || '?'}</div>
 				<button class="slot-arrow-btn" data-index="${i}" style="color:${amsTextColor};">▼</button>
 			</div>
@@ -136,7 +139,7 @@ function showAmsPopup(filamentIdx, amsTrayFilamentList, filament) {
 		amsFilamentBtn.style.color = amsFilamentTextColor;
 		amsFilamentBtn.innerHTML = `
 			<div class="tray-index">${amsFilament.trayIndex}</div>
-			<div class="tray-dash">&mdash;</div>
+			<div class="tray-dash"></div>
 			<div class="tray-filament-type">${amsFilament.amsFilamentType}</div>
 		`;
 		amsFilamentBtn.onclick = function(e) {
@@ -216,7 +219,6 @@ function initEventHandlers() {
 	});
 
 	$('#upload-btn').on('click', function() {
-		mPrintTask.printInfo.enableAms = $('#option-enable-ams').prop('checked');
 		mPrintTask.printInfo.timeLapse = $('#option-timelapse').prop('checked');
 		mPrintTask.printInfo.heatedBedLeveling = $('#option-bedlevel').prop('checked');
 		mPrintTask.printInfo.uploadAndPrint = $('#option-upload-and-print').prop('checked');
@@ -228,7 +230,7 @@ function initEventHandlers() {
 		} else if ($('#bedB').hasClass('selected')) {
 			mPrintTask.printInfo.bedType = 'btPEI';
 		}
-		if (hasAmsInfo && $('#option-enable-ams').prop('checked')) {
+		if (hasAmsInfo) {
 			if (!checkFilamentMapping(mPrintTask.printInfo.filamentList)) {
 				showStatusTip(getTranslation('some_filaments_not_mapped'));
 				return;
@@ -262,7 +264,7 @@ function initEventHandlers() {
 
 	$('#model-name').on('blur', function() {
 		$(this).prop('readonly', true);
-		// let filtered = filterModelName($(this).val());
+		let filtered = $(this).val();
 		// $(this).val(filtered);
 		if (mPrintTask && mPrintTask.printInfo) {
 			mPrintTask.printInfo.modelName = filtered;
@@ -283,10 +285,6 @@ function initEventHandlers() {
 	});
 
 	$('#option-upload-and-print').on('change', function() {
-		updateDisplay();
-	});
-
-	$('#option-enable-ams').on('change', function() {
 		updateDisplay();
 	});
 
@@ -313,18 +311,11 @@ function updateDisplay() {
 		document.querySelector('#bedA').style.display = 'block';
 		document.querySelector('#bedB').style.display = 'block';
 		if (hasAmsInfo) {
-			document.querySelector('[data-option="option-enable-ams"]').style.display = 'block';
-			if (!$('#option-enable-ams').prop('checked')) {
-				document.querySelector('.filament-info').style.display = 'none';
-			} else {
-				document.querySelector('.filament-info').style.display = 'block';
-			}
+			document.querySelector('.filament-info').style.display = 'block';
 		} else {
-			document.querySelector('[data-option="option-enable-ams"]').style.display = 'none';
 			document.querySelector('.filament-info').style.display = 'none';
 		}
 	} else {
-		document.querySelector('[data-option="option-enable-ams"]').style.display = 'none';
 		document.querySelector('[data-option="option-timelapse"]').style.display = 'none';
 		document.querySelector('[data-option="option-bedlevel"]').style.display = 'none';
 		document.querySelector('.filament-info').style.display = 'none';
