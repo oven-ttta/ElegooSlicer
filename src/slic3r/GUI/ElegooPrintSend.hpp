@@ -43,7 +43,6 @@ public:
         return {{"bedType", std::to_string(static_cast<int>(mBedType))},
                 {"timeLapse", std::to_string(mTimeLapse)},
                 {"heatedBedLeveling", std::to_string(mHeatedBedLeveling)},
-                {"enableAms", std::to_string(mEnableAms)},
                 {"autoRefill", std::to_string(mAutoRefill)},
                 {"filamentAmsMapping", mFilamentAmsMapping.dump()}};
     }   
@@ -83,7 +82,6 @@ private:
     int     mTimeLapse;
     int     mHeatedBedLeveling;
     BedType mBedType;
-    int    mEnableAms;
     int    mAutoRefill;
     std::string mProjectName;
     std::map<int, DynamicPrintConfig> mFilamentAmsList;

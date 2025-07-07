@@ -5,6 +5,12 @@
     "from": "system",
     "filament_id": "GPETB00",
     "instantiation": "false",
+    "filament_vendor": [
+        "Generic"
+    ],
+    "filament_type": [
+        "PET"
+    ],
     "cool_plate_temp": [
         "0"
     ],

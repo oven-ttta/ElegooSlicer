@@ -37,6 +37,9 @@
     "filament_type": [
         "PC"
     ],
+    "filament_vendor": [
+        "Generic"
+    ],
     "filament_density": [
         "1.04"
     ],

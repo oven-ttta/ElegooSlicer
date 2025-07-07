@@ -832,6 +832,9 @@ private:
 
     void cut_horizontal(size_t obj_idx, size_t instance_idx, double z, ModelObjectCutAttributes attributes);
 
+    // Auto-load missing vendor presets when loading 3MF files
+    int auto_load_missing_vendor_presets(PresetBundle* preset_bundle, DynamicPrintConfig& config, 
+                                        std::set<std::string>& modified_gcodes, const std::string& filename);
     friend class SuppressBackgroundProcessingUpdate;
     friend class PlaterDropTarget;
 };

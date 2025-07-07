@@ -62,6 +62,9 @@
 	"filament_end_gcode": [
 		"; filament end gcode \n"
 	],
+	"filament_vendor": [
+		"Generic"
+	],
 	"filament_type": [
 		"PETG"
 	]

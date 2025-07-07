@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-14 11:50+0800\n"
+"POT-Creation-Date: 2025-06-27 17:08+0800\n"
 "PO-Revision-Date: 2024-07-11 00:22+0300\n"
 "Last-Translator: Olcay ÖREN\n"
 "Language-Team: \n"
@@ -1007,6 +1007,10 @@ msgid "Orient the text towards the camera."
 msgstr "Metni kameraya doğru yönlendirin."
 
 #, boost-format
+msgid "Font \"%1%\" can't be used. Please select another."
+msgstr ""
+
+#, boost-format
 msgid ""
 "Can't load exactly same font(\"%1%\"). Application selected a similar "
 "one(\"%2%\"). You have to specify font for enable edit text."
@@ -1262,6 +1266,9 @@ msgstr "Nano SVG ayrıştırıcı dosyadan (%1%) yüklenemiyor."
 msgid "SVG file does NOT contain a single path to be embossed (%1%)."
 msgstr "SVG dosyası kabartma yapılacak tek bir yol İÇERMEZ (%1%)."
 
+msgid "No feature"
+msgstr ""
+
 msgid "Vertex"
 msgstr "Tepe noktası"
 
@@ -1286,9 +1293,6 @@ msgstr "Kenarın merkezi"
 msgid "Center of circle"
 msgstr "Çemberin merkezi"
 
-msgid "ShiftLeft mouse button"
-msgstr "Shift + Sol fare düğmesi"
-
 msgid "Select feature"
 msgstr "Özellik seçin"
 
@@ -1304,18 +1308,25 @@ msgstr "Seçimi sıfırla"
 msgid "Esc"
 msgstr "Esc"
 
-msgid "Unselect"
-msgstr "Seçimi kaldır"
+msgid "Cancel a feature until exit"
+msgstr ""
 
 msgid "Measure"
 msgstr "Ölçüm"
+
+msgid ""
+"Please confirm explosion ratio = 1,and please select at least one object"
+msgstr ""
+
+msgid "Please select at least one object."
+msgstr ""
 
 msgid "Edit to scale"
 msgstr "Ölçeğe göre düzenleyin"
 
 msgctxt "Verb"
-msgid "Scale"
-msgstr "Ölçek"
+msgid "Scale all"
+msgstr ""
 
 msgid "None"
 msgstr "Hiçbiri"
@@ -1328,6 +1339,42 @@ msgstr "Uzunluk"
 
 msgid "Selection"
 msgstr "Seçim"
+
+msgid " (Moving)"
+msgstr ""
+
+msgid ""
+"Select 2 faces on objects and \n"
+" make objects assemble together."
+msgstr ""
+
+msgid ""
+"Select 2 points or circles on objects and \n"
+" specify distance between them."
+msgstr ""
+
+msgid "Face"
+msgstr ""
+
+msgid " (Fixed)"
+msgstr ""
+
+msgid "Point"
+msgstr ""
+
+msgid ""
+"Feature 1 has been reset, \n"
+"feature 2 has been feature 1"
+msgstr ""
+
+msgid "Warning:please select Plane's feature."
+msgstr ""
+
+msgid "Warning:please select Point's or Circle's feature."
+msgstr ""
+
+msgid "Warning:please select two different mesh."
+msgstr ""
 
 msgid "Copy to clipboard"
 msgstr "Panoya kopyala"
@@ -1343,6 +1390,27 @@ msgstr "Doğrudan mesafe"
 
 msgid "Distance XYZ"
 msgstr "Uzaklık XYZ"
+
+msgid "Parallel"
+msgstr ""
+
+msgid "Center coincidence"
+msgstr ""
+
+msgid "Featue 1"
+msgstr ""
+
+msgid "Reverse rotation"
+msgstr ""
+
+msgid "Rotate around center:"
+msgstr ""
+
+msgid "Parallel distance:"
+msgstr ""
+
+msgid "Flip by Face 2"
+msgstr ""
 
 msgid "Ctrl+"
 msgstr "Ctrl+"
@@ -1687,9 +1755,6 @@ msgstr "Gizle"
 
 msgid "Show"
 msgstr "Göster"
-
-msgid "Del"
-msgstr "Sil"
 
 msgid "Delete the selected object"
 msgstr "Seçilen nesneyi sil"
@@ -2795,9 +2860,6 @@ msgstr "Giriş değeri %1%'den büyük ve %2%'den küçük olmalıdır"
 msgid "SN"
 msgstr "SN"
 
-msgid "Setting AMS slot information while printing is not supported"
-msgstr "Yazdırma sırasında AMS yuvası bilgilerinin ayarlanması desteklenmiyor"
-
 msgid "Factors of Flow Dynamics Calibration"
 msgstr "Akış Dinamiği Kalibrasyonunun Faktörleri"
 
@@ -2809,6 +2871,9 @@ msgstr "Faktör K"
 
 msgid "Factor N"
 msgstr "Faktör N"
+
+msgid "Setting AMS slot information while printing is not supported"
+msgstr "Yazdırma sırasında AMS yuvası bilgilerinin ayarlanması desteklenmiyor"
 
 msgid "Setting Virtual slot information while printing is not supported"
 msgstr "Yazdırma desteklenmediğinde Sanal yuva bilgilerinin ayarlanması"
@@ -2930,8 +2995,8 @@ msgstr "AMS'yi devre dışı bırak"
 msgid "Print with the filament mounted on the back of chassis"
 msgstr "Şasinin arkasına monte edilmiş filamentle yazdırma"
 
-msgid "Current Cabin humidity"
-msgstr "Mevcut Kabin nemi"
+msgid "Current AMS humidity"
+msgstr ""
 
 msgid ""
 "Please change the desiccant when it is too wet. The indicator may not "
@@ -3120,8 +3185,12 @@ msgstr ""
 "Bir hata oluştu. Belki sistemin hafızası yeterli değildir veya programın bir "
 "hatasıdır"
 
-msgid "Please save project and restart the program. "
-msgstr "Lütfen projeyi kaydedin ve programı yeniden başlatın. "
+#, boost-format
+msgid "A fatal error occurred: \"%1%\""
+msgstr ""
+
+msgid "Please save project and restart the program."
+msgstr ""
 
 msgid "Processing G-Code from Previous file..."
 msgstr "Önceki dosyadan G Kodu işleniyor..."
@@ -3617,10 +3686,8 @@ msgstr ""
 
 msgid ""
 "Alternate extra wall does't work well when ensure vertical shell thickness "
-"is set to All. "
+"is set to All."
 msgstr ""
-"Alternatif ekstra duvar, dikey kabuk kalınlığının Tümü olarak "
-"ayarlandığından emin olunduğunda iyi çalışmaz. "
 
 msgid ""
 "Change these settings automatically? \n"
@@ -4705,6 +4772,9 @@ msgstr "Panoyu yapıştır"
 msgid "Delete selected"
 msgstr "Seçileni sil"
 
+msgid "Del"
+msgstr "Sil"
+
 msgid "Deletes the current selection"
 msgstr "Geçerli seçimi sil"
 
@@ -4744,6 +4814,14 @@ msgstr "Perspektif Görünüm"
 msgid "Use Orthogonal View"
 msgstr "Ortogonal Görünüm"
 
+msgid "Auto Perspective"
+msgstr ""
+
+msgid ""
+"Automatically switch between orthographic and perspective when changing from "
+"top/bottom/side views"
+msgstr ""
+
 msgid "Show &G-code Window"
 msgstr "&G-code Penceresini Göster"
 
@@ -4774,7 +4852,7 @@ msgstr "Çıkıntıyı Göster"
 msgid "Show object overhang highlight in 3D scene"
 msgstr "3B sahnede nesne çıkıntısı vurgusunu göster"
 
-msgid "Show Selected Outline (Experimental)"
+msgid "Show Selected Outline (beta)"
 msgstr ""
 
 msgid "Show outline around selected object in 3D scene"
@@ -4884,15 +4962,18 @@ msgid "&Help"
 msgstr "&Yardım"
 
 #, c-format, boost-format
-msgid "A file exists with the same name: %s, do you want to override it."
-msgstr "Aynı adda bir dosya var: %s, üzerine yazmak istiyor musunuz."
+msgid "A file exists with the same name: %s, do you want to overwrite it?"
+msgstr ""
 
 #, c-format, boost-format
-msgid "A config exists with the same name: %s, do you want to override it."
-msgstr "Aynı adda bir yapılandırma mevcut: %s, üzerine yazmak istiyor musunuz."
+msgid "A config exists with the same name: %s, do you want to overwrite it?"
+msgstr ""
 
 msgid "Overwrite file"
 msgstr "Dosyanın üzerine yaz"
+
+msgid "Overwrite config"
+msgstr ""
 
 msgid "Yes to All"
 msgstr "Tümüne evet"
@@ -5016,8 +5097,8 @@ msgstr ""
 msgid "The printer has been logged out and cannot connect."
 msgstr "Yazıcıda oturum kapatıldı ve bağlanamıyor."
 
-msgid "Stopped."
-msgstr "Durdu."
+msgid "Video Stopped."
+msgstr ""
 
 msgid "LAN Connection Failed (Failed to start liveview)"
 msgstr "LAN Bağlantısı Başarısız Oldu (Canlı izleme başlatılamadı)"
@@ -5079,10 +5160,6 @@ msgstr "Dosya listesini yazıcıdan yeniden yükleyin."
 msgid "No printers."
 msgstr "Yazıcı yok."
 
-#, c-format, boost-format
-msgid "Connect failed [%d]!"
-msgstr "Bağlantı başarısız oldu [%d]!"
-
 msgid "Loading file list..."
 msgstr "Dosya listesi yükleniyor..."
 
@@ -5092,9 +5169,6 @@ msgstr "Dosya yok"
 msgid "Load failed"
 msgstr "Yükleme başarısız"
 
-msgid "Initialize failed (Device connection not ready)!"
-msgstr "Başlatma başarısız oldu (Cihaz bağlantısı hazır değil)!"
-
 msgid ""
 "Browsing file in SD card is not supported in current firmware. Please update "
 "the printer firmware."
@@ -5102,22 +5176,16 @@ msgstr ""
 "SD karttaki dosyaya göz atmak mevcut donanım yazılımında desteklenmiyor. "
 "Lütfen yazıcının ürün yazılımını güncelleyin."
 
-msgid "Initialize failed (Storage unavailable, insert SD card.)!"
+msgid ""
+"Please check if the SD card is inserted into the printer.\n"
+"If it still cannot be read, you can try formatting the SD card."
 msgstr ""
-"Başlatma başarısız oldu (Depolama alanı kullanılamıyor, SD kartı takın.)!"
 
 msgid "LAN Connection Failed (Failed to view sdcard)"
 msgstr "LAN Bağlantısı Başarısız (SD kart görüntülenemedi)"
 
 msgid "Browsing file in SD card is not supported in LAN Only Mode."
 msgstr "SD karttaki dosyaya göz atmak Yalnızca LAN Modunda desteklenmez."
-
-#, c-format, boost-format
-msgid "Initialize failed (%s)!"
-msgstr "Başlatma başarısız oldu (%s)!"
-
-msgid "Network unreachable"
-msgstr "Ağa ulaşılamıyor"
 
 #, c-format, boost-format
 msgid "You are going to delete %u file from printer. Are you sure to continue?"
@@ -5557,6 +5625,25 @@ msgstr "En son sürüm:"
 
 msgid "Not for now"
 msgstr "Şu an için değil"
+
+msgid "Server Exception"
+msgstr ""
+
+msgid ""
+"The server is unable to respond. Please click the link below to check the "
+"server status."
+msgstr ""
+
+msgid ""
+"If the server is in a fault state, you can temporarily use offline printing "
+"or local network printing."
+msgstr ""
+
+msgid "How to use LAN only mode"
+msgstr ""
+
+msgid "Don't show this dialog again"
+msgstr ""
 
 msgid "3D Mouse disconnected."
 msgstr "3D Fare bağlantısı kesildi."
@@ -6244,6 +6331,22 @@ msgstr ""
 "ElegooSlicer'ya aktarma başarısız oldu. Lütfen dosyayı indirin ve manuel "
 "olarak İçe aktarın."
 
+msgid "INFO:"
+msgstr ""
+
+msgid ""
+"No accelerations provided for calibration. Use default acceleration value "
+msgstr ""
+
+msgid "mm/s²"
+msgstr "mm/s²"
+
+msgid "No speeds provided for calibration. Use default optimal speed "
+msgstr ""
+
+msgid "mm/s"
+msgstr "mm/s"
+
 msgid "Import SLA archive"
 msgstr "SLA arşivini içe aktar"
 
@@ -6283,6 +6386,10 @@ msgstr "Proje olarak aç"
 
 msgid "Import geometry only"
 msgstr "Yalnızca geometriyi içe aktar"
+
+msgid ""
+"This option can be changed later in preferences, under 'Load Behaviour'."
+msgstr ""
 
 msgid "Only one G-code file can be opened at the same time."
 msgstr "Aynı anda yalnızca bir G kodu dosyası açılabilir."
@@ -6455,13 +6562,10 @@ msgstr ""
 
 #, c-format, boost-format
 msgid ""
-"Plate% d: %s is not suggested to be used to print filament %s(%s). If you "
+"Plate %d: %s is not suggested to be used to print filament %s(%s). If you "
 "still want to do this printing, please set this filament's bed temperature "
-"to non zero."
+"to non-zero."
 msgstr ""
-"Plaka% d: %s'nin %s(%s) filamentinı yazdırmak için kullanılması önerilmez. "
-"Eğer yine de bu baskıyı yapmak istiyorsanız, lütfen bu filamentin yatak "
-"sıcaklığını sıfır olmayan bir değere ayarlayın."
 
 msgid "Switching the language requires application restart.\n"
 msgstr "Dili değiştirmek uygulamanın yeniden başlatılmasını gerektirir.\n"
@@ -6708,6 +6812,24 @@ msgstr "Web bağlantılarını ElegooSlicer ile ilişkilendirin"
 
 msgid "Associate URLs to ElegooSlicer"
 msgstr "URL’leri ElegooSlicer ile ilişkilendirin"
+
+msgid "Load All"
+msgstr ""
+
+msgid "Ask When Relevant"
+msgstr ""
+
+msgid "Always Ask"
+msgstr ""
+
+msgid "Load Geometry Only"
+msgstr ""
+
+msgid "Load Behaviour"
+msgstr ""
+
+msgid "Should printer/filament/process settings be loaded when opening a .3mf?"
+msgstr ""
 
 msgid "Maximum recent projects"
 msgstr "Maksimum yeni proje"
@@ -7275,6 +7397,9 @@ msgstr "Cihaz adını değiştir"
 msgid "Bind with Pin Code"
 msgstr "Pin Koduyla Bağla"
 
+msgid "Bind with Access Code"
+msgstr ""
+
 msgid "Send to Printer SD card"
 msgstr "Yazıcı SD kartına gönder"
 
@@ -7459,13 +7584,11 @@ msgid "Still print by object?"
 msgstr "Hala nesneye göre yazdırıyor musunuz?"
 
 msgid ""
-"We have added an experimental style \"Tree Slim\" that features smaller "
-"support volume but weaker strength.\n"
-"We recommend using it with: 0 interface layers, 0 top distance, 2 walls."
+"When using support material for the support interface, We recommend the "
+"following settings:\n"
+"0 top z distance, 0 interface spacing, interlaced rectilinear pattern and "
+"disable independent support layer height"
 msgstr ""
-"Daha küçük destek hacmine ancak daha zayıf güce sahip deneysel bir tarz olan "
-"\"Tree Slim\" ekledik.\n"
-"Şunlarla kullanmanızı öneririz: 0 arayüz katmanı, 0 üst mesafe, 2 duvar."
 
 msgid ""
 "Change these settings automatically? \n"
@@ -7475,26 +7598,6 @@ msgstr ""
 "Bu ayarlar otomatik olarak değiştirilsin mi?\n"
 "Evet - Bu ayarları otomatik olarak değiştir\n"
 "Hayır - Bu ayarları benim için değiştirme"
-
-msgid ""
-"For \"Tree Strong\" and \"Tree Hybrid\" styles, we recommend the following "
-"settings: at least 2 interface layers, at least 0.1mm top z distance or "
-"using support materials on interface."
-msgstr ""
-"\"Güçlü Ağaç\" ve \"Ağaç Hibrit\" stilleri için şu ayarları öneriyoruz: en "
-"az 2 arayüz katmanı, en az 0,1 mm üst z mesafesi veya arayüzde destek "
-"malzemeleri kullanılması."
-
-msgid ""
-"When using support material for the support interface, We recommend the "
-"following settings:\n"
-"0 top z distance, 0 interface spacing, concentric pattern and disable "
-"independent support layer height"
-msgstr ""
-"Destek arayüzü için destek materyali kullanırken aşağıdaki ayarları "
-"öneriyoruz:\n"
-"0 üst z mesafesi, 0 arayüz aralığı, eş merkezli desen ve bağımsız destek "
-"katmanı yüksekliğini devre dışı bırakma"
 
 msgid ""
 "Enabling this option will modify the model's shape. If your print requires "
@@ -7566,6 +7669,75 @@ msgstr ""
 "eklenmesi önerilir.\n"
 "Yapı plakasının boş konumuna sağ tıklayın ve \"İlkel Ekle\" -> \"Timelapse "
 "Temizleme Kulesi\" seçeneğini seçin."
+
+msgid ""
+"A copy of the current system preset will be created, which will be detached "
+"from the system preset."
+msgstr ""
+
+msgid ""
+"The current custom preset will be detached from the parent system preset."
+msgstr ""
+
+msgid "Modifications to the current profile will be saved."
+msgstr ""
+
+msgid ""
+"This action is not revertible.\n"
+"Do you want to proceed?"
+msgstr ""
+
+msgid "Detach preset"
+msgstr ""
+
+msgid "This is a default preset."
+msgstr ""
+
+msgid "This is a system preset."
+msgstr ""
+
+msgid "Current preset is inherited from the default preset."
+msgstr ""
+
+msgid "Current preset is inherited from"
+msgstr ""
+
+msgid "It can't be deleted or modified."
+msgstr ""
+
+msgid ""
+"Any modifications should be saved as a new preset inherited from this one."
+msgstr ""
+
+msgid "To do that please specify a new name for the preset."
+msgstr ""
+
+msgid "Additional information:"
+msgstr ""
+
+msgid "vendor"
+msgstr ""
+
+msgid "printer model"
+msgstr ""
+
+msgid "default print profile"
+msgstr ""
+
+msgid "default filament profile"
+msgstr ""
+
+msgid "default SLA material profile"
+msgstr ""
+
+msgid "default SLA print profile"
+msgstr ""
+
+msgid "full profile name"
+msgstr ""
+
+msgid "symbolic profile name"
+msgstr ""
 
 msgid "Line width"
 msgstr "Katman Genişliği"
@@ -7718,6 +7890,14 @@ msgstr "Nozul"
 msgid "Nozzle temperature when printing"
 msgstr "Yazdırma sırasında nozul sıcaklığı"
 
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
+msgstr ""
+
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7828,6 +8008,12 @@ msgstr "Sıkıştırma ayarları"
 msgid "Toolchange parameters with multi extruder MM printers"
 msgstr "Çoklu Ekstruder MM Yazıcılarda Araç Değiştirme Parametreleri"
 
+msgid "Dependencies"
+msgstr ""
+
+msgid "Profile dependencies"
+msgstr ""
+
 msgid "Printable space"
 msgstr "Tabla Ayarı"
 
@@ -7932,8 +8118,8 @@ msgstr ""
 msgid "Layer height limits"
 msgstr "Katman Yüksekliği Sınırları"
 
-msgid "Lift Z Enforcement"
-msgstr "Z Kaldırma Uygulaması"
+msgid "Z-Hop"
+msgstr ""
 
 msgid "Retraction when switching material"
 msgstr "Malzemeyi Değiştirirken Geri Çekme"
@@ -8087,8 +8273,8 @@ msgstr ""
 "kaydedilmemiş değişiklikleri içeriyor:"
 
 #, boost-format
-msgid "You have changed some settings of preset \"%1%\". "
-msgstr "“%1%” ön ayarının bazı ayarlarını değiştirdiniz."
+msgid "You have changed some settings of preset \"%1%\"."
+msgstr ""
 
 msgid ""
 "\n"
@@ -8751,8 +8937,8 @@ msgstr "Canlı Önizlemeyi Görüntüle"
 msgid "Confirm and Update Nozzle"
 msgstr "Nozulu Onaylayın ve Güncelleyin"
 
-msgid "LAN Connection Failed (Sending print file)"
-msgstr "LAN Bağlantısı Başarısız (Yazdırma dosyası gönderiliyor)"
+msgid "Connect the printer using IP and access code"
+msgstr ""
 
 msgid ""
 "Step 1, please confirm ElegooSlicer and your printer are in the same LAN."
@@ -8772,18 +8958,38 @@ msgstr "IP"
 msgid "Access Code"
 msgstr "Giriş kodu"
 
+msgid "Printer model"
+msgstr ""
+
+msgid "Printer name"
+msgstr ""
+
 msgid "Where to find your printer's IP and Access Code?"
 msgstr "Yazıcınızın IP'sini ve Erişim Kodunu nerede bulabilirsiniz?"
 
-msgid "Step 3: Ping the IP address to check for packet loss and latency."
+msgid "Connect"
 msgstr ""
-"Adım 3: Paket kaybını ve gecikmeyi kontrol etmek için IP adresine ping atın."
 
-msgid "Test"
-msgstr "Test"
+msgid "Manual Setup"
+msgstr ""
 
-msgid "IP and Access Code Verified! You may close the window"
-msgstr "IP ve Erişim Kodu Doğrulandı! Pencereyi kapatabilirsin"
+msgid "connecting..."
+msgstr ""
+
+msgid "Failed to connect to printer."
+msgstr ""
+
+msgid "Failed to publish login request."
+msgstr ""
+
+msgid "The printer has already been bound."
+msgstr ""
+
+msgid "The printer mode is incorrect, please switch to LAN Only."
+msgstr ""
+
+msgid "Connecting to printer... The dialog will close later"
+msgstr ""
 
 msgid "Connection failed, please double check IP and Access Code"
 msgstr ""
@@ -9242,6 +9448,11 @@ msgstr ""
 "gerektirir"
 
 msgid ""
+"The prime tower is only supported for multiple objects if they are printed "
+"with the same support_top_z_distance"
+msgstr ""
+
+msgid ""
 "The prime tower requires that all objects are sliced with the same layer "
 "heights."
 msgstr ""
@@ -9255,11 +9466,22 @@ msgstr ""
 "Prime tower yalnızca tüm nesnelerin aynı değişken katman yüksekliğine sahip "
 "olması durumunda desteklenir"
 
+msgid ""
+"One or more object were assigned an extruder that the printer does not have."
+msgstr ""
+
 msgid "Too small line width"
 msgstr "Çizgi genişliği çok küçük"
 
 msgid "Too large line width"
 msgstr "Çok büyük çizgi genişliği"
+
+msgid ""
+"Printing with multiple extruders of differing nozzle diameters. If support "
+"is to be printed with the current filament (support_filament == 0 or "
+"support_interface_filament == 0), all nozzles have to be of the same "
+"diameter."
+msgstr ""
 
 msgid ""
 "The prime tower requires that support has the same layer height with object."
@@ -9389,6 +9611,9 @@ msgstr "G kodu oluşturuluyor"
 
 msgid "Failed processing of the filename_format template."
 msgstr "Dosyaadı_format şablonunun işlenmesi başarısız oldu."
+
+msgid "Printer technology"
+msgstr ""
 
 msgid "Printable area"
 msgstr "Yazdırılabilir alan"
@@ -9624,6 +9849,11 @@ msgstr "İlk katman yatak sıcaklığı"
 
 msgid ""
 "Bed temperature of the initial layer. Value 0 means the filament does not "
+"support to print on the Cool Plate SuperTack"
+msgstr ""
+
+msgid ""
+"Bed temperature of the initial layer. Value 0 means the filament does not "
 "support to print on the Cool Plate"
 msgstr ""
 "İlk katmanın yatak sıcaklığı. 0 değeri, filamentin Cool Plate üzerine "
@@ -9736,42 +9966,47 @@ msgstr "Üst ve alt yüzeyler"
 msgid "Nowhere"
 msgstr "Hiçbir yerde"
 
-msgid "Force cooling for overhang and bridge"
-msgstr "Çıkıntı ve köprüler için soğutmayı zorla"
-
-msgid ""
-"Enable this option to optimize part cooling fan speed for overhang and "
-"bridge to get better cooling"
-msgstr ""
-"Daha iyi soğutma elde etmek amacıyla çıkıntı ve köprü için parça soğutma "
-"fanı hızını optimize etmek amacıyla bu seçeneği etkinleştirin"
-
-msgid "Fan speed for overhang"
-msgstr "Çıkıntılar için fan hızı"
-
-msgid ""
-"Force part cooling fan to be this speed when printing bridge or overhang "
-"wall which has large overhang degree. Forcing cooling for overhang and "
-"bridge can get better quality for these part"
-msgstr ""
-"Çıkıntı derecesi büyük olan köprü veya çıkıntılı duvara baskı yaparken parça "
-"soğutma fanını bu hızda olmaya zorlayın. Çıkıntı ve köprü için soğutmayı "
-"zorlamak, bu parça için daha iyi kalite elde edilmesini sağlayabilir"
-
-msgid "Cooling overhang threshold"
-msgstr "Çıkıntı soğutması"
-
-#, c-format
-msgid ""
-"Force cooling fan to be specific speed when overhang degree of printed part "
-"exceeds this value. Expressed as percentage which indicates how much width "
-"of the line without support from lower layer. 0% means forcing cooling for "
-"all outer wall no matter how much overhang degree"
+msgid "Force cooling for overhangs and bridges"
 msgstr ""
 
-msgid "Bridge infill direction"
-msgstr "Köprü dolgu açısı"
+msgid ""
+"Enable this option to allow adjustment of the part cooling fan speed for "
+"specifically for overhangs, internal and external bridges. Setting the fan "
+"speed specifically for these features can improve overall print quality and "
+"reduce warping."
+msgstr ""
 
+msgid "Overhangs and external bridges fan speed"
+msgstr ""
+
+msgid ""
+"Use this part cooling fan speed when printing bridges or overhang walls with "
+"an overhang threshold that exceeds the value set in the 'Overhangs cooling "
+"threshold' parameter above. Increasing the cooling specifically for "
+"overhangs and bridges can improve the overall print quality of these "
+"features.\n"
+"\n"
+"Please note, this fan speed is clamped on the lower end by the minimum fan "
+"speed threshold set above. It is also adjusted upwards up to the maximum fan "
+"speed threshold when the minimum layer time threshold is not met."
+msgstr ""
+
+msgid "Overhang cooling activation threshold"
+msgstr ""
+
+#, no-c-format, no-boost-format
+msgid ""
+"When the overhang exceeds this specified threshold, force the cooling fan to "
+"run at the 'Overhang Fan Speed' set below. This threshold is expressed as a "
+"percentage, indicating the portion of each line's width that is unsupported "
+"by the layer beneath it. Setting this value to 0% forces the cooling fan to "
+"run for all outer walls, regardless of the overhang degree."
+msgstr ""
+
+msgid "External bridge infill direction"
+msgstr ""
+
+#, no-c-format, no-boost-format
 msgid ""
 "Bridging angle override. If left to zero, the bridging angle will be "
 "calculated automatically. Otherwise the provided angle will be used for "
@@ -9781,13 +10016,45 @@ msgstr ""
 "olarak hesaplanacaktır. Aksi halde dış köprüler için sağlanan açı "
 "kullanılacaktır. Sıfır açı için 180°'yi kullanın."
 
-msgid "Bridge density"
-msgstr "Köprü dolgu yoğunluğu"
-
-msgid "Density of external bridges. 100% means solid bridge. Default is 100%."
+msgid "Internal bridge infill direction"
 msgstr ""
-"Dış köprülerin yoğunluğu. %100 sağlam köprü anlamına gelir. Varsayılan "
-"%100'dür."
+
+msgid ""
+"Internal bridging angle override. If left to zero, the bridging angle will "
+"be calculated automatically. Otherwise the provided angle will be used for "
+"internal bridges. Use 180°for zero angle.\n"
+"\n"
+"It is recommended to leave it at 0 unless there is a specific model need not "
+"to."
+msgstr ""
+
+msgid "External bridge density"
+msgstr ""
+
+msgid ""
+"Controls the density (spacing) of external bridge lines. 100% means solid "
+"bridge. Default is 100%.\n"
+"\n"
+"Lower density external bridges can help improve reliability as there is more "
+"space for air to circulate around the extruded bridge, improving its cooling "
+"speed."
+msgstr ""
+
+msgid "Internal bridge density"
+msgstr ""
+
+msgid ""
+"Controls the density (spacing) of internal bridge lines. 100% means solid "
+"bridge. Default is 100%.\n"
+"\n"
+" Lower density internal bridges can help reduce top surface pillowing and "
+"improve internal bridge reliability as there is more space for air to "
+"circulate around the extruded bridge, improving its cooling speed. \n"
+"\n"
+"This option works particularly well when combined with the second internal "
+"bridge over infill option, further improving internal bridging structure "
+"before solid infill is extruded."
+msgstr ""
 
 msgid "Bridge flow ratio"
 msgstr "Köprülerde akış oranı"
@@ -9839,14 +10106,10 @@ msgstr "Hassas duvar"
 
 msgid ""
 "Improve shell precision by adjusting outer wall spacing. This also improves "
-"layer consistency.\n"
-"Note: This setting will only take effect if the wall sequence is configured "
-"to Inner-Outer"
+"layer consistency."
 msgstr ""
 "Dış duvar aralığını ayarlayarak kabuk hassasiyetini artırın. Bu aynı zamanda "
-"katman tutarlılığını da artırır.\n"
-"Not: Bu ayar yalnızca duvar sırası İç-Dış olarak yapılandırıldığında etkili "
-"olacaktır."
+"katman tutarlılığını da artırır."
 
 msgid "Only one wall on top surfaces"
 msgstr "Üst yüzeylerde yalnızca bir duvar"
@@ -9896,10 +10159,8 @@ msgstr "Çıkıntılarda ekstra çevre (perimeter)"
 
 msgid ""
 "Create additional perimeter paths over steep overhangs and areas where "
-"bridges cannot be anchored. "
+"bridges cannot be anchored."
 msgstr ""
-"Dik çıkıntılar ve köprülerin sabitlenemediği alanlar üzerinde ek çevre "
-"yolları (perimeter) oluşturun. "
 
 msgid "Reverse on even"
 msgstr ""
@@ -10025,9 +10286,6 @@ msgid ""
 "overhang."
 msgstr ""
 
-msgid "mm/s"
-msgstr "mm/s"
-
 msgid "Internal"
 msgstr "Dahili"
 
@@ -10048,6 +10306,9 @@ msgstr "Kenar tipi"
 msgid ""
 "This controls the generation of the brim at outer and/or inner side of "
 "models. Auto means the brim width is analyzed and calculated automatically."
+msgstr ""
+
+msgid "Painted"
 msgstr ""
 
 msgid "Brim-object gap"
@@ -10096,11 +10357,23 @@ msgstr "yukarı doğru uyumlu makine"
 msgid "Compatible machine condition"
 msgstr "Uyumlu yazıcıdurumu"
 
+msgid ""
+"A boolean expression using the configuration values of an active printer "
+"profile. If this expression evaluates to true, this profile is considered "
+"compatible with the active printer profile."
+msgstr ""
+
 msgid "Compatible process profiles"
 msgstr "Uyumlu süreç profilleri"
 
 msgid "Compatible process profiles condition"
 msgstr "Uyumlu süreç profillerinin durumu"
+
+msgid ""
+"A boolean expression using the configuration values of an active print "
+"profile. If this expression evaluates to true, this profile is considered "
+"compatible with the active print profile."
+msgstr ""
 
 msgid "Print sequence, layer by layer or object by object"
 msgstr "Yazdırma sırası, katman katman veya nesne nesne"
@@ -10143,9 +10416,6 @@ msgid ""
 msgstr ""
 "İlk katman dışında hem normal yazdırmanın hem de ilerlemenin varsayılan "
 "ivmesi"
-
-msgid "mm/s²"
-msgstr "mm/s²"
 
 msgid "Default filament profile"
 msgstr "Varsayılan filament profili"
@@ -10199,8 +10469,8 @@ msgstr ""
 "Desteği çok büyük yapan tüm köprü alanını desteklemeyin. Bridge genellikle "
 "çok uzun olmasa da destek olmadan doğrudan yazdırılabilir"
 
-msgid "Thick bridges"
-msgstr "Kalın köprüler"
+msgid "Thick external bridges"
+msgstr ""
 
 msgid ""
 "If enabled, bridges are more reliable, can bridge longer distances, but may "
@@ -10224,36 +10494,86 @@ msgstr ""
 "açık olması önerilir. Ancak büyük nozul uçları kullanıyorsanız kapatmayı "
 "düşünün."
 
-msgid "Filter out small internal bridges (beta)"
+msgid "Extra bridge layers (beta)"
 msgstr ""
 
 msgid ""
-"This option can help reducing pillowing on top surfaces in heavily slanted "
-"or curved models.\n"
+"This option enables the generation of an extra bridge layer over internal "
+"and/or external bridges.\n"
+"\n"
+"Extra bridge layers help improve bridge appearance and reliability, as the "
+"solid infill is better supported. This is especially useful in fast "
+"printers, where the bridge and solid infill speeds vary greatly. The extra "
+"bridge layer results in reduced pillowing on top surfaces, as well as "
+"reduced separation of the external bridge layer from its surrounding "
+"perimeters.\n"
+"\n"
+"It is generally recommended to set this to at least 'External bridge only', "
+"unless specific issues with the sliced model are found.\n"
+"\n"
+"Options:\n"
+"1. Disabled - does not generate second bridge layers. This is the default "
+"and is set for compatibility purposes.\n"
+"2. External bridge only - generates second bridge layers for external-facing "
+"bridges only. Please note that small bridges that are shorter or narrower "
+"than the set number of perimeters will be skipped as they would not benefit "
+"from a second bridge layer. If generated, the second bridge layer will be "
+"extruded parallel to the first bridge layer to reinforce the bridge "
+"strength.\n"
+"3. Internal bridge only - generates second bridge layers for internal "
+"bridges over sparse infill only. Please note that the internal bridges count "
+"towards the top shell layer count of your model. The second internal bridge "
+"layer will be extruded as close to perpendicular to the first as possible. "
+"If multiple regions in the same island, with varying bridge angles are "
+"present, the last region of that island will be selected as the angle "
+"reference.\n"
+"4. Apply to all - generates second bridge layers for both internal and "
+"external-facing bridges\n"
+msgstr ""
+
+msgid "Disabled"
+msgstr "Devredışı"
+
+msgid "External bridge only"
+msgstr ""
+
+msgid "Internal bridge only"
+msgstr ""
+
+msgid "Apply to all"
+msgstr ""
+
+msgid "Filter out small internal bridges"
+msgstr ""
+
+msgid ""
+"This option can help reduce pillowing on top surfaces in heavily slanted or "
+"curved models.\n"
 "\n"
 "By default, small internal bridges are filtered out and the internal solid "
 "infill is printed directly over the sparse infill. This works well in most "
 "cases, speeding up printing without too much compromise on top surface "
 "quality. \n"
 "\n"
-"However, in heavily slanted or curved models especially where too low sparse "
-"infill density is used, this may result in curling of the unsupported solid "
-"infill, causing pillowing.\n"
+"However, in heavily slanted or curved models, especially where too low a "
+"sparse infill density is used, this may result in curling of the unsupported "
+"solid infill, causing pillowing.\n"
 "\n"
-"Disabling this option will print internal bridge layer over slightly "
-"unsupported internal solid infill. The options below control the amount of "
-"filtering, i.e. the amount of internal bridges created.\n"
+"Enabling limited filtering or no filtering will print internal bridge layer "
+"over slightly unsupported internal solid infill. The options below control "
+"the sensitivity of the filtering, i.e. they control where internal bridges "
+"are created.\n"
 "\n"
-"Filter - enable this option. This is the default behavior and works well in "
-"most cases.\n"
+"1. Filter - enables this option. This is the default behavior and works well "
+"in most cases.\n"
 "\n"
-"Limited filtering - creates internal bridges on heavily slanted surfaces, "
-"while avoiding creating unnecessary internal bridges. This works well for "
-"most difficult models.\n"
+"2. Limited filtering - creates internal bridges on heavily slanted surfaces "
+"while avoiding unnecessary bridges. This works well for most difficult "
+"models.\n"
 "\n"
-"No filtering - creates internal bridges on every potential internal "
-"overhang. This option is useful for heavily slanted top surface models. "
-"However, in most cases it creates too many unnecessary bridges."
+"3. No filtering - creates internal bridges on every potential internal "
+"overhang. This option is useful for heavily slanted top surface models; "
+"however, in most cases, it creates too many unnecessary bridges."
 msgstr ""
 
 msgid "Filter"
@@ -11087,6 +11407,9 @@ msgstr "İç dolgu deseni"
 msgid "Grid"
 msgstr "Kafes"
 
+msgid "2D Lattice"
+msgstr ""
+
 msgid "Line"
 msgstr "Çizgi"
 
@@ -11116,6 +11439,25 @@ msgstr "Yıldırım"
 
 msgid "Cross Hatch"
 msgstr "Çapraz çizgi"
+
+msgid "Quarter Cubic"
+msgstr ""
+
+msgid "Lattice angle 1"
+msgstr ""
+
+msgid ""
+"The angle of the first set of 2D lattice elements in the Z direction. Zero "
+"is vertical."
+msgstr ""
+
+msgid "Lattice angle 2"
+msgstr ""
+
+msgid ""
+"The angle of the second set of 2D lattice elements in the Z direction. Zero "
+"is vertical."
+msgstr ""
 
 msgid "Sparse infill anchor length"
 msgstr "Dolgu uzunluğu"
@@ -11330,10 +11672,24 @@ msgid "Support interface fan speed"
 msgstr "Destekler için fan hızı"
 
 msgid ""
-"This fan speed is enforced during all support interfaces, to be able to "
-"weaken their bonding with a high fan speed.\n"
-"Set to -1 to disable this override.\n"
-"Can only be overridden by disable_fan_first_layers."
+"This part cooling fan speed is applied when printing support interfaces. "
+"Setting this parameter to a higher than regular speed  reduces the layer "
+"binding strength between supports and the supported part, making them easier "
+"to separate.\n"
+"Set to -1 to disable it.\n"
+"This setting is overridden by disable_fan_first_layers."
+msgstr ""
+
+msgid "Internal bridges fan speed"
+msgstr ""
+
+msgid ""
+"The part cooling fan speed used for all internal bridges. Set to -1 to use "
+"the overhang fan speed settings instead.\n"
+"\n"
+"Reducing the internal bridges fan speed, compared to your regular fan speed, "
+"can help reduce part warping due to excessive cooling applied over a large "
+"surface for a prolonged period of time."
 msgstr ""
 
 msgid ""
@@ -11374,6 +11730,59 @@ msgstr "Bulanık cildi ilk katmana uygulayın"
 msgid "Whether to apply fuzzy skin on the first layer"
 msgstr "İlk katmana bulanık cilt uygulanıp uygulanmayacağı"
 
+msgid "Fuzzy skin noise type"
+msgstr ""
+
+msgid ""
+"Noise type to use for fuzzy skin generation.\n"
+"Classic: Classic uniform random noise.\n"
+"Perlin: Perlin noise, which gives a more consistent texture.\n"
+"Billow: Similar to perlin noise, but clumpier.\n"
+"Ridged Multifractal: Ridged noise with sharp, jagged features. Creates "
+"marble-like textures.\n"
+"Voronoi: Divides the surface into voronoi cells, and displaces each one by a "
+"random amount. Creates a patchwork texture."
+msgstr ""
+
+msgid "Classic"
+msgstr "Klasik"
+
+msgid "Perlin"
+msgstr ""
+
+msgid "Billow"
+msgstr ""
+
+msgid "Ridged Multifractal"
+msgstr ""
+
+msgid "Voronoi"
+msgstr ""
+
+msgid "Fuzzy skin feature size"
+msgstr ""
+
+msgid ""
+"The base size of the coherent noise features, in mm. Higher values will "
+"result in larger features."
+msgstr ""
+
+msgid "Fuzzy Skin Noise Octaves"
+msgstr ""
+
+msgid ""
+"The number of octaves of coherent noise to use. Higher values increase the "
+"detail of the noise, but also increase computation time."
+msgstr ""
+
+msgid "Fuzzy skin noise persistence"
+msgstr ""
+
+msgid ""
+"The decay rate for higher octaves of the coherent noise. Lower values will "
+"result in smoother noise."
+msgstr ""
+
 msgid "Filter out tiny gaps"
 msgstr "Küçük boşlukları filtrele"
 
@@ -11383,7 +11792,7 @@ msgstr "Katmanlar ve Çevreler"
 msgid ""
 "Don't print gap fill with a length is smaller than the threshold specified "
 "(in mm). This setting applies to top, bottom and solid infill and, if using "
-"the classic perimeter generator, to wall gap fill. "
+"the classic perimeter generator, to wall gap fill."
 msgstr ""
 
 msgid ""
@@ -11691,6 +12100,12 @@ msgstr ""
 msgid "Speed of internal sparse infill"
 msgstr "İç seyrek dolgunun hızı"
 
+msgid "Inherits profile"
+msgstr ""
+
+msgid "Name of parent profile"
+msgstr ""
+
 msgid "Interface shells"
 msgstr "Arayüz kabukları"
 
@@ -11820,6 +12235,14 @@ msgstr "Ütüleme çizgi aralığı"
 
 msgid "The distance between the lines of ironing"
 msgstr "Ütü çizgileri arasındaki mesafe"
+
+msgid "Ironing inset"
+msgstr ""
+
+msgid ""
+"The distance to keep from the edges. A value of 0 sets this to half of the "
+"nozzle diameter"
+msgstr ""
 
 msgid "Ironing speed"
 msgstr "Ütüleme hızı"
@@ -12087,16 +12510,18 @@ msgid ""
 "Default value of 3 works well for most cases. If your printer is stuttering, "
 "increase this value to reduce the number of adjustments made\n"
 "\n"
-"Allowed values: 1-5"
+"Allowed values: 0.5-5"
 msgstr ""
-"Daha düşük bir değer, daha yumuşak ekstrüzyon hızı geçişleriyle sonuçlanır. "
-"Ancak bu, önemli ölçüde daha büyük bir gcode dosyası ve yazıcının işlemesi "
-"için daha fazla talimatla sonuçlanır. \n"
-"\n"
-"Varsayılan değer olan 3 çoğu durumda iyi çalışır. Yazıcınız takılıyorsa, "
-"yapılan ayarlamaların sayısını azaltmak için bu değeri artırın\n"
-"\n"
-"İzin verilen değerler: 1-5"
+
+msgid "Apply only on external features"
+msgstr ""
+
+msgid ""
+"Applies extrusion rate smoothing only on external perimeters and overhangs. "
+"This can help reduce artefacts due to sharp speed transitions on externally "
+"visible overhangs without impacting the print speed of features that will "
+"not be visible to the user."
+msgstr ""
 
 msgid "Minimum speed for part cooling fan"
 msgstr "Parça soğutma fanı için minimum hız"
@@ -12129,13 +12554,10 @@ msgid "Min print speed"
 msgstr "Minimum baskı hızı"
 
 msgid ""
-"The minimum printing speed that the printer will slow down to to attempt to "
-"maintain the minimum layer time above, when slow down for better layer "
-"cooling is enabled."
+"The minimum print speed to which the printer slows down to maintain the "
+"minimum layer time defined above when the slowdown for better layer cooling "
+"is enabled."
 msgstr ""
-"Daha iyi katman soğutması için yavaşlama etkinleştirildiğinde, yukarıdaki "
-"minimum katman süresini korumaya çalışmak için yazıcının yavaşlayacağı "
-"minimum yazdırma hızı."
 
 msgid "Diameter of nozzle"
 msgstr "Nozul çapı"
@@ -12423,6 +12845,14 @@ msgstr "Katman değişiminde geri çek"
 msgid "Force a retraction when changes layer"
 msgstr "Katmanı değiştirdiğinde geri çekilmeyi zorla"
 
+msgid "Retract on top layer"
+msgstr ""
+
+msgid ""
+"Force a retraction on top layer. Disabling could prevent clog on very slow "
+"patterns with small movements, like Hilbert curve"
+msgstr ""
+
 msgid "Retraction Length"
 msgstr "Geri Çekme Uzunluğu"
 
@@ -12433,8 +12863,8 @@ msgstr ""
 "Uzun seyahat sırasında sızıntıyı önlemek için ekstruderdeki malzemenin bir "
 "kısmı geri çekilir. Geri çekmeyi devre dışı bırakmak için sıfır ayarlayın"
 
-msgid "Long retraction when cut(experimental)"
-msgstr "Kesildiğinde uzun geri çekilme (deneysel)"
+msgid "Long retraction when cut(beta)"
+msgstr ""
 
 msgid ""
 "Experimental feature.Retracting and cutting off the filament at a longer "
@@ -12457,8 +12887,8 @@ msgstr ""
 "Deneysel özellik.Filament değişimi sırasında kesilmeden önce geri çekilme "
 "uzunluğu"
 
-msgid "Z hop when retract"
-msgstr "Geri çekme esnasında Z sıçraması"
+msgid "Z-hop height"
+msgstr ""
 
 msgid ""
 "Whenever the retraction is done, the nozzle is lifted a little to create "
@@ -12490,6 +12920,9 @@ msgstr ""
 "Bu değer pozitifse, Z sıçraması yalnızca Z parametresinin üzerinde olduğunda "
 "etkinleşir: \"Z sıçrama alt sınırı\" parametresinin üzerinde ve bu değerin "
 "altında olduğunda"
+
+msgid "Z-hop type"
+msgstr ""
 
 msgid "Z hop type"
 msgstr "Z sıçraması türü"
@@ -12839,6 +13272,15 @@ msgstr "Etek yüksekliği"
 msgid "How many layers of skirt. Usually only one layer"
 msgstr "Etek katman sayısı. Genellikle tek katman"
 
+msgid "Single loop draft shield"
+msgstr ""
+
+msgid ""
+"Limits the draft shield loops to one wall after the first layer. This is "
+"useful, on occasion, to conserve filament but may cause the draft shield to "
+"warp / crack."
+msgstr ""
+
 msgid "Draft shield"
 msgstr "Rüzgarlık"
 
@@ -12853,9 +13295,6 @@ msgid ""
 "distance from the object. Therefore, if brims are active it may intersect "
 "with them. To avoid this, increase the skirt distance value.\n"
 msgstr ""
-
-msgid "Disabled"
-msgstr "Devredışı"
 
 msgid "Enabled"
 msgstr "Etkin"
@@ -12899,7 +13338,7 @@ msgid ""
 "Using a non zero value is useful if the printer is set up to print without a "
 "prime line.\n"
 "Final number of loops is not taling into account whli arranging or "
-"validating objects distance. Increase loop number in such case. "
+"validating objects distance. Increase loop number in such case."
 msgstr ""
 
 msgid ""
@@ -12956,12 +13395,32 @@ msgstr ""
 msgid "Max XY Smoothing"
 msgstr "Maksimum xy yumuşatma"
 
+#, no-c-format, no-boost-format
 msgid ""
-"Maximum distance to move points in XY to try to achieve a smooth spiralIf "
+"Maximum distance to move points in XY to try to achieve a smooth spiral. If "
 "expressed as a %, it will be computed over nozzle diameter"
 msgstr ""
-"Düzgün bir spiral elde etmek için XY'deki noktaları hareket ettirmek için "
-"maksimum mesafe % olarak ifade edilirse nozül çapı üzerinden hesaplanacaktır."
+
+msgid "Spiral starting flow ratio"
+msgstr ""
+
+#, no-c-format, no-boost-format
+msgid ""
+"Sets the starting flow ratio while transitioning from the last bottom layer "
+"to the spiral. Normally the spiral transition scales the flow ratio from 0% "
+"to 100% during the first loop which can in some cases lead to under "
+"extrusion at the start of the spiral."
+msgstr ""
+
+msgid "Spiral finishing flow ratio"
+msgstr ""
+
+#, no-c-format, no-boost-format
+msgid ""
+"Sets the finishing flow ratio while ending the spiral. Normally the spiral "
+"transition scales the flow ratio from 100% to 0% during the last loop which "
+"can in some cases lead to under extrusion at the end of the spiral."
+msgstr ""
 
 msgid ""
 "If smooth or traditional mode is selected, a timelapse video will be "
@@ -13130,31 +13589,34 @@ msgid "Enable support generation."
 msgstr "Destek oluşturmayı etkinleştir."
 
 msgid ""
-"normal(auto) and tree(auto) is used to generate support automatically. If "
-"normal(manual) or tree(manual) is selected, only support enforcers are "
+"Normal (auto) and Tree (auto) is used to generate support automatically. If "
+"Normal (manual) or Tree (manual) is selected, only support enforcers are "
 "generated"
 msgstr ""
-"Desteği otomatik olarak oluşturmak için normal(otomatik) ve ağaç(otomatik) "
-"kullanılır. Normal(manuel) veya ağaç(manuel) seçilirse yalnızca destek "
-"uygulayıcıları oluşturulur"
 
-msgid "normal(auto)"
-msgstr "Normal(Otomatik)"
+msgid "Normal (auto)"
+msgstr ""
 
-msgid "tree(auto)"
-msgstr "Ağaç(Otomatik)"
+msgid "Tree (auto)"
+msgstr ""
 
-msgid "normal(manual)"
-msgstr "Normal(Manuel)"
+msgid "Normal (manual)"
+msgstr ""
 
-msgid "tree(manual)"
-msgstr "Ağaç(Manuel)"
+msgid "Tree (manual)"
+msgstr ""
 
 msgid "Support/object xy distance"
 msgstr "Destek/nesne xy mesafesi"
 
 msgid "XY separation between an object and its support"
 msgstr "Bir nesne ile desteği arasındaki XY ayrımı"
+
+msgid "Support/object first layer gap"
+msgstr ""
+
+msgid "XY separation between an object and its support at the first layer."
+msgstr ""
 
 msgid "Pattern angle"
 msgstr "Desen açısı"
@@ -13333,7 +13795,7 @@ msgstr ""
 "Hybrid stil, büyük düz çıkıntıların altında normal destekle benzer bir yapı "
 "oluşturacaktır."
 
-msgid "Default (Grid/Organic"
+msgid "Default (Grid/Organic)"
 msgstr ""
 
 msgid "Snug"
@@ -13371,6 +13833,15 @@ msgid ""
 "Support will be generated for overhangs whose slope angle is below the "
 "threshold."
 msgstr "Eğim açısı eşiğin altında olan çıkmalar için destek oluşturulacaktır."
+
+msgid "Threshold overlap"
+msgstr ""
+
+msgid ""
+"If threshold angle is zero, support will be generated for overhangs whose "
+"overlap is below the threshold. The smaller this value is, the steeper the "
+"overhang that can be printed without support."
+msgstr ""
 
 msgid "Tree support branch angle"
 msgstr "Ağaç desteği dal açısı"
@@ -13475,24 +13946,13 @@ msgstr ""
 "dalların uzunlukları boyunca eşit kalınlığa sahip olmasına neden olacaktır. "
 "Birazcık açı organik desteğin stabilitesini artırabilir."
 
-msgid "Branch Diameter with double walls"
-msgstr "Çift duvarlı dal çapı"
-
-#. TRN PrintSettings: "Organic supports" > "Branch Diameter"
-msgid ""
-"Branches with area larger than the area of a circle of this diameter will be "
-"printed with double walls for stability. Set this value to zero for no "
-"double walls."
-msgstr ""
-"Bu çaptaki bir dairenin alanından daha büyük alana sahip dallar, stabilite "
-"için çift duvarlı olarak basılacaktır. Çift duvar olmaması için bu değeri "
-"sıfır olarak ayarlayın."
-
 msgid "Support wall loops"
 msgstr "Destek duvarı döngüleri"
 
-msgid "This setting specify the count of walls around support"
-msgstr "Bu ayar desteğin etrafındaki duvarların sayısını belirtir"
+msgid ""
+"This setting specifies the count of support walls in the range of [0,2]. 0 "
+"means auto."
+msgstr ""
 
 msgid "Tree support with infill"
 msgstr "Dolgulu ağaç desteği"
@@ -13722,6 +14182,36 @@ msgstr ""
 "Silme kulesi dış çevreleri için bu ayardan bağımsız olarak iç çevre hızı "
 "kullanılır."
 
+msgid "Wall type"
+msgstr ""
+
+msgid ""
+"Wipe tower outer wall type.\n"
+"1. Rectangle: The default wall type, a rectangle with fixed width and "
+"height.\n"
+"2. Cone: A cone with a fillet at the bottom to help stabilize the wipe "
+"tower.\n"
+"3. Rib: Adds four ribs to the tower wall for enhanced stability."
+msgstr ""
+
+msgid "Extra rib length"
+msgstr ""
+
+msgid ""
+"Positive values can increase the size of the rib wall, while negative values "
+"can reduce the size.However, the size of the rib wall can not be smaller "
+"than that determined by the cleaning volume."
+msgstr ""
+
+msgid "Rib width"
+msgstr ""
+
+msgid "Fillet wall"
+msgstr ""
+
+msgid "The wall of prime tower will fillet."
+msgstr ""
+
 msgid ""
 "The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
 "use the one that is available (non-soluble would be preferred)."
@@ -13903,9 +14393,6 @@ msgstr ""
 "ve çok ince alanlar için boşluk doldurma kullanılır. Arachne motoru değişken "
 "ekstrüzyon genişliğine sahip duvarlar üretir"
 
-msgid "Classic"
-msgstr "Klasik"
-
 msgid "Arachne"
 msgstr "Arachne"
 
@@ -14043,11 +14530,82 @@ msgstr "çok büyük çizgi genişliği "
 msgid " not in range "
 msgstr " aralıkta değil "
 
+msgid "Export 3MF"
+msgstr "3MF'yi dışa aktar"
+
+msgid "Export project as 3MF."
+msgstr "Projeyi 3MF olarak dışa aktarın."
+
+msgid "Export slicing data"
+msgstr "Dilimleme verilerini dışa aktar"
+
+msgid "Export slicing data to a folder."
+msgstr "Dilimleme verilerini bir klasöre aktarın."
+
+msgid "Load slicing data"
+msgstr "Dilimleme verilerini yükle"
+
+msgid "Load cached slicing data from directory"
+msgstr "Önbelleğe alınmış dilimleme verilerini dizinden yükle"
+
+msgid "Export STL"
+msgstr "STL'yi dışa aktar"
+
+msgid "Export the objects as single STL."
+msgstr ""
+
+msgid "Export multiple STLs"
+msgstr ""
+
+msgid "Export the objects as multiple STLs to directory"
+msgstr ""
+
+msgid "Slice"
+msgstr "Dilimle"
+
+msgid "Slice the plates: 0-all plates, i-plate i, others-invalid"
+msgstr "Plakaları dilimleyin: 0-tüm plakalar, i-plaka i, diğerleri-geçersiz"
+
+msgid "Show command help."
+msgstr "Komut yardımını göster."
+
+msgid "UpToDate"
+msgstr "Güncel"
+
+msgid "Update the configs values of 3mf to latest."
+msgstr "3mf'nin yapılandırma değerlerini en son sürüme güncelleyin."
+
+msgid "downward machines check"
+msgstr ""
+
+msgid ""
+"check whether current machine downward compatible with the machines in the "
+"list"
+msgstr ""
+
+msgid "Load default filaments"
+msgstr "Varsayılan filamentleri yükle"
+
+msgid "Load first filament as default for those not loaded"
+msgstr "Yüklenmeyenler için ilk filamenti varsayılan olarak yükleyin"
+
 msgid "Minimum save"
 msgstr "Minimum tasarruf"
 
 msgid "export 3mf with minimum size."
 msgstr "3mf'yi minimum boyutta dışa aktarın."
+
+msgid "mtcpp"
+msgstr "mtcpp"
+
+msgid "max triangle count per plate for slicing."
+msgstr "dilimleme için plaka başına maksimum üçgen sayısı."
+
+msgid "mstpp"
+msgstr "mstpp"
+
+msgid "max slicing time per plate in seconds."
+msgstr "saniye cinsinden plaka başına maksimum dilimleme süresi."
 
 msgid "No check"
 msgstr "Kontrol yok"
@@ -14057,6 +14615,43 @@ msgstr ""
 "Gcode yol çakışmaları kontrolü gibi herhangi bir geçerlilik kontrolü "
 "çalıştırmayın."
 
+msgid "Normative check"
+msgstr "Normatif kontrol"
+
+msgid "Check the normative items."
+msgstr "Normatif maddeleri kontrol edin."
+
+msgid "Output Model Info"
+msgstr "Çıktı Model Bilgileri"
+
+msgid "Output the model's information."
+msgstr "Modelin bilgilerini çıktıla."
+
+msgid "Export Settings"
+msgstr "Dışa Aktarma Ayarları"
+
+msgid "Export settings to a file."
+msgstr "Ayarları bir dosyaya aktarın."
+
+msgid "Send progress to pipe"
+msgstr "İlerlemeyi kanala gönder"
+
+msgid "Send progress to pipe."
+msgstr "İlerlemeyi boruya gönder."
+
+msgid "Arrange Options"
+msgstr "Hizalama Seçenekleri"
+
+msgid "Arrange options: 0-disable, 1-enable, others-auto"
+msgstr ""
+"Hizalama seçenekleri: 0-devre dışı bırak, 1-etkinleştir, diğer-otomatik"
+
+msgid "Repetions count"
+msgstr "Tekrar sayısı"
+
+msgid "Repetions count of the whole model"
+msgstr "Tüm modelin tekrar sayısı"
+
 msgid "Ensure on bed"
 msgstr "Baskı yatağında olduğundan emin olun"
 
@@ -14065,6 +14660,17 @@ msgid ""
 msgstr ""
 "Kısmen aşağıda olduğunda nesneyi yatağın üzerine kaldırın. Varsayılan olarak "
 "devre dışı"
+
+msgid ""
+"Arrange the supplied models in a plate and merge them in a single model in "
+"order to perform actions once."
+msgstr ""
+
+msgid "Convert Unit"
+msgstr "Birimi Dönüştür"
+
+msgid "Convert the units of model"
+msgstr "Modelin birimlerini dönüştür"
 
 msgid "Orient Options"
 msgstr "Yönlendirme Seçenekleri"
@@ -14083,6 +14689,67 @@ msgstr "Y etrafında döndür"
 msgid "Rotation angle around the Y axis in degrees."
 msgstr "Y ekseni etrafında derece cinsinden dönüş açısı."
 
+msgid "Scale the model by a float factor"
+msgstr "Modeli kayan nokta faktörüne göre ölçeklendirin"
+
+msgid "Load General Settings"
+msgstr "Genel Ayarları Yükle"
+
+msgid "Load process/machine settings from the specified file"
+msgstr "Belirtilen dosyadan proses/yazıcıayarlarını yükleyin"
+
+msgid "Load Filament Settings"
+msgstr "Filament Ayarlarını Yükle"
+
+msgid "Load filament settings from the specified file list"
+msgstr "Filament ayarlarını belirtilen dosya listesinden yükleyin"
+
+msgid "Skip Objects"
+msgstr "Nesneleri Atla"
+
+msgid "Skip some objects in this print"
+msgstr "Bu baskıdaki bazı nesneleri atla"
+
+msgid "Clone Objects"
+msgstr ""
+
+msgid "Clone objects in the load list"
+msgstr ""
+
+msgid "load uptodate process/machine settings when using uptodate"
+msgstr "güncellemeyi kullanırken güncelleme işlemi/yazıcıayarlarını yükle"
+
+msgid ""
+"load uptodate process/machine settings from the specified file when using "
+"uptodate"
+msgstr ""
+"güncellemeyi kullanırken belirtilen dosyadan güncel işlem/yazıcıayarlarını "
+"yükle"
+
+msgid "load uptodate filament settings when using uptodate"
+msgstr ""
+
+msgid ""
+"load uptodate filament settings from the specified file when using uptodate"
+msgstr ""
+
+msgid ""
+"if enabled, check whether current machine downward compatible with the "
+"machines in the list"
+msgstr ""
+
+msgid "downward machines settings"
+msgstr ""
+
+msgid "the machine settings list need to do downward checking"
+msgstr ""
+
+msgid "Load assemble list"
+msgstr ""
+
+msgid "Load assemble object list from config file"
+msgstr ""
+
 msgid "Data directory"
 msgstr "Veri dizini"
 
@@ -14095,11 +14762,92 @@ msgstr ""
 "veya bir ağ depolama birimindeki yapılandırmaları dahil etmek için "
 "kullanışlıdır."
 
+msgid "Output directory"
+msgstr "Çıkış dizini"
+
+msgid "Output directory for the exported files."
+msgstr "Dışa aktarılan dosyalar için çıkış dizini."
+
+msgid "Debug level"
+msgstr "Hata ayıklama düzeyi"
+
+msgid ""
+"Sets debug logging level. 0:fatal, 1:error, 2:warning, 3:info, 4:debug, 5:"
+"trace\n"
+msgstr ""
+"Hata ayıklama günlüğü düzeyini ayarlar. 0:önemli, 1:hata, 2:uyarı, 3:bilgi, "
+"4:hata ayıklama, 5:izleme\n"
+
+msgid "Enable timelapse for print"
+msgstr ""
+
+msgid "If enabled, this slicing will be considered using timelapse"
+msgstr ""
+
 msgid "Load custom gcode"
 msgstr "Özel gcode yükle"
 
 msgid "Load custom gcode from json"
 msgstr "Json'dan özel gcode yükleyin"
+
+msgid "Load filament ids"
+msgstr ""
+
+msgid "Load filament ids for each object"
+msgstr ""
+
+msgid "Allow multiple color on one plate"
+msgstr ""
+
+msgid "If enabled, the arrange will allow multiple color on one plate"
+msgstr ""
+
+msgid "Allow rotatations when arrange"
+msgstr ""
+
+msgid "If enabled, the arrange will allow rotations when place object"
+msgstr ""
+
+msgid "Avoid extrusion calibrate region when doing arrange"
+msgstr ""
+
+msgid ""
+"If enabled, the arrange will avoid extrusion calibrate region when place "
+"object"
+msgstr ""
+
+msgid "Skip modified gcodes in 3mf"
+msgstr ""
+
+msgid "Skip the modified gcodes in 3mf from Printer or filament Presets"
+msgstr ""
+
+msgid "MakerLab name"
+msgstr ""
+
+msgid "MakerLab name to generate this 3mf"
+msgstr ""
+
+msgid "MakerLab version"
+msgstr ""
+
+msgid "MakerLab version to generate this 3mf"
+msgstr ""
+
+msgid "metadata name list"
+msgstr ""
+
+msgid "metadata name list added into 3mf"
+msgstr ""
+
+msgid "metadata value list"
+msgstr ""
+
+msgid "metadata value list added into 3mf"
+msgstr ""
+
+msgid "Allow 3mf with newer version to be sliced"
+msgstr ""
 
 msgid "Current z-hop"
 msgstr "Mevcut z-hop"
@@ -14386,9 +15134,6 @@ msgstr "Dolgu takım yolu oluşturma"
 msgid "Detect overhangs for auto-lift"
 msgstr "Otomatik kaldırma için çıkıntıları tespit edin"
 
-msgid "Generating support"
-msgstr "Destek oluşturma"
-
 msgid "Checking support necessity"
 msgstr "Destek gerekliliğinin kontrol edilmesi"
 
@@ -14408,6 +15153,9 @@ msgid ""
 msgstr ""
 "Görünüşe göre %s nesnesinde %s var. Lütfen nesneyi yeniden yönlendirin veya "
 "destek oluşturmayı etkinleştirin."
+
+msgid "Generating support"
+msgstr "Destek oluşturma"
 
 msgid "Optimizing toolpath"
 msgstr "Takım yolunu optimize etme"
@@ -14431,36 +15179,8 @@ msgstr ""
 "kullanılmayacaktır.\n"
 "XY Boyut telafisi  renkli boyamayla birleştirilemez."
 
-#, c-format, boost-format
-msgid "Support: generate toolpath at layer %d"
-msgstr "Destek: %d katmanında takım yolu oluştur"
-
-msgid "Support: detect overhangs"
-msgstr "Destek: çıkıntıları tespit et"
-
 msgid "Support: generate contact points"
 msgstr "Destek: iletişim noktaları oluştur"
-
-msgid "Support: propagate branches"
-msgstr "Destek: dal şeklinde oluştur"
-
-msgid "Support: draw polygons"
-msgstr "Destek: çokgen çizme"
-
-msgid "Support: generate toolpath"
-msgstr "Destek: takım yolu oluştur"
-
-#, c-format, boost-format
-msgid "Support: generate polygons at layer %d"
-msgstr "Destek: %d katmanında çokgenler oluşturma"
-
-#, c-format, boost-format
-msgid "Support: fix holes at layer %d"
-msgstr "Destek: %d katmanındaki delikleri düzeltin"
-
-#, c-format, boost-format
-msgid "Support: propagate branches at layer %d"
-msgstr "Destek: %d katmanındaki dalları çoğalt"
 
 msgid ""
 "Unknown file format. Input file must have .stl, .obj, .amf(.xml) extension."
@@ -15094,8 +15814,20 @@ msgstr "PA bitişi: "
 msgid "PA step: "
 msgstr "PA adımı: "
 
+msgid "Accelerations: "
+msgstr ""
+
+msgid "Speeds: "
+msgstr ""
+
 msgid "Print numbers"
 msgstr "Sayıları yazdır"
+
+msgid "Comma-separated list of printing accelerations"
+msgstr ""
+
+msgid "Comma-separated list of printing speeds"
+msgstr ""
 
 msgid ""
 "Please input valid values:\n"
@@ -15211,8 +15943,8 @@ msgstr "Geri çekme uzunluğu bitişi: "
 msgid "mm/mm"
 msgstr "mm/mm"
 
-msgid "Send G-Code to printer host"
-msgstr "G Kodunu yazıcı ana bilgisayarına gönder"
+msgid "Send G-code to printer host"
+msgstr ""
 
 msgid "Upload to Printer Host with the following filename:"
 msgstr "Yazıcıya aşağıdaki dosya adıyla yükleyin:"
@@ -15267,16 +15999,8 @@ msgstr "Yükleniyor"
 msgid "Cancelling"
 msgstr "İptal Ediliyor"
 
-msgid ""
-"The selected bed type does not match the file. Please confirm before "
-"starting the print."
-msgstr ""
-
-msgid "Time-lapse"
-msgstr ""
-
-msgid "Heated Bed Leveling"
-msgstr ""
+msgid "Error uploading to print host"
+msgstr "Yazdırma ana bilgisayarına yükleme hatası"
 
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "Seçilen parçalarda bölme işlemi gerçekleştirilemiyor"
@@ -15892,6 +16616,9 @@ msgstr "Fiziksel Yazıcı"
 msgid "Print Host upload"
 msgstr "Yazıcı Bağlantı Ayarları"
 
+msgid "Test"
+msgstr "Test"
+
 msgid "Could not get a valid Printer Host reference"
 msgstr "Geçerli bir Yazıcı Ana Bilgisayarı referansı alınamadı"
 
@@ -16390,7 +17117,7 @@ msgstr ""
 msgid "User cancelled."
 msgstr "Kullanıcı iptal edildi."
 
-msgid "Connection to ElegooLink works correctly."
+msgid "Connection to ElegooLink is working correctly."
 msgstr ""
 
 msgid "Could not connect to ElegooLink"
@@ -16463,6 +17190,50 @@ msgid "Font doesn't have any shape for given text."
 msgstr ""
 
 msgid "There is no valid surface for text projection."
+msgstr ""
+
+msgid "Head diameter"
+msgstr ""
+
+msgid "Max angle"
+msgstr ""
+
+msgid "Detection radius"
+msgstr ""
+
+msgid "Remove selected points"
+msgstr ""
+
+msgid "Remove all"
+msgstr ""
+
+msgid "Auto-generate points"
+msgstr ""
+
+msgid "Add a brim ear"
+msgstr ""
+
+msgid "Delete a brim ear"
+msgstr ""
+
+msgid "Adjust section view"
+msgstr ""
+
+msgid ""
+"Warning: The brim type is not set to \"painted\",the brim ears will not take "
+"effect !"
+msgstr ""
+
+msgid "Set the brim type to \"painted\""
+msgstr ""
+
+msgid " invalid brim ears"
+msgstr ""
+
+msgid "Brim Ears"
+msgstr ""
+
+msgid "Please select single object."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -16783,6 +17554,284 @@ msgstr ""
 "ABS gibi bükülmeye yatkın malzemelere baskı yaparken, ısıtma yatağı "
 "sıcaklığının uygun şekilde arttırılmasının bükülme olasılığını "
 "azaltabileceğini biliyor muydunuz?"
+
+#~ msgid "ShiftLeft mouse button"
+#~ msgstr "Shift + Sol fare düğmesi"
+
+#~ msgid "Unselect"
+#~ msgstr "Seçimi kaldır"
+
+#~ msgctxt "Verb"
+#~ msgid "Scale"
+#~ msgstr "Ölçek"
+
+#~ msgid "Current Cabin humidity"
+#~ msgstr "Mevcut Kabin nemi"
+
+#~ msgid "Please save project and restart the program. "
+#~ msgstr "Lütfen projeyi kaydedin ve programı yeniden başlatın. "
+
+#~ msgid ""
+#~ "Alternate extra wall does't work well when ensure vertical shell "
+#~ "thickness is set to All. "
+#~ msgstr ""
+#~ "Alternatif ekstra duvar, dikey kabuk kalınlığının Tümü olarak "
+#~ "ayarlandığından emin olunduğunda iyi çalışmaz. "
+
+#, c-format, boost-format
+#~ msgid "A file exists with the same name: %s, do you want to override it."
+#~ msgstr "Aynı adda bir dosya var: %s, üzerine yazmak istiyor musunuz."
+
+#, c-format, boost-format
+#~ msgid "A config exists with the same name: %s, do you want to override it."
+#~ msgstr ""
+#~ "Aynı adda bir yapılandırma mevcut: %s, üzerine yazmak istiyor musunuz."
+
+#~ msgid "Stopped."
+#~ msgstr "Durdu."
+
+#, c-format, boost-format
+#~ msgid "Connect failed [%d]!"
+#~ msgstr "Bağlantı başarısız oldu [%d]!"
+
+#~ msgid "Initialize failed (Device connection not ready)!"
+#~ msgstr "Başlatma başarısız oldu (Cihaz bağlantısı hazır değil)!"
+
+#~ msgid "Initialize failed (Storage unavailable, insert SD card.)!"
+#~ msgstr ""
+#~ "Başlatma başarısız oldu (Depolama alanı kullanılamıyor, SD kartı takın.)!"
+
+#, c-format, boost-format
+#~ msgid "Initialize failed (%s)!"
+#~ msgstr "Başlatma başarısız oldu (%s)!"
+
+#~ msgid "Network unreachable"
+#~ msgstr "Ağa ulaşılamıyor"
+
+#, c-format, boost-format
+#~ msgid ""
+#~ "Plate% d: %s is not suggested to be used to print filament %s(%s). If you "
+#~ "still want to do this printing, please set this filament's bed "
+#~ "temperature to non zero."
+#~ msgstr ""
+#~ "Plaka% d: %s'nin %s(%s) filamentinı yazdırmak için kullanılması "
+#~ "önerilmez. Eğer yine de bu baskıyı yapmak istiyorsanız, lütfen bu "
+#~ "filamentin yatak sıcaklığını sıfır olmayan bir değere ayarlayın."
+
+#~ msgid ""
+#~ "We have added an experimental style \"Tree Slim\" that features smaller "
+#~ "support volume but weaker strength.\n"
+#~ "We recommend using it with: 0 interface layers, 0 top distance, 2 walls."
+#~ msgstr ""
+#~ "Daha küçük destek hacmine ancak daha zayıf güce sahip deneysel bir tarz "
+#~ "olan \"Tree Slim\" ekledik.\n"
+#~ "Şunlarla kullanmanızı öneririz: 0 arayüz katmanı, 0 üst mesafe, 2 duvar."
+
+#~ msgid ""
+#~ "For \"Tree Strong\" and \"Tree Hybrid\" styles, we recommend the "
+#~ "following settings: at least 2 interface layers, at least 0.1mm top z "
+#~ "distance or using support materials on interface."
+#~ msgstr ""
+#~ "\"Güçlü Ağaç\" ve \"Ağaç Hibrit\" stilleri için şu ayarları öneriyoruz: "
+#~ "en az 2 arayüz katmanı, en az 0,1 mm üst z mesafesi veya arayüzde destek "
+#~ "malzemeleri kullanılması."
+
+#~ msgid ""
+#~ "When using support material for the support interface, We recommend the "
+#~ "following settings:\n"
+#~ "0 top z distance, 0 interface spacing, concentric pattern and disable "
+#~ "independent support layer height"
+#~ msgstr ""
+#~ "Destek arayüzü için destek materyali kullanırken aşağıdaki ayarları "
+#~ "öneriyoruz:\n"
+#~ "0 üst z mesafesi, 0 arayüz aralığı, eş merkezli desen ve bağımsız destek "
+#~ "katmanı yüksekliğini devre dışı bırakma"
+
+#~ msgid "Lift Z Enforcement"
+#~ msgstr "Z Kaldırma Uygulaması"
+
+#, boost-format
+#~ msgid "You have changed some settings of preset \"%1%\". "
+#~ msgstr "“%1%” ön ayarının bazı ayarlarını değiştirdiniz."
+
+#~ msgid "LAN Connection Failed (Sending print file)"
+#~ msgstr "LAN Bağlantısı Başarısız (Yazdırma dosyası gönderiliyor)"
+
+#~ msgid "Step 3: Ping the IP address to check for packet loss and latency."
+#~ msgstr ""
+#~ "Adım 3: Paket kaybını ve gecikmeyi kontrol etmek için IP adresine ping "
+#~ "atın."
+
+#~ msgid "IP and Access Code Verified! You may close the window"
+#~ msgstr "IP ve Erişim Kodu Doğrulandı! Pencereyi kapatabilirsin"
+
+#~ msgid "Force cooling for overhang and bridge"
+#~ msgstr "Çıkıntı ve köprüler için soğutmayı zorla"
+
+#~ msgid ""
+#~ "Enable this option to optimize part cooling fan speed for overhang and "
+#~ "bridge to get better cooling"
+#~ msgstr ""
+#~ "Daha iyi soğutma elde etmek amacıyla çıkıntı ve köprü için parça soğutma "
+#~ "fanı hızını optimize etmek amacıyla bu seçeneği etkinleştirin"
+
+#~ msgid "Fan speed for overhang"
+#~ msgstr "Çıkıntılar için fan hızı"
+
+#~ msgid ""
+#~ "Force part cooling fan to be this speed when printing bridge or overhang "
+#~ "wall which has large overhang degree. Forcing cooling for overhang and "
+#~ "bridge can get better quality for these part"
+#~ msgstr ""
+#~ "Çıkıntı derecesi büyük olan köprü veya çıkıntılı duvara baskı yaparken "
+#~ "parça soğutma fanını bu hızda olmaya zorlayın. Çıkıntı ve köprü için "
+#~ "soğutmayı zorlamak, bu parça için daha iyi kalite elde edilmesini "
+#~ "sağlayabilir"
+
+#~ msgid "Cooling overhang threshold"
+#~ msgstr "Çıkıntı soğutması"
+
+#~ msgid "Bridge infill direction"
+#~ msgstr "Köprü dolgu açısı"
+
+#~ msgid "Bridge density"
+#~ msgstr "Köprü dolgu yoğunluğu"
+
+#~ msgid ""
+#~ "Density of external bridges. 100% means solid bridge. Default is 100%."
+#~ msgstr ""
+#~ "Dış köprülerin yoğunluğu. %100 sağlam köprü anlamına gelir. Varsayılan "
+#~ "%100'dür."
+
+#~ msgid ""
+#~ "Improve shell precision by adjusting outer wall spacing. This also "
+#~ "improves layer consistency.\n"
+#~ "Note: This setting will only take effect if the wall sequence is "
+#~ "configured to Inner-Outer"
+#~ msgstr ""
+#~ "Dış duvar aralığını ayarlayarak kabuk hassasiyetini artırın. Bu aynı "
+#~ "zamanda katman tutarlılığını da artırır.\n"
+#~ "Not: Bu ayar yalnızca duvar sırası İç-Dış olarak yapılandırıldığında "
+#~ "etkili olacaktır."
+
+#~ msgid ""
+#~ "Create additional perimeter paths over steep overhangs and areas where "
+#~ "bridges cannot be anchored. "
+#~ msgstr ""
+#~ "Dik çıkıntılar ve köprülerin sabitlenemediği alanlar üzerinde ek çevre "
+#~ "yolları (perimeter) oluşturun. "
+
+#~ msgid "Thick bridges"
+#~ msgstr "Kalın köprüler"
+
+#~ msgid ""
+#~ "A lower value results in smoother extrusion rate transitions. However, "
+#~ "this results in a significantly larger gcode file and more instructions "
+#~ "for the printer to process. \n"
+#~ "\n"
+#~ "Default value of 3 works well for most cases. If your printer is "
+#~ "stuttering, increase this value to reduce the number of adjustments made\n"
+#~ "\n"
+#~ "Allowed values: 1-5"
+#~ msgstr ""
+#~ "Daha düşük bir değer, daha yumuşak ekstrüzyon hızı geçişleriyle "
+#~ "sonuçlanır. Ancak bu, önemli ölçüde daha büyük bir gcode dosyası ve "
+#~ "yazıcının işlemesi için daha fazla talimatla sonuçlanır. \n"
+#~ "\n"
+#~ "Varsayılan değer olan 3 çoğu durumda iyi çalışır. Yazıcınız takılıyorsa, "
+#~ "yapılan ayarlamaların sayısını azaltmak için bu değeri artırın\n"
+#~ "\n"
+#~ "İzin verilen değerler: 1-5"
+
+#~ msgid ""
+#~ "The minimum printing speed that the printer will slow down to to attempt "
+#~ "to maintain the minimum layer time above, when slow down for better layer "
+#~ "cooling is enabled."
+#~ msgstr ""
+#~ "Daha iyi katman soğutması için yavaşlama etkinleştirildiğinde, yukarıdaki "
+#~ "minimum katman süresini korumaya çalışmak için yazıcının yavaşlayacağı "
+#~ "minimum yazdırma hızı."
+
+#~ msgid "Long retraction when cut(experimental)"
+#~ msgstr "Kesildiğinde uzun geri çekilme (deneysel)"
+
+#~ msgid "Z hop when retract"
+#~ msgstr "Geri çekme esnasında Z sıçraması"
+
+#~ msgid ""
+#~ "Maximum distance to move points in XY to try to achieve a smooth spiralIf "
+#~ "expressed as a %, it will be computed over nozzle diameter"
+#~ msgstr ""
+#~ "Düzgün bir spiral elde etmek için XY'deki noktaları hareket ettirmek için "
+#~ "maksimum mesafe % olarak ifade edilirse nozül çapı üzerinden "
+#~ "hesaplanacaktır."
+
+#~ msgid ""
+#~ "normal(auto) and tree(auto) is used to generate support automatically. If "
+#~ "normal(manual) or tree(manual) is selected, only support enforcers are "
+#~ "generated"
+#~ msgstr ""
+#~ "Desteği otomatik olarak oluşturmak için normal(otomatik) ve "
+#~ "ağaç(otomatik) kullanılır. Normal(manuel) veya ağaç(manuel) seçilirse "
+#~ "yalnızca destek uygulayıcıları oluşturulur"
+
+#~ msgid "normal(auto)"
+#~ msgstr "Normal(Otomatik)"
+
+#~ msgid "tree(auto)"
+#~ msgstr "Ağaç(Otomatik)"
+
+#~ msgid "normal(manual)"
+#~ msgstr "Normal(Manuel)"
+
+#~ msgid "tree(manual)"
+#~ msgstr "Ağaç(Manuel)"
+
+#~ msgid "Branch Diameter with double walls"
+#~ msgstr "Çift duvarlı dal çapı"
+
+#~ msgid ""
+#~ "Branches with area larger than the area of a circle of this diameter will "
+#~ "be printed with double walls for stability. Set this value to zero for no "
+#~ "double walls."
+#~ msgstr ""
+#~ "Bu çaptaki bir dairenin alanından daha büyük alana sahip dallar, "
+#~ "stabilite için çift duvarlı olarak basılacaktır. Çift duvar olmaması için "
+#~ "bu değeri sıfır olarak ayarlayın."
+
+#~ msgid "This setting specify the count of walls around support"
+#~ msgstr "Bu ayar desteğin etrafındaki duvarların sayısını belirtir"
+
+#, c-format, boost-format
+#~ msgid "Support: generate toolpath at layer %d"
+#~ msgstr "Destek: %d katmanında takım yolu oluştur"
+
+#~ msgid "Support: detect overhangs"
+#~ msgstr "Destek: çıkıntıları tespit et"
+
+#~ msgid "Support: propagate branches"
+#~ msgstr "Destek: dal şeklinde oluştur"
+
+#~ msgid "Support: draw polygons"
+#~ msgstr "Destek: çokgen çizme"
+
+#~ msgid "Support: generate toolpath"
+#~ msgstr "Destek: takım yolu oluştur"
+
+#, c-format, boost-format
+#~ msgid "Support: generate polygons at layer %d"
+#~ msgstr "Destek: %d katmanında çokgenler oluşturma"
+
+#, c-format, boost-format
+#~ msgid "Support: fix holes at layer %d"
+#~ msgstr "Destek: %d katmanındaki delikleri düzeltin"
+
+#, c-format, boost-format
+#~ msgid "Support: propagate branches at layer %d"
+#~ msgstr "Destek: %d katmanındaki dalları çoğalt"
+
+#~ msgid "Send G-Code to printer host"
+#~ msgstr "G Kodunu yazıcı ana bilgisayarına gönder"
 
 #~ msgid "Cool plate"
 #~ msgstr "Soğuk plaka"
@@ -17769,9 +18818,6 @@ msgstr ""
 #~ msgid "Unknown error occured"
 #~ msgstr "Bilinmeyen hata oluştu"
 
-#~ msgid "Error uploading to print host"
-#~ msgstr "Yazdırma ana bilgisayarına yükleme hatası"
-
 #~ msgid "ElegooSlicer is based on PrusaSlicer and BambuStudio"
 #~ msgstr "ElegooSlicer, PrusaSlicer ve BambuStudio’yu temel alır"
 
@@ -18528,13 +19574,6 @@ msgstr ""
 #~ msgid "Configuration package updated to "
 #~ msgstr "Yapılandırma paketi şu şekilde güncellendi: "
 
-#~ msgid ""
-#~ "Improve shell precision by adjusting outer wall spacing. This also "
-#~ "improves layer consistency."
-#~ msgstr ""
-#~ "Dış duvar aralığını ayarlayarak kabuk hassasiyetini artırın. Bu aynı "
-#~ "zamanda katman tutarlılığını da artırır."
-
 #~ msgid "Enable Flow Compensation"
 #~ msgstr "Akış telafisi'ni etkinleştir"
 
@@ -18827,158 +19866,14 @@ msgstr ""
 #~ msgid "%%"
 #~ msgstr "%%"
 
-#~ msgid "Export 3MF"
-#~ msgstr "3MF'yi dışa aktar"
-
-#~ msgid "Export project as 3MF."
-#~ msgstr "Projeyi 3MF olarak dışa aktarın."
-
-#~ msgid "Export slicing data"
-#~ msgstr "Dilimleme verilerini dışa aktar"
-
-#~ msgid "Export slicing data to a folder."
-#~ msgstr "Dilimleme verilerini bir klasöre aktarın."
-
-#~ msgid "Load slicing data"
-#~ msgstr "Dilimleme verilerini yükle"
-
-#~ msgid "Load cached slicing data from directory"
-#~ msgstr "Önbelleğe alınmış dilimleme verilerini dizinden yükle"
-
-#~ msgid "Export STL"
-#~ msgstr "STL'yi dışa aktar"
-
 #~ msgid "Export the objects as multiple STL."
 #~ msgstr "Nesneleri birden çok STL olarak dışa aktarın."
-
-#~ msgid "Slice"
-#~ msgstr "Dilimle"
-
-#~ msgid "Slice the plates: 0-all plates, i-plate i, others-invalid"
-#~ msgstr "Plakaları dilimleyin: 0-tüm plakalar, i-plaka i, diğerleri-geçersiz"
-
-#~ msgid "Show command help."
-#~ msgstr "Komut yardımını göster."
-
-#~ msgid "UpToDate"
-#~ msgstr "Güncel"
-
-#~ msgid "Update the configs values of 3mf to latest."
-#~ msgstr "3mf'nin yapılandırma değerlerini en son sürüme güncelleyin."
-
-#~ msgid "Load default filaments"
-#~ msgstr "Varsayılan filamentleri yükle"
-
-#~ msgid "Load first filament as default for those not loaded"
-#~ msgstr "Yüklenmeyenler için ilk filamenti varsayılan olarak yükleyin"
-
-#~ msgid "mtcpp"
-#~ msgstr "mtcpp"
-
-#~ msgid "max triangle count per plate for slicing."
-#~ msgstr "dilimleme için plaka başına maksimum üçgen sayısı."
-
-#~ msgid "mstpp"
-#~ msgstr "mstpp"
-
-#~ msgid "max slicing time per plate in seconds."
-#~ msgstr "saniye cinsinden plaka başına maksimum dilimleme süresi."
-
-#~ msgid "Normative check"
-#~ msgstr "Normatif kontrol"
-
-#~ msgid "Check the normative items."
-#~ msgstr "Normatif maddeleri kontrol edin."
-
-#~ msgid "Output Model Info"
-#~ msgstr "Çıktı Model Bilgileri"
-
-#~ msgid "Output the model's information."
-#~ msgstr "Modelin bilgilerini çıktıla."
-
-#~ msgid "Export Settings"
-#~ msgstr "Dışa Aktarma Ayarları"
-
-#~ msgid "Export settings to a file."
-#~ msgstr "Ayarları bir dosyaya aktarın."
-
-#~ msgid "Send progress to pipe"
-#~ msgstr "İlerlemeyi kanala gönder"
-
-#~ msgid "Send progress to pipe."
-#~ msgstr "İlerlemeyi boruya gönder."
-
-#~ msgid "Arrange Options"
-#~ msgstr "Hizalama Seçenekleri"
-
-#~ msgid "Arrange options: 0-disable, 1-enable, others-auto"
-#~ msgstr ""
-#~ "Hizalama seçenekleri: 0-devre dışı bırak, 1-etkinleştir, diğer-otomatik"
-
-#~ msgid "Repetions count"
-#~ msgstr "Tekrar sayısı"
-
-#~ msgid "Repetions count of the whole model"
-#~ msgstr "Tüm modelin tekrar sayısı"
-
-#~ msgid "Convert Unit"
-#~ msgstr "Birimi Dönüştür"
-
-#~ msgid "Convert the units of model"
-#~ msgstr "Modelin birimlerini dönüştür"
 
 #~ msgid "Rotate around X"
 #~ msgstr "X etrafında döndür"
 
 #~ msgid "Rotation angle around the X axis in degrees."
 #~ msgstr "X ekseni etrafında derece cinsinden dönüş açısı."
-
-#~ msgid "Scale the model by a float factor"
-#~ msgstr "Modeli kayan nokta faktörüne göre ölçeklendirin"
-
-#~ msgid "Load General Settings"
-#~ msgstr "Genel Ayarları Yükle"
-
-#~ msgid "Load process/machine settings from the specified file"
-#~ msgstr "Belirtilen dosyadan proses/yazıcıayarlarını yükleyin"
-
-#~ msgid "Load Filament Settings"
-#~ msgstr "Filament Ayarlarını Yükle"
-
-#~ msgid "Load filament settings from the specified file list"
-#~ msgstr "Filament ayarlarını belirtilen dosya listesinden yükleyin"
-
-#~ msgid "Skip Objects"
-#~ msgstr "Nesneleri Atla"
-
-#~ msgid "Skip some objects in this print"
-#~ msgstr "Bu baskıdaki bazı nesneleri atla"
-
-#~ msgid "load uptodate process/machine settings when using uptodate"
-#~ msgstr "güncellemeyi kullanırken güncelleme işlemi/yazıcıayarlarını yükle"
-
-#~ msgid ""
-#~ "load uptodate process/machine settings from the specified file when using "
-#~ "uptodate"
-#~ msgstr ""
-#~ "güncellemeyi kullanırken belirtilen dosyadan güncel işlem/"
-#~ "yazıcıayarlarını yükle"
-
-#~ msgid "Output directory"
-#~ msgstr "Çıkış dizini"
-
-#~ msgid "Output directory for the exported files."
-#~ msgstr "Dışa aktarılan dosyalar için çıkış dizini."
-
-#~ msgid "Debug level"
-#~ msgstr "Hata ayıklama düzeyi"
-
-#~ msgid ""
-#~ "Sets debug logging level. 0:fatal, 1:error, 2:warning, 3:info, 4:debug, 5:"
-#~ "trace\n"
-#~ msgstr ""
-#~ "Hata ayıklama günlüğü düzeyini ayarlar. 0:önemli, 1:hata, 2:uyarı, 3:"
-#~ "bilgi, 4:hata ayıklama, 5:izleme\n"
 
 #, boost-format
 #~ msgid "The selected preset: %1% is not found."
