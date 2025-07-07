@@ -114,7 +114,7 @@
         "Cool Plate"
     ],
     "nozzle_temperature_initial_layer": [
-        "210"
+        "215"
     ],
     "full_fan_speed_layer": [
         "0"
@@ -135,7 +135,7 @@
         "; filament start gcode\n"
     ],
     "nozzle_temperature": [
-        "205"
+        "215"
     ],
     "temperature_vitrification": [
         "60"
@@ -144,7 +144,7 @@
         "205"
     ],
     "nozzle_temperature_range_high": [
-        "210"
+        "215"
     ],
     "additional_cooling_fan_speed": [
         "70"
