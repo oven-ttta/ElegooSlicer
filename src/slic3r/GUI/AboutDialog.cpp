@@ -222,7 +222,7 @@ AboutDialog::AboutDialog()
     std::string icon_path = (boost::format("%1%/images/ElegooSlicerTitle.ico") % resources_dir()).str();
     SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
 
-    wxPanel* m_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(560), FromDIP(125)), wxTAB_TRAVERSAL);
+    wxPanel* m_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(560), FromDIP(237)), wxTAB_TRAVERSAL);
 
     wxBoxSizer *panel_versizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *vesizer  = new wxBoxSizer(wxVERTICAL);
@@ -240,7 +240,7 @@ AboutDialog::AboutDialog()
     // logo
     m_logo_bitmap = ScalableBitmap(this, "ElegooSlicer_about", 250);
     m_logo = new wxStaticBitmap(this, wxID_ANY, m_logo_bitmap.bmp(), wxDefaultPosition,wxDefaultSize, 0);
-    m_logo->SetSizer(vesizer);
+    
 
     panel_versizer->Add(m_logo, 1, wxALL | wxEXPAND, 0);
 
@@ -279,6 +279,7 @@ AboutDialog::AboutDialog()
 // #endif
         vesizer->Add(0, 0, 1, wxEXPAND, FromDIP(5));
     }
+    m_logo->SetSizer(vesizer);
 
     wxBoxSizer *text_sizer_horiz = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer *text_sizer = new wxBoxSizer(wxVERTICAL);

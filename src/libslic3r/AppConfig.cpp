@@ -220,7 +220,7 @@ void AppConfig::set_defaults()
         set_bool("show_3d_navigator", true);
 
     if (get("show_outline").empty())
-        set_bool("show_outline", false);
+        set_bool("show_outline", true);
 
 #ifdef _WIN32
 

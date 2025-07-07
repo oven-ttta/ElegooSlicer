@@ -89,6 +89,10 @@ wxSizer* ObjectLayers::create_layer(const t_layer_height_range& range, PlusMinus
             return false;
         }
 
+        if (min_z < 0.0) {
+            return false;
+        }
+
         // data for next focusing
         coordf_t max_z = min_z < range.second ? range.second : min_z + 0.5;
         const t_layer_height_range new_range = { min_z, max_z };
@@ -347,7 +351,7 @@ LayerRangeEditor::LayerRangeEditor( ObjectLayers* parent,
 #endif
     )
 {
-    this->SetFont(wxGetApp().normal_font());
+    this->SetFont(wxGetApp().normal_font()); 
     wxGetApp().UpdateDarkUI(this);
 
     // Reset m_enter_pressed flag to _false_, when value is editing
