@@ -149,7 +149,7 @@ void ElegooPrintSend::init()
 
     mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &ElegooPrintSend::onScriptMessage, this);
 
-    wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/elegoo/printsend.html").make_preferred().string());
+    wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/device/elegoo_print_send/printsend.html").make_preferred().string());
     TargetUrl          = "file://" + TargetUrl;
     mBrowser->LoadURL(TargetUrl);
 

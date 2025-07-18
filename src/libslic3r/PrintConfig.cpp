@@ -5741,6 +5741,10 @@ void PrintConfigDef::init_fff_params()
                    " Otherwise, rectilinear pattern is used by default.");
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("support_device_list_management", coBool);
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(false));
 }
 
 void PrintConfigDef::init_extruder_option_keys()

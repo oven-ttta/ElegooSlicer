@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Printer</title>
+    <link rel="stylesheet" href="css/light.css">
+    <!-- <link rel="stylesheet" href="css/dark.css"> -->
+    <script src="../include/jquery-3.6.0.min.js"></script>
+    <script src="manual_form.js"></script>
+    <script src="add_printer.js"></script>
+
+
+</head>
+<body>
+<div class="add-printer-dialog">
+    <div class="add-printer-header">
+        <span>Add Printer</span>
+        <button class="add-printer-close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="add-printer-tabs">
+        <button id="tab-discover" class="add-printer-tab-btn active" onclick="switchTab('discover')">Discover</button>
+        <button id="tab-manual" class="add-printer-tab-btn" onclick="switchTab('manual')">Manual Add</button>
+    </div>
+    <div class="add-printer-content">
+        <div id="discover-panel">
+            <table class="add-printer-table">
+                <thead class="add-printer-table-header">
+                    <tr>
+                        <th>Device</th>
+                        <th>Info</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="discover-list-table">
+                </tbody>
+            </table>
+        </div>
+        <div id="manual-panel">
+            <div id="manual-form-container"></div>
+        </div>
+    </div>
+    <div class="add-printer-btn">
+        <button type="button" class="add-printer-cancel-btn" onclick="closeModal()">Close</button>   
+        <button type="button" class="add-printer-connect-btn" onclick="connectPrinter()">Connect</button>
+    </div>
+    <div class="add-printer-tip" id="discover-tip">
+        <a href="#">Can't find your printer?</a>
+    </div>
+</div>
+</body>
+</html>

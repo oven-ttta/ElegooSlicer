@@ -31,6 +31,7 @@
 // BBS
 #include "BBLTopbar.hpp"
 #include "PrinterWebView.hpp"
+#include "PrinterManager.hpp"
 #include "calib_dlg.hpp"
 #include "MultiMachinePage.hpp"
 
@@ -369,6 +370,7 @@ public:
     CalibrationPanel*     m_calibration{ nullptr };
     WebViewPanel*         m_webview { nullptr };
     PrinterWebView*       m_printer_view{nullptr};
+    PrinterManager*       m_printer_manager{nullptr};
     wxLogWindow*          m_log_window { nullptr };
     // BBS
     //wxBookCtrlBase*       m_tabpanel { nullptr };

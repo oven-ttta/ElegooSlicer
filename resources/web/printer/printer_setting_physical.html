@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/light.css">
+    <!-- <link rel="stylesheet" href="css/dark.css"> -->
+    <script src="../include/jquery-3.6.0.min.js"></script>
+    <script src="manual_form.js"></script>
+    <script src="printer_setting_physical.js"></script>
+</head>
+<body>
+<div class="printer-setting-physical-dialog">
+    <div class="printer-setting-physical-header">
+        <span>Physical Printer</span>
+        <button class="printer-setting-physical-close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="printer-setting-physical-content">
+        <div id="manual-form-container"></div>
+        <div class="printer-setting-physical-btn">
+            <button type="button" class="printer-setting-physical-cancel-btn" onclick="deletePrinter()">Delete</button>
+            <button type="button" class="printer-setting-physical-connect-btn" onclick="connectPrinter()">Connect</button>
+        </div>
+        <div class="printer-setting-physical-tip" id="physical-tip">
+            <a href="#">Can't find your printer?</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

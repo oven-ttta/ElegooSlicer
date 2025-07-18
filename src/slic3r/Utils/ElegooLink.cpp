@@ -46,13 +46,13 @@ namespace Slic3r {
     typedef enum
     {
         SDCP_PRINT_CTRL_ACK_OK = 0,  // OK
-        SDCP_PRINT_CTRL_ACK_BUSY = 1 , // 设备忙 device is busy
-        SDCP_PRINT_CTRL_ACK_NOT_FOUND = 2,  // 未找到目标文件 file not found
-        SDCP_PRINT_CTRL_ACK_MD5_FAILED = 3,  // MD5校验失败 MD5 check failed
-        SDCP_PRINT_CTRL_ACK_FILEIO_FAILED = 4,  // 文件读取失败  file I/O error
-        SDCP_PRINT_CTRL_ACK_INVLAID_RESOLUTION = 5, // 文件分辨率不匹配 file resolution is invalid
-        SDCP_PRINT_CTRL_ACK_UNKNOW_FORMAT = 6,  // 无法识别的文件格式 file format is invalid
-        SDCP_PRINT_CTRL_ACK_UNKNOW_MODEL = 7, // 文件机型不匹配 file model is invalid
+        SDCP_PRINT_CTRL_ACK_BUSY = 1 , // Device is busy
+        SDCP_PRINT_CTRL_ACK_NOT_FOUND = 2,  // File not found
+        SDCP_PRINT_CTRL_ACK_MD5_FAILED = 3,  // MD5 check failed
+        SDCP_PRINT_CTRL_ACK_FILEIO_FAILED = 4,  // File I/O error
+        SDCP_PRINT_CTRL_ACK_INVLAID_RESOLUTION = 5, // File resolution is invalid
+        SDCP_PRINT_CTRL_ACK_UNKNOW_FORMAT = 6,  // File format is invalid
+        SDCP_PRINT_CTRL_ACK_UNKNOW_MODEL = 7, // File model is invalid
     } ElegooLinkStartPrintAck;
 
 
@@ -968,11 +968,11 @@ namespace Slic3r {
     //     //   std::string vendor = filament->config.option<ConfigOptionString>("filament_vendor")->value;
     //     //   std::transform(vendor.begin(), vendor.end(), vendor.begin(), ::toupper);
     //     //    if (vendor  == "ELEGOO") {
-    //     //         //获取打印机型号
+    //     //         // Get printer model
     //     //         std::string printer_model = filament->config.option<ConfigOptionString>("printer_model")->value;
-    //     //         //获取打印机型号
+    //     //         // Get printer model
     //     //         std::string printer_model = filament->config.option<ConfigOptionString>("printer_model")->value;
-    //     //         //获取打印机型号
+    //     //         // Get printer model
     //     //         std::string printer_model = filament->config.option<ConfigOptionString>("printer_model")->value;
     //     //         tray.filament_type = filament->filament_type;
     //     //         tray.filament_color = filament->filament_color;
