@@ -16,13 +16,14 @@ public:
         return &instance;
     }
 
-    std::vector<std::map<std::string, std::string>> discoverPrinters();
-    bool connectToPrinter(const std::string& printerId, const std::string& printerIp, const std::string& printerPort);
-    void disconnectFromPrinter(const std::string& printerId);
-    bool sendPrintTask(const std::string& printerId, const std::string& task);
-    bool sendPrintFile(const std::string& printerId, const std::string& file);
-    bool isPrinterConnected(const std::string& printerId);
-    NetworkStatus getPrinterStatus(const std::string& printerId);
+    std::vector<PrinterInfo> discoverPrinters();
+    bool connectToPrinter(const PrinterInfo& printerInfo);
+    bool isPrinterConnected(const PrinterInfo& printerInfo);
+    void disconnectFromPrinter(const PrinterInfo& printerInfo);
+    
+    bool sendPrintTask(const PrinterInfo& printerInfo, const PrinterNetworkParams& params);
+    bool sendPrintFile(const PrinterInfo& printerInfo, const PrinterNetworkParams& params);
+ 
 
 private:
     PrinterNetworkManager();

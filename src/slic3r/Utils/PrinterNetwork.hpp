@@ -7,65 +7,68 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <map>
+#include <cereal/archives/binary.hpp>
+#include "slic3r/Utils/PrintHost.hpp"
 
 namespace Slic3r {
-
-enum class NetworkStatus {
-    DISCONNECTED,
-    CONNECTING,
-    CONNECTED,
-    CONNECT_ERROR,
-    DISCONNECT_ERROR
-};
-
-enum class MessageType {
-    STATUS_UPDATE,
-    PRINT_PROGRESS
-};
-
-struct NetworkMessage {
-    MessageType type;
-    std::string printerId;
-    nlohmann::json data;
-    std::string timestamp;
-};
-
-struct NetworkConfig {
+struct PrinterInfo
+{
+    std::string id;
+    std::string name;
     std::string ip;
-    int port;
+    std::string port;
     std::string vendor;
-    std::string protocol;
-    int timeout;
-    bool useSSL;
+    std::string machineName;
+    std::string machineModel;
+    std::string protocolVersion;
+    std::string firmwareVersion;
+    std::string deviceId;
+    std::string deviceType;
+    std::string serialNumber;
+    std::string webUrl;
+    std::string connectionUrl;
+    bool        isPhysicalPrinter;
+
+    template<class Archive> void serialize(Archive& ar)
+    {
+        ar(id, name, ip, port, vendor, machineName,
+           machineModel, protocolVersion, firmwareVersion, deviceId, deviceType,
+           serialNumber, webUrl, connectionUrl, isPhysicalPrinter);
+    }
 };
 
-using MessageCallback = std::function<void(const NetworkMessage&)>;
-using StatusCallback = std::function<void(const std::string&, NetworkStatus)>;
+struct PrinterNetworkParams
+{
+    PrintHostUpload       uploadData;
+    PrintHost::ProgressFn progressFn;
+    PrintHost::ErrorFn    errorFn;
+    PrintHost::InfoFn     infoFn;
+};
 
-class IPrinterNetwork {
+class IPrinterNetwork
+{
 public:
+    IPrinterNetwork(const PrinterInfo& printerInfo);
     virtual ~IPrinterNetwork() = default;
 
-    virtual bool connect(const std::string& printerId, const std::string& printerIp, const std::string& printerPort) = 0;
-    virtual void disconnect() = 0;
-    virtual bool isConnected() const = 0;
-    virtual NetworkStatus getStatus() const = 0;
+    virtual bool                     connect()                                         = 0;
+    virtual void                     disconnect()                                      = 0;
+    virtual bool                     isConnected() const                               = 0;
+    virtual bool                     sendPrintTask(const PrinterNetworkParams& params) = 0;
+    virtual bool                     sendPrintFile(const PrinterNetworkParams& params) = 0;
+    virtual std::vector<PrinterInfo> discoverDevices()                                 = 0;
 
-    virtual bool sendPrintTask(const std::string& task) = 0;
-    virtual bool sendPrintFile(const std::string& file) = 0;
+    IPrinterNetwork()                                  = delete;
+    IPrinterNetwork& operator=(const IPrinterNetwork&) = delete;
 
-    virtual std::vector<std::map<std::string, std::string>> discoverDevices() = 0;
-
-    virtual void setMessageCallback(MessageCallback callback) = 0;
-    virtual void setStatusCallback(StatusCallback callback) = 0;
-
-    virtual std::string getPrinterId() const = 0;
-    virtual NetworkConfig getConfig() const = 0;
+protected:
+    PrinterInfo m_printerInfo;
 };
 
-class PrinterNetworkFactory {
+class PrinterNetworkFactory
+{
 public:
-    static std::unique_ptr<IPrinterNetwork> createNetwork(const PrintHostType hostType);
+    static std::unique_ptr<IPrinterNetwork> createNetwork(const PrinterInfo& printerInfo, const PrintHostType hostType);
 };
 } // namespace Slic3r
 

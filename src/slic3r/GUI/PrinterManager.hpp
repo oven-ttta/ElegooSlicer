@@ -1,13 +1,12 @@
 #pragma once
 #include <map>
 #include "slic3r/GUI/PrinterWebView.hpp"
-#include "slic3r/GUI/TabButton.hpp"
+#include "slic3r/Utils/PrinterNetwork.hpp"
 #include <wx/webview.h>
 #include <wx/aui/aui.h>
 #include <wx/colour.h>
 #include <nlohmann/json.hpp>
 #include "Plater.hpp"
-#include "PrintHostDialogs.hpp"
 #if wxUSE_WEBVIEW_IE
 #include "wx/msw/webview_ie.h"
 #endif
@@ -33,51 +32,15 @@ enum DeviceStatus {
     DEVICE_STATUS_ERROR = 999,
 };
 
-
-struct PrinterInfo {
-    // machine info
-    std::string id;
-    std::string name;
-    std::string ip;
-    std::string port;
-    std::string vendor;
-    std::string machineName;
-    std::string machineModel;
-    std::string protocolVersion;
-    std::string firmwareVersion;
-    std::string deviceId;
-    std::string deviceType;
-    std::string serialNumber;
-    std::string webUrl;
-    std::string connectionUrl;
-    bool isPhysicalPrinter;
-
-    template<class Archive>
-    void serialize(Archive & ar) {
-        ar(CEREAL_NVP(id),
-           CEREAL_NVP(name),
-           CEREAL_NVP(ip),
-           CEREAL_NVP(port),
-           CEREAL_NVP(vendor),
-           CEREAL_NVP(machineName),
-           CEREAL_NVP(machineModel),
-           CEREAL_NVP(protocolVersion),
-           CEREAL_NVP(firmwareVersion),
-           CEREAL_NVP(deviceId),
-           CEREAL_NVP(deviceType),
-           CEREAL_NVP(serialNumber),
-           CEREAL_NVP(webUrl),
-           CEREAL_NVP(connectionUrl),
-           CEREAL_NVP(isPhysicalPrinter));
-    }
-};
-
 class PrinterManager : public wxPanel
 {
 public:
     PrinterManager(wxWindow *parent);
     virtual ~PrinterManager();
     void onClose(wxCloseEvent& evt);
+    nlohmann::json getPrinterList();
+
+    bool upload(PrintHostUpload upload_data, PrintHost::ProgressFn prorgess_fn, PrintHost::ErrorFn error_fn, PrintHost::InfoFn info_fn);
 private:
     void onScriptMessage(wxWebViewEvent &evt);
     void runScript(const wxString &javascript);
@@ -86,7 +49,6 @@ private:
     void openPrinterTab(const std::string& id);
     void loadPrinterList();
     void savePrinterList();
-    nlohmann::json getPrinterList();
     nlohmann::json discoverPrinter();
     nlohmann::json bindPrinters(nlohmann::json& printers);
     bool updatePrinterName(const std::string& id, const std::string& name);
@@ -96,6 +58,6 @@ private:
 
     std::map<std::string, PrinterInfo> mPrinterList;
     std::map<std::string, PrinterWebView*> mPrinterViews;
-   
+
 };
 }} // namespace Slic3r::GUI 

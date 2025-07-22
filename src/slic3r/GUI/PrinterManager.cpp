@@ -318,35 +318,34 @@ nlohmann::json PrinterManager::discoverPrinter()
     boost::filesystem::path resources_path(Slic3r::resources_dir());
     nlohmann::json printers = json::array();
  
-    std::vector<std::map<std::string, std::string>> printerList = PrinterNetworkManager::getInstance()->discoverPrinters();
-    for (auto& mPrinter : printerList) {
-        for (auto& printerInfo : mPrinterList) {
-            if (printerInfo.second.ip == mPrinter["ip"] || printerInfo.second.deviceId == mPrinter["deviceId"]) {
+    std::vector<PrinterInfo> discoverPrinterList = PrinterNetworkManager::getInstance()->discoverPrinters();
+    for (auto& discoverPrinter : discoverPrinterList) {
+        for (auto& p : mPrinterList) {
+            if (p.second.ip == discoverPrinter.ip || p.second.deviceId == discoverPrinter.deviceId) {
                 continue;
             }
         }
         nlohmann::json printer = json::object();
         printer["id"] = boost::uuids::to_string(boost::uuids::random_generator{}());
-        printer["name"] = mPrinter["name"];
-        printer["ip"] = mPrinter["ip"];
-        printer["port"] = mPrinter["port"];
+        printer["name"] = discoverPrinter.name;
+        printer["ip"] = discoverPrinter.ip;
+        printer["port"] = discoverPrinter.port;
         VendorProfile::PrinterModel printerModel;
-        VendorProfile machineProfile = getMachineProfile(mPrinter["vendor"], mPrinter["machineModel"], printerModel);
+        VendorProfile machineProfile = getMachineProfile(discoverPrinter.vendor, discoverPrinter.machineModel, printerModel);
         printer["vendor"] = machineProfile.name;
         printer["machineName"] = printerModel.name;
         printer["machineModel"] = printerModel.name;
         std::string img_path = resources_path.string() + "/profiles/" + machineProfile.name + "/" + printerModel.name + "_cover.png";
         printer["printerImg"] = imageFileToBase64DataURI(img_path);
-        printer["protocolVersion"] = mPrinter["protocolVersion"];
-        printer["firmwareVersion"] = mPrinter["firmwareVersion"];
-        printer["connectionUrl"] = mPrinter["connectionUrl"];
-        printer["deviceId"] = mPrinter["deviceId"];
-        printer["deviceType"] = mPrinter["deviceType"];
-        printer["serialNumber"] = mPrinter["serialNumber"];
-        printer["webUrl"] = mPrinter["webUrl"];
+        printer["protocolVersion"] = discoverPrinter.protocolVersion;
+        printer["firmwareVersion"] = discoverPrinter.firmwareVersion;
+        printer["connectionUrl"] = discoverPrinter.connectionUrl;
+        printer["deviceId"] = discoverPrinter.deviceId;
+        printer["deviceType"] = discoverPrinter.deviceType;
+        printer["serialNumber"] = discoverPrinter.serialNumber;
+        printer["webUrl"] = discoverPrinter.webUrl;
         printer["isPhysicalPrinter"] = false;
-        printer["authMode"] = mPrinter["authMode"];
-        printer["connectionUrl"] = mPrinter["connectionUrl"];
+        printer["connectionUrl"] = discoverPrinter.connectionUrl;
         printers.push_back(printer);
     }
 
@@ -426,7 +425,36 @@ void PrinterManager::onClosePrinterTab(wxAuiNotebookEvent& event)
     }
     event.Skip();
 }
+bool PrinterManager::upload(PrintHostUpload       upload_data,
+                            PrintHost::ProgressFn prorgess_fn,
+                            PrintHost::ErrorFn    error_fn,
+                            PrintHost::InfoFn     info_fn)
+{
+    std::string printerId = upload_data.extended_info["selectedPrinterId"];
+    if (mPrinterList.find(printerId) == mPrinterList.end()) {
+        return false;
+    }
+    PrinterInfo printerInfo = mPrinterList[printerId];
 
+    if (!PrinterNetworkManager::getInstance()->isPrinterConnected(printerInfo)) {
+        if (!PrinterNetworkManager::getInstance()->connectToPrinter(printerInfo)) {
+            error_fn(wxString::FromUTF8("connect to printer failed"));
+            return false;
+        }
+    }
 
+    PrinterNetworkParams params;
+    params.uploadData = upload_data;
+    params.progressFn = prorgess_fn;
+    params.errorFn    = error_fn;
+    params.infoFn     = info_fn;
+    if (PrinterNetworkManager::getInstance()->sendPrintFile(printerInfo, params)) {
+        if (upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+            PrinterNetworkManager::getInstance()->sendPrintTask(printerInfo, params);
+        }
+        return true;
+    }
+    return false;
+}
 } // GUI
 } // Slic3r

@@ -1,42 +1,55 @@
-var mPrintTask = null;
+let mPrintTask = null;
 let currentPage = 1;
 const pageSize = 4;
-var hasAmsInfo = false;
+let hasAmsInfo = false;
+let mPrinterList = [];
+let selectedPrinterId = null;
+let selectedBedType = null;
 
 function OnInit() {
 	TranslatePage();
 	RequestPrintTask();
+	RequestPrinterList();
 	initEventHandlers();
-}
-
-function RequestPrintTask()
-{
-	var tSend={};
-	tSend['sequence_id']=Math.round(new Date() / 1000);
-	tSend['command']="request_print_task";
-		
-	SendWXMessage( JSON.stringify(tSend) );		
-}
-
-function HandleStudio(pVal)
-{
-	let strCmd=pVal['command'];
 	
-	if(strCmd=='response_print_task')
-	{
+	document.querySelector('.print-options-section').classList.add('hidden');
+}
+
+function RequestPrintTask() {
+	var tSend = {};
+	tSend['sequence_id'] = Math.round(new Date() / 1000);
+	tSend['command'] = "request_print_task";
+	SendWXMessage(JSON.stringify(tSend));
+}
+
+function RequestPrinterList() {
+	var tSend = {};
+	tSend['sequence_id'] = Math.round(new Date() / 1000);
+	tSend['command'] = "request_printer_list";
+	SendWXMessage(JSON.stringify(tSend));
+}
+
+function HandleStudio(pVal) {
+	let strCmd = pVal['command'];
+	
+	if (strCmd == 'response_print_task') {
 		mPrintTask = pVal['response'];
 		UpdatePrintInfo();
+	} else if (strCmd == 'response_printer_list') {
+		mPrinterList = pVal['response'] || [];
+		UpdatePrinterList();
 	}
-
 }
 
-function UpdatePrintInfo()
-{
+function UpdatePrintInfo() {
 	if (!mPrintTask) return;
+	
 	const printInfo = mPrintTask.printInfo;
 	const amsInfo = mPrintTask.amsInfo;
+	
 	$('#model-name').val(printInfo.modelName);
 	adjustModelNameWidth();
+	
 	if (printInfo.thumbnail) {
 		$('#model-image').attr('src', 'data:image/png;base64,' + printInfo.thumbnail);
 	}
@@ -51,12 +64,29 @@ function UpdatePrintInfo()
 	$('#option-switch-to-device-tab').prop('checked', printInfo.switchToDeviceTab);
 	$('#option-auto-refill').prop('checked', printInfo.autoRefill);
 
-	if (printInfo.bedType == "btPC") {
-		$('#bedB').prop('checked', true);
-	} else {
-		$('#bedA').prop('checked', true);
+	if (printInfo.bedType) {
+		selectedBedType = printInfo.bedType;
+		const bedOptions = document.getElementById('bed-options');
+		if (bedOptions) {
+			bedOptions.querySelectorAll('.dropdown-item').forEach(opt => opt.classList.remove('selected'));
+			const selectedOption = bedOptions.querySelector(`[data-value="${printInfo.bedType}"]`);
+			if (selectedOption) {
+				selectedOption.classList.add('selected');
+				const bedHeader = document.getElementById('bed-header');
+				const title = selectedOption.querySelector('.dropdown-item-title').textContent;
+				const imageSrc = selectedOption.querySelector('.dropdown-item-icon').src;
+				bedHeader.innerHTML = `
+					<img src="${imageSrc}" alt="" class="dropdown-icon">
+					<div class="dropdown-content">
+						<div class="dropdown-title">${title}</div>
+					</div>
+					<img src="img/arrow_down.svg" alt="" class="dropdown-arrow">
+				`;
+			}
+		}
 	}
-	if (amsInfo.trayFilamentList && amsInfo.trayFilamentList.length > 0) {
+	
+	if (amsInfo && amsInfo.trayFilamentList && amsInfo.trayFilamentList.length > 0) {
 		renderFilamentMapping(printInfo.filamentList, amsInfo.trayFilamentList);
 		hasAmsInfo = true;
 	} else {
@@ -65,9 +95,99 @@ function UpdatePrintInfo()
 	updateDisplay();
 }
 
+function UpdatePrinterList() {
+	if(mPrinterList.length == 0) {
+		return;
+	}
+	const optionsContainer = document.getElementById('printer-options');
+	optionsContainer.innerHTML = '';
+	
+	let selectedPrinter = null
+	
+	mPrinterList.forEach(printer => {
+		if(printer.selected) {
+			selectedPrinter = printer;
+		}
+	});
+
+	if(selectedPrinter == null) {
+		selectedPrinter = mPrinterList[0];
+	}
+	
+	// Set the default selected printer ID
+	selectedPrinterId = selectedPrinter.id;
+	
+	mPrinterList.forEach(printer => {
+		const option = document.createElement('li');	
+
+		const isSelected = selectedPrinter && printer.id === selectedPrinter.id;
+		option.className = isSelected ? 'dropdown-item selected' : 'dropdown-item';
+		
+		option.setAttribute('data-value', printer.id);
+		option.setAttribute('data-printer', JSON.stringify(printer));
+		
+		const icon = document.createElement('img');
+		icon.src = printer.printerImg;
+		icon.alt = '';
+		icon.className = 'dropdown-item-icon';
+		
+		const content = document.createElement('div');
+		content.className = 'dropdown-item-content';
+		
+		const title = document.createElement('div');
+		title.className = 'dropdown-item-title';
+		title.textContent = printer.name;
+		
+		content.appendChild(title);
+		
+		if (printer.model) {
+			const subtitle = document.createElement('div');
+			subtitle.className = 'dropdown-item-subtitle';
+			subtitle.textContent = printer.model;
+			content.appendChild(subtitle);
+		}
+		
+		option.appendChild(icon);
+		option.appendChild(content);
+		
+		optionsContainer.appendChild(option);
+	});
+
+	document.querySelector('#printer-header .dropdown-icon').src = selectedPrinter.printerImg;	
+	document.querySelector('#printer-header .dropdown-title').textContent = selectedPrinter.name;
+	document.querySelector('#printer-header .dropdown-subtitle').textContent = selectedPrinter.machineModel || '';	
+	
+	// Add click event listeners
+	optionsContainer.querySelectorAll('.dropdown-item').forEach(option => {
+		option.addEventListener('click', function() {
+			const value = this.getAttribute('data-value');
+			const printer = JSON.parse(this.getAttribute('data-printer'));
+			
+			// Update header content (not the entire header)
+			const headerIcon = document.querySelector('#printer-header .dropdown-icon');
+			const headerTitle = document.querySelector('#printer-header .dropdown-title');
+			const headerSubtitle = document.querySelector('#printer-header .dropdown-subtitle');
+			
+			if (headerIcon) {
+				headerIcon.src = printer.printerImg;
+			}
+			if (headerTitle) headerTitle.textContent = printer.name;
+			if (headerSubtitle) headerSubtitle.textContent = printer.machineModel || '';
+			
+			optionsContainer.querySelectorAll('.dropdown-item').forEach(opt => opt.classList.remove('selected'));
+			this.classList.add('selected');
+			
+			document.getElementById('printer-options').hidden = true;
+			document.getElementById('printer-header').classList.remove('active');
+			
+			selectedPrinterId = value;
+			OnPrinterChanged(value);
+		});
+	});
+}
+
 function getContrastColor(hexColor) {
 	hexColor = hexColor.replace('#', '');
-
 	if (hexColor.length === 3) {
 		hexColor = hexColor.split('').map(x => x + x).join('');
 	}
@@ -82,10 +202,12 @@ function renderFilamentMapping(filamentList, amsTrayFilamentList) {
 	const list = document.getElementById('filament-list');
 	list.innerHTML = '';
 	if (!filamentList || !amsTrayFilamentList) return;
+	
 	const totalPages = Math.ceil(filamentList.length / pageSize);
 	const start = (currentPage - 1) * pageSize;
 	const end = Math.min(start + pageSize, filamentList.length);
 	document.getElementById('filament-page').textContent = `${currentPage}/${totalPages}`;
+	
 	for (let i = start; i < end; i++) {
 		const filament = filamentList[i];
 		const filamentColor = filament.filamentColor;
@@ -98,100 +220,164 @@ function renderFilamentMapping(filamentList, amsTrayFilamentList) {
 			<div class="filament-rect" style="background:${filamentColor};color:${circleTextColor}; border:1px solid ${circleTextColor};" title="${filament.filamentName}">
 				<div class="filament-type">${filament.filamentType}</div>
 				<div class="filament-dash"></div>
-				<div class="filament-weight">${filament.filamentWeight}</div>
+				<div class="filament-weight">${filament.filamentWeight}g</div>
 			</div>
 			<div class="tray-arrow"></div>
-			<div class="tray-rect" style="background:${amsColor};color:${amsTextColor}; border:1px solid ${amsTextColor};">
-				<div class="tray-index">${filament.trayIndex || '?'}</div>
+			<div class="tray-rect" style="background:${amsColor};color:${amsTextColor}; border:1px solid ${amsTextColor};" title="${filament.amsFilamentName || 'No mapping'}">
+				<div class="tray-index">${filament.amsTrayIndex || '?'}</div>
 				<div class="tray-dash"></div>
-				<div class="tray-filament-type">${filament.amsFilamentType || '?'}</div>
-				<button class="slot-arrow-btn" data-index="${i}" style="color:${amsTextColor};">▼</button>
+				<div class="tray-filament-type">${filament.amsFilamentType || 'N/A'}</div>
 			</div>
 		`;
-		const arrowBtn = filamentDiv.querySelector('.slot-arrow-btn');
-		arrowBtn.addEventListener('click', function(e) {
-			e.stopPropagation();
-			showAmsPopup(i, amsTrayFilamentList, filament);
-		});
 		list.appendChild(filamentDiv);
 	}
 }
 
 function showAmsPopup(filamentIdx, amsTrayFilamentList, filament) {
-	document.querySelectorAll('.ams-popover').forEach(e => e.remove());
-	const btn = document.querySelector(`.slot-arrow-btn[data-index="${filamentIdx}"]`);
-	if (!btn) return;
 	const popover = document.createElement('div');
 	popover.className = 'ams-popover';
-
-	const amsGrid = document.createElement('div');
-	amsGrid.style.display = 'grid';
-	amsGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
-	amsGrid.style.justifyItems = 'center';
-	amsGrid.style.alignItems = 'center';
-
-	amsTrayFilamentList.forEach(amsFilament => {
-		const amsFilamentColor = amsFilament.amsFilamentColor;
-		const amsFilamentTextColor = getContrastColor(amsFilamentColor);
-		const amsFilamentBtn = document.createElement('button');
-		amsFilamentBtn.className = 'tray-popover-card';
-		amsFilamentBtn.style.background = amsFilamentColor;
-		amsFilamentBtn.style.color = amsFilamentTextColor;
-		amsFilamentBtn.innerHTML = `
-			<div class="tray-index">${amsFilament.trayIndex}</div>
-			<div class="tray-dash"></div>
-			<div class="tray-filament-type">${amsFilament.amsFilamentType}</div>
+	popover.style.left = '50%';
+	popover.style.top = '50%';
+	popover.style.transform = 'translate(-50%, -50%)';
+	
+	let popoverContent = '<div style="margin-bottom: 8px; font-weight: 500;">Select AMS Tray:</div>';
+	amsTrayFilamentList.forEach((amsFilament, index) => {
+		const amsColor = amsFilament.filamentColor || '#888';
+		const amsTextColor = getContrastColor(amsColor);
+		popoverContent += `
+			<div class="tray-popover-card" data-index="${index}" style="background:${amsColor};color:${amsTextColor}; border:1px solid ${amsTextColor};">
+				<div class="tray-index">${index + 1}</div>
+				<div class="tray-dash"></div>
+				<div class="tray-filament-type">${amsFilament.filamentType}</div>
+			</div>
 		`;
-		amsFilamentBtn.onclick = function(e) {
-			e.stopPropagation();
-			updateFilamentMapping(filamentIdx, amsFilament);
-			popover.remove();
-		};
-		amsGrid.appendChild(amsFilamentBtn);
 	});
-
-	popover.appendChild(amsGrid);
-
+	
+	popover.innerHTML = popoverContent;
 	document.body.appendChild(popover);
-	const rect = btn.getBoundingClientRect();
-	const scrollTop = window.scrollY || document.documentElement.scrollTop;
-	const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-	popover.style.top = (rect.bottom + scrollTop + 6) + 'px';
-	popover.style.left = (rect.left + rect.width / 2 + scrollLeft) + 'px';
-	popover.style.transform = 'translateX(-50%)';
-
-	setTimeout(() => {
-		document.addEventListener('mousedown', onClickOutside);
-	}, 0);
+	
 	function onClickOutside(e) {
 		if (!popover.contains(e.target)) {
-			popover.remove();
-			document.removeEventListener('mousedown', onClickOutside);
+			document.body.removeChild(popover);
+			document.removeEventListener('click', onClickOutside);
 		}
 	}
+	
+	setTimeout(() => document.addEventListener('click', onClickOutside), 0);
+	
+	popover.querySelectorAll('.tray-popover-card').forEach(card => {
+		card.addEventListener('click', function() {
+			const amsIndex = parseInt(this.getAttribute('data-index'));
+			updateFilamentMapping(filamentIdx, amsTrayFilamentList[amsIndex]);
+			document.body.removeChild(popover);
+			document.removeEventListener('click', onClickOutside);
+		});
+	});
 }
 
 function updateFilamentMapping(filamentIdx, amsFilament) {
-	//dalert(filamentIdx);
-	const trayContainer = document.querySelector(`.slot-arrow-btn[data-index="${filamentIdx}"]`).closest('.tray-rect');
-	trayContainer.querySelector('.tray-index').textContent = amsFilament.trayIndex;
-	trayContainer.querySelector('.tray-filament-type').textContent = amsFilament.amsFilamentType;
-	trayContainer.style.background = amsFilament.amsFilamentColor;
-	const trayTextColor = getContrastColor(amsFilament.amsFilamentColor);	
-	trayContainer.style.color = trayTextColor;
-	trayContainer.querySelector('.slot-arrow-btn').style.color = trayTextColor;
-
 	if (mPrintTask && mPrintTask.printInfo && mPrintTask.printInfo.filamentList) {
-		mPrintTask.printInfo.filamentList[filamentIdx].trayIndex = amsFilament.trayIndex;
-		mPrintTask.printInfo.filamentList[filamentIdx].trayId = amsFilament.trayId;
-		mPrintTask.printInfo.filamentList[filamentIdx].amsId = amsFilament.amsId;
-		mPrintTask.printInfo.filamentList[filamentIdx].amsFilamentColor = amsFilament.amsFilamentColor;
-		mPrintTask.printInfo.filamentList[filamentIdx].amsFilamentType = amsFilament.amsFilamentType;
-		mPrintTask.printInfo.filamentList[filamentIdx].amsFilamentName = amsFilament.amsFilamentName;
+		mPrintTask.printInfo.filamentList[filamentIdx].amsFilamentColor = amsFilament.filamentColor;
+		mPrintTask.printInfo.filamentList[filamentIdx].amsFilamentName = amsFilament.filamentName;
+		mPrintTask.printInfo.filamentList[filamentIdx].amsFilamentType = amsFilament.filamentType;
+		mPrintTask.printInfo.filamentList[filamentIdx].amsTrayIndex = amsFilament.trayIndex;
+		renderFilamentMapping(mPrintTask.printInfo.filamentList, mPrintTask.amsInfo.trayFilamentList);
 	}
 }
 
 function initEventHandlers() {
+	// Debounce function to reduce frequent calls
+	function debounce(func, wait) {
+		let timeout;
+		return function executedFunction(...args) {
+			const later = () => {
+				clearTimeout(timeout);
+				func(...args);
+			};
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+		};
+	}
+
+	// Optimized dropdown handlers
+	document.getElementById('printer-header').addEventListener('click', function(e) {
+		// Handle refresh button click
+		if (e.target.closest('.printer-refresh-btn')) {
+			e.preventDefault();
+			e.stopPropagation();
+			OnRefreshPrinterList();
+			return;
+		}
+		
+		e.preventDefault();
+		const options = document.getElementById('printer-options');
+		const isVisible = !options.hidden;
+		
+		document.getElementById('bed-options').hidden = true;
+		document.getElementById('bed-header').classList.remove('active');
+		
+		if (isVisible) {
+			options.hidden = true;
+			this.classList.remove('active');
+		} else {
+			options.hidden = false;
+			this.classList.add('active');
+		}
+	});
+	
+	document.getElementById('bed-header').addEventListener('click', function(e) {
+		e.preventDefault();
+		const options = document.getElementById('bed-options');
+		const isVisible = !options.hidden;
+		
+		document.getElementById('printer-options').hidden = true;
+		document.getElementById('printer-header').classList.remove('active');
+		
+		if (isVisible) {
+			options.hidden = true;
+			this.classList.remove('active');
+		} else {
+			options.hidden = false;
+			this.classList.add('active');
+		}
+	});
+	
+	document.getElementById('bed-options').addEventListener('click', function(e) {
+		if (e.target.closest('.dropdown-item')) {
+			const option = e.target.closest('.dropdown-item');
+			const value = option.getAttribute('data-value');
+			const title = option.querySelector('.dropdown-item-title').textContent;
+			const imageSrc = option.querySelector('.dropdown-item-icon').src;
+			
+			const header = document.getElementById('bed-header');
+			header.innerHTML = `
+				<img src="${imageSrc}" alt="" class="dropdown-icon">
+				<div class="dropdown-content">
+					<div class="dropdown-title">${title}</div>
+				</div>
+				<img src="img/arrow_down.svg" alt="" class="dropdown-arrow">
+			`;
+			
+			this.querySelectorAll('.dropdown-item').forEach(opt => opt.classList.remove('selected'));
+			option.classList.add('selected');
+			
+			this.hidden = true;
+			document.getElementById('bed-header').classList.remove('active');
+			
+			OnBedTypeChanged(value);
+		}
+	});
+	
+	// Optimized click outside handler
+	document.addEventListener('click', debounce(function(e) {
+		if (!e.target.closest('.dropdown')) {
+			document.getElementById('printer-options').hidden = true;
+			document.getElementById('bed-options').hidden = true;
+			document.getElementById('printer-header').classList.remove('active');
+			document.getElementById('bed-header').classList.remove('active');
+		}
+	}, 10));
+
 	document.getElementById('prev-page').addEventListener('click', function() {
 		if (currentPage > 1) {
 			currentPage--;
@@ -224,12 +410,12 @@ function initEventHandlers() {
 		mPrintTask.printInfo.uploadAndPrint = $('#option-upload-and-print').prop('checked');
 		mPrintTask.printInfo.switchToDeviceTab = $('#option-switch-to-device-tab').prop('checked');
 		mPrintTask.printInfo.autoRefill = $('#option-auto-refill').prop('checked');
-
-		if ($('#bedA').hasClass('selected')) {
-			mPrintTask.printInfo.bedType = 'btPC';
-		} else if ($('#bedB').hasClass('selected')) {
-			mPrintTask.printInfo.bedType = 'btPEI';
+		mPrintTask.printInfo.selectedPrinterId = selectedPrinterId;
+		const selectedBedOption = document.querySelector('#bed-options .dropdown-item.selected');
+		if (selectedBedOption) {
+			mPrintTask.printInfo.bedType = selectedBedOption.getAttribute('data-value');
 		}
+
 		if (hasAmsInfo) {
 			if (!checkFilamentMapping(mPrintTask.printInfo.filamentList)) {
 				showStatusTip(getTranslation('some_filaments_not_mapped'));
@@ -241,16 +427,6 @@ function initEventHandlers() {
 			sequence_id: Math.round(new Date() / 1000),
 			data: mPrintTask
 		}));
-	});
-
-	
-	document.getElementById('bedA').addEventListener('click', function() {
-		document.getElementById('bedA').classList.add('selected');
-		document.getElementById('bedB').classList.remove('selected');
-	});
-	document.getElementById('bedB').addEventListener('click', function() {
-		document.getElementById('bedB').classList.add('selected');
-		document.getElementById('bedA').classList.remove('selected');
 	});
 
 	$('#edit-name-btn').on('click', function() {
@@ -265,18 +441,17 @@ function initEventHandlers() {
 	$('#model-name').on('blur', function() {
 		$(this).prop('readonly', true);
 		let filtered = $(this).val();
-		// $(this).val(filtered);
 		if (mPrintTask && mPrintTask.printInfo) {
 			mPrintTask.printInfo.modelName = filtered;
 		}
 		adjustModelNameWidth();
 	});
+
 	$('#model-name').on('keydown', function(e) {
 		if (e.key === 'Enter') {
 			$(this).prop('readonly', true);
 			$(this).blur();
-			// let filtered = filterModelName($(this).val());
-			// $(this).val(filtered);
+			let filtered = filterModelName($(this).val());
 			if (mPrintTask && mPrintTask.printInfo) {
 				mPrintTask.printInfo.modelName = filtered;
 			}
@@ -288,7 +463,8 @@ function initEventHandlers() {
 		updateDisplay();
 	});
 
-	$('#model-name').on('input', adjustModelNameWidth);
+	// Debounced input handler
+	$('#model-name').on('input', debounce(adjustModelNameWidth, 100));
 	$(function() { adjustModelNameWidth(); });
 }
 
@@ -306,70 +482,37 @@ function adjustModelNameWidth() {
 
 function updateDisplay() {
 	if ($('#option-upload-and-print').prop('checked')) {
-		document.querySelector('[data-option="option-timelapse"]').style.display = 'block';
-		document.querySelector('[data-option="option-bedlevel"]').style.display = 'block';
-		document.querySelector('#bedA').style.display = 'block';
-		document.querySelector('#bedB').style.display = 'block';
+		document.querySelector('.print-options-section').classList.remove('hidden');
+		document.querySelector('.bed-dropdown').classList.remove('hidden');
 		if (hasAmsInfo) {
-			document.querySelector('.filament-info').style.display = 'block';
+			document.querySelector('.filament-section').classList.remove('hidden');
 		} else {
-			document.querySelector('.filament-info').style.display = 'none';
+			document.querySelector('.filament-section').classList.add('hidden');
 		}
 	} else {
-		document.querySelector('[data-option="option-timelapse"]').style.display = 'none';
-		document.querySelector('[data-option="option-bedlevel"]').style.display = 'none';
-		document.querySelector('.filament-info').style.display = 'none';
-		document.querySelector('#bedA').style.display = 'none';
-		document.querySelector('#bedB').style.display = 'none';
+		document.querySelector('.print-options-section').classList.add('hidden');
+		document.querySelector('.bed-dropdown').classList.add('hidden');
+		document.querySelector('.filament-section').classList.add('hidden');
 	}
-}
-
-function checkFilamentMapping(filamentList) {
-	for (const filament of filamentList) {
-		if (
-			filament.trayIndex === undefined || filament.trayIndex === null || filament.trayIndex === '' ||
-			filament.amsId === undefined || filament.amsId === null || filament.amsId === '' ||
-			filament.trayId === undefined || filament.trayId === null || filament.trayId === ''
-		) {
-			return false;
-		}
-	}
-	return true;
 }
 
 function showStatusTip(msg) {
 	const tip = document.getElementById('status-tip');
 	tip.textContent = msg;
-	tip.classList.add('show');
-	tip.classList.remove('hide');
-	if (tip._timer) clearTimeout(tip._timer);
-	tip._timer = setTimeout(() => {
-		tip.classList.add('hide');
-		setTimeout(() => { tip.classList.remove('show'); }, 200);
-	}, 5000);
+	tip.style.display = 'block';
+	setTimeout(() => {
+		tip.style.display = 'none';
+	}, 3000);
 }
 
-document.addEventListener('DOMContentLoaded', adjustModelNameWidth);
-document.getElementById('model-name').addEventListener('input', adjustModelNameWidth);
+function OnBedTypeChanged(bedType) {
+	selectedBedType = bedType;
+}
 
-document.getElementById('model-name').value = modelName;
-adjustModelNameWidth();
+function OnPrinterChanged(printerId) {
+	selectedPrinterId = printerId;
+}
 
 function getTranslation(key) {
-	// Ensure LangText is loaded
-	if (typeof LangText === 'undefined') {
-		console.warn('Translation system not initialized');
-		return key;
-	}
-	
-	// Get current language
-	const currentLang = localStorage.getItem(LANG_COOKIE_NAME) || 'en';
-	
-	// Check if translation exists
-	if (!LangText[currentLang] || !LangText[currentLang][key]) {
-		console.warn(`Translation missing for key: ${key} in language: ${currentLang}`);
-		return LangText['en'][key] || key;
-	}
-	
-	return LangText[currentLang][key];
+	return window.g_translation && window.g_translation[key] ? window.g_translation[key] : key;
 }

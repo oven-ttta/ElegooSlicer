@@ -1489,6 +1489,9 @@ bool MainFrame::can_send_gcode() const
     if (m_plater && !m_plater->model().objects.empty())
     {
         auto cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+        if(cfg.has("support_device_list_management") && cfg.option<ConfigOptionBool>("support_device_list_management")->value) {
+            return true;
+        }
         if (const auto *print_host_opt = cfg.option<ConfigOptionString>("print_host"); print_host_opt)
             return !print_host_opt->value.empty();
     }

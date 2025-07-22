@@ -581,6 +581,16 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrinterNetwork.hpp
     Utils/ElegooNetwork.cpp
     Utils/ElegooNetwork.hpp
+    Utils/ElegooLocalWebSocket.cpp
+    Utils/ElegooLocalWebSocket.hpp
+
+    Utils/WSClient.cpp
+    Utils/WSClient.hpp
+    Utils/WSManager.cpp
+    Utils/WSManager.hpp
+    Utils/WSTypes.hpp
+
+    Utils/Singleton.hpp
 )
 
 if (WIN32)

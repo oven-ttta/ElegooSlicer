@@ -252,6 +252,8 @@ public:
 
     // BBS
     BBLTopbar* topbar() { return m_topbar; }
+    
+    PrinterManager* printer_manager() { return m_printer_manager; }
 
     // for cali to update tab when save new preset
     void update_filament_tab_ui();

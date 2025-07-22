@@ -15,13 +15,45 @@ using tcp = net::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
 
 class WebSocketClient {
 public:
-//服务器是ws://echo.websocket.org:80/websocket
+//ws://echo.websocket.org:80/websocket
     WebSocketClient():
     resolver_(ioc_), ws_(ioc_),is_connect(false) {
 
     }
 
     ~WebSocketClient() {
+        disconnect();
+    }
+    bool connect(const std::string& host, const std::string& port, const std::string& path="/"){
+        if(is_connect){
+           return true;
+        }
+        try{
+            auto const results = resolver_.resolve(host, port);
+            auto ep = net::connect(ws_.next_layer(), results);
+            std::string _host = host;
+            //if _host last char is  '/', remove it
+            if(_host.size()>0&&_host[host.size()-1] == '/'){
+                _host[host.size()-1] = '\0';
+            }
+
+            // _host += ':' + std::to_string(ep.port());
+            // Set a decorator to change the User-Agent of the handshake
+            ws_.set_option(websocket::stream_base::decorator(
+                [](websocket::request_type& req)
+                {
+                    req.set(http::field::user_agent,"ElegooSlicer");
+                }));
+            // Perform the WebSocket handshake
+            ws_.handshake(_host, path);
+            is_connect = true;
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            is_connect = false;
+        }
+        return is_connect;
+    }
+    void disconnect(){
         if(!is_connect){
             return;
         }
@@ -31,37 +63,20 @@ public:
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << std::endl;
         }
+        is_connect = false;
     }
-    void connect(const std::string& host, const std::string& port, const std::string& path="/"){
-        if(is_connect){
-           return;
-        }
-        // Look up the domain name
-        auto const results = resolver_.resolve(host, port);
-
-        // Make the connection on the IP address we get from a lookup
-        auto ep = net::connect(ws_.next_layer(), results);
-        std::string _host = host;
-        //if _host last char is  '/', remove it
-        if(_host.size()>0&&_host[host.size()-1] == '/'){
-            _host[host.size()-1] = '\0';
-        }
-
-        // _host += ':' + std::to_string(ep.port());
-        // Set a decorator to change the User-Agent of the handshake
-        ws_.set_option(websocket::stream_base::decorator(
-            [](websocket::request_type& req)
-            {
-                req.set(http::field::user_agent,"ElegooSlicer");
-            }));
-        // Perform the WebSocket handshake
-        ws_.handshake(_host, path);
-        is_connect = true;
-    }
-
-    void send(const std::string& message){
+    bool send(const std::string& message){
         // Send a message
-        ws_.write(net::buffer(message));
+        if(!is_connect){
+            return false;
+        }
+        try {
+            ws_.write(net::buffer(message));
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return false;
+        }
+        return true;
     }
 
     std::string receive(int timeout = 0){
@@ -74,7 +89,9 @@ public:
         // Return the message as a string
         return beast::buffers_to_string(buffer.data());
     }
-
+    bool isConnected() const {
+        return is_connect;
+    }
 
 private:
     net::io_context ioc_;

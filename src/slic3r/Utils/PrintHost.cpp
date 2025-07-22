@@ -320,13 +320,26 @@ void PrintHostJobQueue::priv::remove_source()
 void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
 {
     emit_progress(0);   // Indicate the upload is starting
+    bool success = false;
 
-    bool success = the_job.printhost->upload(std::move(the_job.upload_data),
-        [this](Http::Progress progress, bool &cancel)   { this->progress_fn(std::move(progress), cancel); },
-        [this](wxString error)                          { this->error_fn(std::move(error)); },
-        [this](wxString tag, wxString host)             { this->info_fn(std::move(tag), std::move(host)); }
-    );
 
+    DynamicPrintConfig cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    bool support_device_list = cfg.has("support_device_list_management") &&
+        cfg.option<ConfigOptionBool>("support_device_list_management")->value;
+
+    if (support_device_list) {
+        success = wxGetApp().mainframe->printer_manager()->upload(
+            std::move(the_job.upload_data),
+            [this](Http::Progress progress, bool& cancel) { this->progress_fn(std::move(progress), cancel); },
+            [this](wxString error) { this->error_fn(std::move(error)); },
+            [this](wxString tag, wxString host) { this->info_fn(std::move(tag), std::move(host)); });
+    } else {
+        success = the_job.printhost->upload(
+            std::move(the_job.upload_data),
+            [this](Http::Progress progress, bool& cancel) { this->progress_fn(std::move(progress), cancel); },
+            [this](wxString error) { this->error_fn(std::move(error)); },
+            [this](wxString tag, wxString host) { this->info_fn(std::move(tag), std::move(host)); });
+    }
     if (success) {
         emit_progress(100);
         if (the_job.switch_to_device_tab) {

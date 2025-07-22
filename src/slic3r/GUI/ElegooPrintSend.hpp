@@ -36,6 +36,7 @@ public:
     int          timeLapse() const { return mTimeLapse; }
     int          heatedBedLeveling() const { return mHeatedBedLeveling; }
     BedType      bedType() const { return mBedType; }
+    std::string  selectedPrinterId() const { return mSelectedPrinterId; }
 
     virtual void                               init() override;
     virtual std::map<std::string, std::string> extendedInfo() const
@@ -44,6 +45,7 @@ public:
                 {"timeLapse", std::to_string(mTimeLapse)},
                 {"heatedBedLeveling", std::to_string(mHeatedBedLeveling)},
                 {"autoRefill", std::to_string(mAutoRefill)},
+                {"selectedPrinterId", mSelectedPrinterId},
                 {"filamentAmsMapping", mFilamentAmsMapping.dump()}};
     }   
 
@@ -51,6 +53,7 @@ private:
     void onScriptMessage(wxWebViewEvent &evt);
     void runScript(const wxString &javascript);
     nlohmann::json preparePrintTask();
+    nlohmann::json getPrinterList();
     void onPrint(const nlohmann::json &printInfo);
 
 
@@ -83,6 +86,7 @@ private:
     int     mHeatedBedLeveling;
     BedType mBedType;
     int    mAutoRefill;
+    std::string mSelectedPrinterId;
     std::string mProjectName;
     std::map<int, DynamicPrintConfig> mFilamentAmsList;
     nlohmann::json mFilamentAmsMapping;

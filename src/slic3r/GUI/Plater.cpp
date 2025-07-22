@@ -1286,12 +1286,18 @@ void Sidebar::update_all_preset_comboboxes()
         p_mainframe->load_printer_url(url, apikey);
         p_mainframe->set_print_button_to_default(print_btn_type);
 
+        bool support_device_list = cfg.has("support_device_list_management") && cfg.option<ConfigOptionBool>("support_device_list_management")->value;
+        if (support_device_list) {
+            connection_btn->Hide();
+        } else {
+            connection_btn->Show();
+        }
 
-        wxTheApp->CallAfter([this]() {
-            load_ams_list();
-            if(wxGetApp().preset_bundle->filament_ams_list.size() > 0)
-                ams_btn->Show();          
-        });           
+        // wxTheApp->CallAfter([this]() {
+        //     load_ams_list();
+        //     if(wxGetApp().preset_bundle->filament_ams_list.size() > 0)
+        //         ams_btn->Show();          
+        // });           
        
     }
 
@@ -12916,20 +12922,18 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
                 return;
         }
     if (use_3mf) {
-            // Process gcode
-            const int result = send_gcode(plate_idx, nullptr);
+        // Process gcode
+        const int result = send_gcode(plate_idx, nullptr);
 
-            if (result < 0) {
-                wxString msg = _L("Abnormal print file data. Please slice again");
-                show_error(this, msg, false);
-                return;
-            }
-
-            upload_job.upload_data.source_path = p->m_print_job_data._3mf_path;
+        if (result < 0) {
+            wxString msg = _L("Abnormal print file data. Please slice again");
+            show_error(this, msg, false);
+            return;
         }
 
-    p->export_gcode(fs::path(), false, std::move(upload_job));           
-
+        upload_job.upload_data.source_path = p->m_print_job_data._3mf_path;    
+    }
+    p->export_gcode(fs::path(), false, std::move(upload_job)); 
 }
 int Plater::send_gcode(int plate_idx, Export3mfProgressFn proFn)
 {

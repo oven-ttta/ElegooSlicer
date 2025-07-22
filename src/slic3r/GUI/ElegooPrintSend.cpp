@@ -41,6 +41,7 @@ static const char* CONFIG_KEY_TIMELAPSE         = "elegoolink_timelapse";
 static const char* CONFIG_KEY_HEATEDBEDLEVELING = "elegoolink_heated_bed_leveling";
 static const char* CONFIG_KEY_BEDTYPE           = "elegoolink_bed_type";
 static const char* CONFIG_KEY_AUTO_REFILL       = "elegoolink_auto_refill";
+static const char* CONFIG_KEY_SELECTED_PRINTER_ID = "elegoo_selected_printer_id";
 
 using namespace nlohmann;
 
@@ -149,18 +150,18 @@ void ElegooPrintSend::init()
 
     mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &ElegooPrintSend::onScriptMessage, this);
 
-    wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/device/elegoo_print_send/printsend.html").make_preferred().string());
+    wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/elegoo_print_send/printsend.html").make_preferred().string());
     TargetUrl          = "file://" + TargetUrl;
     mBrowser->LoadURL(TargetUrl);
 
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
     topsizer->Add(mBrowser, wxSizerFlags().Expand().Proportion(1));
-    int height = 740;
+    int height = 815;
     if (mFilamentAmsList.empty()) {
-        height = 500;
+        height = 564;
     }
-    wxSize pSize = FromDIP(wxSize(446, height));
+    wxSize pSize = FromDIP(wxSize(860, height));
     SetSize(pSize);
     CenterOnParent();
 
@@ -246,6 +247,16 @@ void ElegooPrintSend::onScriptMessage(wxWebViewEvent& evt)
             wxString strJS = wxString::Format("HandleStudio(%s)", response.dump(-1, ' ', true));
 
             BOOST_LOG_TRIVIAL(trace) << "ElegooPrintSend::OnScriptMessage;response_ams_filament_list:" << strJS.c_str();
+            wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
+        } else if (strCmd == "request_printer_list") {
+            json response           = json::object();
+            response["command"]     = "response_printer_list";
+            response["sequence_id"] = "10002";
+            response["response"]    = getPrinterList();
+
+            wxString strJS = wxString::Format("HandleStudio(%s)", response.dump(-1, ' ', true));
+
+            BOOST_LOG_TRIVIAL(trace) << "ElegooPrintSend::OnScriptMessage;response_printer_list:" << strJS.c_str();
             wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
         } else if (strCmd == "cancel_print") {
             onCancel();
@@ -456,6 +467,24 @@ nlohmann::json ElegooPrintSend::preparePrintTask()
     printTask["printInfo"]    = printInfo;
 
     return printTask;
+}
+
+nlohmann::json ElegooPrintSend::getPrinterList()
+{
+    nlohmann::json printers = json::array();
+    auto printerManager = wxGetApp().mainframe->printer_manager();
+    if (printerManager) {
+        printers = printerManager->getPrinterList();
+    }
+    std::string selectedPrinterId = wxGetApp().app_config->get("recent", CONFIG_KEY_SELECTED_PRINTER_ID);
+    for (auto& printer : printers) {
+        if (selectedPrinterId.empty() || printer["id"].get<std::string>() != selectedPrinterId) {
+            printer["selected"] = false;
+        } else {
+            printer["selected"] = true;
+        }
+    }
+    return printers;
 }
 
 void ElegooPrintSend::getFilamentAmsMapping(nlohmann::json& filamentList, nlohmann::json& trayFilamentList)
@@ -720,13 +749,29 @@ void ElegooPrintSend::onPrint(const nlohmann::json& printInfo)
         bool uploadAndPrint    = printInfo["uploadAndPrint"].get<bool>();
         bool switchToDeviceTab = printInfo["switchToDeviceTab"].get<bool>();
         bool auto_refill       = printInfo["autoRefill"].get<bool>();
+        std::string selectedPrinterId = printInfo["selectedPrinterId"].get<std::string>();
+        std::string bedType = printInfo["bedType"].get<std::string>();
 
+        if(bedType == "btPC") {
+            mBedType = BedType::btPC;
+        } else {
+            mBedType = BedType::btPEI;
+        }
+
+        if(!selectedPrinterId.empty()) {
+            wxGetApp().app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, selectedPrinterId);        
+        } else {
+            wxMessageBox("Please select a printer!", "Error", wxOK | wxICON_ERROR);
+            return;
+        }
+   
         mTimeLapse             = timeLapse ? 1 : 0;
         mHeatedBedLeveling     = heatedBedLeveling ? 1 : 0;
         post_upload_action     = uploadAndPrint ? PrintHostPostUploadAction::StartPrint : PrintHostPostUploadAction::None;
         m_switch_to_device_tab = switchToDeviceTab ? 1 : 0;
         mAutoRefill            = auto_refill ? 1 : 0;
-
+        mSelectedPrinterId     = selectedPrinterId;
+        
         wxString modelName = wxString::FromUTF8(printInfo["modelName"].get<std::string>());
         if (!modelName.EndsWith(".gcode")) {
             modelName += ".gcode";
