@@ -324,7 +324,7 @@ void ElegooMessageHandler::handleFileTransferProgress(const std::string& data) {
             info.speedKBps = speed / 1024.0;
             info.finished = (percentage >= 100.0);
             info.errorMsg = errorMsg;
-            ElegooLocalWebSocket::instance()->setFileTransferProgress(req_id, device_id, info);
+            ElegooLocalWebSocket::getInstance()->setFileTransferProgress(req_id, device_id, info);
         }
     } catch (const std::exception& e) {
         std::cerr << "Error handling file transfer progress: " << e.what() << std::endl;
@@ -386,7 +386,7 @@ bool ElegooLocalWebSocket::connect() {
         return true;
     }
 
-    if (WSManager::instance()->addClient(mClientId, "ws://" + mHost + ":" + mPort + "/ws", mMessageHandler, mStatusHandler)) {
+    if (WSManager::getInstance()->addClient(mClientId, "ws://" + mHost + ":" + mPort + "/ws", mMessageHandler, mStatusHandler)) {
         mIsConnected = true;
         return true;
     }
@@ -395,7 +395,7 @@ bool ElegooLocalWebSocket::connect() {
 
 void ElegooLocalWebSocket::disconnect() {
     if (mIsConnected.load()) {
-        WSManager::instance()->removeClient(mClientId);
+        WSManager::getInstance()->removeClient(mClientId);
         mIsConnected = false;
     }
 }
@@ -453,7 +453,7 @@ bool ElegooLocalWebSocket::addPrinter(const PrinterInfo& printerInfo) {
     message["data"]["token"] = "";
     message["data"]["extraParams"] = nlohmann::json::object();
     std::string messageStr = message.dump();
-    std::string response = WSManager::instance()->send(mClientId, messageStr);
+    std::string response = WSManager::getInstance()->send(mClientId, messageStr);
 
     nlohmann::json responseJson = nlohmann::json::parse(response);
     if (responseJson.contains("data") && responseJson["data"].contains("code")) {
@@ -503,7 +503,7 @@ std::vector<PrinterInfo> ElegooLocalWebSocket::discoverDevices() {
     message["data"]["preferredListenPorts"] = {8080, 8081};
     
     std::string messageStr = message.dump();
-    std::string response = WSManager::instance()->send(mClientId, messageStr);
+    std::string response = WSManager::getInstance()->send(mClientId, messageStr);
     
     std::vector<PrinterInfo> printerList;
     
@@ -529,7 +529,7 @@ std::vector<PrinterInfo> ElegooLocalWebSocket::discoverDevices() {
                     printerInfo.machineName = device.value("name", "");
                     printerInfo.serialNumber = device.value("serialNumber", "");
                     printerInfo.webUrl = device.value("webUrl", "");     
-                    printerInfo.port = "";
+                    printerInfo.port = 0;
                     printerList.push_back(printerInfo);
                 }
             }
@@ -578,7 +578,7 @@ bool ElegooLocalWebSocket::sendPrintFile(const PrinterInfo& printerInfo, const P
     bool cancel = false;
     std::atomic<bool> threadFinished{false};
     std::thread uploadThread([&]() {
-        std::string response = WSManager::instance()->send(mClientId, messageStr, 3600 * 1000);
+        std::string response = WSManager::getInstance()->send(mClientId, messageStr, 3600 * 1000);
         nlohmann::json responseJson = nlohmann::json::parse(response);
         std::string errorMsg;
         if (responseJson.contains("data") && responseJson["data"].contains("code")) {
@@ -693,7 +693,7 @@ bool ElegooLocalWebSocket::sendPrintTask(const PrinterInfo& printerInfo, const P
     message["data"]["extraParams"] = nlohmann::json::object();
     std::string messageStr = message.dump();
 
-    std::string response = WSManager::instance()->send(mClientId, messageStr);
+    std::string response = WSManager::getInstance()->send(mClientId, messageStr);
     nlohmann::json responseJson = nlohmann::json::parse(response);
 
     if (responseJson.contains("data") && responseJson["data"].contains("code")) {

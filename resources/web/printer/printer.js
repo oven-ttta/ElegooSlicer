@@ -32,7 +32,7 @@ function HandleStudio(pVal)
 				}, '*');
 			}
 		}
-	} else if(strCmd=="response_bind_printers" || strCmd=="response_update_printer_name") {
+	} else if(strCmd=="response_bind_printer" || strCmd=="response_update_printer_name") {
         RequestPrintTask();
 	} else if(strCmd=="response_delete_printer") {
         RequestPrintTask();
@@ -141,11 +141,11 @@ document.addEventListener('DOMContentLoaded', function() {
             SendWXMessage( JSON.stringify(tSend) );
         } else if (event.data.command === 'closeModal') {
             closeModals();
-        } else if (event.data.command === 'bind_printers') {
+        } else if (event.data.command === 'bind_printer') {
             var tSend={};
             tSend['sequence_id']=Math.round(new Date() / 1000);
-            tSend['command']="request_bind_printers";
-            tSend['printers']=event.data.printers;
+            tSend['command']="request_bind_printer";
+            tSend['printer']=event.data.printer;
             SendWXMessage( JSON.stringify(tSend) );
         } else if (event.data.command === 'update_printer_name') {
             var tSend={};
@@ -170,7 +170,7 @@ function showPrinterSettingsByIndex(index) {
 function showPrinterSettings(printer) {
     document.getElementById('modal-overlay').style.display = 'block';
     var dialog = document.createElement('div');
-    if (printer.isPhysicalPrinter) {
+    if (!printer.isPhysicalPrinter) {
         dialog.innerHTML = `
             <div class="printer-setting-physical-modal">
                 <iframe src="printer_setting_physical.html" class="printer-setting-physical-iframe"></iframe>

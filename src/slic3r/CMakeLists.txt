@@ -275,8 +275,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/WebViewDialog.hpp
     GUI/PrinterWebView.cpp
     GUI/PrinterWebView.hpp
-    GUI/PrinterManager.cpp
-    GUI/PrinterManager.hpp
+    GUI/PrinterManagerView.cpp
+    GUI/PrinterManagerView.hpp
     GUI/WebDownPluginDlg.hpp
     GUI/WebDownPluginDlg.cpp
     GUI/WebGuideDialog.hpp
@@ -574,7 +574,9 @@ set(SLIC3R_GUI_SOURCES
     Utils/SimplyPrint.hpp
     GUI/ElegooPrintSend.cpp
     GUI/ElegooPrintSend.hpp
-    
+
+    Utils/PrinterManager.cpp
+    Utils/PrinterManager.hpp 
     Utils/PrinterNetworkManager.cpp
     Utils/PrinterNetworkManager.hpp
     Utils/PrinterNetwork.cpp

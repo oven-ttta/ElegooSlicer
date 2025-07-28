@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="css/light.css">
     <!-- <link rel="stylesheet" href="css/dark.css"> -->
     <script src="../include/jquery-3.6.0.min.js"></script>
-    <script src="manual_form.js"></script>
     <script src="printer_setting_physical.js"></script>
 </head>
 <body>
@@ -15,14 +14,12 @@
         <button class="printer-setting-physical-close-btn" onclick="closeModal()">×</button>
     </div>
     <div class="printer-setting-physical-content">
-        <div id="manual-form-container"></div>
+        <iframe src="manual_form.html" style="width: 100%; height: 100%; border: none; overflow: hidden;"></iframe>
         <div class="printer-setting-physical-btn">
             <button type="button" class="printer-setting-physical-cancel-btn" onclick="deletePrinter()">Delete</button>
             <button type="button" class="printer-setting-physical-connect-btn" onclick="connectPrinter()">Connect</button>
         </div>
-        <div class="printer-setting-physical-tip" id="physical-tip">
-            <a href="#">Can't find your printer?</a>
-        </div>
+
     </div>
 </div>
 </body>

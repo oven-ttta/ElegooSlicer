@@ -10,7 +10,7 @@ namespace Slic3r {
 template <typename T>
 class Singleton {
 public:
-    static T* instance() {
+    static T* getInstance() {
         T* expected = nullptr;
         if (s_instance.compare_exchange_strong(expected, nullptr)) {
             std::lock_guard<std::mutex> lock(s_mutex);

@@ -1,29 +1,26 @@
 function closeModal() {
     window.parent.postMessage({command: 'closeModal'}, '*');
 }
+
 function deletePrinter() {
     if (confirm('Are you sure you want to delete this printer?')) {
-        var tSend = { command: "delete_printer", sequence_id: Date.now() };
-        SendWXMessage(JSON.stringify(tSend));
+        window.parent.postMessage({command: 'delete_printer'}, '*');
     }
 }
 
 function connectPrinter() {
-    var formData = getManualFormData();
-    if (formData) {
-        formData.command = "connect_printer";
-        formData.sequence_id = Date.now();
-        SendWXMessage(JSON.stringify(formData));
+    // Get form data from iframe
+    const iframe = document.querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({command: 'get_form_data'}, '*');
     }
 }
 
 window.addEventListener('message', function(event) {
-    if (event.data && event.data.command === 'printer_settings') {
-        alert(JSON.stringify(event.data.data));
+    if (event.data.command === 'form_data') {
+        // Forward form data from iframe to parent with command
+        const formData = event.data.data;
+        formData.command = "connect_physical_printer";
+        window.parent.postMessage(formData, '*');
     }
-});
-
-
-$(document).ready(function() {
-    renderManualForm('manual-form-container');
 }); 

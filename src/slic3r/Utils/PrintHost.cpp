@@ -28,6 +28,7 @@
 #include "Flashforge.hpp"
 #include "SimplyPrint.hpp"
 #include "ElegooLink.hpp"
+#include "PrinterManager.hpp"
 
 namespace fs = boost::filesystem;
 using boost::optional;
@@ -328,7 +329,7 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
         cfg.option<ConfigOptionBool>("support_device_list_management")->value;
 
     if (support_device_list) {
-        success = wxGetApp().mainframe->printer_manager()->upload(
+        success = PrinterManager::getInstance()->upload(
             std::move(the_job.upload_data),
             [this](Http::Progress progress, bool& cancel) { this->progress_fn(std::move(progress), cancel); },
             [this](wxString error) { this->error_fn(std::move(error)); },

@@ -1190,7 +1190,7 @@ void MainFrame::show_device(bool bBBLPrinter) {
         bool support_device_list = cfg.has("support_device_list_management") &&
             cfg.option<ConfigOptionBool>("support_device_list_management")->value;
         if (support_device_list) {
-            if (m_tabpanel->FindPage(m_printer_manager) != wxNOT_FOUND)
+            if (m_tabpanel->FindPage(m_printer_manager_view) != wxNOT_FOUND)
                 return;
         } else {
             if (m_tabpanel->FindPage(m_printer_view) != wxNOT_FOUND)
@@ -1203,14 +1203,14 @@ void MainFrame::show_device(bool bBBLPrinter) {
 
         if (support_device_list) {
             remove_page(m_printer_view);
-            if (m_tabpanel->FindPage(m_printer_manager) == wxNOT_FOUND) {
-                m_printer_manager = new PrinterManager(m_tabpanel);
+            if (m_tabpanel->FindPage(m_printer_manager_view) == wxNOT_FOUND) {
+                m_printer_manager_view = new PrinterManagerView(m_tabpanel);
             }
-            m_printer_manager->Show(false);
-            m_tabpanel->InsertPage(tpMonitor, m_printer_manager, _L("Device"), std::string("tab_monitor_active"),
+            m_printer_manager_view->Show(false);
+            m_tabpanel->InsertPage(tpMonitor, m_printer_manager_view, _L("Device"), std::string("tab_monitor_active"),
                                 std::string("tab_monitor_active"));
         } else {     
-            remove_page(m_printer_manager);
+            remove_page(m_printer_manager_view);
             if (m_printer_view == nullptr) {
                 m_printer_view = new PrinterWebView(m_tabpanel);
                 Bind(EVT_LOAD_PRINTER_URL, [this](LoadPrinterViewEvent& evt) {

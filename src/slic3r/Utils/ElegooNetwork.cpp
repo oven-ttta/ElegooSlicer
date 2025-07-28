@@ -19,32 +19,32 @@ ElegooNetwork::~ElegooNetwork() {
 
 bool ElegooNetwork::connect()
 {
-    return ElegooLocalWebSocket::instance()->addPrinter(m_printerInfo);
+    return ElegooLocalWebSocket::getInstance()->addPrinter(m_printerInfo);
 }
 
 void ElegooNetwork::disconnect()
 {
-    ElegooLocalWebSocket::instance()->removePrinter(m_printerInfo);
+    ElegooLocalWebSocket::getInstance()->removePrinter(m_printerInfo);
 }
 
 bool ElegooNetwork::isConnected() const
 {
-    return ElegooLocalWebSocket::instance()->isPrinterConnected(m_printerInfo);
+    return ElegooLocalWebSocket::getInstance()->isPrinterConnected(m_printerInfo);
 }
 
 std::vector<PrinterInfo> ElegooNetwork::discoverDevices()   
 {
-    return ElegooLocalWebSocket::instance()->discoverDevices();
+    return ElegooLocalWebSocket::getInstance()->discoverDevices();
 }
 
 bool ElegooNetwork::sendPrintTask(const PrinterNetworkParams& params)
 {
-    return ElegooLocalWebSocket::instance()->sendPrintTask(m_printerInfo, params);
+    return ElegooLocalWebSocket::getInstance()->sendPrintTask(m_printerInfo, params);
 }
 
 bool ElegooNetwork::sendPrintFile(const PrinterNetworkParams& params)
 {
-    return ElegooLocalWebSocket::instance()->sendPrintFile(m_printerInfo, params);
+    return ElegooLocalWebSocket::getInstance()->sendPrintFile(m_printerInfo, params);
 }
 
 } // namespace Slic3r 

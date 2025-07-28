@@ -1,13 +1,16 @@
 var printer = null;
+
 function closeModal() {
     window.parent.postMessage({command: 'closeModal'}, '*');
 }
+
 function deleteDevice() {
     if (!confirm('Are you sure you want to delete this device? This action cannot be undone.')) {
         return;
     }
     window.parent.postMessage({command: 'delete_printer', id: printer.id}, '*');
 }
+
 window.addEventListener('message', function(event) {
     if (event.data && event.data.command === 'printer_settings') {
         printer = event.data.data;
@@ -70,12 +73,10 @@ function editPrinterIP() {
     function saveChanges() {
         var newIP = $input.val().trim();
         if (newIP && newIP !== currentIP) {
-            var tSend = { 
+            window.parent.postMessage({ 
                 command: "update_printer_ip", 
-                ip: newIP,
-                sequence_id: Date.now() 
-            };
-            SendWXMessage(JSON.stringify(tSend));
+                ip: newIP
+            }, '*');
             $textElement.text(newIP);
         }
         $input.remove();
@@ -88,17 +89,16 @@ function editPrinterIP() {
     }
     
     $input.on('keydown', function(e) {
-        if (e.keyCode === 13) { // Enter key
+        if (e.keyCode === 13) {
             e.preventDefault();
             saveChanges();
-        } else if (e.keyCode === 27) { // Escape key
+        } else if (e.keyCode === 27) {
             e.preventDefault();
             cancelChanges();
         }
     });
     
     $input.on('blur', function(e) {
-        // Use setTimeout to allow click events to process first
         setTimeout(function() {
             if ($input.is(':visible')) {
                 saveChanges();
@@ -108,8 +108,7 @@ function editPrinterIP() {
 }
 
 function checkFirmwareUpdate() {
-    var tSend = { command: "check_firmware_update", sequence_id: Date.now() };
-    SendWXMessage(JSON.stringify(tSend));
+    window.parent.postMessage({ command: "check_firmware_update" }, '*');
 }
 
 function showPrinterInfo(printer) {
@@ -134,24 +133,3 @@ function showPrinterInfo(printer) {
         $('.printer-setting-update-tag').text('Latest Version').removeClass('available');
     }
 }
-
-function handleDeleteResult(msg) {
-    if (msg.success) {
-        alert('Device deleted successfully');
-        closePrinterSetting();
-    } else {
-        alert('Delete failed: ' + (msg.error || 'Unknown error'));
-    }
-}
-
-$(document).ready(function() {
-    var printerId = window.parent.currentPrinterId;
-    if (printerId) {
-        var tSend = { 
-            command: "request_printer_info", 
-            printer_id: printerId,
-            sequence_id: Date.now() 
-        };
-        SendWXMessage(JSON.stringify(tSend));
-    }
-});

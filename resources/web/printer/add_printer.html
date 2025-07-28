@@ -6,10 +6,7 @@
     <link rel="stylesheet" href="css/light.css">
     <!-- <link rel="stylesheet" href="css/dark.css"> -->
     <script src="../include/jquery-3.6.0.min.js"></script>
-    <script src="manual_form.js"></script>
     <script src="add_printer.js"></script>
-
-
 </head>
 <body>
 <div class="add-printer-dialog">
@@ -33,19 +30,27 @@
                 </thead>
                 <tbody id="discover-list-table">
                 </tbody>
+                <tfoot id="discover-loading" class="discover-loading">
+                    <tr>
+                        <td colspan="3">
+                            <div class="loading-text">
+                                <div class="loading-spinner"></div>
+                                Discovering printers...
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
         <div id="manual-panel">
-            <div id="manual-form-container"></div>
+            <iframe src="./manual_form.html" style="width: 100%; height: 100%; border: none; overflow: hidden;"></iframe>
         </div>
     </div>
     <div class="add-printer-btn">
         <button type="button" class="add-printer-cancel-btn" onclick="closeModal()">Close</button>   
         <button type="button" class="add-printer-connect-btn" onclick="connectPrinter()">Connect</button>
     </div>
-    <div class="add-printer-tip" id="discover-tip">
-        <a href="#">Can't find your printer?</a>
-    </div>
+
 </div>
 </body>
 </html>

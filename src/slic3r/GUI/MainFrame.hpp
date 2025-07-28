@@ -31,7 +31,7 @@
 // BBS
 #include "BBLTopbar.hpp"
 #include "PrinterWebView.hpp"
-#include "PrinterManager.hpp"
+#include "PrinterManagerView.hpp"
 #include "calib_dlg.hpp"
 #include "MultiMachinePage.hpp"
 
@@ -253,8 +253,6 @@ public:
     // BBS
     BBLTopbar* topbar() { return m_topbar; }
     
-    PrinterManager* printer_manager() { return m_printer_manager; }
-
     // for cali to update tab when save new preset
     void update_filament_tab_ui();
 
@@ -372,7 +370,7 @@ public:
     CalibrationPanel*     m_calibration{ nullptr };
     WebViewPanel*         m_webview { nullptr };
     PrinterWebView*       m_printer_view{nullptr};
-    PrinterManager*       m_printer_manager{nullptr};
+    PrinterManagerView*   m_printer_manager_view{nullptr};
     wxLogWindow*          m_log_window { nullptr };
     // BBS
     //wxBookCtrlBase*       m_tabpanel { nullptr };

@@ -16,7 +16,7 @@ struct PrinterInfo
     std::string id;
     std::string name;
     std::string ip;
-    std::string port;
+    int port;
     std::string vendor;
     std::string machineName;
     std::string machineModel;
@@ -28,12 +28,15 @@ struct PrinterInfo
     std::string webUrl;
     std::string connectionUrl;
     bool        isPhysicalPrinter;
+    uint64_t    addTime;
+    uint64_t    modifyTime;
+    uint64_t    lastActiveTime;
 
     template<class Archive> void serialize(Archive& ar)
     {
         ar(id, name, ip, port, vendor, machineName,
            machineModel, protocolVersion, firmwareVersion, deviceId, deviceType,
-           serialNumber, webUrl, connectionUrl, isPhysicalPrinter);
+           serialNumber, webUrl, connectionUrl, isPhysicalPrinter, addTime, modifyTime, lastActiveTime);
     }
 };
 
