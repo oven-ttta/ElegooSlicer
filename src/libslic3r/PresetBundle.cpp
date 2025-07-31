@@ -2772,7 +2772,10 @@ std::pair<PresetsConfigSubstitutions, size_t> PresetBundle::load_vendor_configs_
         machine_subfiles.clear();
         process_subfiles.clear();
     }
-
+    if (flags.has(LoadConfigBundleAttribute::LoadMachineOnly)) {
+        process_subfiles.clear();
+        filament_subfiles.clear();
+    }
     //2) paste the machine model
     for (auto& machine_model : machine_model_subfiles)
     {
@@ -3050,7 +3053,7 @@ std::pair<PresetsConfigSubstitutions, size_t> PresetBundle::load_vendor_configs_
 
         // Load the preset into the list of presets, save it to disk.
         Preset &loaded = presets_collection->load_preset(file_path.string(), preset_name, std::move(config), false);
-        if (flags.has(LoadConfigBundleAttribute::LoadSystem)) {
+        if (flags.has(LoadConfigBundleAttribute::LoadSystem) || flags.has(LoadConfigBundleAttribute::LoadMachineOnly)) {
             loaded.is_system = true;
             loaded.vendor = current_vendor_profile;
             loaded.version = current_vendor_profile->config_version;

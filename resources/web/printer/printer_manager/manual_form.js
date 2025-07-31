@@ -14,7 +14,6 @@ window.addEventListener('message', function(event) {
 });
 
 function renderPrinterModelList(printerModelList) {
-    alert(printerModelList.length);
     const vendorSelect = document.getElementById('printer_vendor_select');
     const modelSelect = document.getElementById('printer_model_select');
     const hostTypeSelect = document.getElementById('host_type_select');

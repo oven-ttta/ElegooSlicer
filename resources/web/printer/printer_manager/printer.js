@@ -5,10 +5,9 @@ let cachedPrinterModelList = null; // Cache for printer model list
 function OnInit() {
 	TranslatePage();
 	RequestPrintTask();
-    requestPrinterModelList();
-    // setTimeout(function() {
-        
-    // }, 5000);
+    setTimeout(function() {
+        requestPrinterModelList();
+    }, 3000);
 }
 function requestPrinterModelList() {
     var tSend={};

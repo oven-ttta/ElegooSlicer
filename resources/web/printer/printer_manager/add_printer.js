@@ -78,7 +78,7 @@ function switchTab(tab) {
         $('#add-printer-manual-form').hide();
         $('#tab-discover').addClass('active');
         $('#tab-manual').removeClass('active');
-        //requestDiscoverPrinters();
+        requestDiscoverPrinters();
     } else {
         $('#discover-panel').hide();
         $('#add-printer-manual-form').show();

@@ -388,9 +388,14 @@ nlohmann::json PrinterManagerView::getPrinterModelList()
     for (const auto& vendor_pair : bundle.vendors) {
         const std::string& vendor_name = vendor_pair.first;
         PresetBundle       vendor_bundle;
-        vendor_bundle.load_vendor_configs_from_json((boost::filesystem::path(Slic3r::resources_dir()) / "profiles").string(), vendor_name,
-                                                    PresetBundle::LoadSystem,
-                                                    ForwardCompatibilitySubstitutionRule::EnableSilent, nullptr);
+        try {
+            vendor_bundle.load_vendor_configs_from_json((boost::filesystem::path(Slic3r::resources_dir()) / "profiles").string(), vendor_name,
+                                                        PresetBundle::LoadMachineOnly,
+                                                        ForwardCompatibilitySubstitutionRule::EnableSilent, nullptr);
+        } catch (const std::exception& e) {
+            wxLogMessage("get printer model list load vendor %s error: %s", vendor_name.c_str(), e.what());
+            continue;
+        }
         for (const auto& printer : vendor_bundle.printers) {
             if (!printer.vendor) {
                 continue;

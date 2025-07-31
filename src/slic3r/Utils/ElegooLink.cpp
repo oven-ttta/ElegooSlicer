@@ -73,7 +73,7 @@ std::vector<PrinterNetworkInfo> ElegooLink::discoverDevices() {
   
     std::vector<PrinterNetworkInfo> printerList;
     elink::DeviceDiscoveryParams discoveryParams;
-    discoveryParams.timeoutMs = 10 * 1000;
+    discoveryParams.timeoutMs = 5 * 1000;
     discoveryParams.broadcastInterval = 1000;   
     discoveryParams.enableAutoRetry = true;    
     
