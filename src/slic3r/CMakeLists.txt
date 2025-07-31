@@ -496,7 +496,6 @@ set(SLIC3R_GUI_SOURCES
     GUI/TaskManager.hpp
     Utils/Http.cpp
     Utils/Http.hpp
-    Utils/WebSocketClient.hpp
     Utils/FixModelByWin10.cpp
     Utils/FixModelByWin10.hpp
     Utils/EmbossStyleManager.cpp
@@ -530,8 +529,6 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrintHost.cpp
     Utils/NetworkAgent.cpp
     Utils/NetworkAgent.hpp
-    Utils/ElegooLink.cpp
-    Utils/ElegooLink.hpp
     Utils/PrintHost.cpp
     Utils/PrintHost.hpp
     Utils/Serial.cpp
@@ -572,9 +569,10 @@ set(SLIC3R_GUI_SOURCES
     GUI/Jobs/OAuthJob.hpp
     Utils/SimplyPrint.cpp
     Utils/SimplyPrint.hpp
-    GUI/ElegooPrintSend.cpp
-    GUI/ElegooPrintSend.hpp
-
+    
+    GUI/PrintSendDialogEx.cpp
+    GUI/PrintSendDialogEx.hpp
+    Utils/Singleton.hpp
     Utils/PrinterManager.cpp
     Utils/PrinterManager.hpp 
     Utils/PrinterNetworkManager.cpp
@@ -583,16 +581,9 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrinterNetwork.hpp
     Utils/ElegooNetwork.cpp
     Utils/ElegooNetwork.hpp
-    Utils/ElegooLocalWebSocket.cpp
-    Utils/ElegooLocalWebSocket.hpp
+    Utils/ElegooLink.cpp
+    Utils/ElegooLink.hpp
 
-    Utils/WSClient.cpp
-    Utils/WSClient.hpp
-    Utils/WSManager.cpp
-    Utils/WSManager.hpp
-    Utils/WSTypes.hpp
-
-    Utils/Singleton.hpp
 )
 
 if (WIN32)

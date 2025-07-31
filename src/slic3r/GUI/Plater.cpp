@@ -153,7 +153,7 @@
 #include "CreatePresetsDialog.hpp"
 #include "FileArchiveDialog.hpp"
 
-#include "ElegooPrintSend.hpp"
+#include "PrintSendDialogEx.hpp"
 
 using boost::optional;
 namespace fs = boost::filesystem;
@@ -1286,8 +1286,7 @@ void Sidebar::update_all_preset_comboboxes()
         p_mainframe->load_printer_url(url, apikey);
         p_mainframe->set_print_button_to_default(print_btn_type);
 
-        bool support_device_list = cfg.has("support_device_list_management") && cfg.option<ConfigOptionBool>("support_device_list_management")->value;
-        if (support_device_list) {
+        if (PrintHost::support_device_list_management(cfg)) {
             connection_btn->Hide();
         } else {
             connection_btn->Show();
@@ -12885,13 +12884,11 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
 
     {
         auto       preset_bundle = wxGetApp().preset_bundle;
-        const auto opt           = physical_printer_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
-        const auto host_type     = opt != nullptr ? opt->value : htElegooLink;
         auto       config        = get_app_config();
 
         std::unique_ptr<PrintHostSendDialog> pDlg;
-        if (host_type == htElegooLink) {
-            pDlg = std::make_unique<ElegooPrintSend>(this, get_partplate_list().get_curr_plate_index(), default_output_file,
+        if (PrintHost::support_device_list_management(*physical_printer_config)) {
+            pDlg = std::make_unique<PrintSendDialogEx>(this, get_partplate_list().get_curr_plate_index(), default_output_file,
                                                      upload_job.printhost->get_post_upload_actions(), groups, storage_paths, storage_names,
                                                      config->get_bool("open_device_tab_post_upload"),
                                                      wxGetApp().preset_bundle->filament_ams_list);

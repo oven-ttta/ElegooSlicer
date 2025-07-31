@@ -5,6 +5,7 @@
   "setting_id": "EN4MAX04",
   "instantiation": "true",
   "inherits": "Elegoo Neptune 4 0.4 nozzle",
+  "host_type": "elegoolink",
   "printer_model": "Elegoo Neptune 4 Max",
   "default_print_profile": "0.20mm Standard @Elegoo N4Max 0.4 nozzle",
   "nozzle_diameter": [
@@ -19,26 +20,26 @@
   ],
   "printable_height": "480",
   "retract_lift_below": [
-      "479"
+    "479"
   ],
   "machine_max_acceleration_extruding": [
     "5000",
     "5000"
   ],
   "machine_max_acceleration_retracting": [
-      "5000",
-      "5000"
+    "5000",
+    "5000"
   ],
   "machine_max_acceleration_x": [
-      "5000",
-      "5000"
+    "5000",
+    "5000"
   ],
   "machine_max_acceleration_y": [
-      "5000",
-      "5000"
+    "5000",
+    "5000"
   ],
   "machine_max_acceleration_z": [
-    "300", 
+    "300",
     "300"
   ],
   "machine_max_acceleration_e": [
@@ -50,20 +51,20 @@
     "5000"
   ],
   "machine_max_speed_e": [
-    "60", 
+    "60",
     "60"
   ],
   "machine_max_speed_x": [
-    "500", 
+    "500",
     "500"
   ],
   "machine_max_speed_y": [
-    "500", 
+    "500",
     "500"
   ],
   "machine_max_speed_z": [
-      "20",
-      "20"
+    "20",
+    "20"
   ],
   "cooling_tube_length": "5",
   "enable_filament_ramming": "1",

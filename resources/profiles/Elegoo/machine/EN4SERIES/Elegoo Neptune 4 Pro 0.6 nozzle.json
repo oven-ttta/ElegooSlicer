@@ -6,7 +6,7 @@
   "setting_id": "EN4PRO06",
   "instantiation": "true",
   "nozzle_diameter": [
-      "0.6"
+    "0.6"
   ],
   "printer_model": "Elegoo Neptune 4 Pro",
   "printer_variant": "0.6",
@@ -18,15 +18,15 @@
     "1.2"
   ],
   "wipe_distance": [
-      "1.8"
+    "1.8"
   ],
   "retraction_length": [
     "0.8"
   ],
   "max_layer_height": [
-      "0.42"
+    "0.42"
   ],
   "min_layer_height": [
-      "0.12"
+    "0.12"
   ]
 }

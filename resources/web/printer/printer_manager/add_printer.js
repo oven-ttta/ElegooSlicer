@@ -2,6 +2,7 @@ var printers = null;
 
 function OnInit() {
     switchTab('discover');
+    
 }
 
 function closeModal() {
@@ -15,23 +16,72 @@ window.addEventListener('message', function(event) {
         printers = event.data.data;
         renderDiscoverList(printers);
     } else if (event.data.command === 'form_data') {
-        // Forward form data from iframe to parent with command
         const formData = event.data.data;
         formData.command = "manual_add_printer";
         window.parent.postMessage(formData, '*');
-    }
+    } else if (event.data.command === 'response_printer_model_list') {
+        printerModelList = event.data.data;
+        const iframe = document.querySelector('#add-printer-manual-form iframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+                command: 'render_printer_model_list',
+                data: printerModelList
+            }, '*');
+        }
+    } 
 });
+
+
+
+function getSelectedPrinterInfo() {
+    const vendorSelect = document.getElementById('printer_vendor_select');
+    const modelSelect = document.getElementById('printer_model_select');
+    const hostTypeSelect = document.getElementById('host_type_select');
+    
+    return {
+        vendor: vendorSelect.value,
+        model: modelSelect.value,
+        hostType: hostTypeSelect.value
+    };
+}
+
+function resetPrinterSelection() {
+    const vendorSelect = document.getElementById('printer_vendor_select');
+    const modelSelect = document.getElementById('printer_model_select');
+    const hostTypeSelect = document.getElementById('host_type_select');
+    
+    vendorSelect.value = '';
+    modelSelect.value = '';
+    hostTypeSelect.value = '';
+    
+    // Trigger change event to clear linkage
+    vendorSelect.dispatchEvent(new Event('change'));
+}
+
+function validatePrinterSelection() {
+    const selectedInfo = getSelectedPrinterInfo();
+    return selectedInfo.vendor && selectedInfo.model && selectedInfo.hostType;
+}
+
+function getPrinterModelData(vendor, model) {
+    if (!window.printerModelData) return null;
+    
+    const vendorData = window.printerModelData.find(v => v.vendor === vendor);
+    if (!vendorData) return null;
+    
+    return vendorData.models.find(m => m.model_name === model);
+}
 
 function switchTab(tab) {
     if (tab === 'discover') {
         $('#discover-panel').show();
-        $('#manual-panel').hide();
+        $('#add-printer-manual-form').hide();
         $('#tab-discover').addClass('active');
         $('#tab-manual').removeClass('active');
-        requestDiscoverPrinters();
+        //requestDiscoverPrinters();
     } else {
         $('#discover-panel').hide();
-        $('#manual-panel').show();
+        $('#add-printer-manual-form').show();
         $('#tab-discover').removeClass('active');
         $('#tab-manual').addClass('active');
     }
@@ -46,7 +96,7 @@ function connectPrinter() {
         window.parent.postMessage({command: 'bind_printer', printer: printers[window.selectedPrinterIdx]}, '*');
     } else {
         // Get form data from iframe
-        const iframe = document.querySelector('#manual-panel iframe');
+        const iframe = document.querySelector('#add-printer-manual-form iframe');
         if (iframe && iframe.contentWindow) {
             iframe.contentWindow.postMessage({command: 'get_form_data'}, '*');
         }

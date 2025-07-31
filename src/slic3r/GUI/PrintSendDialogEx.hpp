@@ -16,10 +16,10 @@
 namespace Slic3r { namespace GUI {
 
 
-class ElegooPrintSend : public PrintHostSendDialog
+class PrintSendDialogEx : public PrintHostSendDialog
 {
 public:
-    ElegooPrintSend(Plater*                        plater,
+    PrintSendDialogEx(Plater*                        plater,
                     int                            printPlateIdx,
                     const boost::filesystem::path& path,
                     PrintHostPostUploadActions     postActions,
@@ -29,22 +29,17 @@ public:
                     bool                           switchToDeviceTab,
                     const std::map<int, DynamicPrintConfig>& filamentAmsList);
 
-    ~ElegooPrintSend();
-
+    ~PrintSendDialogEx();
 
     virtual void EndModal(int ret) override;
-    int          timeLapse() const { return mTimeLapse; }
-    int          heatedBedLeveling() const { return mHeatedBedLeveling; }
-    BedType      bedType() const { return mBedType; }
-    std::string  selectedPrinterId() const { return mSelectedPrinterId; }
 
     virtual void                               init() override;
     virtual std::map<std::string, std::string> extendedInfo() const
     {
-        return {{"bedType", std::to_string(static_cast<int>(mBedType))},
-                {"timeLapse", std::to_string(mTimeLapse)},
-                {"heatedBedLeveling", std::to_string(mHeatedBedLeveling)},
-                {"autoRefill", std::to_string(mAutoRefill)},
+        return {{"bedType", mBedType == BedType::btPC ? "btPC" : "btPTE"},
+                {"timeLapse", mTimeLapse ? "true" : "false"},
+                {"heatedBedLeveling", mHeatedBedLeveling ? "true" : "false"},
+                {"autoRefill", mAutoRefill ? "true" : "false"},
                 {"selectedPrinterId", mSelectedPrinterId},
                 {"filamentAmsMapping", mFilamentAmsMapping.dump()}};
     }   
@@ -55,16 +50,7 @@ private:
     nlohmann::json preparePrintTask();
     nlohmann::json getPrinterList();
     void onPrint(const nlohmann::json &printInfo);
-
-
     void onCancel();
-
-    void finalDealEdgePixelsData(ThumbnailData& data);
-    void cloneThumbnailData();
-    void changeDefaultNormal(int oldFilamentId, wxColour tempAmsColor);
-    void unifyDealThumbnailData(ThumbnailData &inputData, ThumbnailData &noLightData);
-    void recordEdgePixelsData();
-    wxColour adjustColorForRender(const wxColour &color);
     std::string getCurrentProjectName();
     void getFilamentAmsMapping(nlohmann::json &filamentList, nlohmann::json &trayFilamentList);
     void saveFilamentAmsMapping(nlohmann::json &filamentList);
@@ -82,10 +68,10 @@ private:
     std::vector<wxColour>               mPreviewColorsInThumbnail;
     std::vector<wxColour>               mCurColorsInThumbnail;
     std::vector<bool>                   mEdgePixels;
-    int     mTimeLapse;
-    int     mHeatedBedLeveling;
+    bool    mTimeLapse{false};
+    bool    mHeatedBedLeveling;
     BedType mBedType;
-    int    mAutoRefill;
+    bool    mAutoRefill;
     std::string mSelectedPrinterId;
     std::string mProjectName;
     std::map<int, DynamicPrintConfig> mFilamentAmsList;

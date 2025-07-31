@@ -10,7 +10,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 namespace Slic3r {
-
+  
 VendorProfile getMachineProfile(const std::string& vendorName, const std::string& machineModel, VendorProfile::PrinterModel& printerModel)
 {
     std::string profile_vendor_name;    
@@ -94,87 +94,77 @@ bool PrinterManager::updatePrinterName(const std::string& id, const std::string&
     }
     return false;
 }
-std::string PrinterManager::bindPrinter(PrinterInfo& printer)
+std::string PrinterManager::bindPrinter(PrinterNetworkInfo& printerNetworkInfo)
 {
     for(auto& p : mPrinterList) {
-        if (p.second.ip == printer.ip || p.second.deviceId == printer.deviceId) {
+        if (p.second.ip == printerNetworkInfo.ip || p.second.deviceId == printerNetworkInfo.deviceId) {
             return p.second.id;
         }
     }
     uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    printer.addTime = now;
-    printer.modifyTime = now;
-    printer.lastActiveTime = now;
-    printer.id = boost::uuids::to_string(boost::uuids::random_generator{}());
-    mPrinterList[printer.id] = printer;
+    printerNetworkInfo.addTime = now;
+    printerNetworkInfo.modifyTime = now;
+    printerNetworkInfo.lastActiveTime = now;
+    printerNetworkInfo.id = boost::uuids::to_string(boost::uuids::random_generator{}());
+    mPrinterList[printerNetworkInfo.id] = printerNetworkInfo;
     savePrinterList();
-    return printer.id;
+    return printerNetworkInfo.id;
 }
-std::vector<PrinterInfo> PrinterManager::discoverPrinter()
+std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
 {
     boost::filesystem::path resources_path(Slic3r::resources_dir());
-    std::vector<PrinterInfo> printers;
-    std::vector<PrinterInfo> discoverPrinterList = PrinterNetworkManager::getInstance()->discoverPrinters();
+    std::vector<PrinterNetworkInfo> printers;
+    std::vector<PrinterNetworkInfo> discoverPrinterList = PrinterNetworkManager::getInstance()->discoverPrinters();
     for (auto& discoverPrinter : discoverPrinterList) {
         for (auto& p : mPrinterList) {
             if (p.second.ip == discoverPrinter.ip || p.second.deviceId == discoverPrinter.deviceId) {
                 continue;
             }
         }
-        PrinterInfo printerInfo = discoverPrinter;
+        PrinterNetworkInfo printerNetworkInfo = discoverPrinter;
         VendorProfile::PrinterModel printerModel;
         VendorProfile machineProfile = getMachineProfile(discoverPrinter.vendor, discoverPrinter.machineModel, printerModel);
-        printerInfo.vendor = machineProfile.name;
-        printerInfo.machineName = printerModel.name;
-        printerInfo.machineModel = printerModel.name;
-        printerInfo.isPhysicalPrinter = false;
-        printers.push_back(printerInfo);
+        printerNetworkInfo.vendor = machineProfile.name;
+        printerNetworkInfo.machineName = printerModel.name;
+        printerNetworkInfo.machineModel = printerModel.name;
+        printerNetworkInfo.isPhysicalPrinter = false;
+        printers.push_back(printerNetworkInfo);
     }
     return printers;
 }
-std::vector<PrinterInfo> PrinterManager::getPrinterList()
+std::vector<PrinterNetworkInfo> PrinterManager::getPrinterList()
 {  
-    std::vector<PrinterInfo> printers;
+    std::vector<PrinterNetworkInfo> printers;
     for (auto& printerInfo : mPrinterList) {
         printers.push_back(printerInfo.second);
     }
-    std::sort(printers.begin(), printers.end(), [](const PrinterInfo& a, const PrinterInfo& b) {
+    std::sort(printers.begin(), printers.end(), [](const PrinterNetworkInfo& a, const PrinterNetworkInfo& b) {
         return a.addTime < b.addTime;
     });
     return printers;
 }
 
-void PrinterManager::notifyPrintInfo(PrinterInfo printerInfo, int printerStatus, int printProgress, int currentTicks, int totalTicks)
-{
 
-}
-
-bool PrinterManager::upload(PrintHostUpload       upload_data,
-                            PrintHost::ProgressFn prorgess_fn,
-                            PrintHost::ErrorFn    error_fn,
-                            PrintHost::InfoFn     info_fn)
+bool PrinterManager::upload(PrinterNetworkParams& params)
 {
-    std::string printerId = upload_data.extended_info["selectedPrinterId"];
+    std::string printerId = params.printerNetworkInfo.id;
     if (mPrinterList.find(printerId) == mPrinterList.end()) {
         return false;
     }
-    PrinterInfo printerInfo = mPrinterList[printerId];
+    PrinterNetworkInfo printerNetworkInfo = mPrinterList[printerId];
 
-    if (!PrinterNetworkManager::getInstance()->isPrinterConnected(printerInfo)) {
-        if (!PrinterNetworkManager::getInstance()->connectToPrinter(printerInfo)) {
-            error_fn(wxString::FromUTF8("connect to printer failed"));
+    if (!PrinterNetworkManager::getInstance()->isPrinterConnected(printerNetworkInfo)) {
+        if (!PrinterNetworkManager::getInstance()->connectToPrinter(printerNetworkInfo)) {
+            if (params.errorFn) {
+                params.errorFn("connect to printer failed");
+            }
             return false;
         }
     }
 
-    PrinterNetworkParams params;
-    params.uploadData = upload_data;
-    params.progressFn = prorgess_fn;
-    params.errorFn    = error_fn;
-    params.infoFn     = info_fn;
-    if (PrinterNetworkManager::getInstance()->sendPrintFile(printerInfo, params)) {
-        if (upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
-            PrinterNetworkManager::getInstance()->sendPrintTask(printerInfo, params);
+    if (PrinterNetworkManager::getInstance()->sendPrintFile(printerNetworkInfo, params)) {
+        if (params.uploadAndStartPrint) {
+            PrinterNetworkManager::getInstance()->sendPrintTask(printerNetworkInfo, params);
         }
         return true;
     }

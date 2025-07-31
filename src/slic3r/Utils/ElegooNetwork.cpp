@@ -1,5 +1,5 @@
 #include "ElegooNetwork.hpp"
-#include "ElegooLocalWebSocket.hpp"
+#include "ElegooLink.hpp"
 #include <wx/log.h>
 #include <chrono>
 #include <iomanip>
@@ -7,9 +7,9 @@
 
 namespace Slic3r {
 
-ElegooNetwork::ElegooNetwork(const PrinterInfo& printerInfo) 
-    : IPrinterNetwork(printerInfo)
-    , m_printerInfo(printerInfo)
+ElegooNetwork::ElegooNetwork(const PrinterNetworkInfo& printerNetworkInfo) 
+    : IPrinterNetwork(printerNetworkInfo)
+    , m_printerNetworkInfo(printerNetworkInfo)
 {
 }
 
@@ -19,32 +19,32 @@ ElegooNetwork::~ElegooNetwork() {
 
 bool ElegooNetwork::connect()
 {
-    return ElegooLocalWebSocket::getInstance()->addPrinter(m_printerInfo);
+    return ElegooLink::getInstance()->addPrinter(m_printerNetworkInfo);
 }
 
 void ElegooNetwork::disconnect()
 {
-    ElegooLocalWebSocket::getInstance()->removePrinter(m_printerInfo);
+    ElegooLink::getInstance()->removePrinter(m_printerNetworkInfo);
 }
 
 bool ElegooNetwork::isConnected() const
 {
-    return ElegooLocalWebSocket::getInstance()->isPrinterConnected(m_printerInfo);
+    return ElegooLink::getInstance()->isPrinterConnected(m_printerNetworkInfo);
 }
 
-std::vector<PrinterInfo> ElegooNetwork::discoverDevices()   
+std::vector<PrinterNetworkInfo> ElegooNetwork::discoverDevices()   
 {
-    return ElegooLocalWebSocket::getInstance()->discoverDevices();
+    return ElegooLink::getInstance()->discoverDevices();
 }
 
 bool ElegooNetwork::sendPrintTask(const PrinterNetworkParams& params)
 {
-    return ElegooLocalWebSocket::getInstance()->sendPrintTask(m_printerInfo, params);
+    return ElegooLink::getInstance()->sendPrintTask(m_printerNetworkInfo, params);
 }
 
 bool ElegooNetwork::sendPrintFile(const PrinterNetworkParams& params)
 {
-    return ElegooLocalWebSocket::getInstance()->sendPrintFile(m_printerInfo, params);
+    return  ElegooLink::getInstance()->sendPrintFile(m_printerNetworkInfo, params);
 }
 
 } // namespace Slic3r 

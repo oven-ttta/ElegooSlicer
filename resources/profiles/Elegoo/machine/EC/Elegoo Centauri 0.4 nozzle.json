@@ -8,6 +8,7 @@
   "nozzle_diameter": [
     "0.4"
   ],
+  "host_type": "elegoolink",
   "printer_model": "Elegoo Centauri",
   "printer_variant": "0.4",
   "auxiliary_fan": "1",

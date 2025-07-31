@@ -5,28 +5,28 @@
 
 namespace Slic3r {
 
-IPrinterNetwork::IPrinterNetwork(const PrinterInfo& printerInfo) {
-    m_printerInfo.id = printerInfo.id;
-    m_printerInfo.name = printerInfo.name;
-    m_printerInfo.ip = printerInfo.ip;
-    m_printerInfo.port = printerInfo.port;
-    m_printerInfo.vendor = printerInfo.vendor;
-    m_printerInfo.machineName = printerInfo.machineName;
-    m_printerInfo.machineModel = printerInfo.machineModel;
-    m_printerInfo.protocolVersion = printerInfo.protocolVersion;
-    m_printerInfo.firmwareVersion = printerInfo.firmwareVersion;
-    m_printerInfo.deviceId = printerInfo.deviceId;
-    m_printerInfo.deviceType = printerInfo.deviceType;
-    m_printerInfo.serialNumber = printerInfo.serialNumber;
-    m_printerInfo.webUrl = printerInfo.webUrl;
-    m_printerInfo.connectionUrl = printerInfo.connectionUrl;
+IPrinterNetwork::IPrinterNetwork(const PrinterNetworkInfo& printerNetworkInfo) {
+    m_printerNetworkInfo.id = printerNetworkInfo.id;
+    m_printerNetworkInfo.name = printerNetworkInfo.name;
+    m_printerNetworkInfo.ip = printerNetworkInfo.ip;
+    m_printerNetworkInfo.port = printerNetworkInfo.port;
+    m_printerNetworkInfo.vendor = printerNetworkInfo.vendor;
+    m_printerNetworkInfo.machineName = printerNetworkInfo.machineName;
+    m_printerNetworkInfo.machineModel = printerNetworkInfo.machineModel;
+    m_printerNetworkInfo.protocolVersion = printerNetworkInfo.protocolVersion;
+    m_printerNetworkInfo.firmwareVersion = printerNetworkInfo.firmwareVersion;
+    m_printerNetworkInfo.deviceId = printerNetworkInfo.deviceId;
+    m_printerNetworkInfo.deviceType = printerNetworkInfo.deviceType;
+    m_printerNetworkInfo.serialNumber = printerNetworkInfo.serialNumber;
+    m_printerNetworkInfo.webUrl = printerNetworkInfo.webUrl;
+    m_printerNetworkInfo.connectionUrl = printerNetworkInfo.connectionUrl;
 }
 
 
 
-std::unique_ptr<IPrinterNetwork> PrinterNetworkFactory::createNetwork(const PrinterInfo& printerInfo, const PrintHostType hostType) {
+std::unique_ptr<IPrinterNetwork> PrinterNetworkFactory::createNetwork(const PrinterNetworkInfo& printerNetworkInfo, const PrintHostType hostType) {
   switch (hostType) {
-    case htElegooLink: return std::make_unique<ElegooNetwork>(printerInfo);
+    case htElegooLink: return std::make_unique<ElegooNetwork>(printerNetworkInfo);
     default: return nullptr;
   }
   return nullptr;

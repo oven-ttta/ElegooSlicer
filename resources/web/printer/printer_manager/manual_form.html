@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="css/light.css">
 <script src="manual_form.js"></script>
 
-<form id="manual-form" autocomplete="off">
+<form class="manual-form" autocomplete="off">
     <div class="form-group-box">
         <div class="form-group">
             <div class="form-group-header">
@@ -16,17 +16,17 @@
             </div>
             <div class="form-group-row">
                 <div class="form-group-col">
-                    <select name="printer_supplier">
-                        <option value="" disabled selected>Select Supplier</option>
+                    <select id="printer_vendor_select">
+                        <!-- <option value="" disabled selected>Select Supplier</option>
                         <option value="elegoo">ELEGOO</option>
                         <option value="creality">Creality</option>
-                        <option value="anycubic">Anycubic</option>
+                        <option value="anycubic">Anycubic</option> -->
                     </select>
                 </div>
                 <div class="form-group-col">
-                    <select name="printer_model">
-                        <option value="" disabled selected>Select Model</option>
-                        <option value="ELEGOO Link">ELEGOO Link</option>
+                    <select id="printer_model_select">
+                        <!-- <option value="" disabled selected>Select Model</option>
+                        <option value="ELEGOOLink">ELEGOOLink</option> -->
                     </select>
                 </div>
             </div>
@@ -39,8 +39,8 @@
         
         <div class="form-group">
             <label>Host Type</label>
-            <select name="host_type">
-                <option value="ELEGOO Link">ELEGOO Link</option>
+            <select id="host_type_select">
+                <!-- <option value="ELEGOOLink">ELEGOOLink</option> -->
             </select>
         </div>
         

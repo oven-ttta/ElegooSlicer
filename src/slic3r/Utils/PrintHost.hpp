@@ -111,6 +111,8 @@ public:
     virtual bool get_storage(wxArrayString& /*storage_path*/, wxArrayString& /*storage_name*/) const { return false; }
 
     static PrintHost* get_print_host(DynamicPrintConfig *config);
+    static PrintHostType get_print_host_type(const DynamicPrintConfig &config);
+    static bool support_device_list_management(const DynamicPrintConfig &config);
 
     //Support for cloud webui login
     virtual bool is_cloud() const { return false; }

@@ -1186,10 +1186,8 @@ void MainFrame::show_device(bool bBBLPrinter) {
 #endif // _MSW_DARK_MODE
 
     } else {
-        DynamicPrintConfig cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
-        bool support_device_list = cfg.has("support_device_list_management") &&
-            cfg.option<ConfigOptionBool>("support_device_list_management")->value;
-        if (support_device_list) {
+        auto cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+        if (PrintHost::support_device_list_management(cfg)) {
             if (m_tabpanel->FindPage(m_printer_manager_view) != wxNOT_FOUND)
                 return;
         } else {
@@ -1201,7 +1199,7 @@ void MainFrame::show_device(bool bBBLPrinter) {
         remove_page(m_multi_machine);
         remove_page(m_monitor);   
 
-        if (support_device_list) {
+        if (PrintHost::support_device_list_management(cfg)) {
             remove_page(m_printer_view);
             if (m_tabpanel->FindPage(m_printer_manager_view) == wxNOT_FOUND) {
                 m_printer_manager_view = new PrinterManagerView(m_tabpanel);
@@ -1489,7 +1487,7 @@ bool MainFrame::can_send_gcode() const
     if (m_plater && !m_plater->model().objects.empty())
     {
         auto cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
-        if(cfg.has("support_device_list_management") && cfg.option<ConfigOptionBool>("support_device_list_management")->value) {
+        if(PrintHost::support_device_list_management(cfg)) {
             return true;
         }
         if (const auto *print_host_opt = cfg.option<ConfigOptionString>("print_host"); print_host_opt)

@@ -14,7 +14,6 @@
 #include "libslic3r/PrintConfig.hpp"
 #include "libslic3r/Channel.hpp"
 #include "OctoPrint.hpp"
-#include "ElegooLink.hpp"
 #include "Duet.hpp"
 #include "FlashAir.hpp"
 #include "AstroBox.hpp"
@@ -27,7 +26,6 @@
 #include "Obico.hpp"
 #include "Flashforge.hpp"
 #include "SimplyPrint.hpp"
-#include "ElegooLink.hpp"
 #include "PrinterManager.hpp"
 
 namespace fs = boost::filesystem;
@@ -52,10 +50,10 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
 
     if (tech == ptFFF) {
         const auto opt = config->option<ConfigOptionEnum<PrintHostType>>("host_type");
-        const auto host_type = opt != nullptr ? opt->value : htElegooLink;
+        const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
 
         switch (host_type) {
-            case htElegooLink: return new ElegooLink(config);
+            case htElegooLink: return new OctoPrint(config);
             case htOctoPrint: return new OctoPrint(config);
             case htDuet:      return new Duet(config);
             case htFlashAir:  return new FlashAir(config);
@@ -75,7 +73,18 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
         return new SL1Host(config);
     }
 }
-
+PrintHostType PrintHost::get_print_host_type(const DynamicPrintConfig &config)
+{
+    const auto opt = config.option<ConfigOptionEnum<PrintHostType>>("host_type");
+    const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
+    return host_type;
+}
+bool PrintHost::support_device_list_management(const DynamicPrintConfig &config)
+{
+    PrintHostType host_type = PrintHost::get_print_host_type(config);
+    std::vector<PrintHostType> support_device_list_management_host_types = {htElegooLink, htOctoPrint};
+    return std::find(support_device_list_management_host_types.begin(), support_device_list_management_host_types.end(), host_type) != support_device_list_management_host_types.end();
+}
 wxString PrintHost::format_error(const std::string &body, const std::string &error, unsigned status) const
 {
     if (status != 0) {
@@ -325,15 +334,42 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
 
 
     DynamicPrintConfig cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
-    bool support_device_list = cfg.has("support_device_list_management") &&
-        cfg.option<ConfigOptionBool>("support_device_list_management")->value;
+    if (PrintHost::support_device_list_management(cfg)) {
+        PrinterNetworkParams params;
+        params.filePath = the_job.upload_data.source_path.string();
+        params.fileName = the_job.upload_data.upload_path.string();
+        params.bedType = 0;
+        if(the_job.upload_data.extended_info.find("bedType") != the_job.upload_data.extended_info.end()) {
+            int bedType = std::stoi(the_job.upload_data.extended_info["bedType"]);
+            if(bedType == BedType::btPC) {
+                params.bedType = 1;
+            }
+        }
+        if(the_job.upload_data.extended_info.find("timeLapse") != the_job.upload_data.extended_info.end()) {
+            params.timeLapse = the_job.upload_data.extended_info["timeLapse"] == "true";
+        }
+        if(the_job.upload_data.extended_info.find("heatedBedLeveling") != the_job.upload_data.extended_info.end()) {
+            params.heatedBedLeveling = the_job.upload_data.extended_info["heatedBedLeveling"] == "true";
+        }
+        if(the_job.upload_data.extended_info.find("autoRefill") != the_job.upload_data.extended_info.end()) {
+            params.autoRefill = the_job.upload_data.extended_info["autoRefill"] == "true";
+        }
 
-    if (support_device_list) {
-        success = PrinterManager::getInstance()->upload(
-            std::move(the_job.upload_data),
-            [this](Http::Progress progress, bool& cancel) { this->progress_fn(std::move(progress), cancel); },
-            [this](wxString error) { this->error_fn(std::move(error)); },
-            [this](wxString tag, wxString host) { this->info_fn(std::move(tag), std::move(host)); });
+        if(the_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+            params.uploadAndStartPrint = true;
+        }
+        if(the_job.upload_data.extended_info.find("selectedPrinterId") != the_job.upload_data.extended_info.end()) {
+            params.printerId = the_job.upload_data.extended_info["selectedPrinterId"];
+        }
+
+        params.uploadProgressFn = [this](uint64_t uploadedBytes, uint64_t totalBytes, bool& cancel) { 
+            Http::Progress progress(totalBytes, uploadedBytes, totalBytes, uploadedBytes, "");
+            this->progress_fn(std::move(progress), cancel);
+        };
+        params.errorFn = [this](const std::string& errorMsg) { 
+            this->error_fn(wxString::FromUTF8(errorMsg)); 
+        };
+        success = PrinterManager::getInstance()->upload(params);
     } else {
         success = the_job.printhost->upload(
             std::move(the_job.upload_data),

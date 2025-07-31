@@ -361,13 +361,13 @@ body[data-theme="light"] .theme-toggle img {
     color: #666;
 }
 
-.add-printer-content, .printer-setting-physical-content {
-    flex: 1 1 auto;
-    overflow: auto;
-    padding: 0 32px;
+.add-printer-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0 32px;
 }
 
 /* Add Printer Table */
@@ -985,20 +985,26 @@ iframe {
     overflow: hidden;
 }
 
-#manual-form {
+#add-printer-manual-form {
     margin: 0;
     padding: 0;
     overflow: hidden;
-}
-
-#manual-panel {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
 }
 
-#manual-panel iframe {
+#printer-setting-physical-manual-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0 32px;
+}
+
+#add-printer-manual-form iframe, #printer-setting-physical-manual-form iframe {
     flex: 1;
     min-height: 0;
 }

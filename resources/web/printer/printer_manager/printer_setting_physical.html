@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/light.css">
     <!-- <link rel="stylesheet" href="css/dark.css"> -->
-    <script src="../include/jquery-3.6.0.min.js"></script>
+    <script src="../../include/jquery-3.6.0.min.js"></script>
     <script src="printer_setting_physical.js"></script>
 </head>
 <body>
@@ -13,13 +13,12 @@
         <span>Physical Printer</span>
         <button class="printer-setting-physical-close-btn" onclick="closeModal()">×</button>
     </div>
-    <div class="printer-setting-physical-content">
+    <div id="printer-setting-physical-manual-form">
         <iframe src="manual_form.html" style="width: 100%; height: 100%; border: none; overflow: hidden;"></iframe>
-        <div class="printer-setting-physical-btn">
-            <button type="button" class="printer-setting-physical-cancel-btn" onclick="deletePrinter()">Delete</button>
-            <button type="button" class="printer-setting-physical-connect-btn" onclick="connectPrinter()">Connect</button>
-        </div>
-
+    </div>
+    <div class="printer-setting-physical-btn">
+        <button type="button" class="printer-setting-physical-cancel-btn" onclick="deletePrinter()">Delete</button>
+        <button type="button" class="printer-setting-physical-connect-btn" onclick="connectPrinter()">Connect</button>
     </div>
 </div>
 </body>

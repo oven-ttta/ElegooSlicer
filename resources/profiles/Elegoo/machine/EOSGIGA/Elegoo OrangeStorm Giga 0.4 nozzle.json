@@ -5,6 +5,7 @@
     "from": "system",
     "setting_id": "EOSG04",
     "instantiation": "true",
+    "host_type": "elegoolink",
     "printer_model": "Elegoo OrangeStorm Giga",
     "default_print_profile": "0.20mm Standard @EOS Giga 0.4 nozzle",
     "nozzle_diameter": [

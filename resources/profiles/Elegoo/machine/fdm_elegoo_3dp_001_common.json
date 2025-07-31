@@ -93,7 +93,7 @@
     "0",
     "0"
   ],
-  "retract_lift_below":[
+  "retract_lift_below": [
     "249"
   ],
   "extruder_clearance_radius": "57",
@@ -101,7 +101,7 @@
   "extruder_clearance_height_to_lid": "90",
   "nozzle_volume": "107",
   "printer_structure": "corexy",
-  "best_object_pos":"0.5x0.5",
+  "best_object_pos": "0.5x0.5",
   "retraction_minimum_travel": [
     "0.8"
   ],
@@ -109,7 +109,7 @@
     "0%"
   ],
   "wipe_distance": [
-      "1.2"
+    "1.2"
   ],
   "retraction_length": [
     "0.8"
@@ -130,8 +130,8 @@
     "Auto Lift"
   ],
   "thumbnails": [
-  "320x320",
-  "160x160"
+    "320x320",
+    "160x160"
   ],
   "thumbnails_format": "PNG",
   "nozzle_type": "brass",

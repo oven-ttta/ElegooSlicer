@@ -1,11 +1,21 @@
 
 let globalPrinterList = [];
+let cachedPrinterModelList = null; // Cache for printer model list
 
 function OnInit() {
 	TranslatePage();
 	RequestPrintTask();
+    requestPrinterModelList();
+    // setTimeout(function() {
+        
+    // }, 5000);
 }
-
+function requestPrinterModelList() {
+    var tSend={};
+    tSend['command']="request_printer_model_list";
+    tSend['sequence_id']=Math.round(new Date() / 1000);
+    SendWXMessage( JSON.stringify(tSend) );
+}
 function RequestPrintTask()
 {
 	var tSend={};
@@ -37,6 +47,9 @@ function HandleStudio(pVal)
 	} else if(strCmd=="response_delete_printer") {
         RequestPrintTask();
         closeModals();
+    } else if(strCmd=="response_printer_model_list") {
+        let printerModelList=pVal['response'];
+        cachedPrinterModelList = printerModelList;
     }
 }
 
@@ -99,8 +112,8 @@ function renderAllPrinters(printers) {
 
 function showPrinterDetail(id) {
 	var tSend={};
-	tSend['sequence_id']=Math.round(new Date() / 1000);
 	tSend['command']="request_printer_detail";
+    tSend['sequence_id']=Math.round(new Date() / 1000);
 	tSend['id']=id;	
 	SendWXMessage( JSON.stringify(tSend) );	
 }
@@ -121,6 +134,14 @@ document.addEventListener('DOMContentLoaded', function() {
             iframe.contentWindow.postMessage({
                 command: 'init',
             }, '*');
+            
+            // Send cached printer model list if available
+            if (cachedPrinterModelList) {
+                iframe.contentWindow.postMessage({
+                    command: 'response_printer_model_list',
+                    data: cachedPrinterModelList
+                }, '*');
+            }
         };        
         return dialog;
     };
@@ -128,34 +149,39 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('message', function(event) {
         if (event.data.command == 'discover_printers') {
             var tSend={};
-            tSend['sequence_id']=Math.round(new Date() / 1000);
             tSend['command']="request_discover_printers";
+            tSend['sequence_id']=Math.round(new Date() / 1000);
             SendWXMessage( JSON.stringify(tSend) );
         } else if (event.data.command == 'connect_printer') {
             console.log('Connect printer message received');
         } else if (event.data.command == 'delete_printer') {
             var tSend={};
-            tSend['sequence_id']=Math.round(new Date() / 1000);
             tSend['command']="request_delete_printer";
+            tSend['sequence_id']=Math.round(new Date() / 1000);
             tSend['id']=event.data.id;
             SendWXMessage( JSON.stringify(tSend) );
         } else if (event.data.command === 'closeModal') {
             closeModals();
         } else if (event.data.command === 'bind_printer') {
             var tSend={};
-            tSend['sequence_id']=Math.round(new Date() / 1000);
             tSend['command']="request_bind_printer";
+            tSend['sequence_id']=Math.round(new Date() / 1000);
             tSend['printer']=event.data.printer;
             SendWXMessage( JSON.stringify(tSend) );
         } else if (event.data.command === 'update_printer_name') {
             var tSend={};
-            tSend['sequence_id']=Math.round(new Date() / 1000);
             tSend['command']="request_update_printer_name";
+            tSend['sequence_id']=Math.round(new Date() / 1000);
             tSend['id']=event.data.id;
             tSend['name']=event.data.name;
             SendWXMessage( JSON.stringify(tSend) );
         } else if (event.data.command === 'delete_printer') {
         
+        } else if (event.data.command === 'request_printer_model_list') {
+            var tSend={};
+            tSend['command']="request_printer_model_list";
+            tSend['sequence_id']=Math.round(new Date() / 1000);
+            SendWXMessage( JSON.stringify(tSend) );
         }
     });
 });
@@ -192,6 +218,14 @@ function showPrinterSettings(printer) {
             command: 'printer_settings',
             data: printer
         }, '*'); 
+        
+        // Send cached printer model list if available and it's a physical printer
+        if (cachedPrinterModelList && !printer.isPhysicalPrinter) {
+            iframe.contentWindow.postMessage({
+                command: 'response_printer_model_list',
+                data: cachedPrinterModelList
+            }, '*');
+        }
     }
     return dialog;
 }

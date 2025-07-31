@@ -206,8 +206,7 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "long_retractions_when_cut",
         "retraction_distances_when_cut",
         "filament_long_retractions_when_cut",
-        "filament_retraction_distances_when_cut",
-        "support_device_list_management" 
+        "filament_retraction_distances_when_cut"
     };
 
     static std::unordered_set<std::string> steps_ignore;
