@@ -1,7 +1,7 @@
 #include "ElegooLink.hpp"
 #include <nlohmann/json.hpp>
 #include "elegoolink/elegoolink.h"
-
+#include "libslic3r/Utils.hpp"
 namespace Slic3r {
 
 ElegooLink::ElegooLink() {
@@ -9,6 +9,11 @@ ElegooLink::ElegooLink() {
     cfg.level = 2;
     cfg.enableConsole = true;
     cfg.enableFile = false;
+    cfg.enableWebServer =true;
+    cfg.webServerPort = 32538;
+    auto webDir = resources_dir();
+    std::replace(webDir.begin(), webDir.end(), '\\', '/');
+    cfg.staticWebPath = webDir + "/web/elegoo-fdm-web";
 
     if(!elink::ElegooLink::getInstance().initialize(cfg)) {
         std::cerr << "Error initializing ElegooLink" << std::endl;

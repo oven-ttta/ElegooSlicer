@@ -51,10 +51,10 @@ bool PrinterNetworkManager::connectToPrinter(const PrinterNetworkInfo& printerNe
     
     if (network->connect()) {
         m_networkConnections[printerNetworkInfo.id] = std::move(network);
-        wxLogMessage("Connected to printer: %s (%s:%s)", printerNetworkInfo.id, printerNetworkInfo.ip, printerNetworkInfo.port);
+        wxLogMessage("Connected to printer: %s (%s:%d)", printerNetworkInfo.id, printerNetworkInfo.ip, printerNetworkInfo.port);
         return true;
     } else {
-        wxLogError("Failed to connect to printer: %s (%s:%s)", printerNetworkInfo.id, printerNetworkInfo.ip, printerNetworkInfo.port);
+        wxLogError("Failed to connect to printer: %s (%s:%d)", printerNetworkInfo.id, printerNetworkInfo.ip, printerNetworkInfo.port);
         return false;
     }
 }

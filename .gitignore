@@ -37,3 +37,4 @@ resources/profiles/user/default
 CMakePresets.json
 *.env
 *.code-workspace
+resources/web/elegoo-fdm-web/
