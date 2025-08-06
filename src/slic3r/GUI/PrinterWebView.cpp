@@ -317,7 +317,6 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
             
             try {
                 PrinterNetworkParams networkParams;
-                networkParams.printerNetworkInfo.id = params.value("printerId", "");
                 networkParams.fileName = params.value("fileName", "");
                 networkParams.filePath = params.value("filePath", "");
                 networkParams.printerId = params.value("printerId", "");

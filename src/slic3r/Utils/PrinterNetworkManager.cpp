@@ -114,6 +114,27 @@ PrinterNetworkResult<bool> PrinterNetworkManager::connectToPrinter(const Printer
     return result;
 }
 
+PrinterNetworkResult<bool> PrinterNetworkManager::disconnectFromPrinter(const std::string& printerId) {
+    PrinterNetworkResult<bool> result(PrinterNetworkErrorCode::UNKNOWN_ERROR, false);
+    std::lock_guard<std::mutex> lock(mConnectionsMutex);
+    auto it = mNetworkConnections.find(printerId);
+    if (it != mNetworkConnections.end()) {
+        result = it->second->disconnectFromPrinter(printerId);
+        mNetworkConnections.erase(it);
+        if (result.isSuccess()) {
+            wxLogMessage("Disconnected from printer: %s", printerId);
+        } else {
+            wxLogWarning("Disconnected from printer %s but encountered error: %s", 
+                        printerId, result.message.c_str());
+        }
+    } else {
+        wxLogError("No network connection for printer: %s", printerId);
+        result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NOT_FOUND, false);
+    }
+    return result;
+}
+
+
 
 PrinterNetworkResult<bool> PrinterNetworkManager::sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) { 
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerNetworkInfo.printerId);

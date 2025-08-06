@@ -136,7 +136,7 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId)
     
     if(printerInfo.deviceType == 2) 
     {
-        url = url + wxString("?id=") + from_u8(printerInfo.id) + "&ip=" + printerInfo.ip +"&sn=" + from_u8(printerInfo.serialNumber);
+        url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber);
     }
     view->load_url(url);
     mTabBar->AddPage(view, from_u8(printerInfo.printerName));
