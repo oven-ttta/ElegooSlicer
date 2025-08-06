@@ -1248,7 +1248,7 @@ wxWindow* PreferencesDialog::create_general_page()
     sizer_page->Add(item_use_free_camera_settings, 0, wxTOP, FromDIP(3));
     sizer_page->Add(reverse_mouse_zoom, 0, wxTOP, FromDIP(3));
     sizer_page->Add(item_show_splash_screen, 0, wxTOP, FromDIP(3));
-#if 0 //暂时屏蔽 Show Tip of the Day
+#if 0 // Temporarily disable Show Tip of the Day
     sizer_page->Add(item_hints, 0, wxTOP, FromDIP(3));
 #endif
     sizer_page->Add(item_calc_in_long_retract, 0, wxTOP, FromDIP(3));

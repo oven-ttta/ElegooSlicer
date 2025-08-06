@@ -1,4 +1,4 @@
-var printer = null;
+let printer = null;
 
 function closeModal() {
     window.parent.postMessage({command: 'closeModal'}, '*');
@@ -8,13 +8,13 @@ function deleteDevice() {
     if (!confirm('Are you sure you want to delete this device? This action cannot be undone.')) {
         return;
     }
-    window.parent.postMessage({command: 'delete_printer', id: printer.id}, '*');
+    window.parent.postMessage({command: 'delete_printer', id: printer.printerId}, '*');
 }
 
 window.addEventListener('message', function(event) {
     if (event.data && event.data.command === 'printer_settings') {
-        printer = event.data.data;
-        showPrinterInfo(event.data.data);
+        printer = event.data.printer;
+        showPrinterInfo();
     }
 });
 
@@ -30,7 +30,7 @@ function editPrinterName() {
     function saveChanges() {
         var newName = $input.val().trim();
         if (newName && newName !== currentName) {
-            window.parent.postMessage({command: 'update_printer_name', name: newName, id: printer.id}, '*');
+            window.parent.postMessage({command: 'update_printer_name', name: newName, id: printer.printerId}, '*');
             $textElement.text(newName);
         }
         $input.remove();
@@ -61,23 +61,24 @@ function editPrinterName() {
     });
 }
 
-function editPrinterIP() {
-    var $textElement = $('#printer-setting-ip .printer-setting-info-text');
-    var currentIP = $textElement.text();
+function editPrinterHost() {
+    var $textElement = $('#printer-setting-host .printer-setting-info-text');
+    var currentHost = $textElement.text();
     
-    var $input = $('<input type="text" class="printer-setting-info-input" value="' + currentIP + '">');
+    var $input = $('<input type="text" class="printer-setting-info-input" value="' + currentHost + '">');
     $textElement.hide();
     $textElement.after($input);
     $input.focus().select();
     
     function saveChanges() {
-        var newIP = $input.val().trim();
-        if (newIP && newIP !== currentIP) {
+        var newHost = $input.val().trim();
+        if (newHost && newHost !== currentHost) {
             window.parent.postMessage({ 
-                command: "update_printer_ip", 
-                ip: newIP
+                command: "update_printer_host", 
+                host: newHost,
+                id: printer.printerId
             }, '*');
-            $textElement.text(newIP);
+            $textElement.text(newHost);
         }
         $input.remove();
         $textElement.show().css('display', 'flex');
@@ -111,15 +112,15 @@ function checkFirmwareUpdate() {
     window.parent.postMessage({ command: "check_firmware_update" }, '*');
 }
 
-function showPrinterInfo(printer) {
-    if (printer.name) {
-        $('#printer-setting-name .printer-setting-info-text').text(printer.name);
+function showPrinterInfo() {
+    if (printer.printerName) {
+        $('#printer-setting-name .printer-setting-info-text').text(printer.printerName);
     }
-    if (printer.ip) {
-        $('#printer-setting-ip .printer-setting-info-text').text(printer.ip);
+    if (printer.host) {
+        $('#printer-setting-host .printer-setting-info-text').text(printer.host);
     }
-    if (printer.machineModel) {
-        $('.printer-setting-info-item:eq(1) .printer-setting-info-value').text(printer.machineModel);
+    if (printer.printerModel) {
+        $('.printer-setting-info-item:eq(1) .printer-setting-info-value').text(printer.printerModel);
     }
     if (printer.firmwareVersion) {
         $('.printer-setting-firmware-version').text(printer.firmwareVersion);

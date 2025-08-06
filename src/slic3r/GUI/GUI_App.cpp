@@ -926,7 +926,7 @@ void GUI_App::post_init()
     }*/
 
     // BBS: to be checked
-#if 0 //暂时屏蔽 Show Tip of the Day
+#if 0 // Temporarily disable Show Tip of the Day
     // show "Did you know" notification
     if (app_config->get("show_hints") == "true" && !is_gcode_viewer()) {
         plater_->get_notification_manager()->push_hint_notification(false);

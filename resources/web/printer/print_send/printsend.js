@@ -115,15 +115,15 @@ function UpdatePrinterList() {
 	}
 	
 	// Set the default selected printer ID
-	selectedPrinterId = selectedPrinter.id;
+	selectedPrinterId = selectedPrinter.printerId;
 	
 	mPrinterList.forEach(printer => {
 		const option = document.createElement('li');	
 
-		const isSelected = selectedPrinter && printer.id === selectedPrinter.id;
+		const isSelected = selectedPrinter && printer.printerId === selectedPrinter.printerId;
 		option.className = isSelected ? 'dropdown-item selected' : 'dropdown-item';
 		
-		option.setAttribute('data-value', printer.id);
+		option.setAttribute('data-value', printer.printerId);
 		option.setAttribute('data-printer', JSON.stringify(printer));
 		
 		const icon = document.createElement('img');
@@ -136,14 +136,14 @@ function UpdatePrinterList() {
 		
 		const title = document.createElement('div');
 		title.className = 'dropdown-item-title';
-		title.textContent = printer.name;
+		title.textContent = printer.printerName;
 		
 		content.appendChild(title);
 		
-		if (printer.model) {
+		if (printer.printerModel) {
 			const subtitle = document.createElement('div');
 			subtitle.className = 'dropdown-item-subtitle';
-			subtitle.textContent = printer.model;
+			subtitle.textContent = printer.printerModel;
 			content.appendChild(subtitle);
 		}
 		
@@ -154,8 +154,8 @@ function UpdatePrinterList() {
 	});
 
 	document.querySelector('#printer-header .dropdown-icon').src = selectedPrinter.printerImg;	
-	document.querySelector('#printer-header .dropdown-title').textContent = selectedPrinter.name;
-	document.querySelector('#printer-header .dropdown-subtitle').textContent = selectedPrinter.machineModel || '';	
+	document.querySelector('#printer-header .dropdown-title').textContent = selectedPrinter.printerName;
+	document.querySelector('#printer-header .dropdown-subtitle').textContent = selectedPrinter.printerModel || '';	
 	
 	// Add click event listeners
 	optionsContainer.querySelectorAll('.dropdown-item').forEach(option => {
@@ -171,8 +171,8 @@ function UpdatePrinterList() {
 			if (headerIcon) {
 				headerIcon.src = printer.printerImg;
 			}
-			if (headerTitle) headerTitle.textContent = printer.name;
-			if (headerSubtitle) headerSubtitle.textContent = printer.machineModel || '';
+			if (headerTitle) headerTitle.textContent = printer.printerName;
+			if (headerSubtitle) headerSubtitle.textContent = printer.printerModel || '';
 			
 			optionsContainer.querySelectorAll('.dropdown-item').forEach(opt => opt.classList.remove('selected'));
 			this.classList.add('selected');

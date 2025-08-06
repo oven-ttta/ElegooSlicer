@@ -69,6 +69,7 @@
 #include <shellapi.h>
 #endif // _WIN32
 #include <slic3r/GUI/CreatePresetsDialog.hpp>
+#include "../Utils/PrinterManager.hpp"
 
 
 namespace Slic3r {
@@ -948,7 +949,7 @@ void MainFrame::shutdown()
     wxGetApp().shutdown();
     // BBS: why clear ?
     //wxGetApp().plater_ = nullptr;
-
+    PrinterManager::getInstance()->close();
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << "MainFrame::shutdown exit";
 }
 
@@ -2234,7 +2235,7 @@ static wxMenu* generate_help_menu()
     append_menu_item(helpMenu, wxID_ANY, _L("Show Configuration Folder"), _L("Show Configuration Folder"),
         [](wxCommandEvent&) { Slic3r::GUI::desktop_open_datadir_folder(); });
 
-#if 0  //暂时屏蔽 Show Tip of the Day
+#if 0  // Temporarily disable Show Tip of the Day
     append_menu_item(helpMenu, wxID_ANY, _L("Show Tip of the Day"), _L("Show Tip of the Day"), [](wxCommandEvent&) {
         wxGetApp().plater()->get_dailytips()->open();
         wxGetApp().plater()->get_current_canvas3D()->set_as_dirty();

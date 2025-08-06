@@ -1,7 +1,7 @@
 
 elegooslicer_add_cmake_project(elegoolink
     GIT_REPOSITORY      https://github.com/wujie-elegoo/elegoolink.git
-    GIT_TAG             v0.0.3
+    GIT_TAG             v0.0.8
 
 
     DEPENDS 

@@ -471,24 +471,7 @@ nlohmann::json PrintSendDialogEx::getPrinterList()
     std::vector<PrinterNetworkInfo> printerList = PrinterManager::getInstance()->getPrinterList();
     for (auto& printer : printerList) {
         nlohmann::json printerJson = json::object();
-        printerJson["id"] = printer.id;
-        printerJson["name"] = printer.name;
-        printerJson["ip"] = printer.ip;
-        printerJson["port"] = printer.port;
-        printerJson["vendor"] = printer.vendor;
-        printerJson["machineName"] = printer.machineName;
-        printerJson["machineModel"] = printer.machineModel;
-        printerJson["protocolVersion"] = printer.protocolVersion;
-        printerJson["firmwareVersion"] = printer.firmwareVersion;
-        printerJson["deviceId"] = printer.deviceId;
-        printerJson["deviceType"] = printer.deviceType;
-        printerJson["serialNumber"] = printer.serialNumber;
-        printerJson["webUrl"] = printer.webUrl;
-        printerJson["connectionUrl"] = printer.connectionUrl;
-        printerJson["isPhysicalPrinter"] = printer.isPhysicalPrinter;
-        printerJson["addTime"] = printer.addTime;
-        printerJson["modifyTime"] = printer.modifyTime;
-        printerJson["lastActiveTime"] = printer.lastActiveTime;
+        printerJson = PrinterManager::convertPrinterNetworkInfoToJson(printer);
         printers.push_back(printerJson);
     }
     std::string selectedPrinterId = wxGetApp().app_config->get("recent", CONFIG_KEY_SELECTED_PRINTER_ID);

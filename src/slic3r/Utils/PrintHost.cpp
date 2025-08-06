@@ -82,8 +82,63 @@ PrintHostType PrintHost::get_print_host_type(const DynamicPrintConfig &config)
 bool PrintHost::support_device_list_management(const DynamicPrintConfig &config)
 {
     PrintHostType host_type = PrintHost::get_print_host_type(config);
-    std::vector<PrintHostType> support_device_list_management_host_types = {htElegooLink, htOctoPrint};
+    std::vector<PrintHostType> support_device_list_management_host_types = {htElegooLink};
     return std::find(support_device_list_management_host_types.begin(), support_device_list_management_host_types.end(), host_type) != support_device_list_management_host_types.end();
+}
+PrintHostType PrintHost::get_print_host_type(const std::string &host_type_str)
+{
+    if(host_type_str == "ElegooLink") {
+        return htElegooLink;
+    } else if(host_type_str == "OctoPrint") {
+        return htOctoPrint;
+    } else if(host_type_str == "PrusaLink") {
+        return htPrusaLink;
+    } else if(host_type_str == "PrusaConnect") {
+        return htPrusaConnect;
+    } else if(host_type_str == "Duet") {
+        return htDuet;
+    } else if(host_type_str == "FlashAir") {
+        return htFlashAir;
+    } else if(host_type_str == "AstroBox") {
+        return htAstroBox;
+    } else if(host_type_str == "Repetier") {
+        return htRepetier;
+    } else if(host_type_str == "MKS") {
+        return htMKS;
+    } else if(host_type_str == "ESP3D") {
+        return htESP3D;
+    } else if(host_type_str == "CrealityPrint") {
+        return htCrealityPrint;
+    } else if(host_type_str == "Obico") {
+        return htObico;
+    } else if(host_type_str == "Flashforge") {
+        return htFlashforge;
+    } else if(host_type_str == "SimplyPrint") {
+        return htSimplyPrint;
+    }
+    return htOctoPrint;
+}
+std::string PrintHost::get_print_host_type_str(const PrintHostType host_type)
+{
+    std::string host_type_str;
+    switch (host_type) {
+        case htElegooLink: host_type_str = "ElegooLink"; break;
+        case htOctoPrint: host_type_str = "OctoPrint"; break;
+        case htPrusaLink: host_type_str = "PrusaLink"; break;
+        case htPrusaConnect: host_type_str = "PrusaConnect"; break;
+        case htDuet: host_type_str = "Duet"; break;
+        case htFlashAir: host_type_str = "FlashAir"; break;
+        case htAstroBox: host_type_str = "AstroBox"; break;
+        case htRepetier: host_type_str = "Repetier"; break;
+        case htMKS: host_type_str = "MKS"; break;
+        case htESP3D: host_type_str = "ESP3D"; break;
+        case htCrealityPrint: host_type_str = "CrealityPrint"; break;
+        case htObico: host_type_str = "Obico"; break;
+        case htFlashforge: host_type_str = "Flashforge"; break;
+        case htSimplyPrint: host_type_str = "SimplyPrint"; break;
+        default: host_type_str = ""; break;
+    }
+    return host_type_str;
 }
 wxString PrintHost::format_error(const std::string &body, const std::string &error, unsigned status) const
 {

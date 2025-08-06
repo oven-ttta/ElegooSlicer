@@ -2560,7 +2560,7 @@ void ImGuiWrapper::push_confirm_button_style() {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, to_ImVec4(decode_color_to_float_array("#336699"))); // Hovered button background color
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, to_ImVec4(decode_color_to_float_array("#006699")));  // Active button background color
         ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(1.f, 1.f, 1.f, 1.f));                            // Checkmark color
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.f)); // Text color                             // 文字色
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.f)); // Text color
     }
 }
 

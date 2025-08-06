@@ -14,28 +14,22 @@ namespace Slic3r {
 class IPrinterNetwork
 {
 public:
-    IPrinterNetwork(const PrinterNetworkInfo& printerNetworkInfo);
     virtual ~IPrinterNetwork() = default;
 
-    virtual bool                     connect()                                         = 0;
-    virtual void                     disconnect()                                      = 0;
-    virtual bool                     isConnected() const                               = 0;
-    virtual bool                     sendPrintTask(const PrinterNetworkParams& params) = 0;
-    virtual bool                     sendPrintFile(const PrinterNetworkParams& params) = 0;
-    virtual std::vector<PrinterNetworkInfo> discoverDevices()                          = 0;
-
-    IPrinterNetwork()                                  = delete;
-    IPrinterNetwork& operator=(const IPrinterNetwork&) = delete;
-
-protected:
-    PrinterNetworkInfo m_printerNetworkInfo;
+    virtual PrinterNetworkResult<bool> addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected) = 0;
+    virtual PrinterNetworkResult<bool> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
+    virtual PrinterNetworkResult<bool> disconnectFromPrinter(const std::string& printerId) = 0;
+    virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) = 0;
+    virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) = 0;
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices() = 0;   
 };
 
 class PrinterNetworkFactory
 {
 public:
-    static std::unique_ptr<IPrinterNetwork> createNetwork(const PrinterNetworkInfo& printerNetworkInfo, const PrintHostType hostType);
+    static std::shared_ptr<IPrinterNetwork> createNetwork(const PrintHostType hostType);
 };
+
 } // namespace Slic3r
 
 #endif

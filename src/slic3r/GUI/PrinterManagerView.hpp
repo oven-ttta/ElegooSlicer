@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <functional>
 #include "slic3r/GUI/PrinterWebView.hpp"
 #include <wx/webview.h>
 #include <wx/aui/aui.h>
@@ -25,21 +26,25 @@ public:
 
 private:
     void onScriptMessage(wxWebViewEvent &evt);
+    void handleCommand(const std::string& cmd, const nlohmann::json& root);
+    void sendResponse(const std::string& command, const std::string& sequenceId, const nlohmann::json& response);
     void runScript(const wxString &javascript);
     void onClosePrinterTab(wxAuiNotebookEvent& event);
-    void openPrinterTab(const std::string& id);
+    void openPrinterTab(const std::string& printerId);
 
     nlohmann::json getPrinterList();
     nlohmann::json discoverPrinter();
     nlohmann::json getPrinterModelList();
-    std::string bindPrinter(const nlohmann::json& printer);
-    bool updatePrinterName(const std::string& id, const std::string& name);
-    bool deletePrinter(const std::string& id);
+    std::string addPrinter(const nlohmann::json& printer);
+    std::string addPhysicalPrinter(const nlohmann::json& printer);
+    bool updatePrinterName(const std::string& printerId, const std::string& printerName);
+    bool updatePrinterHost(const std::string& printerId, const std::string& host);
+    bool deletePrinter(const std::string& printerId);
     std::string browseCAFile();
 
     wxAuiNotebook* mTabBar;
     wxWebView* mBrowser;
     std::map<std::string, PrinterWebView*> mPrinterViews;
-
+   
 };
 }} // namespace Slic3r::GUI 

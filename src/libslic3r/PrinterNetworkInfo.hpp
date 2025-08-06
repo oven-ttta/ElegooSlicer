@@ -7,81 +7,119 @@
 #include <string>
 #include <functional>
 #include <nlohmann/json.hpp>
+#include <vector>
+#include <map>
+#include "PrinterNetworkResult.hpp"
 
 namespace Slic3r {
 
+enum PrinterConnectStatus {
+    PRINTER_CONNECT_STATUS_DISCONNECTED = 0,
+    PRINTER_CONNECT_STATUS_CONNECTED    = 1,
+};
+enum PrinterStatus {
+    PRINTER_STATUS_OFFLINE = -1,
+    PRINTER_STATUS_IDLE = 0,
+    PRINTER_STATUS_PRINTING = 1,
+    PRINTER_STATUS_PAUSED = 2,
+    PRINTER_STATUS_PAUSING = 3,
+    PRINTER_STATUS_CANCELED = 4,
+    PRINTER_STATUS_SELF_CHECKING = 5, // Self-checking
+    PRINTER_STATUS_AUTO_LEVELING = 6, // Auto-leveling
+    PRINTER_STATUS_PID_CALIBRATING = 7, // PID calibrating
+    PRINTER_STATUS_RESONANCE_TESTING = 8, // Resonance testing
+    PRINTER_STATUS_UPDATING = 9, // Updating
+    PRINTER_STATUS_FILE_COPYING = 10, // File copying
+    PRINTER_STATUS_FILE_TRANSFERRING = 11, // File transferring
+    PRINTER_STATUS_HOMING = 12, // Homing
+    PRINTER_STATUS_PREHEATING = 13, // Preheating
+    PRINTER_STATUS_FILAMENT_OPERATING = 14, // Filament operating
+    PRINTER_STATUS_EXTRUDER_OPERATING = 15, // Extruder operating
+    PRINTER_STATUS_PRINT_COMPLETED = 16, // Print completed
+    PRINTER_STATUS_RFID_RECOGNIZING = 17, // RFID recognizing
 
-enum PrinterNetworkStatus {
-    PRINTER_NETWORK_STATUS_UNKNOWN = -1,
-    PRINTER_NETWORK_STATUS_CONNECTED = 0,
-    PRINTER_NETWORK_STATUS_DISCONNECTED = 1,
-    PRINTER_NETWORK_STATUS_PRINTING = 2,
-    PRINTER_NETWORK_STATUS_PAUSED = 3,
-    PRINTER_NETWORK_STATUS_CANCELLED = 4,
-    PRINTER_NETWORK_STATUS_ERROR = 5,
+
+    PRINTER_STATUS_ERROR = 999, // Device exception status
+    PRINTER_STATUS_UNKNOWN = 1000, // Unknown status
 };
 
+struct PrinterPrintTask
+{
+    std::string taskId;
+    std::string fileName;
+    int         totalTime{0};
+    int         currentTime{0};
+    int         estimatedTime{0};
+    int         progress{0}; 
+};
+#define PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN "token"
+#define PRINTER_NETWORK_EXTRA_INFO_KEY_HOST "deviceUi"
+#define PRINTER_NETWORK_EXTRA_INFO_KEY_PORT "httpsCaFile"
+#define PRINTER_NETWORK_EXTRA_INFO_KEY_VENDOR "apiKey"
+#define PRINTER_NETWORK_EXTRA_INFO_KEY_PIN "pin"
+#define PRINTER_NETWORK_EXTRA_INFO_KEY_ACCESS_CODE "accessCode"
 
 struct PrinterNetworkInfo
 {
-    std::string id;
-    std::string name;
-    std::string ip;
-    int port{0};
+    std::string printerName;
+    std::string printerId;
+    std::string host;
+    int         port{0};
     std::string vendor;
-    std::string machineName;
-    std::string machineModel;
+    std::string printerModel;
     std::string protocolVersion;
     std::string firmwareVersion;
-    std::string deviceId;
-    int deviceType{0};
+    std::string hostType;
+    std::string mainboardId;
+    int         deviceType{0};
     std::string serialNumber;
+    std::string username;
+    std::string password;
+    std::string authMode;
     std::string webUrl;
     std::string connectionUrl;
-    bool isPhysicalPrinter{false};
-    uint64_t addTime{0};
-    uint64_t modifyTime{0};
-    uint64_t lastActiveTime{0};
+    std::string extraInfo; // json string
+    bool        isPhysicalPrinter{false};
+    uint64_t    addTime{0};
+    uint64_t    modifyTime{0};
+    uint64_t    lastActiveTime{0};
 
-    template<class Archive>
-    void serialize(Archive& ar) {
-        ar(id, name, ip, port, vendor, machineName,
-           machineModel, protocolVersion, firmwareVersion, deviceId,
-           deviceType, serialNumber, webUrl, connectionUrl,
-           isPhysicalPrinter, addTime, modifyTime, lastActiveTime);
+
+    //not save to file
+    PrinterPrintTask printTask;
+    PrinterConnectStatus connectStatus{PRINTER_CONNECT_STATUS_DISCONNECTED};
+    PrinterStatus printerStatus{PRINTER_STATUS_IDLE};
+
+
+    template<class Archive> void serialize(Archive& ar)
+    {
+        ar(printerId, printerName, host, port, vendor, printerModel, protocolVersion, firmwareVersion, hostType, mainboardId,
+           deviceType, serialNumber, username, password, authMode, webUrl, connectionUrl, extraInfo, isPhysicalPrinter, addTime, modifyTime,
+           lastActiveTime);
     }
 };
 
-struct PrinterNetworkPrintTask {
-    std::string taskId;
-    std::string fileName;
-    int totalTime{0};
-    int currentTime{0};
-    int estimatedTime{0};
-    int progress{0};
-};
+
 
 struct PrinterNetworkParams
 {
-    PrinterNetworkInfo printerNetworkInfo;
-    std::string filePath;
-    std::string fileName;
-    std::string printerId;
-    int bedType{0};
-    bool timeLapse{false};
-    bool heatedBedLeveling{false};
-    bool autoRefill{false};
-    bool uploadAndStartPrint{false};
+    std::string        printerId;
+    std::string        filePath;
+    std::string        fileName;
+    int                bedType{0};
+    bool               timeLapse{false};
+    bool               heatedBedLeveling{false};
+    bool               autoRefill{false};
+    bool               uploadAndStartPrint{false};
 
     std::function<void(const uint64_t uploadedBytes, const uint64_t totalBytes, bool& cancel)> uploadProgressFn;
-    std::function<void(const std::string& errorMsg)> errorFn;
+    std::function<void(const std::string& errorMsg)>                                           errorFn;
 };
 
-
-using PrinterStatusFn = std::function<void(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkPrintTask& printTask)>;
-using PrintTaskFn = std::function<void(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkPrintTask& printTask)>;
+using PrinterConnectStatusFn = std::function<void(const std::string& printerId, const PrinterConnectStatus& status)>;
+using PrinterStatusFn     = std::function<void(const std::string& printerId, const PrinterStatus& status)>;
+using PrinterPrintTaskFn     = std::function<void(const std::string& printerId, const PrinterPrintTask& printTask)>;
 
 } // namespace Slic3r
-
 
 #endif

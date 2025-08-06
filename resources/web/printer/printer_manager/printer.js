@@ -1,13 +1,12 @@
 
 let globalPrinterList = [];
-let cachedPrinterModelList = null; // Cache for printer model list
+let globalPrinterModelList = null; // Cache for printer model list
 
 function OnInit() {
 	TranslatePage();
 	RequestPrintTask();
-    setTimeout(function() {
-        requestPrinterModelList();
-    }, 3000);
+    requestPrinterModelList();
+
 }
 function requestPrinterModelList() {
     var tSend={};
@@ -37,18 +36,18 @@ function HandleStudio(pVal)
 			if (add_printer_iframe && add_printer_iframe.contentWindow) {
 				add_printer_iframe.contentWindow.postMessage({
 					command: 'discover_printers',
-					data: pVal.response
+					printers: pVal.response
 				}, '*');
 			}
 		}
-	} else if(strCmd=="response_bind_printer" || strCmd=="response_update_printer_name") {
+	} else if(strCmd=="response_add_printer" || strCmd=="response_update_printer_name" || strCmd=="response_add_physical_printer") {
         RequestPrintTask();
 	} else if(strCmd=="response_delete_printer") {
         RequestPrintTask();
         closeModals();
     } else if(strCmd=="response_printer_model_list") {
         let printerModelList=pVal['response'];
-        cachedPrinterModelList = printerModelList;
+        globalPrinterModelList = printerModelList;
     }
 }
 
@@ -81,9 +80,9 @@ function renderPrinterCards(printers) {
             <div class="printer-card-header">
             <div class="printer-img"><img src="${p.printerImg || ''}" alt="Printer" /></div>
             <div class="printer-header-info">
-                <div class="printer-title">${p.name}</div>
-                <div class="printer-ip">${p.ip || ''}</div>
-                <button class="printer-detail-btn" onclick="showPrinterDetail('${p.id}')">Details</button>
+                <div class="printer-title">${p.printerName}</div>
+                <div class="printer-host">${p.host || ''}</div>
+                <button class="printer-detail-btn" onclick="showPrinterDetail('${p.printerId}')">Details</button>
             </div>
             <div class="card-menu" title="more" onclick="showPrinterSettingsByIndex(${index})">&#8942;</div>
             </div>
@@ -95,7 +94,7 @@ function renderPrinterCards(printers) {
             </div>
             <div class="printer-status-row">
             <button class="printer-status-btn">${getPrinterStatus(p.printerStatus)}</button>
-            <span class="remaining-time">${getRemainingTime(p.currentTicks, p.totalTicks)}</span>
+            <span class="remaining-time">${getRemainingTime(p.printTask.currentTime, p.printTask.totalTime)}</span>
             </div>
         </div>
         `;
@@ -109,11 +108,11 @@ function renderAllPrinters(printers) {
     $("#printer-list").html(html);
 }
 
-function showPrinterDetail(id) {
+function showPrinterDetail(printerId) {
 	var tSend={};
 	tSend['command']="request_printer_detail";
     tSend['sequence_id']=Math.round(new Date() / 1000);
-	tSend['id']=id;	
+	tSend['printerId']=printerId;	
 	SendWXMessage( JSON.stringify(tSend) );	
 }
 
@@ -132,15 +131,9 @@ document.addEventListener('DOMContentLoaded', function() {
         iframe.onload = function() {
             iframe.contentWindow.postMessage({
                 command: 'init',
+                printerModelList: globalPrinterModelList,
+                printer: null
             }, '*');
-            
-            // Send cached printer model list if available
-            if (cachedPrinterModelList) {
-                iframe.contentWindow.postMessage({
-                    command: 'response_printer_model_list',
-                    data: cachedPrinterModelList
-                }, '*');
-            }
         };        
         return dialog;
     };
@@ -157,29 +150,35 @@ document.addEventListener('DOMContentLoaded', function() {
             var tSend={};
             tSend['command']="request_delete_printer";
             tSend['sequence_id']=Math.round(new Date() / 1000);
-            tSend['id']=event.data.id;
+            tSend['printerId']=event.data.printerId;
             SendWXMessage( JSON.stringify(tSend) );
         } else if (event.data.command === 'closeModal') {
             closeModals();
-        } else if (event.data.command === 'bind_printer') {
+        } else if (event.data.command === 'add_printer') {
             var tSend={};
-            tSend['command']="request_bind_printer";
+            tSend['command']="request_add_printer";
             tSend['sequence_id']=Math.round(new Date() / 1000);
             tSend['printer']=event.data.printer;
             SendWXMessage( JSON.stringify(tSend) );
-        } else if (event.data.command === 'update_printer_name') {
+        } else if (event.data.command === 'add_physical_printer') {
+            var tSend={};
+            tSend['command']="request_add_physical_printer";
+            tSend['sequence_id']=Math.round(new Date() / 1000);
+            tSend['printer']=event.data.printer;
+            SendWXMessage( JSON.stringify(tSend) );
+        }  else if (event.data.command === 'update_printer_name') {
             var tSend={};
             tSend['command']="request_update_printer_name";
             tSend['sequence_id']=Math.round(new Date() / 1000);
-            tSend['id']=event.data.id;
-            tSend['name']=event.data.name;
+            tSend['printerId']=event.data.printerId;
+            tSend['printerName']=event.data.printerName;
             SendWXMessage( JSON.stringify(tSend) );
-        } else if (event.data.command === 'delete_printer') {
-        
-        } else if (event.data.command === 'request_printer_model_list') {
+        } else if (event.data.command === 'update_printer_host') {
             var tSend={};
-            tSend['command']="request_printer_model_list";
+            tSend['command']="request_update_printer_host";
             tSend['sequence_id']=Math.round(new Date() / 1000);
+            tSend['printerId']=event.data.printerId;
+            tSend['host']=event.data.host;
             SendWXMessage( JSON.stringify(tSend) );
         }
     });
@@ -213,16 +212,18 @@ function showPrinterSettings(printer) {
     document.body.appendChild(dialog);
     var iframe = dialog.querySelector('iframe');
     iframe.onload = function() {
-        iframe.contentWindow.postMessage({
-            command: 'printer_settings',
-            data: printer
-        }, '*'); 
-        
-        // Send cached printer model list if available and it's a physical printer
-        if (cachedPrinterModelList && !printer.isPhysicalPrinter) {
+        if (!printer.isPhysicalPrinter) {
+            if(globalPrinterModelList) {
+                iframe.contentWindow.postMessage({
+                    command: 'render_printer_model_list',
+                    printerModelList: globalPrinterModelList,
+                    printer: printer
+                }, '*');
+            }
+        }else {
             iframe.contentWindow.postMessage({
-                command: 'response_printer_model_list',
-                data: cachedPrinterModelList
+                command: 'printer_settings',
+                printer: printer
             }, '*');
         }
     }

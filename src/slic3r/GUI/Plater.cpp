@@ -3921,7 +3921,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                         load_type  = static_cast<LoadType>(std::stoi(import_project_action));
 
                     // BBS: version check
-                    Semver app_version = *(Semver::parse(ORCA_VERSION));// 暂时使用Orca的版本，不然加载模型会提示一些兼容性问题。
+                    Semver app_version = *(Semver::parse(ORCA_VERSION));// Temporarily use Orca version to avoid compatibility issues when loading models.
                     if (en_3mf_file_type == En3mfType::From_Prusa) {
                         // do not reset the model config
                         load_config = false;

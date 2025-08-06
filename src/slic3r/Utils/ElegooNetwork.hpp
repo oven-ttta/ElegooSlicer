@@ -2,30 +2,21 @@
 #define slic3r_ElegooNetwork_hpp_
 
 #include "PrinterNetwork.hpp"
-#include <string>
-#include <vector>
-#include <atomic>
-#include <thread>
-#include <mutex>
-#include <memory>
 
 namespace Slic3r {
 
-
-class ElegooNetwork : public IPrinterNetwork {
+class ElegooNetwork : public IPrinterNetwork
+{
 public:
-    ElegooNetwork(const PrinterNetworkInfo& printerNetworkInfo);
+    ElegooNetwork();
     virtual ~ElegooNetwork();
-    
-    virtual bool connect() override;
-    virtual void disconnect() override;
-    virtual bool isConnected() const override;
-    virtual std::vector<PrinterNetworkInfo> discoverDevices() override;
-    virtual bool sendPrintTask(const PrinterNetworkParams& params) override;
-    virtual bool sendPrintFile(const PrinterNetworkParams& params) override;
 
-private:
-    PrinterNetworkInfo m_printerNetworkInfo;
+    virtual PrinterNetworkResult<bool> addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected) override;
+    virtual PrinterNetworkResult<bool> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
+    virtual PrinterNetworkResult<bool> disconnectFromPrinter(const std::string& printerId) override;
+    virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) override;
+    virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) override;
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices() override;
 };
 
 } // namespace Slic3r

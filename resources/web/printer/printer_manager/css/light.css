@@ -366,7 +366,7 @@ body[data-theme="light"] .theme-toggle img {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    overflow: hidden;
+    overflow: auto;
     padding: 0 32px;
 }
 
@@ -375,6 +375,18 @@ body[data-theme="light"] .theme-toggle img {
     width: 100%;
     border-collapse: collapse;
     margin-top: 16px;
+    min-height: 200px;
+}
+
+#discover-panel {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+}
+
+#discover-list-table {
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .add-printer-table td {
@@ -396,7 +408,7 @@ body[data-theme="light"] .theme-toggle img {
     text-align: center;
 }
 
-.add-printer-model, .add-printer-ip {
+.add-printer-name, .add-printer-host {
     font-size: 14px;
     font-weight: 600;
     text-align: center;
@@ -668,12 +680,14 @@ body[data-theme="light"] .theme-toggle img {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 20px;
+    padding: 12px 100px 24px 100px;
     background: #fff;
     border-top: none;
+    flex-shrink: 0;
+    min-height: 60px;
 }
 
-.add-printer-cancel-btn, .add-printer-connect-btn, .printer-setting-physical-cancel-btn, .printer-setting-physical-connect-btn {
+.add-printer-cancel-btn, .add-printer-connect-btn, .printer-setting-physical-cancel-btn, .printer-setting-physical-confirm-btn {
     width: 80px;
     height: 36px;
     border-radius: 4px;
@@ -705,22 +719,22 @@ body[data-theme="light"] .theme-toggle img {
     transform: translateY(1px);
 }
 
-.add-printer-connect-btn, .printer-setting-physical-connect-btn {
+.add-printer-connect-btn, .printer-setting-physical-confirm-btn {
     background: #1976d2;
     color: #fff;
     border-color: #1976d2;
 }
 
-.add-printer-connect-btn:hover, .printer-setting-physical-connect-btn:hover {
+.add-printer-connect-btn:hover, .printer-setting-physical-confirm-btn:hover {
     background: #1565c0;
     border-color: #1565c0;
 }
 
-.add-printer-connect-btn:focus, .printer-setting-physical-connect-btn:focus {
+.add-printer-connect-btn:focus, .printer-setting-physical-confirm-btn:focus {
     box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
 }
 
-.add-printer-connect-btn:active, .printer-setting-physical-connect-btn:active {
+.add-printer-connect-btn:active, .printer-setting-physical-confirm-btn:active {
     background: #0d47a1;
     transform: translateY(1px);
 }

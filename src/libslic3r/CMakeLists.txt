@@ -452,6 +452,9 @@ set(lisbslic3r_sources
     Interlocking/InterlockingGenerator.cpp
     Interlocking/VoxelUtils.hpp
     Interlocking/VoxelUtils.cpp
+    PrinterNetworkInfo.hpp
+    PrinterNetworkResult.hpp
+    PrinterNetworkResult.cpp
 )
 
 if (APPLE)
