@@ -29,7 +29,7 @@ PrinterNetworkManager::PrinterNetworkManager() {
             onPrinterPrintTask(event.printerId, event.task);
         }
     );
-    
+   
 }
 
 PrinterNetworkManager::~PrinterNetworkManager() {
@@ -48,8 +48,10 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterNetworkManager::dis
     std::vector<PrinterNetworkInfo> printers;
     std::vector<PrinterNetworkErrorCode> errors;
     for (auto& printerHostType : {htElegooLink, htOctoPrint, htPrusaLink, htPrusaConnect, htDuet, htFlashAir, htAstroBox, htRepetier, htMKS, htESP3D, htCrealityPrint, htObico, htFlashforge, htSimplyPrint}) {
+
         auto network = PrinterNetworkFactory::createNetwork(printerHostType);
         if (network) {
+
             auto result = network->discoverDevices();
             if (result.isSuccess() && result.hasData()) {
                 printers.insert(printers.end(), result.data.value().begin(), result.data.value().end());
@@ -93,9 +95,11 @@ PrinterNetworkResult<bool> PrinterNetworkManager::addPrinter(const PrinterNetwor
     return result;
 }
 
+
 PrinterNetworkResult<bool> PrinterNetworkManager::connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo) {
     auto network = PrinterNetworkFactory::createNetwork(PrintHost::get_print_host_type(printerNetworkInfo.hostType));
     if (!network) {
+
         wxLogError("Failed to create network for printer: %s", printerNetworkInfo.printerId);
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::HOST_TYPE_NOT_SUPPORTED, false, "Failed to create network for host type " + printerNetworkInfo.hostType);
     }  
@@ -106,29 +110,10 @@ PrinterNetworkResult<bool> PrinterNetworkManager::connectToPrinter(const Printer
         wxLogError("Failed to connect to printer: %s - %s", 
                    printerNetworkInfo.printerId, result.message.c_str());
     }
-    return result;
 
-}
-
-PrinterNetworkResult<bool> PrinterNetworkManager::disconnectFromPrinter(const std::string& printerId) {
-    PrinterNetworkResult<bool> result(PrinterNetworkErrorCode::UNKNOWN_ERROR, false);
-    std::lock_guard<std::mutex> lock(mConnectionsMutex);
-    auto it = mNetworkConnections.find(printerId);
-    if (it != mNetworkConnections.end()) {
-        result = it->second->disconnectFromPrinter(printerId);
-        mNetworkConnections.erase(it);
-        if (result.isSuccess()) {
-            wxLogMessage("Disconnected from printer: %s", printerId);
-        } else {
-            wxLogWarning("Disconnected from printer %s but encountered error: %s", 
-                        printerId, result.message.c_str());
-        }
-    } else {
-        wxLogError("No network connection for printer: %s", printerId);
-        result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NOT_FOUND, false);
-    }
     return result;
 }
+
 
 PrinterNetworkResult<bool> PrinterNetworkManager::sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) { 
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerNetworkInfo.printerId);
@@ -146,6 +131,7 @@ PrinterNetworkResult<bool> PrinterNetworkManager::sendPrintTask(const PrinterNet
     return result;
 }
 
+
 PrinterNetworkResult<bool> PrinterNetworkManager::sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) {
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerNetworkInfo.printerId);
     PrinterNetworkResult<bool> result(PrinterNetworkErrorCode::UNKNOWN_ERROR, false);
@@ -156,6 +142,7 @@ PrinterNetworkResult<bool> PrinterNetworkManager::sendPrintFile(const PrinterNet
                       printerNetworkInfo.printerId, result.message.c_str());
         }
     } else {
+
         wxLogError("No network connection for printer: %s", printerNetworkInfo.printerId);
         result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NOT_FOUND, false);
     }
@@ -181,6 +168,7 @@ void PrinterNetworkManager::registerCallBack(const PrinterConnectStatusFn& print
         return;
     }
     
+
     mPrinterConnectStatusCallback = printerConnectStatusCallback;
     mPrinterStatusCallback = printerStatusCallback;
     mPrinterPrintTaskCallback = printerPrintTaskCallback;
@@ -202,11 +190,13 @@ void PrinterNetworkManager::onPrinterStatus(const std::string& printerId, const 
     }
 }
 
+
 void PrinterNetworkManager::onPrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task) {
     std::lock_guard<std::mutex> lock(mCallbackMutex);
     if (mPrinterPrintTaskCallback) {
         mPrinterPrintTaskCallback(printerId, task);
     }
+
 }
 
 } // namespace Slic3r

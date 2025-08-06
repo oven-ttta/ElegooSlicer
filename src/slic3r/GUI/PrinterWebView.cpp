@@ -14,21 +14,26 @@
 
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <wx/webview.h>
-#include"slic3r/GUI/PhysicalPrinterDialog.hpp"
-namespace pt = boost::property_tree;
+#include "slic3r/GUI/PhysicalPrinterDialog.hpp"
+#include "PrinterManager.hpp"
+#include <nlohmann/json.hpp>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 #define CONNECTIONG_URL_SUFFIX "/web/orca/connecting.html"
 #define FAILED_URL_SUFFIX "/web/orca/connection-failed.html"
 namespace Slic3r {
 namespace GUI {
-
 PrinterWebView::PrinterWebView(wxWindow *parent)
         : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
  {
+    m_uploadInProgress = false;
+    m_shouldStop = false;
 
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 
-      // Create the webview
+    // Create the webview
     m_browser = WebView::CreateWebView(this, "");
     if (m_browser == nullptr) {
         wxLogError("Could not init m_browser");
@@ -99,6 +104,12 @@ PrinterWebView::~PrinterWebView()
 {
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " Start";
     SetEvtHandlerEnabled(false);
+    
+    // 优雅退出上传线程
+    m_shouldStop = true;
+    if (m_uploadThread.joinable()) {
+        m_uploadThread.join();
+    }
 
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " End";
 }
@@ -246,16 +257,17 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
 //#if defined(__APPLE__) || defined(__MACH__)
     wxString message = event.GetString();
     wxLogMessage("Received message: %s", message);
-
     try {
-        //{cmd:'open', data: {url: event.target.href}}
-        boost::property_tree::ptree root;
-        std::stringstream           json_stream(message.ToStdString());
-        boost::property_tree::read_json(json_stream, root);
-        std::string cmd = root.get<std::string>("cmd");
+        nlohmann::json root = nlohmann::json::parse(message.ToUTF8().data());
+        std::string cmd = root["cmd"];
+        std::string requestId = root.value("id", "");
+        nlohmann::json params;
+        if(root.contains("data")) {
+            params = root["data"];
+        }
         if (cmd == "open") {
-            std::string url = root.get<std::string>("data.url");
-            bool needDownload = root.get<bool>("data.needDownload");
+            std::string url = params.value("url", "");
+            bool needDownload = params.value("needDownload", false);
             wxLogMessage("Open URL: %s", url);
             if(needDownload)
             {
@@ -269,6 +281,107 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
             loadUrl(m_url);
             //loadConnectingPage();
             return;
+        }
+        else if (cmd == "open_file_dialog") {
+            nlohmann::json response = json::object();
+            response["cmd"] = cmd;
+            response["id"] = requestId;
+            try {
+                auto filter = params.value("filter", "All files (*.*)|*.*");
+                wxFileDialog openFileDialog(this, _L("Open File"), "", "", filter, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+                if (openFileDialog.ShowModal() != wxID_CANCEL) {  
+                    response["data"]["files"] = {openFileDialog.GetPath().ToStdString()};
+                } else {
+                    response["data"]["files"] = nlohmann::json::array();
+                }
+                response["code"]= 0;
+            } catch (const std::exception& e) {
+                response["code"] = -1;
+                response["message"] = "No file selected";
+            }
+            wxString strJS = wxString::Format("window.HandleStudio(%s)", response.dump(-1, ' ', true));
+            wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
+        } else if(cmd == "upload_file"){
+            nlohmann::json response = json::object();
+            response["cmd"] = cmd;
+            response["id"] = requestId;
+            
+            // 检查是否已有上传在进行中
+            if (m_uploadInProgress) {
+                response["code"] = -1;
+                response["message"] = "Upload already in progress";
+                wxString strJS = wxString::Format("window.HandleStudio(%s)", response.dump(-1, ' ', true));
+                wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
+                return;
+            }
+            
+            try {
+                PrinterNetworkParams networkParams;
+                networkParams.printerNetworkInfo.id = params.value("printerId", "");
+                networkParams.fileName = params.value("fileName", "");
+                networkParams.filePath = params.value("filePath", "");
+                networkParams.printerId = params.value("printerId", "");
+                networkParams.uploadProgressFn = [this, requestId](const uint64_t uploadedBytes, const uint64_t totalBytes, bool& cancel) {
+                    // 检查是否需要停止
+                    if (m_shouldStop) {
+                        cancel = true;
+                        return;
+                    }
+                    
+                    nlohmann::json progress = json::object();
+                    progress["cmd"] = "upload_progress";
+                    progress["id"] = requestId;
+                    progress["data"]["uploadedBytes"] = uploadedBytes;
+                    progress["data"]["totalBytes"] = totalBytes;
+                    wxString strJS = wxString::Format("window.HandleStudio(%s)", progress.dump(-1, ' ', true));
+                    wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
+                };
+
+                // 设置上传状态
+                m_uploadInProgress = true;
+                
+                // 如果之前的线程还在运行，等待它结束
+                if (m_uploadThread.joinable()) {
+                    m_uploadThread.join();
+                }
+                
+                // 启动新的上传线程
+                m_uploadThread = std::thread([this, networkParams, requestId, cmd]() mutable {
+                    bool ret = false;
+                    try {
+                        ret = PrinterManager::getInstance()->upload(networkParams);
+                    } catch (...) {
+                        ret = false;
+                    }
+                    
+                    // 重置上传状态
+                    m_uploadInProgress = false;
+                    
+                    // 在主线程中发送响应
+                    wxGetApp().CallAfter([this, ret, requestId, cmd]() {
+                        nlohmann::json response = json::object();
+                        response["cmd"] = cmd;
+                        response["id"] = requestId;
+                        response["code"] = ret ? 0 : -1;
+                        if (!ret) {
+                            response["message"] = "Upload failed";
+                        }
+                        wxString strJS = wxString::Format("window.HandleStudio(%s)", response.dump(-1, ' ', true));
+                        runScript(strJS);
+                    });
+                });
+                
+            } catch (...) {
+                m_uploadInProgress = false;
+                response["code"] = -1;
+                response["message"] = "Upload initialization failed";
+                wxString strJS = wxString::Format("window.HandleStudio(%s)", response.dump(-1, ' ', true));
+                wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
+            }
+        }
+        
+        else {
+            wxLogMessage("Unknown command: %s", cmd);
         }
     } catch (std::exception& e) {
         wxLogMessage("Error: %s", e.what());
@@ -314,6 +427,13 @@ void PrinterWebView::loadInputUrl()
 }
 void PrinterWebView::loadUrl(const wxString& url) {
     m_browser->LoadURL(url);
+}
+
+void PrinterWebView::runScript(const wxString& javascript)
+{
+    if (!m_browser)
+        return;
+    WebView::RunScript(m_browser, javascript);
 }
 } // GUI
 } // Slic3r

@@ -3,8 +3,9 @@
 #include "libslic3r/PrinterNetworkResult.hpp"
 #include "libslic3r/PrinterNetworkInfo.hpp"
 #include "elegoolink/ElegooLink.h"
-
+#include "libslic3r/Utils.hpp"
 namespace Slic3r {
+
 
 namespace {
 
@@ -77,12 +78,20 @@ elink::ConnectDeviceParams setupConnectionParams(const PrinterNetworkInfo& print
 ElegooLink::ElegooLink()
 {
     elink::ElegooLink::Config cfg;
+
     cfg.level         = 2;
     cfg.enableConsole = true;
+
     cfg.enableFile    = false;
+    cfg.enableWebServer =true;
+    cfg.webServerPort = 32538;
+    auto webDir = resources_dir();
+    std::replace(webDir.begin(), webDir.end(), '\\', '/');
+    cfg.staticWebPath = webDir + "/web/elegoo-fdm-web";
 
     if (!elink::ElegooLink::getInstance().initialize(cfg)) {
         std::cerr << "Error initializing ElegooLink" << std::endl;
+ 
     }
 
     // Subscribe to ElegooLink events
@@ -97,6 +106,7 @@ ElegooLink::ElegooLink()
         });
 
     elink::ElegooLink::getInstance().subscribeEvent<elink::DeviceStatusEvent>([&](const std::shared_ptr<elink::DeviceStatusEvent>& event) {
+
 
         PrinterStatus status = PRINTER_STATUS_IDLE;
         switch (event->status.machineStatus.status) {
@@ -121,6 +131,7 @@ ElegooLink::ElegooLink()
         default: status = PRINTER_STATUS_UNKNOWN; break;
         }
 
+
         switch (event->status.machineStatus.subStatus) {
         case elink::MachineSubStatus::P_PAUSING: status = PRINTER_STATUS_PAUSING; break;
         case elink::MachineSubStatus::P_PAUSED: status = PRINTER_STATUS_PAUSED; break;
@@ -144,7 +155,9 @@ ElegooLink::ElegooLink()
 ElegooLink::~ElegooLink()
 {
     
+
 }
+
 
 PrinterNetworkResult<bool> ElegooLink::addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected)
 {
@@ -166,6 +179,7 @@ PrinterNetworkResult<bool> ElegooLink::addPrinter(const PrinterNetworkInfo& prin
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS);
 }
 
+
 PrinterNetworkResult<bool> ElegooLink::connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::SUCCESS;
@@ -177,8 +191,10 @@ PrinterNetworkResult<bool> ElegooLink::connectToPrinter(const PrinterNetworkInfo
         wxLogError("Exception in ElegooLink::connectToPrinter: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
+
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS);
 }
+
 
 PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& printerId)
 {
@@ -191,8 +207,10 @@ PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& 
         wxLogError("Exception in ElegooLink::disconnectFromPrinter: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
+
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS);
 }
+
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverDevices()
 {
@@ -205,6 +223,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverDevice
         discoveryParams.enableAutoRetry   = true;
         auto elinkResult = elink::ElegooLink::getInstance().startDeviceDiscovery(discoveryParams);
         resultCode    = parseElegooResult(elinkResult.code);
+
 
         if (elinkResult.code == elink::ElegooError::SUCCESS && elinkResult.data.has_value()) {
             for (const auto& device : elinkResult.value().devices) {
@@ -229,8 +248,10 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverDevice
         wxLogError("Exception in ElegooLink::discoverDevices: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
+
     return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, discoverDevices);
 }
+
 
 PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params)
 {
@@ -252,6 +273,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkInfo& p
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS);
 }
 
+
 PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::SUCCESS;
@@ -261,6 +283,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkInfo& p
         uploadParams.storageLocation = "local";
         uploadParams.localFilePath = params.filePath;
         uploadParams.fileName = params.fileName;
+
 
         auto elinkResult = elink::ElegooLink::getInstance().uploadFile(uploadParams, [&](const elink::FileUploadProgressData& progress) -> bool {
             if(params.uploadProgressFn) {
