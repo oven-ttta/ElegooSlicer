@@ -5133,7 +5133,7 @@ msgstr ""
 "direct)"
 
 msgid "Playing..."
-msgstr "En cours...""
+msgstr "En cours..."
 
 msgid "Year"
 msgstr "Année"
@@ -6780,7 +6780,7 @@ msgid ""
 "If enabled, ElegooSlicer will remember and switch filament/process "
 "configuration for each printer automatically."
 msgstr "Si activée, ElegooSlicer mémorisera et modifiera automatiquement "
-"la configuration du filament/traitement pour chaque imprimante.
+"la configuration du filament/traitement pour chaque imprimante."
 
 msgid "Multi-device Management(Take effect after restarting ElegooSlicer)."
 msgstr ""
@@ -10186,8 +10186,9 @@ msgid ""
 "\n"
 "The actual top surface flow used is calculated by multiplying this value "
 "with the filament flow ratio, and if set, the object's flow ratio."
+
 msgstr ""
-"Ce facteur affecte la quantité de matériau pour la zone de remplissage solide #
+"Ce facteur affecte la quantité de matériau pour la zone de remplissage solide"
 "supérieure. Vous pouvez le réduire légèrement pour obtenir une finition de "
 "surface lisse. \n"
 "\n"
@@ -17673,7 +17674,7 @@ msgid ""
 "part modifier? That way you can, for example, create easily resizable holes "
 "directly in Orca Slicer."
 msgstr ""
-"Soustraire une partie\n
+"Soustraire une partie\n"
 "Saviez-vous que vous pouvez soustraire un maillage d'un autre à l'aide du "
 "modificateur de partie négative ? Vous pouvez ainsi, par exemple, créer des "
 "trous facilement redimensionnables directement dans ElegooSlicer."
