@@ -10186,7 +10186,6 @@ msgid ""
 "\n"
 "The actual top surface flow used is calculated by multiplying this value "
 "with the filament flow ratio, and if set, the object's flow ratio."
-
 msgstr ""
 "Ce facteur affecte la quantité de matériau pour la zone de remplissage solide"
 "supérieure. Vous pouvez le réduire légèrement pour obtenir une finition de "
