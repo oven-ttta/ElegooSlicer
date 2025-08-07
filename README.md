@@ -1,9 +1,9 @@
 
 <p align="center">
-    <a href="https://discord.gg/t5qJSrNk">
+    <a href="https://discord.com/invite/NkFzP96cMt">
         <img alt="Static Badge" src="https://img.shields.io/badge/Chat%20on%20Discord-%23FFF?style=flat&logo=discord&logoColor=white&color=%235563e9">
     </a>
-    <a href="https://discord.com/channels/969282195552346202/1068406354097737738/1314179666612850728">
+    <a href="https://discord.com/channels/969282195552346202/1370832511042850987">
         <img alt="Static Badge" src="https://img.shields.io/badge/BETA%20channel%20for%20FDM%20slicer-%23FFF?style=flat&logo=discord&logoColor=white&color=%23FF6000">
     </a>
     <a href="https://github.com/ELEGOO-3D/ElegooSlicer/issues">
@@ -13,7 +13,7 @@
 
 # About ElegooSlicer
 
-ElegooSlicer is an open-source slicer compatible with most FDM printers. Currently, ElegooSlicer is undergoing rapid iteration, with more features to be released soon. Please stay tuned for updates. We invite you to [join our Discord](https://discord.gg/t5qJSrNk) and follow the announcement to join the [BETA channel for FDM slicer](https://discord.com/channels/969282195552346202/1068406354097737738/1314179666612850728) to stay updated on the latest news about ELEGOO products and FDM slicer.
+ElegooSlicer is an open-source slicer compatible with most FDM printers. Currently, ElegooSlicer is undergoing rapid iteration, with more features to be released soon. Please stay tuned for updates. We invite you to [join our Discord](https://discord.com/invite/NkFzP96cMt) and follow the announcement to join the [BETA channel for FDM slicer](https://discord.com/channels/969282195552346202/1370832511042850987) to stay updated on the latest news about ELEGOO products and FDM slicer.
 
 
 # How to install
