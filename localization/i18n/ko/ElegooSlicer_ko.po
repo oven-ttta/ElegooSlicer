@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 17:08+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: 2024-05-31 23:33+0900\n"
 "Last-Translator: Hotsolidinfill <138652683+Hotsolidinfill@users.noreply."
 "github.com>, crwusiz <crwusiz@gmail.com>\n"
@@ -6765,6 +6765,9 @@ msgstr "다크 모드"
 msgid "Enable Dark mode"
 msgstr "다크 모드 사용"
 
+msgid "Develop mode"
+msgstr "개발자 모드"
+
 msgid "Skip AMS blacklist check"
 msgstr "AMS 블랙리스트 확인 건너뛰기"
 
@@ -7767,14 +7770,6 @@ msgstr "노즐"
 msgid "Nozzle temperature when printing"
 msgstr "출력 시 노즐 온도"
 
-msgid "Cool Plate (SuperTack)"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Cool Plate SuperTack"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7819,6 +7814,14 @@ msgid ""
 msgstr ""
 "쿨 플레이트가 설치되었을 때의 베드 온도입니다. 값 0은 필라멘트가 텍스처드 쿨 "
 "플레이트에서 인쇄를 지원하지 않음을 의미합니다"
+
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "체적 속도 제한"
@@ -17073,43 +17076,6 @@ msgstr ""
 msgid "User cancelled."
 msgstr "사용자가 취소했습니다."
 
-msgid "Connection to ElegooLink is working correctly."
-msgstr ""
-
-msgid "Could not connect to ElegooLink"
-msgstr ""
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-
-msgid "Error code not found"
-msgstr ""
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr ""
-
-msgid "The file is lost, please check and try again."
-msgstr ""
-
-msgid "The file is corrupted, please check and try again."
-msgstr ""
-
-msgid "Transmission abnormality, please check and try again."
-msgstr ""
-
-msgid "The file does not match the printer, please check and try again."
-msgstr ""
-
-msgid "Start print timeout"
-msgstr ""
-
-msgid "Start print failed"
-msgstr ""
-
 msgid ""
 "Connection timed out. Please check if the printer and computer network are "
 "functioning properly, and confirm that they are on the same network."
@@ -18026,9 +17992,6 @@ msgstr ""
 
 #~ msgid "Network"
 #~ msgstr "네트워크"
-
-#~ msgid "Develop mode"
-#~ msgstr "개발자 모드"
 
 #~ msgid "Skip this Version"
 #~ msgstr "이 버전 건너뛰기"

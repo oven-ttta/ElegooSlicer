@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 17:08+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -6719,6 +6719,9 @@ msgstr "ダークモード"
 msgid "Enable Dark mode"
 msgstr "ダークモードを有効"
 
+msgid "Develop mode"
+msgstr "開発者モード"
+
 msgid "Skip AMS blacklist check"
 msgstr "Skip AMS blacklist check"
 
@@ -7713,14 +7716,6 @@ msgstr "ノズル"
 msgid "Nozzle temperature when printing"
 msgstr "ノズル温度"
 
-msgid "Cool Plate (SuperTack)"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Cool Plate SuperTack"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7763,6 +7758,14 @@ msgstr ""
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Textured Cool Plate"
+msgstr ""
+
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
 msgstr ""
 
 msgid "Volumetric speed limitation"
@@ -16382,43 +16385,6 @@ msgstr ""
 msgid "User cancelled."
 msgstr ""
 
-msgid "Connection to ElegooLink is working correctly."
-msgstr ""
-
-msgid "Could not connect to ElegooLink"
-msgstr ""
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-
-msgid "Error code not found"
-msgstr ""
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr ""
-
-msgid "The file is lost, please check and try again."
-msgstr ""
-
-msgid "The file is corrupted, please check and try again."
-msgstr ""
-
-msgid "Transmission abnormality, please check and try again."
-msgstr ""
-
-msgid "The file does not match the printer, please check and try again."
-msgstr ""
-
-msgid "Start print timeout"
-msgstr ""
-
-msgid "Start print failed"
-msgstr ""
-
 msgid ""
 "Connection timed out. Please check if the printer and computer network are "
 "functioning properly, and confirm that they are on the same network."
@@ -17062,9 +17028,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Slic3r was created by Alessandro Ranellucci with the help of many other "
 #~ "contributors."
-
-#~ msgid "Develop mode"
-#~ msgstr "開発者モード"
 
 #~ msgid "Skip this Version"
 #~ msgstr "Skip this Version"

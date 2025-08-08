@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 17:08+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -6461,6 +6461,9 @@ msgstr ""
 msgid "Enable Dark mode"
 msgstr ""
 
+msgid "Develop mode"
+msgstr ""
+
 msgid "Skip AMS blacklist check"
 msgstr ""
 
@@ -7392,14 +7395,6 @@ msgstr ""
 msgid "Nozzle temperature when printing"
 msgstr ""
 
-msgid "Cool Plate (SuperTack)"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Cool Plate SuperTack"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7433,6 +7428,14 @@ msgstr ""
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Textured Cool Plate"
+msgstr ""
+
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
 msgstr ""
 
 msgid "Volumetric speed limitation"
@@ -15419,43 +15422,6 @@ msgid "Something unexpected happened when trying to log in, please try again."
 msgstr ""
 
 msgid "User cancelled."
-msgstr ""
-
-msgid "Connection to ElegooLink is working correctly."
-msgstr ""
-
-msgid "Could not connect to ElegooLink"
-msgstr ""
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-
-msgid "Error code not found"
-msgstr ""
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr ""
-
-msgid "The file is lost, please check and try again."
-msgstr ""
-
-msgid "The file is corrupted, please check and try again."
-msgstr ""
-
-msgid "Transmission abnormality, please check and try again."
-msgstr ""
-
-msgid "The file does not match the printer, please check and try again."
-msgstr ""
-
-msgid "Start print timeout"
-msgstr ""
-
-msgid "Start print failed"
 msgstr ""
 
 msgid ""

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 17:08+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Heiko Liebscher <hliebschergmail.com>\n"
 "Language-Team: \n"
@@ -7015,6 +7015,9 @@ msgstr "Dunkler Modus"
 msgid "Enable Dark mode"
 msgstr "Dunklen Modus aktivieren"
 
+msgid "Develop mode"
+msgstr "Entwicklermodus"
+
 msgid "Skip AMS blacklist check"
 msgstr "Überspringen der AMS Blacklist-Prüfung"
 
@@ -8073,14 +8076,6 @@ msgstr "Düse"
 msgid "Nozzle temperature when printing"
 msgstr "Düsentemperatur beim Drucken"
 
-msgid "Cool Plate (SuperTack)"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Cool Plate SuperTack"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -8129,6 +8124,14 @@ msgstr ""
 "Dies ist die Betttemperatur, wenn die kalte Druckplatte installiert ist. Ein "
 "Wert von 0 bedeutet, dass das Filament auf der texturierten kalten "
 "Druckplatte nicht unterstützt wird."
+
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Volumetrische Geschwindigkeitsbegrenzung"
@@ -17945,43 +17948,6 @@ msgstr ""
 msgid "User cancelled."
 msgstr "Benutzer abgebrochen."
 
-msgid "Connection to ElegooLink is working correctly."
-msgstr ""
-
-msgid "Could not connect to ElegooLink"
-msgstr ""
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-
-msgid "Error code not found"
-msgstr ""
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr ""
-
-msgid "The file is lost, please check and try again."
-msgstr ""
-
-msgid "The file is corrupted, please check and try again."
-msgstr ""
-
-msgid "Transmission abnormality, please check and try again."
-msgstr ""
-
-msgid "The file does not match the printer, please check and try again."
-msgstr ""
-
-msgid "Start print timeout"
-msgstr ""
-
-msgid "Start print failed"
-msgstr ""
-
 msgid ""
 "Connection timed out. Please check if the printer and computer network are "
 "functioning properly, and confirm that they are on the same network."
@@ -18940,9 +18906,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Wenn aktiviert, merkt sich Elegoo die Filament-/Prozesskonfiguration für "
 #~ "jeden Drucker und wechselt automatisch."
-
-#~ msgid "Develop mode"
-#~ msgstr "Entwicklermodus"
 
 #~ msgid "Skip this Version"
 #~ msgstr "Überspringe diese Version"

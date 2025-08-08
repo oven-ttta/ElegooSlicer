@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer V2.0.0 Official Release\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 17:08+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: 2024-06-19 16:50+0700\n"
 "Last-Translator: \n"
 "Language-Team: Andylg <andylg@yandex.ru>\n"
@@ -7021,6 +7021,9 @@ msgstr "Тёмная тема"
 msgid "Enable Dark mode"
 msgstr "Включить тёмную тему"
 
+msgid "Develop mode"
+msgstr "Режим разработчика"
+
 msgid "Skip AMS blacklist check"
 msgstr "Пропуск проверки материалов в АСПП из файла чёрного списка"
 
@@ -8074,14 +8077,6 @@ msgstr "Сопло"
 msgid "Nozzle temperature when printing"
 msgstr "Температура сопла при печати"
 
-msgid "Cool Plate (SuperTack)"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Cool Plate SuperTack"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -8130,6 +8125,14 @@ msgstr ""
 "Температура стола при установленной не нагреваемой текстурированной пластине "
 "Bambu. 0 означает, что пластиковая нить не поддерживает печать на этой "
 "печатной пластине."
+
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Ограничение объёмной скорости"
@@ -17966,43 +17969,6 @@ msgstr "При попытке войти произошла какая-то ош
 msgid "User cancelled."
 msgstr "Отменено пользователем."
 
-msgid "Connection to ElegooLink is working correctly."
-msgstr ""
-
-msgid "Could not connect to ElegooLink"
-msgstr ""
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-
-msgid "Error code not found"
-msgstr ""
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr ""
-
-msgid "The file is lost, please check and try again."
-msgstr ""
-
-msgid "The file is corrupted, please check and try again."
-msgstr ""
-
-msgid "Transmission abnormality, please check and try again."
-msgstr ""
-
-msgid "The file does not match the printer, please check and try again."
-msgstr ""
-
-msgid "Start print timeout"
-msgstr ""
-
-msgid "Start print failed"
-msgstr ""
-
 msgid ""
 "Connection timed out. Please check if the printer and computer network are "
 "functioning properly, and confirm that they are on the same network."
@@ -18951,9 +18917,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Если включено, программа автоматически запоминает и переключает "
 #~ "конфигурацию материала/процесса печати для каждого принтера."
-
-#~ msgid "Develop mode"
-#~ msgstr "Режим разработчика"
 
 #~ msgid "Skip this Version"
 #~ msgstr "Пропустить эту версию"

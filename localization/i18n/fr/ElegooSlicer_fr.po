@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 17:08+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Guislain Cyril, Thomas Lété\n"
@@ -7017,6 +7017,9 @@ msgstr "Mode Sombre"
 msgid "Enable Dark mode"
 msgstr "Activer le mode Sombre"
 
+msgid "Develop mode"
+msgstr "Mode Développeur"
+
 msgid "Skip AMS blacklist check"
 msgstr "Ignorer la vérification de la liste noire AMS"
 
@@ -8089,14 +8092,6 @@ msgstr "Buse"
 msgid "Nozzle temperature when printing"
 msgstr "Température de la buse lors de l'impression"
 
-msgid "Cool Plate (SuperTack)"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Cool Plate SuperTack"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -8146,6 +8141,14 @@ msgstr ""
 "Température du plateau lorsque la plaque Cool plate est installée. La valeur "
 "0 signifie que le filament ne peut pas être imprimé sur la plaque Cool plate "
 "texturée."
+
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "Limitation de la vitesse volumétrique"
@@ -18093,49 +18096,6 @@ msgstr ""
 msgid "User cancelled."
 msgstr "L’utilisateur a annulé."
 
-msgid "Connection to ElegooLink is working correctly."
-msgstr ""
-
-msgid "Could not connect to ElegooLink"
-msgstr "Ne peut se connecter à ElegooLink"
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-"Le fichier a été transféré, mais des erreurs inconnues se sont produites. "
-"Veuillez vérifier la page de l'appareil pour le fichier et réessayer "
-"d'imprimer."
-
-msgid "Error code not found"
-msgstr "Code erreur non trouvé"
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr ""
-"L'imprimante est occupée, veuillez vérifier la page de l'appareil pour le "
-"fichier et réessayer d'imprimer"
-
-msgid "The file is lost, please check and try again."
-msgstr "Le fichier est perdu, veuillez controller et réessayer"
-
-msgid "The file is corrupted, please check and try again."
-msgstr "Le fichier est corrompu, veuillez controller et réessayer "
-
-msgid "Transmission abnormality, please check and try again."
-msgstr "Transmission anormale, veuillez controller et réessayer "
-
-msgid "The file does not match the printer, please check and try again."
-msgstr ""
-"Le fichier ne correspond pas à l'imprimante, veuillez vérifier et réessayer."
-
-msgid "Start print timeout"
-msgstr "Expiration du délai de démarrage de l'impression"
-
-msgid "Start print failed"
-msgstr "Démarrage de l'impression a échoué"
-
 msgid ""
 "Connection timed out. Please check if the printer and computer network are "
 "functioning properly, and confirm that they are on the same network."
@@ -18564,6 +18524,47 @@ msgstr ""
 "Saviez-vous que lors de l’impression de matériaux susceptibles de se "
 "déformer, tels que l’ABS, une augmentation appropriée de la température du "
 "plateau chauffant peut réduire la probabilité de déformation."
+
+#~ msgid "Could not connect to ElegooLink"
+#~ msgstr "Ne peut se connecter à ElegooLink"
+
+#~ msgid ""
+#~ "The file has been transferred, but some unknown errors occurred. Please "
+#~ "check the device page for the file and try to start printing again."
+#~ msgstr ""
+#~ "Le fichier a été transféré, mais des erreurs inconnues se sont produites. "
+#~ "Veuillez vérifier la page de l'appareil pour le fichier et réessayer "
+#~ "d'imprimer."
+
+#~ msgid "Error code not found"
+#~ msgstr "Code erreur non trouvé"
+
+#~ msgid ""
+#~ "The printer is busy, Please check the device page for the file and try to "
+#~ "start printing again."
+#~ msgstr ""
+#~ "L'imprimante est occupée, veuillez vérifier la page de l'appareil pour le "
+#~ "fichier et réessayer d'imprimer"
+
+#~ msgid "The file is lost, please check and try again."
+#~ msgstr "Le fichier est perdu, veuillez controller et réessayer"
+
+#~ msgid "The file is corrupted, please check and try again."
+#~ msgstr "Le fichier est corrompu, veuillez controller et réessayer "
+
+#~ msgid "Transmission abnormality, please check and try again."
+#~ msgstr "Transmission anormale, veuillez controller et réessayer "
+
+#~ msgid "The file does not match the printer, please check and try again."
+#~ msgstr ""
+#~ "Le fichier ne correspond pas à l'imprimante, veuillez vérifier et "
+#~ "réessayer."
+
+#~ msgid "Start print timeout"
+#~ msgstr "Expiration du délai de démarrage de l'impression"
+
+#~ msgid "Start print failed"
+#~ msgstr "Démarrage de l'impression a échoué"
 
 #~ msgid "ShiftLeft mouse button"
 #~ msgstr "Maj + Bouton gauche de la souris"
@@ -19146,9 +19147,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Si cette option est activée, Elegoo se souviendra de la configuration du "
 #~ "filament/processus pour chaque imprimante et la modifiera automatiquement."
-
-#~ msgid "Develop mode"
-#~ msgstr "Mode Développeur"
 
 #~ msgid "Skip this Version"
 #~ msgstr "Sauter cette version"

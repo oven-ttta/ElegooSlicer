@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 17:08+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: 2024-06-30 23:05+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -6939,6 +6939,9 @@ msgstr "Темний режим"
 msgid "Enable Dark mode"
 msgstr "Увімкнути темний режим"
 
+msgid "Develop mode"
+msgstr "Режим розробки"
+
 msgid "Skip AMS blacklist check"
 msgstr "Пропустити перевірку чорного списку AMS"
 
@@ -7974,14 +7977,6 @@ msgstr "Сопло"
 msgid "Nozzle temperature when printing"
 msgstr "Температура сопла під час друку"
 
-msgid "Cool Plate (SuperTack)"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Cool Plate SuperTack"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -8025,6 +8020,14 @@ msgstr ""
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Textured Cool Plate"
+msgstr ""
+
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
 msgstr ""
 
 msgid "Volumetric speed limitation"
@@ -17337,43 +17340,6 @@ msgstr "Під час спроби входу трапилося щось нес
 msgid "User cancelled."
 msgstr "Користувача скасовано."
 
-msgid "Connection to ElegooLink is working correctly."
-msgstr ""
-
-msgid "Could not connect to ElegooLink"
-msgstr ""
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-
-msgid "Error code not found"
-msgstr ""
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr ""
-
-msgid "The file is lost, please check and try again."
-msgstr ""
-
-msgid "The file is corrupted, please check and try again."
-msgstr ""
-
-msgid "Transmission abnormality, please check and try again."
-msgstr ""
-
-msgid "The file does not match the printer, please check and try again."
-msgstr ""
-
-msgid "Start print timeout"
-msgstr ""
-
-msgid "Start print failed"
-msgstr ""
-
 msgid ""
 "Connection timed out. Please check if the printer and computer network are "
 "functioning properly, and confirm that they are on the same network."
@@ -18207,9 +18173,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Якщо увімкнено, Elegoo запам'ятовує та автоматично перемикає конфігурацію "
 #~ "нитки/процесу для кожного принтера."
-
-#~ msgid "Develop mode"
-#~ msgstr "Режим розробки"
 
 #~ msgid "Skip this Version"
 #~ msgstr "Пропустити цю версію"

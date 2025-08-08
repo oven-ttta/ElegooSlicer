@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 17:08+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -6621,6 +6621,9 @@ msgstr "深色模式"
 msgid "Enable Dark mode"
 msgstr "启用深色模式"
 
+msgid "Develop mode"
+msgstr "开发者模式"
+
 msgid "Skip AMS blacklist check"
 msgstr "跳过AMS黑名单检查"
 
@@ -7595,14 +7598,6 @@ msgstr "喷嘴"
 msgid "Nozzle temperature when printing"
 msgstr "打印时的喷嘴温度"
 
-msgid "Cool Plate (SuperTack)"
-msgstr ""
-
-msgid ""
-"Bed temperature when cool plate is installed. Value 0 means the filament "
-"does not support to print on the Cool Plate SuperTack"
-msgstr ""
-
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
 "does not support to print on the Cool Plate"
@@ -7640,6 +7635,14 @@ msgid ""
 "does not support to print on the Textured Cool Plate"
 msgstr ""
 "安装纹理低温打印热床时的热床温度。0值表示这个耗材丝不支持纹理低温打印热床"
+
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
+msgstr ""
 
 msgid "Volumetric speed limitation"
 msgstr "体积速度限制"
@@ -16255,45 +16258,6 @@ msgstr "在尝试登录时发生了异常，请重试。"
 msgid "User cancelled."
 msgstr "用户已取消。"
 
-msgid "Connection to ElegooLink is working correctly."
-msgstr "已成功连接到ElegooLink"
-
-msgid "Could not connect to ElegooLink"
-msgstr "无法连接到ElegooLink"
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-"文件已经完成传输，但是发生一些未知的错误，请前往设备页面检查文件并尝试重新启"
-"动打印。"
-
-msgid "Error code not found"
-msgstr "未发现错误码。"
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr "打印机正在工作，请前往设备页面检查文件并尝试重新启动打印。"
-
-msgid "The file is lost, please check and try again."
-msgstr "打印文件已丢失，请检查后重新尝试。"
-
-msgid "The file is corrupted, please check and try again."
-msgstr "文件已损坏，请检查后重新尝试。"
-
-msgid "Transmission abnormality, please check and try again."
-msgstr "传输异常，请检查后重试。"
-
-msgid "The file does not match the printer, please check and try again."
-msgstr "文件与机型不匹配，请检查后重新尝试。"
-
-msgid "Start print timeout"
-msgstr "启动打印超时。"
-
-msgid "Start print failed"
-msgstr "启动打印失败。"
-
 msgid ""
 "Connection timed out. Please check if the printer and computer network are "
 "functioning properly, and confirm that they are on the same network."
@@ -16669,6 +16633,45 @@ msgid ""
 msgstr ""
 "避免翘曲\n"
 "您知道吗？打印ABS这类易翘曲材料时，适当提高热床温度可以降低翘曲的概率。"
+
+#~ msgid "Connection to ElegooLink is working correctly."
+#~ msgstr "已成功连接到ElegooLink"
+
+#~ msgid "Could not connect to ElegooLink"
+#~ msgstr "无法连接到ElegooLink"
+
+#~ msgid ""
+#~ "The file has been transferred, but some unknown errors occurred. Please "
+#~ "check the device page for the file and try to start printing again."
+#~ msgstr ""
+#~ "文件已经完成传输，但是发生一些未知的错误，请前往设备页面检查文件并尝试重新"
+#~ "启动打印。"
+
+#~ msgid "Error code not found"
+#~ msgstr "未发现错误码。"
+
+#~ msgid ""
+#~ "The printer is busy, Please check the device page for the file and try to "
+#~ "start printing again."
+#~ msgstr "打印机正在工作，请前往设备页面检查文件并尝试重新启动打印。"
+
+#~ msgid "The file is lost, please check and try again."
+#~ msgstr "打印文件已丢失，请检查后重新尝试。"
+
+#~ msgid "The file is corrupted, please check and try again."
+#~ msgstr "文件已损坏，请检查后重新尝试。"
+
+#~ msgid "Transmission abnormality, please check and try again."
+#~ msgstr "传输异常，请检查后重试。"
+
+#~ msgid "The file does not match the printer, please check and try again."
+#~ msgstr "文件与机型不匹配，请检查后重新尝试。"
+
+#~ msgid "Start print timeout"
+#~ msgstr "启动打印超时。"
+
+#~ msgid "Start print failed"
+#~ msgstr "启动打印失败。"
 
 #~ msgid "ShiftLeft mouse button"
 #~ msgstr "Shift + 鼠标左键"
@@ -17072,9 +17075,6 @@ msgstr ""
 #~ "If enabled, Elegoo will remember and switch filament/process "
 #~ "configuration for each printer automatically."
 #~ msgstr "如果启用，ElegooSlicer将自动记住并切换每台打印机的灯丝/工艺配置。"
-
-#~ msgid "Develop mode"
-#~ msgstr "开发者模式"
 
 #~ msgid "Skip this Version"
 #~ msgstr "跳过本版本"
