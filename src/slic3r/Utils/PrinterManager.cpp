@@ -513,7 +513,7 @@ void PrinterManager::updatePrinterStatus(const std::string& printerId, const Pri
             it->second.printTask.currentTime = 0;
             it->second.printTask.estimatedTime = 0;
             it->second.printTask.progress = 0;
-        }
+        } 
     }
 }
 
@@ -522,7 +522,16 @@ void PrinterManager::updatePrinterPrintTask(const std::string& printerId, const 
     std::lock_guard<std::mutex> lock(mPrinterListMutex);
     auto                        it = mPrinterList.find(printerId);
     if (it != mPrinterList.end()) {
-        it->second.printTask = task;
+        if(task.taskId.empty() || it->second.printerStatus == PrinterStatus::PRINTER_STATUS_IDLE) {
+            it->second.printTask.taskId = "";
+            it->second.printTask.fileName = "";
+            it->second.printTask.totalTime = 0;
+            it->second.printTask.currentTime = 0;
+            it->second.printTask.estimatedTime = 0;
+            it->second.printTask.progress = 0;
+        } else {
+            it->second.printTask = task;
+        }
     }
 }
 void PrinterManager::updatePrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo)

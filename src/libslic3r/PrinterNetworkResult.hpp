@@ -24,14 +24,14 @@ enum class PrinterNetworkErrorCode
     TIMEOUT = 5,                    // Operation timeout (including connection, file transfer, etc.)
     CANCELLED = 6,                  // Operation cancelled
     PERMISSION_DENIED = 7,          // Insufficient permissions
-    NOT_FOUND = 8,                  // Resource not found (device, file, etc.)
+    NOT_FOUND = 8,                  // Resource not found (printer, file, etc.)
     ALREADY_EXISTS = 9,             // Resource already exists
     INSUFFICIENT_SPACE = 10,        // Insufficient storage space
     BAD_REQUEST = 11,               // Bad request
     CONNECTION_ERROR = 12,          // Connection error (including connection failure, loss)
     NETWORK_ERROR = 13,             // Network error
     SERVICE_UNAVAILABLE = 14,       // Service unavailable (server busy, maintenance, etc.)
-    NOT_IMPLEMENTED = 15,           // Not implemented (not supported by device or API)
+    NOT_IMPLEMENTED = 15,           // Not implemented (not supported by printer or API)
 
     // Version compatibility errors (100-199)
     VERSION_NOT_SUPPORTED = 100,    // Version not supported
@@ -48,14 +48,14 @@ enum class PrinterNetworkErrorCode
     FILE_TRANSFER_FAILED = 300,     // File transfer failed (including upload, download)
     FILE_NOT_FOUND = 301,           // File not found
 
-    // Device business errors (1000-1999)
-    DEVICE_BUSY = 1000,             // Device busy
-    DEVICE_OFFLINE = 1001,          // Device offline
-    DEVICE_INITIALIZATION_ERROR = 1002, // Device initialization error
-    DEVICE_COMMAND_FAILED = 1003,   // Device command execution failed
-    DEVICE_ALREADY_CONNECTED = 1004, // Device already connected or connecting
-    DEVICE_INTERNAL_ERROR = 1005,   // Device internal error
-    DEVICE_TASK_NOT_FOUND = 1006,   // Device task not found
+    // Printer business errors (1000-1999)
+    PRINTER_BUSY = 1000,             // Printer busy
+    PRINTER_OFFLINE = 1001,          // Printer offline
+    PRINTER_INITIALIZATION_ERROR = 1002, // Printer initialization error
+    PRINTER_COMMAND_FAILED = 1003,   // Printer command execution failed
+    PRINTER_ALREADY_CONNECTED = 1004, // Printer already connected or connecting
+    PRINTER_INTERNAL_ERROR = 1005,   // Printer internal error
+    PRINTER_TASK_NOT_FOUND = 1006,   // Printer task not found
 
     HOST_TYPE_NOT_SUPPORTED = 9998,          // Host type not supported
     PRINTER_NETWORK_EXCEPTION = 9999,          // External error

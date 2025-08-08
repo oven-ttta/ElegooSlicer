@@ -60,20 +60,20 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::FILE_NOT_FOUND:
             return _u8L("file not found");
             
-        case PrinterNetworkErrorCode::DEVICE_BUSY:
-            return _u8L("device is currently busy");
-        case PrinterNetworkErrorCode::DEVICE_OFFLINE:
-            return _u8L("device is offline");
-        case PrinterNetworkErrorCode::DEVICE_INITIALIZATION_ERROR:
-            return _u8L("device initialization error");
-        case PrinterNetworkErrorCode::DEVICE_COMMAND_FAILED:
-            return _u8L("device command execution failed");
-        case PrinterNetworkErrorCode::DEVICE_ALREADY_CONNECTED:
-            return _u8L("device is already connected");
-        case PrinterNetworkErrorCode::DEVICE_INTERNAL_ERROR:
-            return _u8L("device internal error");
-        case PrinterNetworkErrorCode::DEVICE_TASK_NOT_FOUND:
-            return _u8L("device task not found");
+        case PrinterNetworkErrorCode::PRINTER_BUSY:
+            return _u8L("printer is currently busy");
+        case PrinterNetworkErrorCode::PRINTER_OFFLINE:
+            return _u8L("printer is offline");
+        case PrinterNetworkErrorCode::PRINTER_INITIALIZATION_ERROR:
+            return _u8L("printer initialization error");
+        case PrinterNetworkErrorCode::PRINTER_COMMAND_FAILED:
+            return _u8L("printer command execution failed");
+        case PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED:
+            return _u8L("printer is already connected");
+        case PrinterNetworkErrorCode::PRINTER_INTERNAL_ERROR:
+            return _u8L("printer internal error");
+        case PrinterNetworkErrorCode::PRINTER_TASK_NOT_FOUND:
+            return _u8L("printer task not found");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION:
             return _u8L("printer network exception");
         default:

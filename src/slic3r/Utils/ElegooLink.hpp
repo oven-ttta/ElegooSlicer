@@ -23,6 +23,9 @@ public:
     PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
     static int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo);
 
+
+    private:
+       bool isBusy(const std::string& printerId, PrinterStatus &status);
 };
 
 } // namespace Slic3r
