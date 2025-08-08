@@ -16,12 +16,13 @@ class IPrinterNetwork
 public:
     virtual ~IPrinterNetwork() = default;
 
-    virtual PrinterNetworkResult<bool> addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected) = 0;
-    virtual PrinterNetworkResult<bool> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
+    virtual PrinterNetworkResult<PrinterNetworkInfo> addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected) = 0;
+    virtual PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
     virtual PrinterNetworkResult<bool> disconnectFromPrinter(const std::string& printerId) = 0;
     virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) = 0;
     virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) = 0;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices() = 0;   
+    virtual int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo) = 0;
 };
 
 class PrinterNetworkFactory

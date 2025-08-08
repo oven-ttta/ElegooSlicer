@@ -472,11 +472,14 @@ nlohmann::json PrintSendDialogEx::getPrinterList()
     for (auto& printer : printerList) {
         nlohmann::json printerJson = json::object();
         printerJson = PrinterManager::convertPrinterNetworkInfoToJson(printer);
+        boost::filesystem::path resources_path(Slic3r::resources_dir());
+        std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
+        printerJson["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
         printers.push_back(printerJson);
     }
     std::string selectedPrinterId = wxGetApp().app_config->get("recent", CONFIG_KEY_SELECTED_PRINTER_ID);
     for (auto& printer : printers) {
-        if (selectedPrinterId.empty() || printer["id"].get<std::string>() != selectedPrinterId) {
+        if (selectedPrinterId.empty() || printer["printerId"].get<std::string>() != selectedPrinterId) {
             printer["selected"] = false;
         } else {
             printer["selected"] = true;

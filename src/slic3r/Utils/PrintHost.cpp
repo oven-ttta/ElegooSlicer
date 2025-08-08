@@ -387,7 +387,6 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
     emit_progress(0);   // Indicate the upload is starting
     bool success = false;
 
-
     DynamicPrintConfig cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
     if (PrintHost::support_device_list_management(cfg)) {
         PrinterNetworkParams params;

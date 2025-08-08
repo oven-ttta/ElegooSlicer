@@ -10,7 +10,6 @@
 #include <wx/textdlg.h>
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <wx/webview.h>
-#include <boost/beast/core/detail/base64.hpp>
 #include "slic3r/Utils/PrinterManager.hpp"
 #include "slic3r/Utils/PrintHost.hpp"
 #include "libslic3r/PrintConfig.hpp"
@@ -24,26 +23,6 @@
 
 namespace Slic3r {
 namespace GUI {
-
-std::string imageFileToBase64DataURI(const std::string& image_path) {
-    std::ifstream ifs(image_path, std::ios::binary);
-    if (!ifs) return "";
-    std::ostringstream oss;
-    oss << ifs.rdbuf();
-    std::string img_data = oss.str();
-    if (img_data.empty()) return "";
-    std::string encoded;
-    encoded.resize(boost::beast::detail::base64::encoded_size(img_data.size()));
-    encoded.resize(boost::beast::detail::base64::encode(
-        &encoded[0], img_data.data(), img_data.size()));
-    std::string ext = "png";
-    size_t dot = image_path.find_last_of('.');
-    if (dot != std::string::npos) {
-        ext = image_path.substr(dot + 1);
-        boost::algorithm::to_lower(ext);
-    }
-    return "data:image/" + ext + ";base64," + encoded;
-}
 
 class TabArt : public wxAuiDefaultTabArt
 {
@@ -193,7 +172,7 @@ void PrinterManagerView::handleCommand(const std::string& cmd, const nlohmann::j
     } else if (cmd == "request_printer_model_list") {
         sendResponse("response_printer_model_list", "10002", getPrinterModelList());
     } else if (cmd == "request_printer_detail") {
-        openPrinterTab(root["id"]);
+        openPrinterTab(root["printerId"]);
     } else if (cmd == "request_discover_printers") {
         sendResponse("response_discover_printers", "10003", discoverPrinter());
     } else if (cmd == "request_add_printer") {
@@ -294,7 +273,7 @@ nlohmann::json PrinterManagerView::discoverPrinter()
         printer_obj = PrinterManager::convertPrinterNetworkInfoToJson(printer);
         boost::filesystem::path resources_path(Slic3r::resources_dir());
         std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
-        printer_obj["printerImg"] = imageFileToBase64DataURI(img_path);
+        printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
         response.push_back(printer_obj);
     }
     return response;
@@ -308,7 +287,7 @@ nlohmann::json PrinterManagerView::getPrinterList()
         printer_obj = PrinterManager::convertPrinterNetworkInfoToJson(printer);
         boost::filesystem::path resources_path(Slic3r::resources_dir());
         std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
-        printer_obj["printerImg"] = imageFileToBase64DataURI(img_path);
+        printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
         response.push_back(printer_obj);
     }
     return response;

@@ -36,7 +36,7 @@ public:
     virtual void                               init() override;
     virtual std::map<std::string, std::string> extendedInfo() const
     {
-        return {{"bedType", mBedType == BedType::btPC ? "btPC" : "btPTE"},
+        return {{"bedType", std::to_string(mBedType)},
                 {"timeLapse", mTimeLapse ? "true" : "false"},
                 {"heatedBedLeveling", mHeatedBedLeveling ? "true" : "false"},
                 {"autoRefill", mAutoRefill ? "true" : "false"},

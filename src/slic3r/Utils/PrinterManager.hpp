@@ -28,6 +28,7 @@ public:
     static PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json);
     static nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printerNetworkInfo);
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
+    static std::string imageFileToBase64DataURI(const std::string& image_path);
 
     void close();
 

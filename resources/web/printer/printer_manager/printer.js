@@ -40,7 +40,7 @@ function HandleStudio(pVal)
 				}, '*');
 			}
 		}
-	} else if(strCmd=="response_add_printer" || strCmd=="response_update_printer_name" || strCmd=="response_add_physical_printer") {
+	} else if(strCmd=="response_add_printer" || strCmd=="response_update_printer_name" || strCmd=="response_add_physical_printer" || strCmd=="response_update_printer_host") {
         RequestPrintTask();
 	} else if(strCmd=="response_delete_printer") {
         RequestPrintTask();
@@ -194,7 +194,7 @@ function showPrinterSettingsByIndex(index) {
 function showPrinterSettings(printer) {
     document.getElementById('modal-overlay').style.display = 'block';
     var dialog = document.createElement('div');
-    if (!printer.isPhysicalPrinter) {
+    if (printer.isPhysicalPrinter) {
         dialog.innerHTML = `
             <div class="printer-setting-physical-modal">
                 <iframe src="printer_setting_physical.html" class="printer-setting-physical-iframe"></iframe>
@@ -212,7 +212,7 @@ function showPrinterSettings(printer) {
     document.body.appendChild(dialog);
     var iframe = dialog.querySelector('iframe');
     iframe.onload = function() {
-        if (!printer.isPhysicalPrinter) {
+        if (printer.isPhysicalPrinter) {
             if(globalPrinterModelList) {
                 iframe.contentWindow.postMessage({
                     command: 'render_printer_model_list',

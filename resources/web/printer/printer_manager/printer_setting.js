@@ -8,7 +8,7 @@ function deleteDevice() {
     if (!confirm('Are you sure you want to delete this device? This action cannot be undone.')) {
         return;
     }
-    window.parent.postMessage({command: 'delete_printer', id: printer.printerId}, '*');
+    window.parent.postMessage({command: 'delete_printer', printerId: printer.printerId}, '*');
 }
 
 window.addEventListener('message', function(event) {
@@ -30,7 +30,7 @@ function editPrinterName() {
     function saveChanges() {
         var newName = $input.val().trim();
         if (newName && newName !== currentName) {
-            window.parent.postMessage({command: 'update_printer_name', name: newName, id: printer.printerId}, '*');
+            window.parent.postMessage({command: 'update_printer_name', printerName: newName, printerId: printer.printerId}, '*');
             $textElement.text(newName);
         }
         $input.remove();
@@ -76,7 +76,7 @@ function editPrinterHost() {
             window.parent.postMessage({ 
                 command: "update_printer_host", 
                 host: newHost,
-                id: printer.printerId
+                printerId: printer.printerId
             }, '*');
             $textElement.text(newHost);
         }
@@ -130,7 +130,9 @@ function showPrinterInfo() {
     }
     if (printer.firmwareUpdate && printer.firmwareUpdate == 1) {
         $('.printer-setting-update-tag').text('Update Available').addClass('available');
+        $('.printer-setting-refresh-btn').show();
     } else {
         $('.printer-setting-update-tag').text('Latest Version').removeClass('available');
+        $('.printer-setting-refresh-btn').hide();
     }
 }

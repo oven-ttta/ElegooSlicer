@@ -6,6 +6,9 @@ window.addEventListener('message', function(event) {
     } else if (event.data.command === 'add_physical_printer') {
         const printer = getFormData();
         window.parent.postMessage({command: 'add_physical_printer', printer: printer}, '*');
+    } else if (event.data.command === 'update_physical_printer') {
+        const printer = getFormData();
+        window.parent.postMessage({command: 'update_physical_printer', printer: printer}, '*');
     }
 });
 
@@ -77,7 +80,7 @@ function renderPrinterModelList(printerModelList, printer) {
             const printerNameInput = document.querySelector('input[name="printer_name"]');
             if (printerNameInput) {
                 printerNameInput.value = printerName;
-            }
+            }                   
         }
     });
     
@@ -104,42 +107,12 @@ function toggleAdvanced() {
     }
 }
 
-function testPrinterConnection() {
 
-}
 function renderPrinter(printer) {
     const form = document.querySelector('.manual-form');
     if (!form || !printer) return;
 
-    // Fill printer name
-    const printerNameInput = form.querySelector('input[name="printer_name"]');
-    if (printerNameInput && printer.printerName) {
-        printerNameInput.value = printer.printerName;
-    }
-    
-    // Fill printer host
-    const printerHostInput = form.querySelector('input[name="printer_host"]');
-    if (printerHostInput) {
-        if (printer.host) {
-            printerHostInput.value = printer.host;
-        }
-    }
-    
-    const deviceUiInput = form.querySelector('input[name="device_ui"]');
-    if (deviceUiInput && printer.deviceUi) {
-        deviceUiInput.value = printer.deviceUi;
-    }
-    
-    const apiKeyInput = form.querySelector('input[name="api_key"]');
-    if (apiKeyInput && printer.apiKey) {
-        apiKeyInput.value = printer.apiKey;
-    }
-    
-    const caFileInput = form.querySelector('input[name="ca_file"]');
-    if (caFileInput && printer.caFile) {
-        caFileInput.value = printer.caFile;
-    }
-    
+   
     // Handle vendor and model selection
     const vendorSelect = document.getElementById('printer_vendor_select');
     const modelSelect = document.getElementById('printer_model_select');
@@ -180,6 +153,37 @@ function renderPrinter(printer) {
             if (modelLabel) modelLabel.classList.add('disabled');
         }
     }
+
+
+     // Fill printer name
+     const printerNameInput = form.querySelector('input[name="printer_name"]');
+     if (printerNameInput && printer.printerName) {
+         printerNameInput.value = printer.printerName;
+     }
+     
+     // Fill printer host
+     const printerHostInput = form.querySelector('input[name="printer_host"]');
+     if (printerHostInput) {
+         if (printer.host) {
+             printerHostInput.value = printer.host;
+         }
+     }
+     
+     const deviceUiInput = form.querySelector('input[name="device_ui"]');
+     if (deviceUiInput && printer.deviceUi) {
+         deviceUiInput.value = printer.deviceUi;
+     }
+     
+     const apiKeyInput = form.querySelector('input[name="api_key"]');
+     if (apiKeyInput && printer.apiKey) {
+         apiKeyInput.value = printer.apiKey;
+     }
+     
+     const caFileInput = form.querySelector('input[name="ca_file"]');
+     if (caFileInput && printer.caFile) {
+         caFileInput.value = printer.caFile;
+     }
+     
 }
 function getFormData() {
     const form = document.querySelector('.manual-form');
