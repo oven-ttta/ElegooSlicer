@@ -43,7 +43,16 @@ struct PrinterPrintTaskEvent {
         : printerId(id), task(t), timestamp(std::chrono::system_clock::now()) {}
 };
 
-using PrinterEvent = std::variant<PrinterConnectStatusEvent, PrinterStatusEvent, PrinterPrintTaskEvent>;
+struct PrinterAttributesEvent {
+    std::string printerId;    
+    PrinterNetworkInfo printerInfo;
+    std::chrono::system_clock::time_point timestamp;
+
+    PrinterAttributesEvent(const std::string& id, const PrinterNetworkInfo& info)
+        : printerId(id), printerInfo(info), timestamp(std::chrono::system_clock::now()) {}
+};
+
+using PrinterEvent = std::variant<PrinterConnectStatusEvent, PrinterStatusEvent, PrinterPrintTaskEvent, PrinterAttributesEvent>;
 
 template<typename EventType>
 class PrinterSignal {
@@ -88,6 +97,7 @@ public:
     PrinterSignal<PrinterConnectStatusEvent> connectStatusChanged;
     PrinterSignal<PrinterStatusEvent> statusChanged;
     PrinterSignal<PrinterPrintTaskEvent> printTaskChanged;
+    PrinterSignal<PrinterAttributesEvent> attributesChanged;
     
 private:
     PrinterNetworkEvent() = default;

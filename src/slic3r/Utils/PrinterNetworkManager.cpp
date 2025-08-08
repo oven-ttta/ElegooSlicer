@@ -20,6 +20,10 @@ PrinterNetworkManager::PrinterNetworkManager()
     // printer print task changed event
     PrinterNetworkEvent::getInstance()->printTaskChanged.connect(
         [this](const PrinterPrintTaskEvent& event) { onPrinterPrintTask(event.printerId, event.task); });
+
+    // printer attributes changed event
+    PrinterNetworkEvent::getInstance()->attributesChanged.connect(
+        [this](const PrinterAttributesEvent& event) { onPrinterAttributes(event.printerId, event.printerInfo); });
 }
 
 PrinterNetworkManager::~PrinterNetworkManager() { close(); }
@@ -197,10 +201,11 @@ int PrinterNetworkManager::getDeviceType(const PrinterNetworkInfo& printerNetwor
 
 void PrinterNetworkManager::registerCallBack(const PrinterConnectStatusFn& printerConnectStatusCallback,
                                              const PrinterStatusFn&        printerStatusCallback,
-                                             const PrinterPrintTaskFn&     printerPrintTaskCallback)
+                                             const PrinterPrintTaskFn&     printerPrintTaskCallback,
+                                             const PrinterAttributesFn&     printerAttributesCallback)
 {
     std::lock_guard<std::mutex> lock(mCallbackMutex);
-    if (!printerConnectStatusCallback || !printerStatusCallback || !printerPrintTaskCallback) {
+    if (!printerConnectStatusCallback || !printerStatusCallback || !printerPrintTaskCallback || !printerAttributesCallback) {
         wxLogError("Invalid callback functions provided to PrinterNetworkManager::registerCallBack");
         return;
     }
@@ -208,6 +213,7 @@ void PrinterNetworkManager::registerCallBack(const PrinterConnectStatusFn& print
     mPrinterConnectStatusCallback = printerConnectStatusCallback;
     mPrinterStatusCallback        = printerStatusCallback;
     mPrinterPrintTaskCallback     = printerPrintTaskCallback;
+    mPrinterAttributesCallback   = printerAttributesCallback;
 
     wxLogMessage("PrinterNetworkManager callbacks registered successfully");
 }
@@ -236,5 +242,12 @@ void PrinterNetworkManager::onPrinterPrintTask(const std::string& printerId, con
     }
 }
 
+void PrinterNetworkManager::onPrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo)
+{
+    std::lock_guard<std::mutex> lock(mCallbackMutex);
+    if (mPrinterAttributesCallback) {
+        mPrinterAttributesCallback(printerId, printerInfo);
+    }
+}
 
 } // namespace Slic3r

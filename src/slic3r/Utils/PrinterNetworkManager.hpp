@@ -21,7 +21,7 @@ public:
     PrinterNetworkResult<bool> disconnectFromPrinter(const PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
     PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
-    void registerCallBack(const PrinterConnectStatusFn& printerConnectStatusCallback, const PrinterStatusFn& printerStatusCallback, const PrinterPrintTaskFn& printerPrintTaskCallback);
+    void registerCallBack(const PrinterConnectStatusFn& printerConnectStatusCallback, const PrinterStatusFn& printerStatusCallback, const PrinterPrintTaskFn& printerPrintTaskCallback, const PrinterAttributesFn& printerAttributesCallback);
     void close();
     static int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo);
 
@@ -33,6 +33,7 @@ private:
     PrinterConnectStatusFn mPrinterConnectStatusCallback;
     PrinterStatusFn mPrinterStatusCallback;
     PrinterPrintTaskFn mPrinterPrintTaskCallback;
+    PrinterAttributesFn mPrinterAttributesCallback;
 
     PrinterNetworkManager();
     PrinterNetworkManager(const PrinterNetworkManager&) = delete;
@@ -41,6 +42,7 @@ private:
     void onPrinterConnectStatus(const std::string& printerId, const PrinterConnectStatus& status);
     void onPrinterStatus(const std::string& printerId, const PrinterStatus& status);
     void onPrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task);
+    void onPrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
 };
 
 } // namespace Slic3r

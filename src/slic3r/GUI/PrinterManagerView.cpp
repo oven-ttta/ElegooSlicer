@@ -171,6 +171,8 @@ void PrinterManagerView::handleCommand(const std::string& cmd, const nlohmann::j
         sendResponse("response_printer_list", "10001", getPrinterList());
     } else if (cmd == "request_printer_model_list") {
         sendResponse("response_printer_model_list", "10002", getPrinterModelList());
+    } else if (cmd == "request_printer_list_status") {
+        sendResponse("response_printer_list_status", "10003", getPrinterListStatus());
     } else if (cmd == "request_printer_detail") {
         openPrinterTab(root["printerId"]);
     } else if (cmd == "request_discover_printers") {
@@ -292,7 +294,17 @@ nlohmann::json PrinterManagerView::getPrinterList()
     }
     return response;
 }
-
+nlohmann::json PrinterManagerView::getPrinterListStatus()
+{
+    auto printerList = PrinterManager::getInstance()->getPrinterList();
+    nlohmann::json response = json::array();
+    for (auto& printer : printerList) {
+        nlohmann::json printer_obj = nlohmann::json::object();
+        printer_obj = PrinterManager::convertPrinterNetworkInfoToJson(printer);
+        response.push_back(printer_obj);
+    }
+    return response;
+}
 std::string PrinterManagerView::browseCAFile()
 {
     try {

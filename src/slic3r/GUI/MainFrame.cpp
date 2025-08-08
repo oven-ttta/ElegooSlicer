@@ -347,6 +347,15 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
     Bind(EVT_SELECT_TAB, [this](wxCommandEvent&evt) {
         TabPosition pos = (TabPosition)evt.GetInt();
         m_tabpanel->SetSelection(pos);
+        
+        // Handle printerId if provided (stored in event string)
+        wxString printerIdStr = evt.GetString();
+        if (!printerIdStr.IsEmpty() && m_printer_manager_view) {
+            // Use CallAfter to ensure SetSelection is complete
+            wxGetApp().CallAfter([this, printerIdStr]() {
+                m_printer_manager_view->openPrinterTab(printerIdStr.ToStdString());
+            });
+        }
     });
 
     Bind(EVT_SYNC_CLOUD_PRESET, &MainFrame::on_select_default_preset, this);
@@ -1149,10 +1158,8 @@ void MainFrame::show_device(bool bBBLPrinter) {
         if (m_tabpanel->FindPage(m_monitor) != wxNOT_FOUND)
             return;
         // Remove printer view
-        if ((idx = m_tabpanel->FindPage(m_printer_view)) != wxNOT_FOUND) {
-            m_printer_view->Show(false);
-            m_tabpanel->RemovePage(idx);
-        }
+        remove_page(m_printer_view);
+        remove_page(m_printer_manager_view);
 
         // Create/insert monitor page
         if (!m_monitor) {
@@ -3542,10 +3549,13 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
     select(false);
 }
 
-void MainFrame::request_select_tab(TabPosition pos)
+void MainFrame::request_select_tab(TabPosition pos, const std::string& printerId)
 {
     wxCommandEvent* evt = new wxCommandEvent(EVT_SELECT_TAB);
     evt->SetInt(pos);
+    if (!printerId.empty()) {
+        evt->SetString(wxString::FromUTF8(printerId));
+    }
     wxQueueEvent(this, evt);
 }
 

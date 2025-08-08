@@ -119,6 +119,7 @@ struct PrinterNetworkParams
 using PrinterConnectStatusFn = std::function<void(const std::string& printerId, const PrinterConnectStatus& status)>;
 using PrinterStatusFn     = std::function<void(const std::string& printerId, const PrinterStatus& status)>;
 using PrinterPrintTaskFn     = std::function<void(const std::string& printerId, const PrinterPrintTask& printTask)>;
+using PrinterAttributesFn     = std::function<void(const std::string& printerId, const PrinterNetworkInfo& printerInfo)>;
 
 } // namespace Slic3r
 

@@ -4,23 +4,30 @@ let globalPrinterModelList = null; // Cache for printer model list
 
 function OnInit() {
 	TranslatePage();
-	RequestPrintTask();
     requestPrinterModelList();
+    requestPrinterList();
+    requestPrinterListStatus();
 
+}
+function requestPrinterList() {
+    var tSend={};
+    tSend['command']="request_printer_list";
+    tSend['sequence_id']=Math.round(new Date() / 1000);
+    SendWXMessage( JSON.stringify(tSend) );
+}
+function requestPrinterListStatus() {
+    setInterval(function () {
+        var tSend = {};
+        tSend['command'] = "request_printer_list_status";
+        tSend['sequence_id'] = Math.round(new Date() / 1000);
+        SendWXMessage(JSON.stringify(tSend));
+    }, 1000);
 }
 function requestPrinterModelList() {
     var tSend={};
     tSend['command']="request_printer_model_list";
     tSend['sequence_id']=Math.round(new Date() / 1000);
     SendWXMessage( JSON.stringify(tSend) );
-}
-function RequestPrintTask()
-{
-	var tSend={};
-	tSend['sequence_id']=Math.round(new Date() / 1000);
-	tSend['command']="request_printer_list";
-		
-	SendWXMessage( JSON.stringify(tSend) );		
 }
 
 function HandleStudio(pVal)
@@ -29,6 +36,9 @@ function HandleStudio(pVal)
 	if(strCmd=="response_printer_list") {
 		let printers=pVal['response'];
 		renderAllPrinters(printers);
+	} else if(strCmd=="response_printer_list_status") {
+		let printers=pVal['response'];
+		renderPrinterListStatus(printers);
 	} else if(strCmd=="response_discover_printers") {
 		var add_printer_modal = document.querySelector('.add-printer-modal');
 		if (add_printer_modal) {
@@ -41,9 +51,9 @@ function HandleStudio(pVal)
 			}
 		}
 	} else if(strCmd=="response_add_printer" || strCmd=="response_update_printer_name" || strCmd=="response_add_physical_printer" || strCmd=="response_update_printer_host") {
-        RequestPrintTask();
+        requestPrinterList();
 	} else if(strCmd=="response_delete_printer") {
-        RequestPrintTask();
+        requestPrinterList();
         closeModals();
     } else if(strCmd=="response_printer_model_list") {
         let printerModelList=pVal['response'];
@@ -51,24 +61,47 @@ function HandleStudio(pVal)
     }
 }
 
-function getPrinterStatus(printerStatus) {
-	switch(printerStatus) {
-		case 0:
-			return "Printing";
-		case 1:
-			return "Idle";
-		default:
-			return "";
-	}
-
+function getPrinterStatus(printerStatus, connectStatus) {
+    // If not connected, always show Offline
+    if (connectStatus === 0) {
+        return "Offline";
+    }
+    switch(printerStatus) {
+        case -1: return "Offline";
+        case 0: return "Idle";
+        case 1: return "Printing";
+        case 2: return "Paused";
+        case 3: return "Pausing";
+        case 4: return "Canceled";
+        case 5: return "Self-checking";
+        case 6: return "Auto-leveling";
+        case 7: return "PID calibrating";
+        case 8: return "Resonance testing";
+        case 9: return "Updating";
+        case 10: return "File copying";
+        case 11: return "File transferring";
+        case 12: return "Homing";
+        case 13: return "Preheating";
+        case 14: return "Filament operating";
+        case 15: return "Extruder operating";
+        case 16: return "Print completed";
+        case 17: return "RFID recognizing";
+        case 999: return "Error";
+        case 1000: return "Unknown";
+        default: return "";
+    }
 }
 
-function getRemainingTime(currentTicks, totalTicks) {
-    let remainingTime = totalTicks - currentTicks;
+function getRemainingTime(currentTicks, totalTicks, estimatedTime) {
+    // If estimatedTime is provided, it already represents remaining seconds
+    let remainingTime = (typeof estimatedTime === 'number' && estimatedTime > 0)
+        ? estimatedTime
+        : Math.max(0, (totalTicks || 0) - (currentTicks || 0));
     let hours = Math.floor(remainingTime / 3600);
     let minutes = Math.floor((remainingTime % 3600) / 60);
     let seconds = remainingTime % 60;
-    return `${hours}:${minutes}:${seconds}`;    
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;    
 }
 
 
@@ -76,7 +109,7 @@ function renderPrinterCards(printers) {
     let html = "";
     printers.forEach((p, index) => {
         html += `
-            <div class="printer-card">
+            <div class="printer-card" id="printer-card-${p.printerId}">
             <div class="printer-card-header">
             <div class="printer-img"><img src="${p.printerImg || ''}" alt="Printer" /></div>
             <div class="printer-header-info">
@@ -87,14 +120,14 @@ function renderPrinterCards(printers) {
             <div class="card-menu" title="more" onclick="showPrinterSettingsByIndex(${index})">&#8942;</div>
             </div>
             <div class="progress-bar-container">
-            <span class="progress-label">${p.printProgress || 0}%</span>
+            <span class="progress-label">${(p.printTask && typeof p.printTask.progress === 'number') ? p.printTask.progress : 0}%</span>
             <div class="progress-bar-bg">
-                <div class="progress-bar" style="width:${p.printProgress || 0}%"></div>
+                <div class="progress-bar" style="width:${(p.printTask && typeof p.printTask.progress === 'number') ? p.printTask.progress : 0}%"></div>
             </div>
             </div>
             <div class="printer-status-row">
-            <button class="printer-status-btn">${getPrinterStatus(p.printerStatus)}</button>
-            <span class="remaining-time">${getRemainingTime(p.printTask.currentTime, p.printTask.totalTime)}</span>
+            <button class="printer-status-btn">${getPrinterStatus(p.printerStatus, p.connectStatus)}</button>
+            <span class="remaining-time">${p.printTask ? getRemainingTime(p.printTask.currentTime, p.printTask.totalTime, p.printTask.estimatedTime) : ''}</span>
             </div>
         </div>
         `;
@@ -106,6 +139,45 @@ function renderAllPrinters(printers) {
     globalPrinterList = printers;
     let html = renderPrinterCards(printers);
     $("#printer-list").html(html);
+}
+
+function renderPrinterListStatus(printers) {
+    // Incremental update: update existing DOM nodes per printer
+    (printers || []).forEach((p) => {
+        const card = document.getElementById(`printer-card-${p.printerId}`);
+        if (!card) return; // skip if card not rendered yet
+
+        // Progress
+        const progress = (p.printTask && typeof p.printTask.progress === 'number') ? p.printTask.progress : 0;
+        const progressLabel = card.querySelector('.progress-label');
+        if (progressLabel) progressLabel.textContent = `${progress}%`;
+        const progressBar = card.querySelector('.progress-bar');
+        if (progressBar) progressBar.style.width = `${progress}%`;
+
+        // Status text
+        const statusBtn = card.querySelector('.printer-status-btn');
+        if (statusBtn) statusBtn.textContent = getPrinterStatus(p.printerStatus, p.connectStatus);
+
+        // Remaining time
+        const remainingSpan = card.querySelector('.remaining-time');
+        if (remainingSpan) {
+            if (p.printTask) {
+                remainingSpan.textContent = getRemainingTime(
+                    p.printTask.currentTime,
+                    p.printTask.totalTime,
+                    p.printTask.estimatedTime
+                );
+            } else {
+                remainingSpan.textContent = '';
+            }
+        }
+
+        // Optional: host or name might change
+        const hostEl = card.querySelector('.printer-host');
+        if (hostEl && typeof p.host === 'string') hostEl.textContent = p.host;
+        const titleEl = card.querySelector('.printer-title');
+        if (titleEl && typeof p.printerName === 'string') titleEl.textContent = p.printerName;
+    });
 }
 
 function showPrinterDetail(printerId) {

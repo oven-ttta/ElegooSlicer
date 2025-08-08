@@ -22,7 +22,7 @@ public:
     PrinterManagerView(wxWindow *parent);
     virtual ~PrinterManagerView();
     void onClose(wxCloseEvent& evt);
-
+    void openPrinterTab(const std::string& printerId);
 
 private:
     void onScriptMessage(wxWebViewEvent &evt);
@@ -30,9 +30,10 @@ private:
     void sendResponse(const std::string& command, const std::string& sequenceId, const nlohmann::json& response);
     void runScript(const wxString &javascript);
     void onClosePrinterTab(wxAuiNotebookEvent& event);
-    void openPrinterTab(const std::string& printerId);
+ 
 
     nlohmann::json getPrinterList();
+    nlohmann::json getPrinterListStatus();
     nlohmann::json discoverPrinter();
     nlohmann::json getPrinterModelList();
     std::string addPrinter(const nlohmann::json& printer);

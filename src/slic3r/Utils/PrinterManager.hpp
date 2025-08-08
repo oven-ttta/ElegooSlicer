@@ -40,9 +40,9 @@ private:
     void updatePrinterConnectStatus(const std::string& printerId, const PrinterConnectStatus& status);
     void updatePrinterStatus(const std::string& printerId, const PrinterStatus& status);
     void updatePrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task);
+    void updatePrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
 
     std::map<std::string, PrinterNetworkInfo> mPrinterList;
-
     std::mutex mPrinterListMutex;
 
 };

@@ -157,6 +157,13 @@ ElegooLink::ElegooLink()
 
         PrinterNetworkEvent::getInstance()->printTaskChanged.emit(PrinterPrintTaskEvent(event->status.deviceId, task));
     });
+
+    elink::ElegooLink::getInstance().subscribeEvent<elink::DeviceAttributesEvent>([&](const std::shared_ptr<elink::DeviceAttributesEvent>& event) {
+        PrinterNetworkInfo info;
+        info.printerId       = event->attributes.deviceId;
+        info.firmwareVersion = event->attributes.firmwareVersion;
+        PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.deviceId, info));
+    });
 }
 
 ElegooLink::~ElegooLink()
@@ -323,10 +330,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkInfo& p
         wxLogError("Exception in ElegooLink::sendPrintFile: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
-    PrinterNetworkResult<bool> networkResult(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS);
-    if(resultCode != PrinterNetworkErrorCode::SUCCESS && params.errorFn) {
-        params.errorFn(networkResult.message);
-    }   
+    PrinterNetworkResult<bool> networkResult(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS); 
     return networkResult;
 }
 

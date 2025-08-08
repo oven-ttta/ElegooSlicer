@@ -208,7 +208,8 @@ PrinterManager::PrinterManager()
         ->registerCallBack([this](const std::string&          printerId,
                                   const PrinterConnectStatus& status) { updatePrinterConnectStatus(printerId, status); },
                            [this](const std::string& printerId, const PrinterStatus& status) { updatePrinterStatus(printerId, status); },
-                           [this](const std::string& printerId, const PrinterPrintTask& task) { updatePrinterPrintTask(printerId, task); });
+                           [this](const std::string& printerId, const PrinterPrintTask& task) { updatePrinterPrintTask(printerId, task); },
+                           [this](const std::string& printerId, const PrinterNetworkInfo& printerInfo) { updatePrinterAttributes(printerId, printerInfo); });
 
     std::thread([this]() {
         for (const auto& [printerId, printer] : mPrinterList) {
@@ -443,32 +444,43 @@ std::vector<PrinterNetworkInfo> PrinterManager::getPrinterList()
               [](const PrinterNetworkInfo& a, const PrinterNetworkInfo& b) { return a.addTime < b.addTime; });
     return printers;
 }
-
 bool PrinterManager::upload(PrinterNetworkParams& params)
 {
     std::string printerId = params.printerId;
     if (mPrinterList.find(printerId) == mPrinterList.end()) {
+        if(params.errorFn) {
+            params.errorFn("Printer not found, File name: " + params.fileName);
+        }
         return false;
     }
     PrinterNetworkInfo printerNetworkInfo = mPrinterList[printerId];
 
     auto sendFileResult = PrinterNetworkManager::getInstance()->sendPrintFile(printerNetworkInfo, params);
-    if (sendFileResult.isSuccess() && sendFileResult.data) {
-        wxLogMessage("File upload success: %s %s %s, file name: %s", printerNetworkInfo.host, printerNetworkInfo.printerName, printerNetworkInfo.printerModel, params.fileName.c_str());
-        if (params.uploadAndStartPrint) {
+    if (sendFileResult.isSuccess()) {
+        wxLogMessage("File upload success: %s %s %s, file name: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
+                     printerNetworkInfo.printerModel, params.fileName.c_str());
+        if (params.uploadAndStartPrint) {          
             auto sendTaskResult = PrinterNetworkManager::getInstance()->sendPrintTask(printerNetworkInfo, params);
             if (sendTaskResult.isError()) {
                 wxLogWarning("Failed to send print task after file upload: %s %s %s, file name: %s, error: %s", printerNetworkInfo.host,
                              printerNetworkInfo.printerName, printerNetworkInfo.printerModel, params.fileName.c_str(),
                              sendTaskResult.message.c_str());
+                if (params.errorFn) {
+                    params.errorFn("Filed to start print, Error: " + std::to_string(static_cast<int>(sendTaskResult.code)) + " " +
+                                   sendTaskResult.message);
+                }
+                return false;
             }
         }
         return true;
     } else {
+        if (params.errorFn) {
+            params.errorFn("Error: " + std::to_string(static_cast<int>(sendFileResult.code)) + " " + sendFileResult.message);
+        }
         wxLogError("Failed to send print file: %s %s %s, file name: %s, error: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                    printerNetworkInfo.printerModel, params.fileName.c_str(), sendFileResult.message.c_str());
-        return false;
     }
+    return false;
 }
 
 void PrinterManager::savePrinterList()
@@ -494,6 +506,14 @@ void PrinterManager::updatePrinterStatus(const std::string& printerId, const Pri
     auto                        it = mPrinterList.find(printerId);
     if (it != mPrinterList.end()) {
         it->second.printerStatus = status;
+        if(status == PrinterStatus::PRINTER_STATUS_IDLE) {
+            it->second.printTask.taskId = "";
+            it->second.printTask.fileName = "";
+            it->second.printTask.totalTime = 0;
+            it->second.printTask.currentTime = 0;
+            it->second.printTask.estimatedTime = 0;
+            it->second.printTask.progress = 0;
+        }
     }
 }
 
@@ -503,6 +523,16 @@ void PrinterManager::updatePrinterPrintTask(const std::string& printerId, const 
     auto                        it = mPrinterList.find(printerId);
     if (it != mPrinterList.end()) {
         it->second.printTask = task;
+    }
+}
+void PrinterManager::updatePrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo)
+{
+    std::lock_guard<std::mutex> lock(mPrinterListMutex);
+    auto                        it = mPrinterList.find(printerId);
+    if (it != mPrinterList.end()) {
+        if(printerInfo.firmwareVersion.empty()) {
+            it->second.firmwareVersion = printerInfo.firmwareVersion;
+        }
     }
 }
 } // namespace Slic3r

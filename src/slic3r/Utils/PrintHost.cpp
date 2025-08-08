@@ -386,7 +386,7 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
 {
     emit_progress(0);   // Indicate the upload is starting
     bool success = false;
-
+    std::string selectedPrinterId = "";
     DynamicPrintConfig cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
     if (PrintHost::support_device_list_management(cfg)) {
         PrinterNetworkParams params;
@@ -414,6 +414,7 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
         }
         if(the_job.upload_data.extended_info.find("selectedPrinterId") != the_job.upload_data.extended_info.end()) {
             params.printerId = the_job.upload_data.extended_info["selectedPrinterId"];
+            selectedPrinterId = params.printerId;
         }
 
         params.uploadProgressFn = [this](uint64_t uploadedBytes, uint64_t totalBytes, bool& cancel) { 
@@ -435,7 +436,7 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
         emit_progress(100);
         if (the_job.switch_to_device_tab) {
             const auto mainframe = GUI::wxGetApp().mainframe;
-            mainframe->request_select_tab(MainFrame::TabPosition::tpMonitor);
+            mainframe->request_select_tab(MainFrame::TabPosition::tpMonitor, selectedPrinterId);
         }
     }
 }

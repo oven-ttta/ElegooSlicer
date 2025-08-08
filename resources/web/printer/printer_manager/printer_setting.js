@@ -1,5 +1,25 @@
 let printer = null;
 
+function validatePrinterName(name) {
+    // Only restrict backslash and forward slash, allow other characters
+    const invalidCharsRegex = /[\\\/]/;
+    return !invalidCharsRegex.test(name) && name.length <= 50;
+}
+
+function validateIPAddress(ip) {
+    // Basic IP address validation: numbers and dots only
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipRegex.test(ip)) {
+        return false;
+    }
+    // Check each octet is between 0-255
+    const octets = ip.split('.');
+    return octets.every(octet => {
+        const num = parseInt(octet, 10);
+        return num >= 0 && num <= 255;
+    });
+}
+
 function closeModal() {
     window.parent.postMessage({command: 'closeModal'}, '*');
 }
@@ -27,9 +47,28 @@ function editPrinterName() {
     $textElement.after($input);
     $input.focus().select();
     
+    // Real-time input restriction for printer name
+    $input.on('input', function() {
+        var value = $(this).val();
+        // Remove backslash and forward slash in real-time
+        var cleanValue = value.replace(/[\\\/]/g, '');
+        // Limit to 50 characters
+        if (cleanValue.length > 50) {
+            cleanValue = cleanValue.substring(0, 50);
+        }
+        if (value !== cleanValue) {
+            $(this).val(cleanValue);
+        }
+    });
+    
     function saveChanges() {
         var newName = $input.val().trim();
         if (newName && newName !== currentName) {
+            if (!validatePrinterName(newName)) {
+                alert('Printer name cannot contain backslash (\\) or forward slash (/) and must be 50 characters or less.');
+                $input.focus().select();
+                return;
+            }
             window.parent.postMessage({command: 'update_printer_name', printerName: newName, printerId: printer.printerId}, '*');
             $textElement.text(newName);
         }
@@ -70,9 +109,43 @@ function editPrinterHost() {
     $textElement.after($input);
     $input.focus().select();
     
+    // Real-time input restriction for IP address
+    $input.on('input', function() {
+        var value = $(this).val();
+        // Only allow numbers and dots
+        var cleanValue = value.replace(/[^\d\.]/g, '');
+        // Prevent multiple consecutive dots
+        cleanValue = cleanValue.replace(/\.+/g, '.');
+        // Prevent dot at the beginning
+        cleanValue = cleanValue.replace(/^\./, '');
+        // Prevent dot at the end
+        cleanValue = cleanValue.replace(/\.$/, '');
+        // Limit to 4 octets (3 dots max)
+        var dots = (cleanValue.match(/\./g) || []).length;
+        if (dots > 3) {
+            var parts = cleanValue.split('.');
+            cleanValue = parts.slice(0, 4).join('.');
+        }
+        // Limit each octet to 3 digits max
+        var parts = cleanValue.split('.');
+        parts = parts.map(function(part) {
+            return part.length > 3 ? part.substring(0, 3) : part;
+        });
+        cleanValue = parts.join('.');
+        
+        if (value !== cleanValue) {
+            $(this).val(cleanValue);
+        }
+    });
+    
     function saveChanges() {
         var newHost = $input.val().trim();
         if (newHost && newHost !== currentHost) {
+            if (!validateIPAddress(newHost)) {
+                alert('Please enter a valid IP address (e.g., 192.168.1.100)');
+                $input.focus().select();
+                return;
+            }
             window.parent.postMessage({ 
                 command: "update_printer_host", 
                 host: newHost,
