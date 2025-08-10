@@ -102,12 +102,12 @@ elink::ConnectDeviceParams setupConnectionParams(const PrinterNetworkInfo& print
         connectionParams.username = "";
         connectionParams.password = "";
     } else if (printerNetworkInfo.authMode == "token") {
-        // nlohmann::json extraInfo = nlohmann::json::parse(printerNetworkInfo.extraInfo);
-        // if (extraInfo.contains(PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN)) {
-        //     connectionParams.token = extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN].get<std::string>();
-        // } else {
-        //     wxLogError("Error connecting to device: %s", "Token is not set");
-        // }
+        nlohmann::json extraInfo = nlohmann::json::parse(printerNetworkInfo.extraInfo);
+        if (extraInfo.contains(PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN)) {
+            connectionParams.token = extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN].get<std::string>();
+        } else {
+            wxLogError("Error connecting to device: %s", "Token is not set");
+        }
     }
 
     return connectionParams;

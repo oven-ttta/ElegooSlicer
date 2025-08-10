@@ -216,8 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
             tSend['command']="request_discover_printers";
             tSend['sequence_id']=Math.round(new Date() / 1000);
             SendWXMessage( JSON.stringify(tSend) );
-        } else if (event.data.command == 'connect_printer') {
-            console.log('Connect printer message received');
         } else if (event.data.command == 'delete_printer') {
             var tSend={};
             tSend['command']="request_delete_printer";
@@ -227,11 +225,15 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (event.data.command === 'closeModal') {
             closeModals();
         } else if (event.data.command === 'add_printer') {
-            var tSend={};
-            tSend['command']="request_add_printer";
-            tSend['sequence_id']=Math.round(new Date() / 1000);
-            tSend['printer']=event.data.printer;
-            SendWXMessage( JSON.stringify(tSend) );
+            if(event.data.printer.authMode == 'token' && (event.data.printer.extraInfo == '' || event.data.printer.extraInfo.token == null || event.data.printer.extraInfo.token == '')) {
+                showPrinterAuth(event.data.printer);
+            } else {
+                var tSend={};
+                tSend['command']="request_add_printer";
+                tSend['sequence_id']=Math.round(new Date() / 1000);
+                tSend['printer']=event.data.printer;
+                SendWXMessage( JSON.stringify(tSend) );
+            }
         } else if (event.data.command === 'add_physical_printer') {
             var tSend={};
             tSend['command']="request_add_physical_printer";
@@ -252,6 +254,8 @@ document.addEventListener('DOMContentLoaded', function() {
             tSend['printerId']=event.data.printerId;
             tSend['host']=event.data.host;
             SendWXMessage( JSON.stringify(tSend) );
+        } else if (event.data.command === 'close_printer_auth') {
+            closePrinterAuth();
         }
     });
 });
@@ -304,7 +308,7 @@ function showPrinterSettings(printer) {
 
 
 function closeModals() {
-    const modals = document.querySelectorAll('.add-printer-modal, .printer-setting-modal, .printer-setting-physical-modal');
+    const modals = document.querySelectorAll('.add-printer-modal, .printer-setting-modal, .printer-setting-physical-modal, .printer-auth-modal');
     modals.forEach(modal => {
         if (modal.parentNode) {
             modal.parentNode.removeChild(modal);
@@ -315,5 +319,37 @@ function closeModals() {
 }
 
 
+function showPrinterAuth(printer) {
+    // 创建并显示认证对话框
+    var dialog = document.createElement('div');
+    dialog.innerHTML = `
+        <div class="printer-auth-modal">
+            <iframe src="printer_auth.html" class="printer-auth-iframe"></iframe>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    // 显示对话框
+    dialog.querySelector('.printer-auth-modal').style.display = 'block';
+    
+    // 等待 iframe 加载完成后发送打印机信息
+    var iframe = dialog.querySelector('iframe');
+    iframe.onload = function() {
+        iframe.contentWindow.postMessage({
+            command: 'init',
+            printer: printer
+        }, '*');
+    };
+    
+    // 存储对话框引用以便后续操作
+    window.currentPrinterAuthDialog = dialog;
+}
 
+function closePrinterAuth() {
+    if (window.currentPrinterAuthDialog) {
+        window.currentPrinterAuthDialog.remove();
+        window.currentPrinterAuthDialog = null;
+    }
+}
 

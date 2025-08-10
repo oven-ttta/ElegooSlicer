@@ -19,6 +19,136 @@ body {
     color: #222;
 }
 
+/* ===================== Printer Auth Dialog ===================== */
+.printer-auth-modal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 592px;
+    border-radius: 12px;
+    background: #FFFFFF;
+    box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.12);
+    z-index: 4;
+    overflow: hidden;
+}
+
+.printer-auth-header {
+    width: 600px;
+    height: 50px;
+    border-bottom: 1px solid #e0e0e0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.printer-auth-header span {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.printer-auth-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #aaa;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.printer-auth-close-btn:hover {
+    color: #000;
+}
+
+.printer-auth-content {
+    padding: 15px 40px;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.printer-image-container {
+    margin-bottom: 15px;
+}
+
+.printer-auth-content img {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    margin-bottom: 15px;
+}
+
+.printer-auth-content h3 {
+    font-family: Roboto;
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 12px 0;
+}
+
+.instruction-text {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 20px 0;
+    line-height: 1.4;
+    text-align: center;
+    max-width: 400px;
+}
+
+.access-code-inputs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+    width: 328px;
+    height: 48px;
+}
+
+.code-input {
+    width: 48px;
+    height: 48px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 20px;
+    text-align: center;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.code-input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.help-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.help-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+
 /* ===================== Theme Toggle ===================== */
 .theme-toggle {
     position: fixed;
@@ -281,7 +411,7 @@ body[data-theme="light"] .theme-toggle img {
 }
 
 /* ===================== Dialog Base ===================== */
-.add-printer-dialog, .printer-setting-physical-dialog, .printer-setting-dialog {
+.add-printer-dialog, .printer-setting-physical-dialog, .printer-setting-dialog, .printer-auth-dialog {
     height: 100vh;
     min-height: 100%;
     display: flex;
@@ -687,7 +817,18 @@ body[data-theme="light"] .theme-toggle img {
     min-height: 60px;
 }
 
-.add-printer-cancel-btn, .add-printer-connect-btn, .printer-setting-physical-cancel-btn, .printer-setting-physical-confirm-btn {
+.printer-auth-btn {
+    display: flex;
+    align-items: center;
+    padding: 15px 100px 20px 100px;
+    background: #fff;
+    border-top: none;
+    flex-shrink: 0;
+    min-height: 50px;
+    justify-content: flex-end;
+    gap: 24px;
+}
+.add-printer-cancel-btn, .add-printer-connect-btn, .printer-setting-physical-cancel-btn, .printer-setting-physical-confirm-btn, .printer-auth-cancel-btn, .printer-auth-connect-btn {
     width: 80px;
     height: 36px;
     border-radius: 4px;
@@ -699,47 +840,47 @@ body[data-theme="light"] .theme-toggle img {
     outline: none;
 }
 
-.add-printer-cancel-btn, .printer-setting-physical-cancel-btn {
+.add-printer-cancel-btn, .printer-setting-physical-cancel-btn, .printer-auth-cancel-btn {
     background: #f5f5f5;
     color: #333;
 }
 
-.add-printer-cancel-btn:hover, .printer-setting-physical-cancel-btn:hover {
+.add-printer-cancel-btn:hover, .printer-setting-physical-cancel-btn:hover, .printer-auth-cancel-btn:hover {
     background: #e8e8e8;
     border-color: #d0d0d0;
 }
 
-.add-printer-cancel-btn:focus, .printer-setting-physical-cancel-btn:focus {
+.add-printer-cancel-btn:focus, .printer-setting-physical-cancel-btn:focus, .printer-auth-cancel-btn:focus {
     border-color: #1976d2;
     box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-.add-printer-cancel-btn:active, .printer-setting-physical-cancel-btn:active {
+.add-printer-cancel-btn:active, .printer-setting-physical-cancel-btn:active, .printer-auth-cancel-btn:active {
     background: #d0d0d0;
     transform: translateY(1px);
 }
 
-.add-printer-connect-btn, .printer-setting-physical-confirm-btn {
+.add-printer-connect-btn, .printer-setting-physical-confirm-btn, .printer-auth-connect-btn {
     background: #1976d2;
     color: #fff;
     border-color: #1976d2;
 }
 
-.add-printer-connect-btn:hover, .printer-setting-physical-confirm-btn:hover {
+.add-printer-connect-btn:hover, .printer-setting-physical-confirm-btn:hover, .printer-auth-connect-btn:hover {
     background: #1565c0;
     border-color: #1565c0;
 }
 
-.add-printer-connect-btn:focus, .printer-setting-physical-confirm-btn:focus {
+.add-printer-connect-btn:focus, .printer-setting-physical-confirm-btn:focus, .printer-auth-connect-btn:focus {
     box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
 }
 
-.add-printer-connect-btn:active, .printer-setting-physical-confirm-btn:active {
+.add-printer-connect-btn:active, .printer-setting-physical-confirm-btn:active, .printer-auth-connect-btn:active {
     background: #0d47a1;
     transform: translateY(1px);
 }
 
-.add-printer-footer, .printer-setting-physical-footer {
+.add-printer-footer, .printer-setting-physical-footer, .printer-auth-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -748,7 +889,7 @@ body[data-theme="light"] .theme-toggle img {
     border-top: none;
 }
 
-.add-printer-footer button, .printer-setting-physical-footer button {
+.add-printer-footer button, .printer-setting-physical-footer button, .printer-auth-footer button {
     height: 32px;
     min-width: 60px;
     border-radius: 4px;
@@ -760,17 +901,17 @@ body[data-theme="light"] .theme-toggle img {
     transition: background 0.2s, border 0.2s;
 }
 
-.add-printer-footer .primary, .printer-setting-physical-footer .primary {
+.add-printer-footer .primary, .printer-setting-physical-footer .primary, .printer-auth-footer .primary {
     background: #1976d2;
     color: #fff;
     border: none;
 }
 
-.add-printer-footer .primary:hover, .printer-setting-physical-footer .primary:hover {
+.add-printer-footer .primary:hover, .printer-setting-physical-footer .primary:hover, .printer-auth-footer .primary:hover {
     background: #1251a3;
 }
 
-.add-printer-tip, .printer-setting-physical-tip {
+.add-printer-tip, .printer-setting-physical-tip, .printer-auth-tip {
     text-align: center;
     margin-top: 8px;
     color: #888;
@@ -958,7 +1099,7 @@ body[data-theme="light"] .theme-toggle img {
     border-radius: 0;
     display: flex;
     flex-direction: column;
-    z-index: 1000;
+    z-index: 3;
 }
 
 .printer-setting-modal {
@@ -971,15 +1112,16 @@ body[data-theme="light"] .theme-toggle img {
     border-radius: 12px;
     background: #FFFFFF;
     box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.12);
-    z-index: 1000;
+    z-index: 3;
     overflow: hidden;
 }
 
-.printer-setting-iframe, .add-printer-iframe, .printer-setting-physical-iframe {
+.printer-setting-iframe, .add-printer-iframe, .printer-setting-physical-iframe, .printer-auth-iframe {
     width: 100%;
     height: 100%;
     border: none;
     border-radius: 0;
+    overflow: hidden;
 }
 
 .modal-overlay {
@@ -989,7 +1131,7 @@ body[data-theme="light"] .theme-toggle img {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+    z-index: 2;
 }
 
 /* ===================== Iframe Styles ===================== */

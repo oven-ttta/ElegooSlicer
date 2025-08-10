@@ -87,7 +87,11 @@ PrinterNetworkInfo PrinterManager::convertJsonToPrinterNetworkInfo(const nlohman
         printerNetworkInfo.authMode          = json["authMode"];
         printerNetworkInfo.webUrl            = json["webUrl"];
         printerNetworkInfo.connectionUrl     = json["connectionUrl"];
-        printerNetworkInfo.extraInfo         = json["extraInfo"];
+        if(json.contains("extraInfo")) {
+            printerNetworkInfo.extraInfo = json["extraInfo"].dump();
+        } else {
+            printerNetworkInfo.extraInfo = "";
+        }
         printerNetworkInfo.isPhysicalPrinter = json["isPhysicalPrinter"].get<bool>();
         printerNetworkInfo.addTime           = json["addTime"].get<uint64_t>();
         printerNetworkInfo.modifyTime        = json["modifyTime"].get<uint64_t>();
@@ -127,7 +131,11 @@ nlohmann::json PrinterManager::convertPrinterNetworkInfoToJson(const PrinterNetw
     json["authMode"]          = printerNetworkInfo.authMode;
     json["webUrl"]            = printerNetworkInfo.webUrl;
     json["connectionUrl"]     = printerNetworkInfo.connectionUrl;
-    json["extraInfo"]         = printerNetworkInfo.extraInfo;
+    if(!printerNetworkInfo.extraInfo.empty()) {
+        json["extraInfo"] = nlohmann::json::parse(printerNetworkInfo.extraInfo);
+    } else {
+        json["extraInfo"] = nlohmann::json::object();
+    }
     json["isPhysicalPrinter"] = printerNetworkInfo.isPhysicalPrinter;
     json["addTime"]           = printerNetworkInfo.addTime;
     json["modifyTime"]        = printerNetworkInfo.modifyTime;
