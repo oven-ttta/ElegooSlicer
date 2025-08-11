@@ -19,6 +19,9 @@
     "230x230",
     "0x230"
   ],
+  "extruder_offset": [
+    "-1x-2"
+  ],
   "printable_height": "265",
   "retract_lift_below": [
     "264"

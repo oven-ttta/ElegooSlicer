@@ -22,6 +22,9 @@
   "retract_lift_below": [
     "479"
   ],
+  "extruder_offset": [
+    "-1.5x2"
+  ],
   "machine_max_acceleration_extruding": [
     "5000",
     "5000"

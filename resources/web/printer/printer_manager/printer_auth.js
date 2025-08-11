@@ -25,10 +25,10 @@ function renderPrinterAuth(printer) {
     $('#printer-auth-printer-image').attr('src', printer.printerImg);
     $('#printer-auth-printer-name').text(printer.printerName);
     
-    // 显示对话框内容
+    // show dialog content
     $('.printer-auth-dialog').show();
     
-    // 设置输入框事件
+    // set input event
     setupCodeInputs();
 }
 
@@ -37,7 +37,7 @@ function closeModal() {
 }
 
 function connectPrinter() {
-    // 获取所有输入框的值并组合
+    // get all input values and combine
     let accessCode = '';
     $('.code-input').each(function() {
         accessCode += $(this).val() || '';
@@ -60,13 +60,13 @@ function setupCodeInputs() {
         const value = $(this).val();
         const index = parseInt($(this).data('index'));
         
-        // 只允许数字
+        // only allow number
         if (!/^\d*$/.test(value)) {
             $(this).val('');
             return;
         }
         
-        // 如果输入了数字，自动跳转到下一个输入框
+        // if input a number, auto focus next input
         if (value.length === 1 && index < 5) {
             $('.code-input[data-index="' + (index + 1) + '"]').focus();
         }
@@ -75,13 +75,13 @@ function setupCodeInputs() {
     $('.code-input').on('keydown', function(e) {
         const index = parseInt($(this).data('index'));
         
-        // 处理退格键
+        // handle backspace
         if (e.key === 'Backspace' && $(this).val() === '' && index > 0) {
             $('.code-input[data-index="' + (index - 1) + '"]').focus();
         }
     });
     
-    // 设置第一个输入框为焦点
+    // set first input to focus
     $('.code-input[data-index="0"]').focus();
 }
 

@@ -51,8 +51,10 @@ function HandleStudio(pVal)
 			}
 		}
 	} else if(strCmd=="response_add_printer" || strCmd=="response_update_printer_name" || strCmd=="response_add_physical_printer" || strCmd=="response_update_printer_host") {
+        // refresh printer list after add or update
         requestPrinterList();
 	} else if(strCmd=="response_delete_printer") {
+        // refresh printer list after delete
         requestPrinterList();
         closeModals();
     } else if(strCmd=="response_printer_model_list") {
@@ -226,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModals();
         } else if (event.data.command === 'add_printer') {
             if(event.data.printer.authMode == 'token' && (event.data.printer.extraInfo == '' || event.data.printer.extraInfo.token == null || event.data.printer.extraInfo.token == '')) {
+                // if auth mode is token and token is not set, show auth dialog
                 showPrinterAuth(event.data.printer);
             } else {
                 var tSend={};
@@ -320,7 +323,7 @@ function closeModals() {
 
 
 function showPrinterAuth(printer) {
-    // 创建并显示认证对话框
+    // create and show auth dialog
     var dialog = document.createElement('div');
     dialog.innerHTML = `
         <div class="printer-auth-modal">
@@ -330,10 +333,10 @@ function showPrinterAuth(printer) {
     
     document.body.appendChild(dialog);
     
-    // 显示对话框
+    // show dialog
     dialog.querySelector('.printer-auth-modal').style.display = 'block';
     
-    // 等待 iframe 加载完成后发送打印机信息
+    // wait for iframe load
     var iframe = dialog.querySelector('iframe');
     iframe.onload = function() {
         iframe.contentWindow.postMessage({
@@ -342,7 +345,6 @@ function showPrinterAuth(printer) {
         }, '*');
     };
     
-    // 存储对话框引用以便后续操作
     window.currentPrinterAuthDialog = dialog;
 }
 
