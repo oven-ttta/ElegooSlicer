@@ -21,11 +21,15 @@ public:
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices();
     PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
     PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
+    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo);
+    void close();
+
     static int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo);
-
-
+    
     private:
        bool isBusy(const std::string& printerId, PrinterStatus &status);
+       std::mutex mMutex;
+       bool mIsCleanup = false;
 };
 
 } // namespace Slic3r

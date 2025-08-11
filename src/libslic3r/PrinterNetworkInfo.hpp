@@ -18,28 +18,27 @@ enum PrinterConnectStatus {
     PRINTER_CONNECT_STATUS_CONNECTED    = 1,
 };
 enum PrinterStatus {
-    PRINTER_STATUS_OFFLINE = -1,
-    PRINTER_STATUS_IDLE = 0,
-    PRINTER_STATUS_PRINTING = 1,
-    PRINTER_STATUS_PAUSED = 2,
-    PRINTER_STATUS_PAUSING = 3,
-    PRINTER_STATUS_CANCELED = 4,
-    PRINTER_STATUS_SELF_CHECKING = 5, // Self-checking
-    PRINTER_STATUS_AUTO_LEVELING = 6, // Auto-leveling
-    PRINTER_STATUS_PID_CALIBRATING = 7, // PID calibrating
-    PRINTER_STATUS_RESONANCE_TESTING = 8, // Resonance testing
-    PRINTER_STATUS_UPDATING = 9, // Updating
-    PRINTER_STATUS_FILE_COPYING = 10, // File copying
-    PRINTER_STATUS_FILE_TRANSFERRING = 11, // File transferring
-    PRINTER_STATUS_HOMING = 12, // Homing
-    PRINTER_STATUS_PREHEATING = 13, // Preheating
+    PRINTER_STATUS_OFFLINE            = -1,
+    PRINTER_STATUS_IDLE               = 0,
+    PRINTER_STATUS_PRINTING           = 1,
+    PRINTER_STATUS_PAUSED             = 2,
+    PRINTER_STATUS_PAUSING            = 3,
+    PRINTER_STATUS_CANCELED           = 4,
+    PRINTER_STATUS_SELF_CHECKING      = 5,  // Self-checking
+    PRINTER_STATUS_AUTO_LEVELING      = 6,  // Auto-leveling
+    PRINTER_STATUS_PID_CALIBRATING    = 7,  // PID calibrating
+    PRINTER_STATUS_RESONANCE_TESTING  = 8,  // Resonance testing
+    PRINTER_STATUS_UPDATING           = 9,  // Updating
+    PRINTER_STATUS_FILE_COPYING       = 10, // File copying
+    PRINTER_STATUS_FILE_TRANSFERRING  = 11, // File transferring
+    PRINTER_STATUS_HOMING             = 12, // Homing
+    PRINTER_STATUS_PREHEATING         = 13, // Preheating
     PRINTER_STATUS_FILAMENT_OPERATING = 14, // Filament operating
     PRINTER_STATUS_EXTRUDER_OPERATING = 15, // Extruder operating
-    PRINTER_STATUS_PRINT_COMPLETED = 16, // Print completed
-    PRINTER_STATUS_RFID_RECOGNIZING = 17, // RFID recognizing
+    PRINTER_STATUS_PRINT_COMPLETED    = 16, // Print completed
+    PRINTER_STATUS_RFID_RECOGNIZING   = 17, // RFID recognizing
 
-
-    PRINTER_STATUS_ERROR = 999, // Device exception status
+    PRINTER_STATUS_ERROR   = 999,  // Device exception status
     PRINTER_STATUS_UNKNOWN = 1000, // Unknown status
 };
 
@@ -50,7 +49,7 @@ struct PrinterPrintTask
     int         totalTime{0};
     int         currentTime{0};
     int         estimatedTime{0};
-    int         progress{0}; 
+    int         progress{0};
 };
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN "token"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_HOST "deviceUi"
@@ -58,6 +57,48 @@ struct PrinterPrintTask
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_VENDOR "apiKey"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_PIN "pin"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_ACCESS_CODE "accessCode"
+
+struct PrinterMmsTray
+{
+    std::string trayId;
+    std::string settingId;
+    std::string filamentId;
+    std::string from;
+    std::string vendor;
+    int         serialNumber;
+    std::string filamentType;
+    std::string filamentName;
+    std::string filamentColor;
+    std::string filamentDiameter;
+    int         minNozzleTemp;
+    int         maxNozzleTemp;
+    int         minBedTemp;
+    int         maxBedTemp;
+    int         status;
+};
+
+struct PrinterMms
+{
+    std::string                 mmId;
+    double                      temperature;
+    int                         humidity;
+    bool                        connected;
+    std::vector<PrinterMmsTray> trayList;
+};
+
+// Multi-Material System
+struct PrinterMmsGroup
+{
+    bool                    mmsConnected;
+    std::string             mmsType;
+    int                     mmsConnectNum;
+    bool                    nozzleFilamentStatus;
+    std::string             activeMmsId;
+    std::string             activeTrayId;
+    bool                    autoRefill;
+    std::vector<PrinterMms> mmsList;
+    PrinterMmsTray          vtTray;
+};
 
 struct PrinterNetworkInfo
 {
@@ -84,42 +125,39 @@ struct PrinterNetworkInfo
     uint64_t    modifyTime{0};
     uint64_t    lastActiveTime{0};
 
-
-    //not save to file
-    PrinterPrintTask printTask;
+    // not save to file
+    PrinterPrintTask     printTask;
     PrinterConnectStatus connectStatus{PRINTER_CONNECT_STATUS_DISCONNECTED};
-    PrinterStatus printerStatus{PRINTER_STATUS_IDLE};
-
+    PrinterStatus        printerStatus{PRINTER_STATUS_IDLE};
+    PrinterMmsGroup      mmsGroup;
 
     template<class Archive> void serialize(Archive& ar)
     {
-        ar(printerId, printerName, host, port, vendor, printerModel, protocolVersion, firmwareVersion, hostType, mainboardId,
-           deviceType, serialNumber, username, password, authMode, webUrl, connectionUrl, extraInfo, isPhysicalPrinter, addTime, modifyTime,
+        ar(printerId, printerName, host, port, vendor, printerModel, protocolVersion, firmwareVersion, hostType, mainboardId, deviceType,
+           serialNumber, username, password, authMode, webUrl, connectionUrl, extraInfo, isPhysicalPrinter, addTime, modifyTime,
            lastActiveTime);
     }
 };
 
-
-
 struct PrinterNetworkParams
 {
-    std::string        printerId;
-    std::string        filePath;
-    std::string        fileName;
-    int                bedType{0};
-    bool               timeLapse{false};
-    bool               heatedBedLeveling{false};
-    bool               autoRefill{false};
-    bool               uploadAndStartPrint{false};
+    std::string printerId;
+    std::string filePath;
+    std::string fileName;
+    int         bedType{0};
+    bool        timeLapse{false};
+    bool        heatedBedLeveling{false};
+    bool        autoRefill{false};
+    bool        uploadAndStartPrint{false};
 
     std::function<void(const uint64_t uploadedBytes, const uint64_t totalBytes, bool& cancel)> uploadProgressFn;
     std::function<void(const std::string& errorMsg)>                                           errorFn;
 };
 
 using PrinterConnectStatusFn = std::function<void(const std::string& printerId, const PrinterConnectStatus& status)>;
-using PrinterStatusFn     = std::function<void(const std::string& printerId, const PrinterStatus& status)>;
+using PrinterStatusFn        = std::function<void(const std::string& printerId, const PrinterStatus& status)>;
 using PrinterPrintTaskFn     = std::function<void(const std::string& printerId, const PrinterPrintTask& printTask)>;
-using PrinterAttributesFn     = std::function<void(const std::string& printerId, const PrinterNetworkInfo& printerInfo)>;
+using PrinterAttributesFn    = std::function<void(const std::string& printerId, const PrinterNetworkInfo& printerInfo)>;
 
 } // namespace Slic3r
 

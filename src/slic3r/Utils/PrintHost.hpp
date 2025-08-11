@@ -43,43 +43,6 @@ struct PrintHostUpload
     std::map<std::string, std::string> extended_info;
 };
 
-struct PrintAmsTray
-{
-    std::string tray_id;
-    std::string setting_id;
-    std::string filament_id;
-    std::string from;
-    std::string brand;
-    int         serial_number;
-    std::string filament_type;
-    std::string filament_name;
-    std::string filament_color;
-    std::string filament_diameter;
-    int         min_nozzle_temp;
-    int         max_nozzle_temp;
-    int         min_bed_temp;
-    int         max_bed_temp;
-    bool        enabled;
-};
-
-struct PrintAms
-{
-    std::string               ams_id;
-    double                    temperature;
-    int                       humidity;
-    std::vector<PrintAmsTray> tray_list;
-};
-
-struct PrintAmsInfo
-{
-    bool                      ams_connect_status;
-    std::string               ams_type;
-    int                       ams_connect_num;
-    bool                      nozzle_filament_status;
-    std::vector<PrintAms>     ams_list;
-    PrintAmsTray              vt_tray;
-};
-
 class PrintHost
 {
 public:
@@ -121,8 +84,6 @@ public:
     virtual bool is_logged_in() const { return false; }
     virtual void log_out() const {}
     virtual bool get_login_url(wxString& auth_url) const { return false; }
-
-    virtual PrintAmsInfo get_ams(const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids)  { return PrintAmsInfo(); }
 
 protected:
     virtual wxString format_error(const std::string &body, const std::string &error, unsigned status) const;

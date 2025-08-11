@@ -59,6 +59,9 @@ enum class PrinterNetworkErrorCode
 
     HOST_TYPE_NOT_SUPPORTED = 9998,          // Host type not supported
     PRINTER_NETWORK_EXCEPTION = 9999,          // External error
+    PRINTER_NETWORK_INVALID_DATA = 1007,    // Printer network invalid data
+
+
 };
 
 
