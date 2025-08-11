@@ -406,6 +406,8 @@ function SwitchDarkMode( DarkCssPath )
 
 function ExecuteDarkMode( DarkCssPath )
 {
+	
+	document.documentElement.classList.add("dark");
     let nMode=0;
 	let bDarkMode=navigator.userAgent.match(  RegExp('dark','i') );	
 	if( bDarkMode!=null )
