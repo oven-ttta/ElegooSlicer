@@ -22,6 +22,8 @@ public:
     virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) = 0;
     virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) = 0;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices() = 0;   
+    virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo) = 0;
+    virtual void close() = 0;
     virtual int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo) = 0;
 };
 

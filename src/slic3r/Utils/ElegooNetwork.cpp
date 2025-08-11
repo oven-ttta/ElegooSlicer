@@ -63,5 +63,15 @@ int ElegooNetwork::getDeviceType(const PrinterNetworkInfo& printerNetworkInfo)
     return ElegooLink::getDeviceType(printerNetworkInfo);
 }
 
+PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo)
+{
+    return ElegooLink::getInstance()->getPrinterMmsInfo(printerNetworkInfo);
+}
+
+void ElegooNetwork::close()
+{
+    ElegooLink::getInstance()->close();
+}
+
 } // namespace Slic3r 
 

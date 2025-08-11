@@ -1783,63 +1783,63 @@ void Sidebar::load_ams_list(std::string const &device, MachineObject* obj)
 std::map<int, DynamicPrintConfig> Sidebar::build_filament_ams_list(const std::string& device_id)
 {
     std::map<int, DynamicPrintConfig> filament_ams_list;
-    auto preset_bundle = wxGetApp().preset_bundle;
-    DynamicPrintConfig cfg = preset_bundle->printers.get_edited_preset().config;
-    std::unique_ptr<PrintHost> host(PrintHost::get_print_host(&cfg));
-    if (host) {
-        std::map<std::string, std::string> vendor_filament_type_filament_ids;
-        std::map<std::string, std::string> generic_filament_type_filament_ids;
-        PrinterTechnology tech;
-        const auto opt = cfg.option<ConfigOptionEnum<PrinterTechnology>>("printer_technology");
-        if (opt != nullptr) {
-            tech = opt->value;
-        }
-        const auto& filaments = preset_bundle->materials(tech == ptFFF ? ptFFF : ptSLA);
-        const auto& filaments_presets = filaments.get_presets();
+    // auto preset_bundle = wxGetApp().preset_bundle;
+    // DynamicPrintConfig cfg = preset_bundle->printers.get_edited_preset().config;
+    // std::unique_ptr<PrintHost> host(PrintHost::get_print_host(&cfg));
+    // if (host) {
+    //     std::map<std::string, std::string> vendor_filament_type_filament_ids;
+    //     std::map<std::string, std::string> generic_filament_type_filament_ids;
+    //     PrinterTechnology tech;
+    //     const auto opt = cfg.option<ConfigOptionEnum<PrinterTechnology>>("printer_technology");
+    //     if (opt != nullptr) {
+    //         tech = opt->value;
+    //     }
+    //     const auto& filaments = preset_bundle->materials(tech == ptFFF ? ptFFF : ptSLA);
+    //     const auto& filaments_presets = filaments.get_presets();
 
-        for(const auto& filaments_preset : filaments_presets) {
-            if(!filaments_preset.is_system) {
-                continue;
-            }
-            auto* filament_type_opt = dynamic_cast<const ConfigOptionStrings*>(filaments_preset.config.option("filament_type"));
-            if(filament_type_opt == nullptr || filament_type_opt->values.size() == 0){
-                continue;
-            }
-            std::string filament_type = filament_type_opt->values[0];
-            if(filaments_preset.alias.empty() || filament_type.empty() || filaments_preset.filament_id.empty()) {
-                continue;
-            }
-            // std::string vendor  = filaments_preset.vendor->name;
-            std::string alias = filaments_preset.alias;
-            alias = boost::algorithm::to_upper_copy(alias);
-            if(alias.find("GENERIC") != std::string::npos) {
-                generic_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
-            }
-            else {
-                vendor_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
-            }
-        }
+    //     for(const auto& filaments_preset : filaments_presets) {
+    //         if(!filaments_preset.is_system) {
+    //             continue;
+    //         }
+    //         auto* filament_type_opt = dynamic_cast<const ConfigOptionStrings*>(filaments_preset.config.option("filament_type"));
+    //         if(filament_type_opt == nullptr || filament_type_opt->values.size() == 0){
+    //             continue;
+    //         }
+    //         std::string filament_type = filament_type_opt->values[0];
+    //         if(filaments_preset.alias.empty() || filament_type.empty() || filaments_preset.filament_id.empty()) {
+    //             continue;
+    //         }
+    //         // std::string vendor  = filaments_preset.vendor->name;
+    //         std::string alias = filaments_preset.alias;
+    //         alias = boost::algorithm::to_upper_copy(alias);
+    //         if(alias.find("GENERIC") != std::string::npos) {
+    //             generic_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
+    //         }
+    //         else {
+    //             vendor_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
+    //         }
+    //     }
 
-        auto ams_info = host->get_ams(vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
-        for (const auto& ams : ams_info.ams_list) {
-            for (const auto& tray : ams.tray_list) {
-                DynamicPrintConfig filament_config;
-                filament_config.set_key_value("filament_id", new ConfigOptionStrings{ tray.filament_id });
-                filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filament_type });
-                filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filament_name });
-                filament_config.set_key_value("tray_name", new ConfigOptionStrings{ ams.ams_id + "-" + tray.tray_id });
-                filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filament_color});
-                filament_config.set_key_value("filament_exist", new ConfigOptionBools{ true });
-                filament_config.set_key_value("tray_id", new ConfigOptionStrings{ tray.tray_id });
-                filament_config.set_key_value("ams_id", new ConfigOptionStrings{ ams.ams_id });
-                filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
-                filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filament_color);
+    //     auto ams_info = host->get_ams(vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
+    //     for (const auto& ams : ams_info.ams_list) {
+    //         for (const auto& tray : ams.tray_list) {
+    //             DynamicPrintConfig filament_config;
+    //             filament_config.set_key_value("filament_id", new ConfigOptionStrings{ tray.filament_id });
+    //             filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filament_type });
+    //             filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filament_name });
+    //             filament_config.set_key_value("tray_name", new ConfigOptionStrings{ ams.ams_id + "-" + tray.tray_id });
+    //             filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filament_color});
+    //             filament_config.set_key_value("filament_exist", new ConfigOptionBools{ true });
+    //             filament_config.set_key_value("tray_id", new ConfigOptionStrings{ tray.tray_id });
+    //             filament_config.set_key_value("ams_id", new ConfigOptionStrings{ ams.ams_id });
+    //             filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
+    //             filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filament_color);
                
-                int filament_index = (std::stoi(ams.ams_id) * 4) + std::stoi(tray.tray_id);
-                filament_ams_list.emplace(filament_index, std::move(filament_config));
-            }
-        }
-    }
+    //             int filament_index = (std::stoi(ams.ams_id) * 4) + std::stoi(tray.tray_id);
+    //             filament_ams_list.emplace(filament_index, std::move(filament_config));
+    //         }
+    //     }
+    // }
     return filament_ams_list;
 }
 

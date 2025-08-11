@@ -34,6 +34,9 @@ void PrinterNetworkManager::close()
     for (auto& [printerId, network] : mNetworkConnections) {
         network->disconnectFromPrinter(printerId);
     }
+    for (auto& [printerId, network] : mNetworkConnections) {
+        network->close();
+    }
     mNetworkConnections.clear();
 }
 
@@ -248,6 +251,24 @@ void PrinterNetworkManager::onPrinterAttributes(const std::string& printerId, co
     if (mPrinterAttributesCallback) {
         mPrinterAttributesCallback(printerId, printerInfo);
     }
+}
+
+PrinterNetworkResult<PrinterMmsGroup> PrinterNetworkManager::getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo)
+{
+    std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerNetworkInfo.printerId);
+    PrinterNetworkResult<PrinterMmsGroup> result(PrinterNetworkErrorCode::UNKNOWN_ERROR, PrinterMmsGroup());
+    if (network) {
+        result = network->getPrinterMmsInfo(printerNetworkInfo);
+        if (result.isError()) {
+            wxLogError("Failed to get printer mms info for printer %s %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
+                       printerNetworkInfo.printerModel, result.message.c_str());
+        }
+    } else {
+        wxLogError("No network connection for printer: %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
+                   printerNetworkInfo.printerModel);
+        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::NOT_FOUND, PrinterMmsGroup());
+    }
+    return result;
 }
 
 } // namespace Slic3r

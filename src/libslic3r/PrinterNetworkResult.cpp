@@ -76,6 +76,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("printer task not found");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION:
             return _u8L("printer network exception");
+        case PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA:
+            return _u8L("printer network invalid data");
         default:
             return _u8L("unknown error occurred");
     }
