@@ -118,7 +118,7 @@ ElegooLink::ElegooLink()
 {
     elink::ElegooLink::Config cfg;
 
-    cfg.logLevel         = 2;
+    cfg.logLevel         = 1;
     cfg.logEnableConsole = true;
     cfg.logEnableFile    = true;
     cfg.logFileName      = data_dir() + "/log/elegoolink.log";

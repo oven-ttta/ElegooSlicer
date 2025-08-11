@@ -1291,13 +1291,11 @@ void Sidebar::update_all_preset_comboboxes()
         } else {
             connection_btn->Show();
         }
-
-        // wxTheApp->CallAfter([this]() {
-        //     load_ams_list();
-        //     if(wxGetApp().preset_bundle->filament_ams_list.size() > 0)
-        //         ams_btn->Show();          
-        // });           
-       
+        if (cfg.has("support_multi_filament") && cfg.option<ConfigOptionBool>("support_multi_filament")->value) {
+            ams_btn->Show();
+        } else {
+            ams_btn->Hide();
+        }              
     }
 
     if (cfg.opt_bool("pellet_modded_printer")) {
