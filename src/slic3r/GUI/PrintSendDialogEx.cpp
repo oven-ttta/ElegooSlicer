@@ -145,8 +145,8 @@ void PrintSendDialogEx::init()
     }
 
     mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrintSendDialogEx::onScriptMessage, this);
-
-    wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/print_send/printsend.html").make_preferred().string());
+    mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
+    wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/print_send/index.html").make_preferred().string());
     TargetUrl          = "file://" + TargetUrl;
     mBrowser->LoadURL(TargetUrl);
 
@@ -155,7 +155,7 @@ void PrintSendDialogEx::init()
     topsizer->Add(mBrowser, wxSizerFlags().Expand().Proportion(1));
     int height = 815;
     if (mFilamentAmsList.empty()) {
-        height = 564;
+        height = 600;
     }
     wxSize pSize = FromDIP(wxSize(860, height));
     SetSize(pSize);
