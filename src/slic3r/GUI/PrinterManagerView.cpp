@@ -115,8 +115,24 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId)
     
     if(printerInfo.deviceType == 2) 
     {
-        url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber);
+        std::string accessToken="123456";
+        if (printerInfo.authMode == "basic") {
+    
+        } else if (printerInfo.authMode == "token") {
+            try {
+                nlohmann::json extraInfo = nlohmann::json::parse(printerInfo.extraInfo);
+                if (extraInfo.contains(PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN)) {
+                accessToken = extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN].get<std::string>();
+                } else {
+                    wxLogError("Error connecting to device: %s", "Token is not set");
+                }
+            }catch (nlohmann::json::parse_error& e) {
+                wxLogError("Error parsing extraInfo: %s", e.what());
+            }
+        }
+        url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber) + "&access_code=" + accessToken;
     }
+
     view->load_url(url);
     mTabBar->AddPage(view, from_u8(printerInfo.printerName));
     mTabBar->SetSelection(mTabBar->GetPageCount() - 1);

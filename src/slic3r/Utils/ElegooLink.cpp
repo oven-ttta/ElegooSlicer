@@ -118,7 +118,7 @@ ElegooLink::ElegooLink()
 {
     elink::ElegooLink::Config cfg;
 
-    cfg.logLevel         = 2;
+    cfg.logLevel         = 1;
     cfg.logEnableConsole = true;
     cfg.logEnableFile    = true;
     cfg.logFileName      = data_dir() + "/log/elegoolink.log";
@@ -298,11 +298,14 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverDevice
     return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, discoverDevices);
 }
 
-bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status)
+bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status, int tryCount)
 {
+    if(tryCount < 1){
+        tryCount = 1;
+    }
     bool isBusy = true;
     status = PRINTER_STATUS_UNKNOWN;
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < tryCount; i++) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         auto elinkResult = elink::ElegooLink::getInstance().getDeviceStatus({printerId});
         if (elinkResult.code == elink::ElegooError::SUCCESS) {
@@ -351,7 +354,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkInfo& p
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     try {
         PrinterStatus status;
-        if(isBusy(printerNetworkInfo.printerId, status)) {
+        if(isBusy(printerNetworkInfo.printerId, status , 1)) {
             return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_BUSY, false, "Printer is busy, status: " + std::to_string(status));
         }
         elink::FileUploadParams uploadParams;
