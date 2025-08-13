@@ -27,7 +27,7 @@ public:
     static int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo);
     
     private:
-       bool isBusy(const std::string& printerId, PrinterStatus &status);
+       bool isBusy(const std::string& printerId, PrinterStatus &status, int tryCount = 10);
        std::mutex mMutex;
        bool mIsCleanup = false;
 };

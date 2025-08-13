@@ -259,13 +259,13 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
     wxLogMessage("Received message: %s", message);
     try {
         nlohmann::json root = nlohmann::json::parse(message.ToUTF8().data());
-        std::string cmd = root["cmd"];
+        std::string method = root["method"];
         std::string requestId = root.value("id", "");
         nlohmann::json params;
-        if(root.contains("data")) {
-            params = root["data"];
+        if(root.contains("params")) {
+            params = root["params"];
         }
-        if (cmd == "open") {
+        if (method == "open") {
             std::string url = params.value("url", "");
             bool needDownload = params.value("needDownload", false);
             wxLogMessage("Open URL: %s", url);
@@ -275,16 +275,16 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
             }else{
                 wxLaunchDefaultBrowser(url);
             }
-        } else if (cmd == "reload"){
+        } else if (method == "reload"){
             if (m_url.IsEmpty())return;
             m_loadState = PWLoadState::URL_LOADING;
             loadUrl(m_url);
             //loadConnectingPage();
             return;
         }
-        else if (cmd == "open_file_dialog") {
+        else if (method == "open_file_dialog") {
             nlohmann::json response = json::object();
-            response["cmd"] = cmd;
+            response["method"] = method;
             response["id"] = requestId;
             try {
                 auto filter = params.value("filter", "All files (*.*)|*.*");
@@ -301,9 +301,9 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
             }
             wxString strJS = wxString::Format("window.HandleStudio(%s)", response.dump(-1, ' ', true));
             wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
-        } else if(cmd == "upload_file"){
+        } else if(method == "upload_file"){
             nlohmann::json response = json::object();
-            response["cmd"] = cmd;
+            response["method"] = method;
             response["id"] = requestId;
             
             // 检查是否已有上传在进行中
@@ -328,7 +328,7 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
                     }
                     
                     nlohmann::json progress = json::object();
-                    progress["cmd"] = "upload_progress";
+                    progress["method"] = "upload_progress";
                     progress["id"] = requestId;
                     progress["data"]["uploadedBytes"] = uploadedBytes;
                     progress["data"]["totalBytes"] = totalBytes;
@@ -345,7 +345,7 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
                 }
                 
                 // 启动新的上传线程
-                m_uploadThread = std::thread([this, networkParams, requestId, cmd]() mutable {
+                m_uploadThread = std::thread([this, networkParams, requestId, method]() mutable {
                     bool ret = false;
                     try {
                         ret = PrinterManager::getInstance()->upload(networkParams);
@@ -357,9 +357,9 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
                     m_uploadInProgress = false;
                     
                     // 在主线程中发送响应
-                    wxGetApp().CallAfter([this, ret, requestId, cmd]() {
+                    wxGetApp().CallAfter([this, ret, requestId, method]() {
                         nlohmann::json response = json::object();
-                        response["cmd"] = cmd;
+                        response["method"] = method;
                         response["id"] = requestId;
                         response["code"] = ret ? 0 : -1;
                         if (!ret) {
@@ -380,7 +380,7 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
         }
         
         else {
-            wxLogMessage("Unknown command: %s", cmd);
+            wxLogMessage("Unknown command: %s", method);
         }
     } catch (std::exception& e) {
         wxLogMessage("Error: %s", e.what());
