@@ -154,6 +154,7 @@
 #include "FileArchiveDialog.hpp"
 
 #include "PrintSendDialogEx.hpp"
+#include "PrinterMmsSyncView.hpp"
 
 using boost::optional;
 namespace fs = boost::filesystem;
@@ -1845,22 +1846,25 @@ std::map<int, DynamicPrintConfig> Sidebar::build_filament_ams_list(const std::st
 
 void Sidebar::load_ams_list()
 {
-    std::string device_id = wxGetApp().preset_bundle->printers.get_edited_preset().base_id;
-    //wxGetApp().preset_bundle->printers
-    std::map<int, DynamicPrintConfig> filament_ams_list = build_filament_ams_list(device_id);
+   
+    // std::string device_id = wxGetApp().preset_bundle->printers.get_edited_preset().base_id;
+    // //wxGetApp().preset_bundle->printers
+    // std::map<int, DynamicPrintConfig> filament_ams_list = build_filament_ams_list(device_id);
 
-    p->ams_list_device = device_id;
-    if (wxGetApp().preset_bundle->filament_ams_list == filament_ams_list)
-        return;
-    wxGetApp().preset_bundle->filament_ams_list = filament_ams_list;
+    // p->ams_list_device = device_id;
+    // if (wxGetApp().preset_bundle->filament_ams_list == filament_ams_list)
+    //     return;
+    // wxGetApp().preset_bundle->filament_ams_list = filament_ams_list;
 
-    for (auto c : p->combos_filament)
-        c->update();
+    // for (auto c : p->combos_filament)
+    //     c->update();
+    wxPostEvent(this, SimpleEvent(EVT_GLTOOLBAR_PRINTER_MMS_SYNC));
 }
 
 void Sidebar::sync_ams_list()
 { 
     load_ams_list();
+    return;
     auto & list = wxGetApp().preset_bundle->filament_ams_list;
     if (list.empty()) {
         MessageDialog dlg(this,
@@ -2344,6 +2348,7 @@ struct Plater::priv
     SendMultiMachinePage* m_send_multi_dlg = nullptr;
     SendToPrinterDialog* m_send_to_sdcard_dlg = nullptr;
     PublishDialog *m_publish_dlg = nullptr;
+    PrinterMmsSyncView* m_printer_mms_sync_view = nullptr;
 
     // Data
     Slic3r::DynamicPrintConfig *config;        // FIXME: leak?
@@ -2813,6 +2818,7 @@ struct Plater::priv
     void on_action_send_to_printer(bool isall = false);
     void on_action_send_to_multi_machine(SimpleEvent&);
     int update_print_required_data(Slic3r::DynamicPrintConfig config, Slic3r::Model model, Slic3r::PlateDataPtrs plate_data_list, std::string file_name, std::string file_path);
+    void on_action_sync_printer_mms(SimpleEvent&);
 private:
     bool layers_height_allowed() const;
 
@@ -3233,6 +3239,7 @@ Plater::priv::priv(Plater *q, MainFrame *main_frame)
         q->Bind(EVT_GLTOOLBAR_SLICE_PLATE, &priv::on_action_slice_plate, this);
         q->Bind(EVT_GLTOOLBAR_SLICE_ALL, &priv::on_action_slice_all, this);
         q->Bind(EVT_GLTOOLBAR_PRINT_PLATE, &priv::on_action_print_plate, this);
+        q->Bind(EVT_GLTOOLBAR_PRINTER_MMS_SYNC, &priv::on_action_sync_printer_mms, this);
         q->Bind(EVT_PRINT_FROM_SDCARD_VIEW, &priv::on_action_print_plate_from_sdcard, this);
         q->Bind(EVT_GLTOOLBAR_SELECT_SLICED_PLATE, &priv::on_action_select_sliced_plate, this);
         q->Bind(EVT_GLTOOLBAR_PRINT_ALL, &priv::on_action_print_all, this);
@@ -7334,6 +7341,14 @@ void Plater::priv::on_action_send_to_multi_machine(SimpleEvent&)
         m_send_multi_dlg = new SendMultiMachinePage(q);
     m_send_multi_dlg->prepare(partplate_list.get_curr_plate_index());
     m_send_multi_dlg->ShowModal();
+}
+
+void Plater::priv::on_action_sync_printer_mms(SimpleEvent&)
+{
+    if(m_printer_mms_sync_view == nullptr) {
+        m_printer_mms_sync_view = new PrinterMmsSyncView(q);
+    }
+    m_printer_mms_sync_view->ShowModal();
 }
 
 void Plater::priv::on_action_print_plate_from_sdcard(SimpleEvent&)
@@ -12888,8 +12903,7 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
         if (PrintHost::support_device_list_management(*physical_printer_config)) {
             pDlg = std::make_unique<PrintSendDialogEx>(this, get_partplate_list().get_curr_plate_index(), default_output_file,
                                                      upload_job.printhost->get_post_upload_actions(), groups, storage_paths, storage_names,
-                                                     config->get_bool("open_device_tab_post_upload"),
-                                                     wxGetApp().preset_bundle->filament_ams_list);
+                                                     config->get_bool("open_device_tab_post_upload"));
         } else {
             pDlg = std::make_unique<PrintHostSendDialog>(default_output_file, upload_job.printhost->get_post_upload_actions(), groups,
                                                          storage_paths, storage_names, config->get_bool("open_device_tab_post_upload"));

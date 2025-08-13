@@ -418,7 +418,7 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const Printe
 
                 for(const auto& canvas : mmsData.canvases) {
                     PrinterMms mmsInfo;
-                    mmsInfo.mmId = canvas.canvasId;
+                    mmsInfo.mmsId = canvas.canvasId;
                     mmsInfo.connected = canvas.connected;
                     for(const auto& tray : canvas.trays) {
                         PrinterMmsTray trayInfo;

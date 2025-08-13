@@ -20,45 +20,45 @@
     <div id="app">
         <div class="filament-sync-container">
             <div class="main">
-                <div v-if="devices&&devices.length >0">
-                    <el-select v-model="curDevice" class="model-select" :show-arrow="false" placeholder="Please select a printer">
+                <div v-if="printerList&&printerList.length >0">
+                    <el-select v-model="curPrinter" class="model-select" :show-arrow="false" placeholder="Please select a printer" @change="onPrinterChanged">
                         <template #label="{ value }">
                             <div class="model-container">
-                                <span class="icon-button" @click="refreshDevice($event, value)">
+                                <span class="icon-button" @click="refreshPrinterList($event, value)">
                                     <img src="./img/refresh.svg" alt="Refresh" />
                                 </span>
-                                <img src="" class="model-image" alt="model" />
+                                <img :src="value.printerImg" class="model-image" alt="model" />
                                 <div class="model-info">
-                                    <span class="model-title">{{ value.name }}: </span>
-                                    <span class="model-description">{{ value.model }}</span>
+                                    <span class="model-title">{{ value.printerName }}: </span>
+                                    <span class="model-description">{{ value.printerModel }}</span>
                                 </div>
                             </div>
                         </template>
-                        <el-option v-for="item in devices" class="model-option" :key="item.id" :value="item">
+                        <el-option v-for="item in printerList" class="model-option" :key="item.printerId" :value="item">
 
                             <div class="model-container">
-                                <img src="" class="model-image" alt="model" />
+                                <img :src="item.printerImg" class="model-image" alt="model" />
                                 <div class="model-info">
-                                    <span class="model-title">{{ item.name }}: </span>
-                                    <span class="model-description">{{ item.model }}</span>
+                                    <span class="model-title">{{ item.printerName }}: </span>
+                                    <span class="model-description">{{ item.printerModel }}</span>
                                 </div>
                             </div>
                         </el-option>
                     </el-select>
                 </div>
-                <div v-if="devices&&devices.length >0">
-                    <div class="filament-title" v-show="curDevice">Filament Information</div>
-                    <div class="empty-content" v-if="curDevice && !curDevice.isOnline">
+                <div v-if="printerList&&printerList.length >0">
+                    <div class="filament-title" v-show="curPrinter">Filament Information</div>
+                    <div class="empty-content" v-if="curPrinter && !curPrinter.isOnline">
                         <img src="./img/offline.svg" />
                         <span class="offline-text">The printer is offline. Please check and refresh or retry.</span>
                     </div>
                     <div class="empty-content"
-                        v-else-if="curDevice && (curDevice.filament?.length=== 0 || !curDevice.filament)">
+                        v-else-if="curPrinter && (mmsFilamentList?.length=== 0 || !mmsFilamentList.filament)">
                         <img src="./img/no-filament.svg" />
                         <span class="no-filament-text">The printer has no filament information to sync. Please check and refresh or retry.</span>
                     </div>
-                    <div class="filament-list" v-else-if="curDevice && curDevice.filament?.length>0">
-                        <div v-for="filament in curDevice.filament" :key="filament.id" class="filament-item">
+                    <div class="filament-list" v-else-if="curPrinter && printFilamentList?.length>0">
+                        <div v-for="filament in printFilamentList" :key="filament.id" class="filament-item">
                             <span class="filament-item-id">{{ filament.id }}</span>
                             <span class="filament-item-line"></span>
                             <div class="filament-item-info">
@@ -70,7 +70,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="empty-content" v-if="!devices||devices.length === 0">
+                <div class="empty-content" v-if="!printerList||printerList.length === 0">
                     <span class="offline-text">No printer connected. Please go to "Devices" to discover or add a new printer.</span>
                 </div>
             </div>
@@ -80,140 +80,7 @@
             </div>
         </div>
     </div>
-    <script>
-        const { createApp } = Vue;
-        const { ElButton, ElDialog, ElInput, ElSelect, ElOption, ElForm, ElFormItem } = ElementPlus;
-
-        createApp({
-           //data for MVVM binding
-            data() {
-                return {
-                    // Your data properties here
-                    curDevice: null,
-                    devices: [{
-                        id: "1",
-                        name: 'Centauri Carbon',
-                        model: 'Centauri Carbon',
-                        isOnline: true,
-                        filament: [{
-                            id: "1",
-                            name: 'PLA+',
-                            amsFilamentColor: '#FF0000',
-                        },
-                        {
-                            id: "2",
-                            name: 'PRTG+',
-                            amsFilamentColor: '#00FF00',
-                        },
-                        {
-                            id: "3",
-                            name: 'PLA PRO',
-                            amsFilamentColor: '#0000FF',
-                        },
-                        ],
-                    },
-                    {
-                        id: "2",
-                        name: 'Centauri Carbon 2',
-                        model: 'Centauri Carbon 2',
-                        isOnline: true,
-                        filament: [{
-                            id: "1",
-                            name: 'PLA+',
-                            amsFilamentColor: '#FF0000',
-                        },
-                        {
-                            id: "2",
-                            name: 'PRTG+',
-                            amsFilamentColor: '#00FF00',
-                        },
-                        {
-                            id: "3",
-                            name: 'PLA PRO',
-                            amsFilamentColor: '#0000FF',
-                        },
-                        {
-                            id: "3",
-                            name: 'PLA PRO',
-                            amsFilamentColor: '#0000FF',
-                        },
-                        {
-                            id: "3",
-                            name: 'PLA PRO',
-                            amsFilamentColor: '#0000FF',
-                        }
-                            ,
-                        {
-                            id: "3",
-                            name: 'PLA PRO',
-                            amsFilamentColor: '#0000FF',
-                        }
-                        ],
-                    },
-                    {
-                        id: "3",
-                        name: 'Centauri Carbon',
-                        model: 'Centauri Carbon',
-                        isOnline: true,
-                        filament: [
-                        ],
-                    },
-                    {
-                        id: "4",
-                        name: 'Centauri Carbon',
-                        model: 'Centauri Carbon',
-                        isOnline: false,
-                        filament: [
-                        ],
-                    },
-                    ],
-                };
-            },
-            methods: {
-                getFilamentSvg(filament) {
-                    const color = filament?.amsFilamentColor || '#888';
-                    return getFilamentSvg(color);
-                },
-                // Lifecycle methods
-                async init() {
-
-                },
-                // Handle messages from backend
-                handleStudio(data) {
-                    const command = data.command;
-                },
-                refreshDevice(event, device) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    console.log('Refreshing devices...');
-                    // Refresh device logic here
-                },
-                cancel() {
-                    console.log('Cancelling...');
-                },
-                sync() {
-                    console.log('Syncing...');
-                }
-            },
-            // Initialize the application
-            mounted() {
-                // Initialize the application
-                this.init();
-
-                // Set up global message handler
-                window.HandleStudio = (data) => {
-                    this.handleStudio(data);
-                };
-
-                // Set up global functions that might be called externally
-                window.OnInit = () => {
-                    this.init();
-                };
-            },
-        })
-            .use(ElementPlus)
-            .mount('#app');
-    </script>
+    <script src="./filament_sync.js"></script>
 </body>
 
 </html>

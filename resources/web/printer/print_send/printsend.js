@@ -1,25 +1,8 @@
 // Vue.js refactored version of printsend.js
 const { createApp, unref } = Vue;
 const { ElInput, ElButton, ElPopover } = ElementPlus;
-// Click outside directive
-const clickOutside = {
-    beforeMount(el, binding) {
-        el.clickOutsideEvent = function (event) {
-            if (!(el === event.target || el.contains(event.target))) {
-                binding.value(event);
-            }
-        };
-        document.body.addEventListener('click', el.clickOutsideEvent);
-    },
-    unmounted(el) {
-        document.body.removeEventListener('click', el.clickOutsideEvent);
-    }
-};
 
 const PrintSendApp = {
-    directives: {
-        clickOutside
-    },
     data() {
         return {
             // Print task data

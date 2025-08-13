@@ -285,6 +285,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/PrinterWebView.hpp
     GUI/PrinterManagerView.cpp
     GUI/PrinterManagerView.hpp
+    GUI/PrinterMmsSyncView.cpp
+    GUI/PrinterMmsSyncView.hpp
     GUI/WebDownPluginDlg.hpp
     GUI/WebDownPluginDlg.cpp
     GUI/WebGuideDialog.hpp
@@ -593,6 +595,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/ElegooLink.hpp
     Utils/PrinterNetworkEvent.cpp
     Utils/PrinterNetworkEvent.hpp
+    Utils/PrinterMmsManager.cpp
+    Utils/PrinterMmsManager.hpp
 
 )
 

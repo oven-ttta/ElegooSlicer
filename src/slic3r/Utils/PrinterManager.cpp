@@ -490,6 +490,23 @@ bool PrinterManager::upload(PrinterNetworkParams& params)
     }
     return false;
 }
+PrinterMmsGroup PrinterManager::getPrinterMmsInfo(const std::string& printerId)
+{
+    PrinterMmsGroup mmsGroup;
+    auto it = mPrinterList.find(printerId);
+    if(it != mPrinterList.end()) {
+        auto mmsInfo = PrinterNetworkManager::getInstance()->getPrinterMmsInfo(it->second);
+        if(mmsInfo.isSuccess()) {
+            if(mmsInfo.hasData()) {
+                mmsGroup = mmsInfo.data.value();
+            }
+        } else {
+            wxLogWarning("Failed to get printer mms info: %s %s %s, error: %s", it->second.host, it->second.printerName,
+                         it->second.printerModel, mmsInfo.message.c_str());
+        }
+    }
+    return mmsGroup;
+}
 
 void PrinterManager::savePrinterList()
 {

@@ -60,7 +60,9 @@ struct PrinterPrintTask
 
 struct PrinterMmsTray
 {
+    std::string mmsId;
     std::string trayId;
+    std::string trayIndex;
     std::string settingId;
     std::string filamentId;
     std::string from;
@@ -79,7 +81,7 @@ struct PrinterMmsTray
 
 struct PrinterMms
 {
-    std::string                 mmId;
+    std::string                 mmsId;
     double                      temperature;
     int                         humidity;
     bool                        connected;
@@ -100,6 +102,17 @@ struct PrinterMmsGroup
     PrinterMmsTray          vtTray;
 };
 
+struct PrintFilamentMmsMapping
+{
+    std::string filamentId;
+    std::string filamentName;
+    std::string filamentColor;
+    std::string filamentType;
+    float       filamentWeight;
+    float       filamentDensity;
+    //print mapping mms filament
+    PrinterMmsTray mappedMmsFilament;
+};
 struct PrinterNetworkInfo
 {
     std::string printerName;
@@ -129,7 +142,6 @@ struct PrinterNetworkInfo
     PrinterPrintTask     printTask;
     PrinterConnectStatus connectStatus{PRINTER_CONNECT_STATUS_DISCONNECTED};
     PrinterStatus        printerStatus{PRINTER_STATUS_IDLE};
-    PrinterMmsGroup      mmsGroup;
 
     template<class Archive> void serialize(Archive& ar)
     {
