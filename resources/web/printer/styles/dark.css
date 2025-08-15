@@ -34,6 +34,18 @@ html.dark {
   --color-danger: #f44336;
   --color-info: #2196f3;
   
+  /* Printer Status Colors - Dark Theme */
+  --printer-status-offline-color: #cccccc;
+  --printer-status-offline-bg: #404040;
+  --printer-status-success-color: var(--color-success);
+  --printer-status-success-bg: rgba(76, 175, 80, 0.2);
+  --printer-status-error-color: var(--color-danger);
+  --printer-status-error-bg: rgba(244, 67, 54, 0.2);
+  --printer-status-warning-color: var(--color-warning);
+  --printer-status-warning-bg: rgba(255, 152, 0, 0.2);
+  --printer-status-primary-color: var(--color-primary);
+  --printer-status-primary-bg: rgba(22, 119, 255, 0.2);
+
   /* Shadow Colors */
   --shadow-light: rgba(0, 0, 0, 0.5);
   --shadow-medium: rgba(0, 0, 0, 0.7);
@@ -49,6 +61,10 @@ html.dark {
   --el-color-primary: var(--color-primary);
   --el-fill-color-blank: #2d2d2d;
   --el-border-color-hover: var(--border-secondary);
+
+  --el-bg-color: var(--bg-primary);
+  --el-dialog-bg-color: var(--el-bg-color);
+  --el-drawer-bg-color: var(--el-dialog-bg-color, var(--el-bg-color));
 }
 
 /* ===== DARK THEME SPECIFIC ADJUSTMENTS ===== */
