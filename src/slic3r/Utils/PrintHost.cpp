@@ -27,6 +27,7 @@
 #include "Flashforge.hpp"
 #include "SimplyPrint.hpp"
 #include "PrinterManager.hpp"
+#include "PrinterMmsManager.hpp"
 
 namespace fs = boost::filesystem;
 using boost::optional;
@@ -416,7 +417,13 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
             params.printerId = the_job.upload_data.extended_info["selectedPrinterId"];
             selectedPrinterId = params.printerId;
         }
-
+        if(the_job.upload_data.extended_info.find("filamentAmsMapping") != the_job.upload_data.extended_info.end()) {
+            nlohmann::json filamentAmsMapping = nlohmann::json::parse(the_job.upload_data.extended_info["filamentAmsMapping"]);
+            for(auto& filament : filamentAmsMapping) {
+                PrintFilamentMmsMapping printFilamentMmsMapping = PrinterMmsManager::convertJsonToPrintFilamentMmsMapping(filament);
+                params.filamentMmsMappingList.push_back(printFilamentMmsMapping);
+            }
+        }
         params.uploadProgressFn = [this](uint64_t uploadedBytes, uint64_t totalBytes, bool& cancel) { 
             Http::Progress progress(totalBytes, uploadedBytes, totalBytes, uploadedBytes, "");
             this->progress_fn(std::move(progress), cancel);

@@ -5,17 +5,16 @@ const { ElButton, ElDialog, ElInput, ElSelect, ElOption, ElForm, ElFormItem } = 
 const FilamentSyncApp = {
     data() {
         return {
-            // Printer and device data
             curPrinter: null,
-            printFilamentList:[],
-            mmsFilamentList:[],
             printerList: [],
+            mmsInfo: null,
+            printFilamentList: [],
         };
     },
 
     methods: {
         getFilamentSvg(filament) {
-            const color = filament?.amsFilamentColor || '#888';
+            const color = filament?.filamentColor || '#888';
             return getFilamentSvg(color);
         },
 
@@ -57,8 +56,8 @@ const FilamentSyncApp = {
                 this.printerList = response.data || [];
                 this.updatePrinterSelection();
             } else if (method === 'getPrinterFilamentInfo') {
-                this.mmsFilamentList = response.data.mmsInfo.mmsList || [];
-                this.printFilamentList = response.data.printFilamentList || [];
+                this.mmsInfo = response.data.mmsInfo;
+                this.printFilamentList = response.data.printFilamentList;
             }
         },
 
@@ -71,13 +70,13 @@ const FilamentSyncApp = {
                 selectedPrinter = this.printerList[0];
             }
 
-            this.curPrinter = selectedPrinter;
-            
+            this.curPrinter = selectedPrinter;  
             // Request filament info for the selected printer
             if (this.curPrinter && this.curPrinter.printerId) {
                 this.requestPrinterFilamentInfo(this.curPrinter.printerId);
             }
         },
+
 
         // Handle printer selection change
         onPrinterChanged(printer) {
@@ -109,9 +108,12 @@ const FilamentSyncApp = {
             // Send sync method to backend
             const message = {
                 id: Math.round(new Date() / 1000).toString(),
-                method: "sync",
+                method: "syncMmsFilament",
                 type: "request",
                 params: {
+                    mmsInfo: this.mmsInfo,
+                    printFilamentList: this.printFilamentList,
+                    printer: this.curPrinter
                 }
             };
             SendWXMessage(JSON.stringify(message));

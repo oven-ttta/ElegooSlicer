@@ -21,7 +21,8 @@
         <div class="filament-sync-container">
             <div class="main">
                 <div v-if="printerList&&printerList.length >0">
-                    <el-select v-model="curPrinter" class="model-select" :show-arrow="false" placeholder="Please select a printer" @change="onPrinterChanged">
+                    <el-select v-model="curPrinter" class="model-select" :show-arrow="false"
+                        placeholder="Please select a printer" @change="onPrinterChanged">
                         <template #label="{ value }">
                             <div class="model-container">
                                 <span class="icon-button" @click="refreshPrinterList($event, value)">
@@ -48,30 +49,33 @@
                 </div>
                 <div v-if="printerList&&printerList.length >0">
                     <div class="filament-title" v-show="curPrinter">Filament Information</div>
-                    <div class="empty-content" v-if="curPrinter && !curPrinter.isOnline">
+                    <div class="empty-content" v-if="curPrinter && curPrinter.connectStatus !== 1">
                         <img src="./img/offline.svg" />
                         <span class="offline-text">The printer is offline. Please check and refresh or retry.</span>
                     </div>
-                    <div class="empty-content"
-                        v-else-if="curPrinter && (mmsFilamentList?.length=== 0 || !mmsFilamentList.filament)">
+                    <div class="empty-content" v-else-if="curPrinter && (mmsInfo?.mmsList?.length=== 0)">
                         <img src="./img/no-filament.svg" />
-                        <span class="no-filament-text">The printer has no filament information to sync. Please check and refresh or retry.</span>
+                        <span class="no-filament-text">The printer has no filament information to sync. Please check and
+                            refresh or retry.</span>
                     </div>
-                    <div class="filament-list" v-else-if="curPrinter && printFilamentList?.length>0">
-                        <div v-for="filament in printFilamentList" :key="filament.id" class="filament-item">
-                            <span class="filament-item-id">{{ filament.id }}</span>
-                            <span class="filament-item-line"></span>
-                            <div class="filament-item-info">
-                                <span v-html="getFilamentSvg(filament)"></span>
-                                <div style="flex: 1; display: flex; justify-content: center;">
-                                    <span class="filament-item-name">{{ filament.name }}</span>
+                    <div class="filament-list" v-else-if="curPrinter && mmsInfo?.mmsList?.length>0">
+                        <div v-for="mms in mmsInfo.mmsList" :key="mms.mmsId" class="mms-item">
+                            <div v-for="tray in mms.trayList" :key="tray.trayName" class="filament-item">
+                                <span class="filament-item-id">{{ tray.trayName }}</span>
+                                <span class="filament-item-line"></span>
+                                <div class="filament-item-info">
+                                    <span v-html="getFilamentSvg(tray)"></span>
+                                    <div style="flex: 1; display: flex; justify-content: center;">
+                                        <span class="filament-item-name">{{ tray.filamentType }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="empty-content" v-if="!printerList||printerList.length === 0">
-                    <span class="offline-text">No printer connected. Please go to "Devices" to discover or add a new printer.</span>
+                    <span class="offline-text">No printer connected. Please go to "Devices" to discover or add a new
+                        printer.</span>
                 </div>
             </div>
             <div class="footer">

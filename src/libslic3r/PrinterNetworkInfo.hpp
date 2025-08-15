@@ -60,9 +60,9 @@ struct PrinterPrintTask
 
 struct PrinterMmsTray
 {
-    std::string mmsId;
     std::string trayId;
-    std::string trayIndex;
+    std::string mmsId;
+    std::string trayName;
     std::string settingId;
     std::string filamentId;
     std::string from;
@@ -82,6 +82,8 @@ struct PrinterMmsTray
 struct PrinterMms
 {
     std::string                 mmsId;
+    std::string                 mmsName;
+    std::string                 mmsModel;
     double                      temperature;
     int                         humidity;
     bool                        connected;
@@ -91,10 +93,8 @@ struct PrinterMms
 // Multi-Material System
 struct PrinterMmsGroup
 {
-    bool                    mmsConnected;
-    std::string             mmsType;
-    int                     mmsConnectNum;
-    bool                    nozzleFilamentStatus;
+    int                     connectNum;
+    bool                    connected;
     std::string             activeMmsId;
     std::string             activeTrayId;
     bool                    autoRefill;
@@ -104,8 +104,10 @@ struct PrinterMmsGroup
 
 struct PrintFilamentMmsMapping
 {
+    int index;
     std::string filamentId;
     std::string filamentName;
+    std::string filamentAlias;
     std::string filamentColor;
     std::string filamentType;
     float       filamentWeight;
@@ -161,6 +163,7 @@ struct PrinterNetworkParams
     bool        heatedBedLeveling{false};
     bool        autoRefill{false};
     bool        uploadAndStartPrint{false};
+    std::vector<PrintFilamentMmsMapping> filamentMmsMappingList;
 
     std::function<void(const uint64_t uploadedBytes, const uint64_t totalBytes, bool& cancel)> uploadProgressFn;
     std::function<void(const std::string& errorMsg)>                                           errorFn;

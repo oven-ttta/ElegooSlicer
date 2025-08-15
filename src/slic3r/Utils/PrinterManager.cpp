@@ -326,6 +326,7 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
         auto connectedPrinter = result.data.value();
         printerNetworkInfo.connectStatus = PRINTER_CONNECT_STATUS_CONNECTED;
         if(printerNetworkInfo.isPhysicalPrinter) {
+            // update the printer network info
             printerNetworkInfo.mainboardId = connectedPrinter.mainboardId;
             printerNetworkInfo.serialNumber = connectedPrinter.serialNumber;
             printerNetworkInfo.deviceType = connectedPrinter.deviceType;
@@ -412,14 +413,15 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
         if (isSamePrinter) {
             continue;
         }
-        // update the machine model and config info to keep consistent
         PrinterNetworkInfo printerNetworkInfo = discoverPrinter;
         printerNetworkInfo.printerId          = "";
         VendorProfile::PrinterModel printerModel;
-        // get machine profile from resources dir and get host type from config
+        // update vendor, printerModel and hostType to keep consistent with the printer model in system preset
         VendorProfile machineProfile    = getMachineProfile(discoverPrinter.vendor, discoverPrinter.printerModel, printerModel);
         printerNetworkInfo.vendor       = machineProfile.name;
-        printerNetworkInfo.printerName  = printerModel.name;
+        if(printerNetworkInfo.printerName.empty()) {
+            printerNetworkInfo.printerName  = printerModel.name;
+        }
         printerNetworkInfo.printerModel = printerModel.name;
         if (printerNetworkInfo.deviceType == 2) {
             printerNetworkInfo.printerModel = "Elegoo Centauri Carbon 2";
@@ -452,6 +454,16 @@ std::vector<PrinterNetworkInfo> PrinterManager::getPrinterList()
               [](const PrinterNetworkInfo& a, const PrinterNetworkInfo& b) { return a.addTime < b.addTime; });
     return printers;
 }
+PrinterNetworkInfo PrinterManager::getPrinterNetworkInfo(const std::string& printerId)
+{
+    std::lock_guard<std::mutex> lock(mPrinterListMutex);
+    auto it = mPrinterList.find(printerId);
+    if(it != mPrinterList.end()) {
+        return it->second;
+    }
+    return PrinterNetworkInfo();
+}
+
 bool PrinterManager::upload(PrinterNetworkParams& params)
 {
     std::string printerId = params.printerId;

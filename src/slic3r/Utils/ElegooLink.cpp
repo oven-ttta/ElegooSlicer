@@ -203,7 +203,6 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::addPrinter(const PrinterNet
                 PrinterNetworkInfo info = printerNetworkInfo;
                 info.firmwareVersion = addPrinter.firmwareVersion;
                 info.webUrl          = addPrinter.webUrl;
-                info.connectionUrl   = addPrinter.connectionUrl;
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
@@ -230,7 +229,6 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
                 PrinterNetworkInfo info = printerNetworkInfo;
                 info.firmwareVersion = addPrinter.firmwareVersion;
                 info.webUrl          = addPrinter.webUrl;
-                info.connectionUrl   = addPrinter.connectionUrl;
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
@@ -284,7 +282,6 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverDevice
                 info.vendor          = device.brand;
                 info.deviceType      = static_cast<int>(device.deviceType);
                 info.webUrl          = device.webUrl;
-                info.connectionUrl   = device.connectionUrl;
                 info.authMode        = device.authMode;
                 info.mainboardId     = device.mainboardId;
                 discoverDevices.push_back(info);
@@ -339,6 +336,15 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkInfo& p
         startPrintParams.autoBedLeveling = params.heatedBedLeveling;
         startPrintParams.heatedBedType   = params.bedType;
         startPrintParams.enableTimeLapse = params.timeLapse;
+
+        std::vector<elink::SlotMapItem> slotMap;
+        for(const auto& filamentMmsMapping : params.filamentMmsMappingList) {
+            elink::SlotMapItem slotMapItem;
+            slotMapItem.t = filamentMmsMapping.index;
+            slotMapItem.canvasId = filamentMmsMapping.mappedMmsFilament.mmsId;
+            slotMapItem.trayId = filamentMmsMapping.mappedMmsFilament.trayId;
+            slotMap.push_back(slotMapItem);
+        }
         auto elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
         resultCode  = parseElegooResult(elinkResult.code);
     } catch (const std::exception& e) {
@@ -415,17 +421,26 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const Printe
         if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if(elinkResult.hasData()) {
                 const auto& mmsData = elinkResult.value();
+                mmsGroup.connectNum = 0;
+                mmsGroup.connected = false;
                 mmsGroup.activeMmsId = mmsData.activeCanvasId;
                 mmsGroup.activeTrayId = mmsData.activeTrayId;
                 mmsGroup.autoRefill = mmsData.autoRefill;
-
                 for(const auto& canvas : mmsData.canvases) {
                     PrinterMms mmsInfo;
                     mmsInfo.mmsId = canvas.canvasId;
                     mmsInfo.connected = canvas.connected;
+                    if(canvas.connected) {
+                        mmsGroup.connected = true;
+                        mmsGroup.connectNum++;
+                    }
+                    mmsInfo.mmsName = canvas.name;
+                    mmsInfo.mmsModel = canvas.model;
                     for(const auto& tray : canvas.trays) {
                         PrinterMmsTray trayInfo;
+                        trayInfo.trayName = "";
                         trayInfo.trayId = tray.trayId;
+                        trayInfo.mmsId = canvas.canvasId;
                         trayInfo.vendor = tray.brand;
                         trayInfo.filamentType = tray.filamentType;
                         trayInfo.filamentName = tray.filamentName;

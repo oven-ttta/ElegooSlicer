@@ -81,11 +81,20 @@ void PrinterMmsSyncView::handleCommand(const std::string& method, const std::str
         sendResponse("getPrinterList", id, getPrinterList());
     } else if (method == "getPrinterFilamentInfo") {
         sendResponse("getPrinterFilamentInfo", id, getPrinterFilamentInfo(params));
-    } else if (method == "closeDialog") {
-        this->Hide();
+    } else if (method == "syncMmsFilament") {
+        sendResponse("syncMmsFilament", id, syncMmsFilament(params));
+        EndModal(wxID_OK);
+    }
+    else if (method == "closeDialog") {
+        EndModal(wxID_CANCEL);
     } else {
         wxLogWarning("Unknown command: %s", method);
     }
+}
+
+void PrinterMmsSyncView::EndModal(int ret)
+{
+    MsgDialog::EndModal(ret);
 }
 
 nlohmann::json PrinterMmsSyncView::getPrinterList()
@@ -171,6 +180,31 @@ nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& 
     };
     return response;
 }
+
+nlohmann::json PrinterMmsSyncView::syncMmsFilament(const nlohmann::json& params)
+{
+    nlohmann::json mmsInfo = params["mmsInfo"];
+    nlohmann::json printFilamentList = params["printFilamentList"];
+    nlohmann::json printer = params["printer"];
+
+    mMmsGroup  = PrinterMmsManager::convertJsonToPrinterMmsGroup(mmsInfo);
+
+    nlohmann::json response = {
+        {"code", 0},
+        {"message", "success"},
+    };
+    std::string selectedPrinterId = printer["printerId"].get<std::string>();
+    if(!selectedPrinterId.empty()) {
+        wxGetApp().app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, selectedPrinterId);
+    }
+    return response;
+}
+
+PrinterMmsGroup PrinterMmsSyncView::getSyncedMmsGroup()
+{
+    return mMmsGroup;
+}
+
 void PrinterMmsSyncView::sendResponse(const std::string& method, const std::string& id, const nlohmann::json& response)
 {
     nlohmann::json jsonResponse = {
@@ -192,6 +226,12 @@ void PrinterMmsSyncView::onShow()
     if (mBrowser) {
         mBrowser->Refresh();
     }
+}
+
+int PrinterMmsSyncView::ShowModal()
+{
+    onShow();
+    return MsgDialog::ShowModal();
 }
 
 }} // namespace Slic3r::GUI

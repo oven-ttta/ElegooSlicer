@@ -1781,90 +1781,47 @@ void Sidebar::load_ams_list(std::string const &device, MachineObject* obj)
     for (auto c : p->combos_filament)
         c->update();
 }
-std::map<int, DynamicPrintConfig> Sidebar::build_filament_ams_list(const std::string& device_id)
+bool Sidebar::load_mms_list()
 {
-    std::map<int, DynamicPrintConfig> filament_ams_list;
-    // auto preset_bundle = wxGetApp().preset_bundle;
-    // DynamicPrintConfig cfg = preset_bundle->printers.get_edited_preset().config;
-    // std::unique_ptr<PrintHost> host(PrintHost::get_print_host(&cfg));
-    // if (host) {
-    //     std::map<std::string, std::string> vendor_filament_type_filament_ids;
-    //     std::map<std::string, std::string> generic_filament_type_filament_ids;
-    //     PrinterTechnology tech;
-    //     const auto opt = cfg.option<ConfigOptionEnum<PrinterTechnology>>("printer_technology");
-    //     if (opt != nullptr) {
-    //         tech = opt->value;
-    //     }
-    //     const auto& filaments = preset_bundle->materials(tech == ptFFF ? ptFFF : ptSLA);
-    //     const auto& filaments_presets = filaments.get_presets();
+    auto printerMmsSyncView = new PrinterMmsSyncView(wxGetApp().mainframe);
 
-    //     for(const auto& filaments_preset : filaments_presets) {
-    //         if(!filaments_preset.is_system) {
-    //             continue;
-    //         }
-    //         auto* filament_type_opt = dynamic_cast<const ConfigOptionStrings*>(filaments_preset.config.option("filament_type"));
-    //         if(filament_type_opt == nullptr || filament_type_opt->values.size() == 0){
-    //             continue;
-    //         }
-    //         std::string filament_type = filament_type_opt->values[0];
-    //         if(filaments_preset.alias.empty() || filament_type.empty() || filaments_preset.filament_id.empty()) {
-    //             continue;
-    //         }
-    //         // std::string vendor  = filaments_preset.vendor->name;
-    //         std::string alias = filaments_preset.alias;
-    //         alias = boost::algorithm::to_upper_copy(alias);
-    //         if(alias.find("GENERIC") != std::string::npos) {
-    //             generic_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
-    //         }
-    //         else {
-    //             vendor_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
-    //         }
-    //     }
+    if (printerMmsSyncView->ShowModal() != wxID_OK) {
+        delete printerMmsSyncView;
+        return false;
+    }
+    auto mmsInfo = printerMmsSyncView->getSyncedMmsGroup();
+    delete printerMmsSyncView;
+    std::map<int, DynamicPrintConfig> filament_mms_list;
+    int                               filament_index = 0;
+    for (const auto& mms : mmsInfo.mmsList) {
 
-    //     auto ams_info = host->get_ams(vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
-    //     for (const auto& ams : ams_info.ams_list) {
-    //         for (const auto& tray : ams.tray_list) {
-    //             DynamicPrintConfig filament_config;
-    //             filament_config.set_key_value("filament_id", new ConfigOptionStrings{ tray.filament_id });
-    //             filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filament_type });
-    //             filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filament_name });
-    //             filament_config.set_key_value("tray_name", new ConfigOptionStrings{ ams.ams_id + "-" + tray.tray_id });
-    //             filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filament_color});
-    //             filament_config.set_key_value("filament_exist", new ConfigOptionBools{ true });
-    //             filament_config.set_key_value("tray_id", new ConfigOptionStrings{ tray.tray_id });
-    //             filament_config.set_key_value("ams_id", new ConfigOptionStrings{ ams.ams_id });
-    //             filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
-    //             filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filament_color);
-               
-    //             int filament_index = (std::stoi(ams.ams_id) * 4) + std::stoi(tray.tray_id);
-    //             filament_ams_list.emplace(filament_index, std::move(filament_config));
-    //         }
-    //     }
-    // }
-    return filament_ams_list;
-}
+        for (const auto& tray : mms.trayList) {
+            DynamicPrintConfig filament_config;
+            filament_config.set_key_value("filament_id", new ConfigOptionStrings{ tray.filamentId });
+            filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filamentType });
+            filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filamentName });
+            filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filamentColor});
+            filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
+            filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filamentColor);
+            filament_mms_list.emplace(filament_index, std::move(filament_config));
+            filament_index++;
+        }
+    }
 
-void Sidebar::load_ams_list()
-{
-   
-    // std::string device_id = wxGetApp().preset_bundle->printers.get_edited_preset().base_id;
-    // //wxGetApp().preset_bundle->printers
-    // std::map<int, DynamicPrintConfig> filament_ams_list = build_filament_ams_list(device_id);
+    p->ams_list_device = wxGetApp().preset_bundle->printers.get_edited_preset().base_id;
+    if (wxGetApp().preset_bundle->filament_ams_list == filament_mms_list)
+        return true;
+    wxGetApp().preset_bundle->filament_ams_list = filament_mms_list;
 
-    // p->ams_list_device = device_id;
-    // if (wxGetApp().preset_bundle->filament_ams_list == filament_ams_list)
-    //     return;
-    // wxGetApp().preset_bundle->filament_ams_list = filament_ams_list;
-
-    // for (auto c : p->combos_filament)
-    //     c->update();
-    wxPostEvent(this, SimpleEvent(EVT_GLTOOLBAR_PRINTER_MMS_SYNC));
+    for (auto c : p->combos_filament)
+        c->update();
+    return true;
 }
 
 void Sidebar::sync_ams_list()
 { 
-    load_ams_list();
-    return;
+    if(!load_mms_list())
+        return;
     auto & list = wxGetApp().preset_bundle->filament_ams_list;
     if (list.empty()) {
         MessageDialog dlg(this,
@@ -2348,7 +2305,6 @@ struct Plater::priv
     SendMultiMachinePage* m_send_multi_dlg = nullptr;
     SendToPrinterDialog* m_send_to_sdcard_dlg = nullptr;
     PublishDialog *m_publish_dlg = nullptr;
-    PrinterMmsSyncView* m_printer_mms_sync_view = nullptr;
 
     // Data
     Slic3r::DynamicPrintConfig *config;        // FIXME: leak?
@@ -2818,7 +2774,6 @@ struct Plater::priv
     void on_action_send_to_printer(bool isall = false);
     void on_action_send_to_multi_machine(SimpleEvent&);
     int update_print_required_data(Slic3r::DynamicPrintConfig config, Slic3r::Model model, Slic3r::PlateDataPtrs plate_data_list, std::string file_name, std::string file_path);
-    void on_action_sync_printer_mms(SimpleEvent&);
 private:
     bool layers_height_allowed() const;
 
@@ -3239,7 +3194,6 @@ Plater::priv::priv(Plater *q, MainFrame *main_frame)
         q->Bind(EVT_GLTOOLBAR_SLICE_PLATE, &priv::on_action_slice_plate, this);
         q->Bind(EVT_GLTOOLBAR_SLICE_ALL, &priv::on_action_slice_all, this);
         q->Bind(EVT_GLTOOLBAR_PRINT_PLATE, &priv::on_action_print_plate, this);
-        q->Bind(EVT_GLTOOLBAR_PRINTER_MMS_SYNC, &priv::on_action_sync_printer_mms, this);
         q->Bind(EVT_PRINT_FROM_SDCARD_VIEW, &priv::on_action_print_plate_from_sdcard, this);
         q->Bind(EVT_GLTOOLBAR_SELECT_SLICED_PLATE, &priv::on_action_select_sliced_plate, this);
         q->Bind(EVT_GLTOOLBAR_PRINT_ALL, &priv::on_action_print_all, this);
@@ -7341,14 +7295,6 @@ void Plater::priv::on_action_send_to_multi_machine(SimpleEvent&)
         m_send_multi_dlg = new SendMultiMachinePage(q);
     m_send_multi_dlg->prepare(partplate_list.get_curr_plate_index());
     m_send_multi_dlg->ShowModal();
-}
-
-void Plater::priv::on_action_sync_printer_mms(SimpleEvent&)
-{
-    if(m_printer_mms_sync_view == nullptr) {
-        m_printer_mms_sync_view = new PrinterMmsSyncView(q);
-    }
-    m_printer_mms_sync_view->ShowModal();
 }
 
 void Plater::priv::on_action_print_plate_from_sdcard(SimpleEvent&)

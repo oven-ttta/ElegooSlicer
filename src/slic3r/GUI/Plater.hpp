@@ -157,8 +157,7 @@ public:
     void load_ams_list(std::string const & device, MachineObject* obj);
     std::map<int, DynamicPrintConfig> build_filament_ams_list(MachineObject* obj);
 
-    void load_ams_list();
-    std::map<int, DynamicPrintConfig> build_filament_ams_list(std::string const &device_id);
+    bool load_mms_list();
 
     void sync_ams_list();
     // Orca

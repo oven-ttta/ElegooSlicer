@@ -5,9 +5,6 @@
     "from": "system",
     "setting_id": "EPLAPLUS00020",
     "instantiation": "true",
-    "filament_type": [
-        "PLA+"
-    ],
     "filament_max_volumetric_speed": [
         "3.2"
     ],

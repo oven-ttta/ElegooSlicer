@@ -408,9 +408,11 @@
 
 .filament-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .mapping-container {
@@ -418,13 +420,14 @@
   flex-direction: column;
   align-items: center;
   height: 84px;
-  width: 78px;
+  width: 84px;
   border-radius: 4px;
   /* outline: 2px solid red; */
   box-shadow: 0 0 0 2px var(--border-secondary);
   padding: 0px;
   border: none;
   box-sizing: border-box;
+  font-size: 12px;
 }
 
 .mapping-container:hover {
@@ -454,7 +457,7 @@
 
 .filament-rect,
 .tray-rect {
-  width: 78px;
+  width: 84px;
   box-sizing: border-box;
 }
 
@@ -469,11 +472,24 @@
   font-size: 10px;
 }
 
-.tray-index {
+.tray-filament-type {
   margin: 0px 4px;
 }
-
-.canvas-header {
+.mms-popover-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.mms-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.mms-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -481,7 +497,7 @@
   margin-bottom: 10px;
 }
 
-.canvas-title {
+.mms-title {
   font-size: 16px;
   font-weight: 500;
   line-height: 22px;
@@ -690,14 +706,16 @@
 /* ===== STATUS TIP ===== */
 .status-tip {
   position: fixed;
-  top: 50%;
+  bottom: 100px;
   left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--shadow-overlay);
-  color: var(--toggle-thumb);
-  padding: 12px 24px;
-  border-radius: 6px;
+  transform: translateX(-50%);
+  background: transparent;
+  color: #ff0000;
+  padding: 8px 16px;
+  border-radius: 4px;
   font-size: 14px;
+  font-weight: 500;
   z-index: 1000;
-  display: none;
+  text-align: center;
+  min-width: 200px;
 }

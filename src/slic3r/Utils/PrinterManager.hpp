@@ -38,7 +38,7 @@ public:
     bool updatePrinterHost(const std::string& printerId, const std::string& host);
     bool deletePrinter(const std::string& printerId);
     PrinterMmsGroup getPrinterMmsInfo(const std::string& printerId);
-
+    PrinterNetworkInfo getPrinterNetworkInfo(const std::string& printerId);
 
     static PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json);
     static nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printerNetworkInfo);

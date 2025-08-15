@@ -6,6 +6,7 @@
 #include <wx/colour.h>
 #include <nlohmann/json.hpp>
 #include "MsgDialog.hpp"
+#include "libslic3r/PrinterNetworkInfo.hpp"
 #if wxUSE_WEBVIEW_IE
 #include "wx/msw/webview_ie.h"
 #endif
@@ -21,7 +22,10 @@ class PrinterMmsSyncView : public GUI::MsgDialog
 public:
     PrinterMmsSyncView(wxWindow *parent);
     virtual ~PrinterMmsSyncView();
-
+    virtual int ShowModal() override;
+    virtual void EndModal(int ret) override;
+    
+    PrinterMmsGroup getSyncedMmsGroup();
 
 private:
     void onScriptMessage(wxWebViewEvent &evt);
@@ -29,9 +33,11 @@ private:
     void sendResponse(const std::string& method, const std::string& id, const nlohmann::json& response);
     nlohmann::json getPrinterList();
     nlohmann::json getPrinterFilamentInfo(const nlohmann::json& params);
+    nlohmann::json syncMmsFilament(const nlohmann::json& params);
     void runScript(const wxString &javascript);
     void onShow();
 
     wxWebView* mBrowser;   
+    PrinterMmsGroup mMmsGroup;
 };
 }} // namespace Slic3r::GUI 

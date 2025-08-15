@@ -5,30 +5,29 @@ const { ElInput, ElButton, ElPopover } = ElementPlus;
 const PrintSendApp = {
     data() {
         return {
-            // Print task data
-            printTask: {
-                printInfo: {
-                    modelName: '',
-                    printTime: '00:00:00',
-                    totalWeight: 0,
-                    layerCount: 0,
-                    thumbnail: '',
-                    timeLapse: false,
-                    heatedBedLeveling: false,
-                    uploadAndPrint: false,
-                    switchToDeviceTab: false,
-                    autoRefill: false,
-                    bedType: 'btPEI',
-                    filamentList: []
-                },
-                amsInfo: {
-                    trayFilamentList: []
+            // Print  data
+
+            printInfo: {
+                modelName: '',
+                printTime: '00:00:00',
+                totalWeight: 0,
+                layerCount: 0,
+                thumbnail: '',
+                timeLapse: false,
+                heatedBedLeveling: false,
+                uploadAndPrint: false,
+                switchToDeviceTab: false,
+                autoRefill: false,
+                bedType: 'btPEI',
+                filamentList: [],
+                mmsInfo: {
+                    mmsList: []
                 }
             },
-
+            
             // Printer management
             printerList: [],
-            selectedPrinterId: null,
+            curPrinter: null,
             printerDropdownOpen: false,
 
             // Bed type management
@@ -41,88 +40,57 @@ const PrintSendApp = {
 
             // Filament management
             currentPage: 1,
-            pageSize: 4,
-            hasAmsInfo: false,
+            pageSize: 8,
+            hasMmsInfo: false,
 
             // UI state
             isEditingName: false,
             statusTip: {
-                show: true,
-                message: '111'
+                show: false,
+                message: ''
             },
         };
     },
 
     computed: {
 
-        selectedPrinter() {
-            return this.printerList.find(p => p.printerId === this.selectedPrinterId);
-        },
-
         selectedBedType() {
             return this.bedTypes.find(b => b.value === this.selectedBedTypeValue) || this.bedTypes[0];
         },
 
         modelImageSrc() {
-            return this.printTask.printInfo.thumbnail
-                ? `data:image/png;base64,${this.printTask.printInfo.thumbnail}`
+            return this.printInfo.thumbnail
+                ? `data:image/png;base64,${this.printInfo.thumbnail}`
                 : '';
         },
 
         showBedDropdown() {
-            return this.printTask.printInfo.uploadAndPrint;
+            return this.printInfo.uploadAndPrint;
         },
 
         showFilamentSection() {
-            return this.printTask.printInfo.uploadAndPrint && this.hasAmsInfo;
+            return this.printInfo.uploadAndPrint && this.hasMmsInfo;
         },
 
         showPrintOptions() {
-            return this.printTask.printInfo.uploadAndPrint;
+            return this.printInfo.uploadAndPrint;
         },
 
         totalPages() {
-            return Math.ceil((this.printTask.printInfo.filamentList?.length || 0) / this.pageSize);
+            return Math.ceil((this.printInfo.filamentList?.length || 0) / this.pageSize);
         },
 
         currentPageFilaments() {
-            if (!this.printTask.printInfo.filamentList) return [];
+            if (!this.printInfo.filamentList) return [];
             const start = (this.currentPage - 1) * this.pageSize;
-            const end = Math.min(start + this.pageSize, this.printTask.printInfo.filamentList.length);
-            return this.printTask.printInfo.filamentList.slice(start, end).map((filament, index) => ({
-                ...filament,
-                index: start + index
+            const end = Math.min(start + this.pageSize, this.printInfo.filamentList.length);
+            return this.printInfo.filamentList.slice(start, end).map((filament) => ({
+                ...filament
             }));
         },
 
-        amsFilamentList() {
-            // return this.printTask.amsInfo?.trayFilamentList || [];
-            return [
-                {
-                    trayIndex: 0,
-                    filamentColor: '#FF0000',
-                    filamentName: 'Filament 1',
-                    filamentType: 'PLA'
-                },
-                {
-                    trayIndex: 1,
-                    filamentColor: '#00FF00',
-                    filamentName: 'Filament 2',
-                    filamentType: 'PLA'
-                },
-                {
-                    trayIndex: 2,
-                    filamentColor: '#0000FF',
-                    filamentName: 'Filament 3',
-                    filamentType: 'PLA'
-                },
-                {
-                    trayIndex: 2,
-                    filamentColor: '#FFFFFF',
-                    filamentName: 'Filament 3',
-                    filamentType: 'PLA'
-                }
-            ]
+        mmsFilamentList() {
+            return this.printInfo.mmsInfo?.mmsList || [];         
         }
     },
 
@@ -130,7 +98,6 @@ const PrintSendApp = {
         // Lifecycle methods
         async init() {
             this.translatePage();
-            await this.requestPrintTask();
             await this.requestPrinterList();
         },
 
@@ -139,7 +106,8 @@ const PrintSendApp = {
         requestPrintTask() {
             const message = {
                 sequence_id: Math.round(new Date() / 1000),
-                command: "request_print_task"
+                command: "request_print_task",
+                printerId: this.curPrinter.printerId
             };
             SendWXMessage(JSON.stringify(message));
         },
@@ -162,7 +130,8 @@ const PrintSendApp = {
             const command = data.command;
 
             if (command === 'response_print_task') {
-                this.printTask = { ...this.printTask, ...data.response };
+                console.log('response_print_task', data.response);
+                this.printInfo = { ...this.printInfo, ...data.response };
                 this.updatePrintInfo();
             } else if (command === 'response_printer_list') {
                 this.printerList = data.response || [];
@@ -171,19 +140,17 @@ const PrintSendApp = {
         },
 
         updatePrintInfo() {
-            const printInfo = this.printTask.printInfo;
-            const amsInfo = this.printTask.amsInfo;
-
+            const printInfo = this.printInfo;
             // Set bed type if provided
             if (printInfo.bedType) {
                 this.selectedBedTypeValue = printInfo.bedType;
             }
 
-            // Check for AMS info
-            if (amsInfo && amsInfo.trayFilamentList && amsInfo.trayFilamentList.length > 0) {
-                this.hasAmsInfo = true;
+            // Check for MMS info
+            if (printInfo.mmsInfo && printInfo.mmsInfo.mmsList && printInfo.mmsInfo.mmsList.length > 0) {
+                this.hasMmsInfo = true;
             } else {
-                this.hasAmsInfo = false;
+                this.hasMmsInfo = false;
             }
 
             this.$nextTick(() => {
@@ -200,7 +167,8 @@ const PrintSendApp = {
                 selectedPrinter = this.printerList[0];
             }
 
-            this.selectedPrinterId = selectedPrinter.printerId;
+            this.curPrinter = selectedPrinter;
+            this.onPrinterChanged();
         },
 
         // Printer dropdown methods
@@ -216,9 +184,9 @@ const PrintSendApp = {
         },
 
         selectPrinter(printer) {
-            this.selectedPrinterId = printer.printerId;
+            this.curPrinter = printer;
             this.printerDropdownOpen = false;
-            this.onPrinterChanged(printer.printerId);
+            this.onPrinterChanged();
         },
 
         // Bed type dropdown methods
@@ -249,7 +217,7 @@ const PrintSendApp = {
 
         stopEditing() {
             this.isEditingName = false;
-            this.printTask.printInfo.modelName = this.filterModelName(this.printTask.printInfo.modelName);
+            this.printInfo.modelName = this.filterModelName(this.printInfo.modelName);
             this.adjustModelNameWidth();
         },
 
@@ -294,12 +262,12 @@ const PrintSendApp = {
         },
 
         getFilamentSvg(filament) {
-            const color = filament.amsFilamentColor || '#888';
+            const color = filament.filamentColor || '#888';
             return getFilamentSvg(color);
         },
 
-        getAmsCardStyle(amsFilament) {
-            const color = amsFilament.filamentColor || '#888';
+        getMmsCardStyle(mmsFilament) {
+            const color = mmsFilament.filamentColor || '#888';
             const textColor = this.getContrastColor(color);
             return {
                 background: color,
@@ -320,22 +288,36 @@ const PrintSendApp = {
             return brightness > 180 ? '#222' : '#fff';
         },
 
-        // AMS popover methods  
-        selectAmsFilament(amsIndex, amsFilament) {
-
+        // MMS popover methods  
+        updateFilamentMapping(filamentIndex, tray) {
             document.getElementsByClassName('filament-section')?.[0].click();
-            console.log('Selected AMS Filament:', amsFilament);
-            this.updateFilamentMapping(amsIndex, amsFilament);
-        },
-
-        updateFilamentMapping(filamentIndex, amsFilament) {
-            if (this.printTask.printInfo.filamentList && this.printTask.printInfo.filamentList[filamentIndex]) {
-                const filament = this.printTask.printInfo.filamentList[filamentIndex];
-                filament.amsFilamentColor = amsFilament.filamentColor;
-                filament.amsFilamentName = amsFilament.filamentName;
-                filament.amsFilamentType = amsFilament.filamentType;
-                filament.amsTrayIndex = amsFilament.trayIndex;
+            console.log('Selected MMS Tray:', tray);
+            for(let i = 0; i < this.printInfo.filamentList.length; i++) {
+                if(this.printInfo.filamentList[i].index === filamentIndex) {
+                    const filament = this.printInfo.filamentList[i];
+                    filament.mappedMmsFilament.filamentColor = tray.filamentColor;
+                    filament.mappedMmsFilament.filamentName = tray.filamentName;
+                    filament.mappedMmsFilament.filamentType = tray.filamentType;
+                    filament.mappedMmsFilament.trayName = tray.trayName;
+                    filament.mappedMmsFilament.mmsId = tray.mmsId;
+                    filament.mappedMmsFilament.trayId = tray.trayId;
+                    filament.mappedMmsFilament.filamentWeight = tray.filamentWeight;
+                    filament.mappedMmsFilament.filamentDensity = tray.filamentDensity;
+                    filament.mappedMmsFilament.minNozzleTemp = tray.minNozzleTemp;
+                    filament.mappedMmsFilament.maxNozzleTemp = tray.maxNozzleTemp;
+                    filament.mappedMmsFilament.minBedTemp = tray.minBedTemp;
+                    filament.mappedMmsFilament.maxBedTemp = tray.maxBedTemp;
+                    filament.mappedMmsFilament.status = tray.status;
+                    filament.mappedMmsFilament.filamentDiameter = tray.filamentDiameter;
+                    filament.mappedMmsFilament.filamentId = tray.filamentId;
+                    filament.mappedMmsFilament.vendor = tray.vendor;
+                    filament.mappedMmsFilament.serialNumber = tray.serialNumber;
+                    filament.mappedMmsFilament.settingId = tray.settingId;
+                    filament.mappedMmsFilament.from = tray.from;
+                    break;
+                }
             }
+
         },
 
         // Action methods
@@ -349,11 +331,11 @@ const PrintSendApp = {
 
         upload() {
             // Update task with current UI state
-            this.printTask.printInfo.selectedPrinterId = this.selectedPrinterId;
-            this.printTask.printInfo.bedType = this.selectedBedTypeValue;
+            this.printInfo.selectedPrinterId = this.curPrinter.printerId;
+            this.printInfo.bedType = this.selectedBedTypeValue;
 
-            // Validate filament mapping if AMS is present
-            if (this.hasAmsInfo && !this.checkFilamentMapping()) {
+            // Validate filament mapping if MMS is present
+            if (this.hasMmsInfo && !this.checkFilamentMapping()) {
                 this.showStatusTip(this.getTranslation('some_filaments_not_mapped'));
                 return;
             }
@@ -361,14 +343,16 @@ const PrintSendApp = {
             const message = {
                 command: 'start_upload',
                 sequence_id: Math.round(new Date() / 1000),
-                data: this.printTask
+                data: this.printInfo
             };
             SendWXMessage(JSON.stringify(message));
         },
 
         checkFilamentMapping() {
-            return this.printTask.printInfo.filamentList.every(filament =>
-                filament.amsTrayIndex !== null && filament.amsTrayIndex !== undefined
+            return this.printInfo.filamentList.every(filament =>
+                filament.mappedMmsFilament && 
+                filament.mappedMmsFilament.trayName && 
+                filament.mappedMmsFilament.trayName.trim() !== ""
             );
         },
 
@@ -396,8 +380,9 @@ const PrintSendApp = {
         },
 
         // Event handlers called by external code
-        onPrinterChanged(printerId) {
+        onPrinterChanged() {
             // Handle printer change logic if needed
+            this.requestPrintTask();
         },
 
         onBedTypeChanged(bedType) {
@@ -421,7 +406,7 @@ const PrintSendApp = {
     },
 
     watch: {
-        'printTask.printInfo.uploadAndPrint'(newValue) {
+        'printInfo.uploadAndPrint'(newValue) {
             // React to upload and print toggle changes
             if (!newValue) {
                 this.currentPage = 1; // Reset pagination when hiding filament section
