@@ -74,6 +74,7 @@ PrinterStatus parseElegooStatus(elink::MachineMainStatus mainStatus, elink::Mach
     switch (subStatus) {
     case elink::MachineSubStatus::P_PAUSING: printerStatus = PRINTER_STATUS_PAUSING; break;
     case elink::MachineSubStatus::P_PAUSED: printerStatus = PRINTER_STATUS_PAUSED; break;
+    case elink::MachineSubStatus::P_PRINTING_COMPLETED: printerStatus = PRINTER_STATUS_PRINT_COMPLETED; break;
     default: break;
     }
     return printerStatus;
@@ -203,7 +204,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::addPrinter(const PrinterNet
                 PrinterNetworkInfo info = printerNetworkInfo;
                 info.firmwareVersion = addPrinter.firmwareVersion;
                 info.webUrl          = addPrinter.webUrl;
-                info.connectionUrl   = addPrinter.connectionUrl;
+                // info.connectionUrl   = addPrinter.connectionUrl;
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
@@ -230,7 +231,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
                 PrinterNetworkInfo info = printerNetworkInfo;
                 info.firmwareVersion = addPrinter.firmwareVersion;
                 info.webUrl          = addPrinter.webUrl;
-                info.connectionUrl   = addPrinter.connectionUrl;
+                // info.connectionUrl   = addPrinter.connectionUrl;
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
@@ -284,7 +285,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverDevice
                 info.vendor          = device.brand;
                 info.deviceType      = static_cast<int>(device.deviceType);
                 info.webUrl          = device.webUrl;
-                info.connectionUrl   = device.connectionUrl;
+                // info.connectionUrl   = device.connectionUrl;
                 info.authMode        = device.authMode;
                 info.mainboardId     = device.mainboardId;
                 discoverDevices.push_back(info);
