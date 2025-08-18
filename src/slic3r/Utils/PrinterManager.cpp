@@ -350,7 +350,7 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
 
 std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
 {
-    std::lock_guard<std::mutex>     lock(mPrinterListMutex);
+    // std::lock_guard<std::mutex>     lock(mPrinterListMutex);
     boost::filesystem::path         resources_path(Slic3r::resources_dir());
     std::vector<PrinterNetworkInfo> printers;
     auto                            discoverResult = PrinterNetworkManager::getInstance()->discoverPrinters();

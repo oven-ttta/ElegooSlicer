@@ -40,7 +40,7 @@ function hookNativeFunction() {
             event.preventDefault();
             try {
                 if (typeof wx !== 'undefined') {
-                    wx.postMessage({ method: 'open', params: { url: target.href, needDownload: needDownload } });
+                    wx.postMessage({ id: "inject_"+ Date.now().toString(), type : "request", method: 'open', params: { url: target.href, needDownload: needDownload } });
                 } else {
                     console.error('wx is not defined');
                 }
@@ -116,7 +116,7 @@ to {
         setTimeout(function () {
             if (typeof wx !== 'undefined') {
                 window.is_loading_printer = true;
-                wx.postMessage({ method: 'reload' });
+                wx.postMessage({ id: "inject_"+ Date.now().toString(), type : "request", method: 'reload' });
             } else {
                 console.error('wx is not defined');
             }

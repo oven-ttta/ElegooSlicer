@@ -20,20 +20,16 @@ const PrinterSettingTemplate = /*html*/
                         <div class="printer-setting-info-item">
                             <span class="printer-setting-info-label">Name</span>
                             <div class="printer-setting-info-value">
-                                <span v-show="!isEditingName" class="printer-setting-info-text">{{ (printer && printer.printerName) || '' }}</span>
-                                <el-form-item v-show="isEditingName" prop="printerName" class="printer-setting-form-item">
+                                <el-form-item prop="printerName" class="printer-setting-form-item">
                                     <el-input
                                         v-model="formData.printerName"
                                         ref="nameInput"
                                         @blur="saveNameChanges"
                                         @keydown="onNameKeydown"
-                                        size="small"
                                         placeholder="Enter printer name"
+                                        maxlength="50"
                                     />
                                 </el-form-item>
-                                <button class="printer-setting-edit-btn" @click="editPrinterName">
-                                    <img src="img/edit.svg" alt="Edit" />
-                                </button>
                             </div>
                         </div>
 
@@ -45,20 +41,16 @@ const PrinterSettingTemplate = /*html*/
                         <div class="printer-setting-info-item">
                             <span class="printer-setting-info-label">Host</span>
                             <div class="printer-setting-info-value">
-                                <span v-show="!isEditingHost" class="printer-setting-info-text">{{ (printer && printer.host) || '' }}</span>
-                                <el-form-item v-show="isEditingHost" prop="host" class="printer-setting-form-item">
+                                <el-form-item  prop="host" class="printer-setting-form-item">
                                     <el-input
                                         v-model="formData.host"
                                         ref="hostInput"
                                         @blur="saveHostChanges"
                                         @keydown="onHostKeydown"
-                                        size="small"
                                         placeholder="Enter host, IP or URL"
+                                        maxlength="30"
                                     />
                                 </el-form-item>
-                                <button class="printer-setting-edit-btn" @click="editPrinterHost">
-                                    <img src="img/edit.svg" alt="Edit" />
-                                </button>
                             </div>
                         </div>
 
@@ -103,8 +95,6 @@ const PrinterSettingComponent = {
 
     data() {
         return {
-            isEditingName: false,
-            isEditingHost: false,
             formData: {
                 printerName: '',
                 host: ''
@@ -116,7 +106,7 @@ const PrinterSettingComponent = {
                 ],
                 host: [
                     { required: true, message: 'Please enter host name, IP or URL', trigger: 'blur' },
-                    { 
+                    {
                         validator: (rule, value, callback) => {
                             this.printerStore.validateHost(rule, value, callback);
                         },
@@ -163,33 +153,12 @@ const PrinterSettingComponent = {
             this.$emit('close-modal');
         },
 
-        deleteDevice() {
+        async deleteDevice() {
             if (!confirm('Are you sure you want to delete this device? This action cannot be undone.')) {
                 return;
             }
-            this.printerStore.requestDeletePrinter(this.printer.printerId);
-        },
-
-        editPrinterName() {
-            this.formData.printerName = (this.printer && this.printer.printerName) || '';
-            this.isEditingName = true;
-            this.$nextTick(() => {
-                if (this.$refs.nameInput) {
-                    this.$refs.nameInput.focus();
-                    this.$refs.nameInput.select();
-                }
-            });
-        },
-
-        editPrinterHost() {
-            this.formData.host = (this.printer && this.printer.host) || '';
-            this.isEditingHost = true;
-            this.$nextTick(() => {
-                if (this.$refs.hostInput) {
-                    this.$refs.hostInput.focus();
-                    this.$refs.hostInput.select();
-                }
-            });
+            await this.printerStore.requestDeletePrinter(this.printer.printerId);
+            this.closeModal();
         },
 
         onNameKeydown(e) {
@@ -215,21 +184,18 @@ const PrinterSettingComponent = {
         saveNameChanges() {
             const newName = this.formData.printerName.trim();
             const currentName = (this.printer && this.printer.printerName) || '';
-            
+
             if (newName && newName !== currentName) {
                 // Use Element Plus form validation
                 this.$refs.printerForm.validateField('printerName', (valid) => {
                     if (valid) {
                         this.printer.printerName = newName;
                         this.printerStore.requestUpdatePrinterName(this.printer.printerId, newName);
-                        this.isEditingName = false;
                     } else {
                         // Validation failed, keep editing mode and show error
                         console.log('Name validation failed');
                     }
                 });
-            } else {
-                this.isEditingName = false;
             }
         },
 
@@ -241,21 +207,17 @@ const PrinterSettingComponent = {
                 // Use Element Plus form validation
                 this.$refs.printerForm.validateField('host', (valid) => {
                     if (valid) {
-                        this.printer.host = newHost; 
+                        this.printer.host = newHost;
                         this.printerStore.requestUpdatePrinterHost(this.printer.printerId, newHost);
-                        this.isEditingHost = false;
                     } else {
                         // Validation failed, keep editing mode and show error
                         console.log('Host validation failed');
                     }
                 });
-            } else {
-                this.isEditingHost = false;
             }
         },
 
         cancelNameChanges() {
-            this.isEditingName = false;
             // Restore original value
             this.formData.printerName = (this.printer && this.printer.printerName) || '';
             // Clear validation errors
@@ -265,7 +227,6 @@ const PrinterSettingComponent = {
         },
 
         cancelHostChanges() {
-            this.isEditingHost = false;
             // Restore original value
             this.formData.host = (this.printer && this.printer.host) || '';
             // Clear validation errors
@@ -295,8 +256,6 @@ const PrinterSettingComponent = {
 
         // Reset editing state to display mode
         resetEditingState() {
-            this.isEditingName = false;
-            this.isEditingHost = false;
             // Clear any validation errors
             if (this.$refs.printerForm) {
                 this.$refs.printerForm.clearValidate();

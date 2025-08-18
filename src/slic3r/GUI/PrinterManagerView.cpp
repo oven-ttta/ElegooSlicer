@@ -1,4 +1,4 @@
-#include "PrinterManager.hpp"
+#include "PrinterManagerView.hpp"
 #include "I18N.hpp"
 #include "slic3r/GUI/wxExtensions.hpp"
 #include "slic3r/GUI/GUI_App.hpp"
@@ -17,7 +17,9 @@
 #include "libslic3r/Utils.hpp"
 #include <map>
 #include <algorithm>
+#include <thread>
 #include <boost/filesystem.hpp>
+#include "slic3r/Utils/WebviewIPCManager.h"
 
 #define FIRST_TAB_NAME _L("Connected Printer")
 
@@ -54,7 +56,9 @@ public:
 
 
 PrinterManagerView::PrinterManagerView(wxWindow *parent)
-    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
+    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize), 
+      m_isDestroying(false),
+      m_lifeTracker(std::make_shared<bool>(true))
 {
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
     
@@ -70,6 +74,10 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
         wxLogError("Could not init mBrowser");
         return;
     }
+    
+    m_ipc = new webviewIpc::WebviewIPCManager(mBrowser);
+    setupIPCHandlers();
+    
     mTabBar->AddPage(mBrowser, FIRST_TAB_NAME);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
     auto _dir = resources_dir();
@@ -77,14 +85,21 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/printer_manager/printer.html").make_preferred().string());
     TargetUrl = "file://" + TargetUrl;
     mBrowser->LoadURL(TargetUrl);
-    mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrinterManagerView::onScriptMessage, this);
     mTabBar->SetSelection(0);
     Bind(wxEVT_CLOSE_WINDOW, &PrinterManagerView::onClose, this);
     mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &PrinterManagerView::onClosePrinterTab, this);
 }
 
 PrinterManagerView::~PrinterManagerView() {
-
+    m_isDestroying = true;
+    
+    // Reset the life tracker to signal all async operations that this object is being destroyed
+    m_lifeTracker.reset();
+    
+    if (m_ipc) {
+        delete m_ipc;
+        m_ipc = nullptr;
+    }
 }
 
 void PrinterManagerView::openPrinterTab(const std::string& printerId)
@@ -168,68 +183,136 @@ void PrinterManagerView::onClosePrinterTab(wxAuiNotebookEvent& event)
     }
     event.Skip();
 }
-void PrinterManagerView::onScriptMessage(wxWebViewEvent& event)
+void PrinterManagerView::setupIPCHandlers()
 {
-    wxString message = event.GetString();
-    try {
-        nlohmann::json root = nlohmann::json::parse(message.ToUTF8().data());
-        std::string cmd = root["command"];  
-        handleCommand(cmd, root);
-        
-    } catch (std::exception& e) {
-        wxLogMessage("Error: %s", e.what());
-    }
+    if (!m_ipc) return;
+
+    // Handle request_printer_list
+    m_ipc->onRequest("request_printer_list", [this](const webviewIpc::IPCRequest& request){
+        return webviewIpc::IPCResult::success(getPrinterList());
+    });
+
+    // Handle request_printer_model_list
+    m_ipc->onRequest("request_printer_model_list", [this](const webviewIpc::IPCRequest& request){
+        return webviewIpc::IPCResult::success(getPrinterModelList());
+    });
+
+    // Handle request_printer_list_status
+    m_ipc->onRequest("request_printer_list_status", [this](const webviewIpc::IPCRequest& request){
+        return webviewIpc::IPCResult::success(getPrinterListStatus());
+    });
+
+    // Handle request_printer_detail
+    m_ipc->onRequest("request_printer_detail", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        if (!printerId.empty()) {
+            openPrinterTab(printerId);
+        }
+        return webviewIpc::IPCResult::success();
+    });
+
+    // Handle request_discover_printers (async due to time-consuming operation)
+    m_ipc->onRequestAsync("request_discover_printers", [this](const webviewIpc::IPCRequest& request, 
+                                                           std::function<void(const webviewIpc::IPCResult&)> sendResponse) {  
+        // Create a weak reference to track object lifetime
+        std::weak_ptr<bool> life_tracker = m_lifeTracker;   
+        // Run the discovery operation in a separate thread to avoid blocking the UI
+        std::thread([life_tracker, sendResponse,this]() {
+            try {
+                // Check if the object still exists
+                if (auto tracker = life_tracker.lock()) {
+                    // Call the static method to avoid accessing this pointer
+                    auto printerList = this->discoverPrinter();
+                    // Final check before sending response
+                    if (life_tracker.lock()) {
+                        sendResponse(webviewIpc::IPCResult::success(printerList));
+                    }
+                } else {
+                    // Object was destroyed, don't send response
+                    return;
+                }
+            } catch (const std::exception& e) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error(-1, std::string("Discovery failed: ") + e.what()));
+                }
+            }
+        }).detach();
+    });
+
+    // Handle request_add_printer
+    m_ipc->onRequest("request_add_printer", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        if (params.contains("printer")) {
+            nlohmann::json printer = params["printer"];
+            std::string result = addPrinter(printer);
+            return webviewIpc::IPCResult::success(nlohmann::json(result));
+        }
+        return webviewIpc::IPCResult::error("Missing printer parameter");
+    });
+
+    // Handle request_add_physical_printer
+    m_ipc->onRequest("request_add_physical_printer", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        if (params.contains("printer")) {
+            std::string result = addPhysicalPrinter(params["printer"]);
+            return webviewIpc::IPCResult::success(nlohmann::json(result));
+        }
+        return webviewIpc::IPCResult::error("Missing printer parameter");
+    });
+
+    // Handle request_update_printer_name
+    m_ipc->onRequest("request_update_printer_name", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        std::string printerName = params.value("printerName", "");
+        bool result = updatePrinterName(printerId, printerName);
+        return webviewIpc::IPCResult::success(nlohmann::json(result));
+    });
+
+    // Handle request_update_printer_host
+    m_ipc->onRequest("request_update_printer_host", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        std::string host = params.value("host", "");
+        bool result = updatePrinterHost(printerId, host);
+        return webviewIpc::IPCResult::success(nlohmann::json(result));
+    });
+
+    // Handle request_delete_printer
+    m_ipc->onRequest("request_delete_printer", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        bool result = deletePrinter(printerId);
+        return webviewIpc::IPCResult::success(nlohmann::json(result));
+    });
+
+    // Handle request_browse_ca_file
+    m_ipc->onRequest("request_browse_ca_file", [this](const webviewIpc::IPCRequest& request){
+        std::string result = browseCAFile();
+        return webviewIpc::IPCResult::success(nlohmann::json(result));
+    });
+
+    // Handle request_refresh_printers
+    m_ipc->onRequest("request_refresh_printers", [this](const webviewIpc::IPCRequest& request){
+        // Implementation for refresh printers
+        return webviewIpc::IPCResult::success();
+    });
+
+    // Handle request_logout_print_host
+    m_ipc->onRequest("request_logout_print_host", [this](const webviewIpc::IPCRequest& request){
+        // Implementation for logout print host
+        return webviewIpc::IPCResult::success();
+    });
+
+    // Handle request_connect_physical_printer
+    m_ipc->onRequest("request_connect_physical_printer", [this](const webviewIpc::IPCRequest& request){
+        // Implementation for connect physical printer
+        return webviewIpc::IPCResult::success();
+    });
 }
 
-void PrinterManagerView::handleCommand(const std::string& cmd, const nlohmann::json& root)
-{
-    if (cmd == "request_printer_list") {
-        sendResponse("response_printer_list", "10001", getPrinterList());
-    } else if (cmd == "request_printer_model_list") {
-        sendResponse("response_printer_model_list", "10002", getPrinterModelList());
-    } else if (cmd == "request_printer_list_status") {
-        sendResponse("response_printer_list_status", "10003", getPrinterListStatus());
-    } else if (cmd == "request_printer_detail") {
-        openPrinterTab(root["printerId"]);
-    } else if (cmd == "request_discover_printers") {
-        sendResponse("response_discover_printers", "10003", discoverPrinter());
-    } else if (cmd == "request_add_printer") {
-        nlohmann::json printer = root["printer"];
-        sendResponse("response_add_printer", "10004", addPrinter(printer));
-    } else if (cmd == "request_add_physical_printer") {
-        sendResponse("response_add_physical_printer", "10005", addPhysicalPrinter(root["printer"]));
-    } else if (cmd == "request_update_printer_name") {
-        sendResponse("response_update_printer_name", "10005", 
-                    updatePrinterName(root["printerId"], root["printerName"]));
-    } else if (cmd == "request_update_printer_host") {
-        sendResponse("response_update_printer_host", "10007", 
-                    updatePrinterHost(root["printerId"], root["host"]));
-    } else if (cmd == "request_delete_printer") {
-        sendResponse("response_delete_printer", "10006", deletePrinter(root["printerId"]));
-    } else if (cmd == "request_browse_ca_file") {
-        sendResponse("response_browse_ca_file", "10008", browseCAFile());
-    } else if (cmd == "request_refresh_printers") {
-       
-    } else if (cmd == "request_logout_print_host") {
-     
-    } else if (cmd == "request_connect_physical_printer") {
-     
-    } else {
-        wxLogWarning("Unknown command: %s", cmd);
-    }
-}
 
-void PrinterManagerView::sendResponse(const std::string& command, const std::string& sequenceId, const nlohmann::json& response)
-{
-    nlohmann::json jsonResponse = {
-        {"command", command},
-        {"sequence_id", sequenceId},
-        {"response", response}
-    };
-    
-    wxString strJS = wxString::Format("HandleStudio(%s)", jsonResponse.dump(-1, ' ', true));
-    wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
-}
 
 bool PrinterManagerView::deletePrinter(const std::string& printerId)
 {

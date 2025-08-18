@@ -30,8 +30,6 @@
 
 // BBS
 #include "BBLTopbar.hpp"
-#include "PrinterWebView.hpp"
-#include "PrinterManagerView.hpp"
 #include "calib_dlg.hpp"
 #include "MultiMachinePage.hpp"
 
@@ -51,6 +49,8 @@ class PrintHostQueueDialog;
 class Plater;
 class MainFrame;
 class ParamsDialog;
+class PrinterWebView;
+class PrinterManagerView;
 
 enum QuickSlice
 {

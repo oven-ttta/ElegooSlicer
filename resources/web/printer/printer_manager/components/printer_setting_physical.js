@@ -8,8 +8,8 @@ const PrinterSettingPhysicalTemplate = /*html*/
                 ></manual-form-component>
             </div>
             <div class="add-printer-footer">
-                <button type="button" class="btn-secondary" @click="deletePrinter">Delete</button>   
-                <button type="button" class="btn-primary" @click="confirmPrinter">Confirm</button>
+                <el-button type="danger" @click="deletePrinter">Delete</el-button>
+                <el-button type="primary" @click="confirmPrinter">Confirm</el-button>
             </div>
         </div>
     `;
@@ -54,9 +54,10 @@ const PrinterSettingPhysicalComponent = {
             this.$emit('close-modal');
         },
 
-        deletePrinter() {
+        async deletePrinter() {
             if (confirm('Are you sure you want to delete this printer?')) {
-                this.printerStore.requestDeletePrinter(this.printer.printerId);
+               await this.printerStore.requestDeletePrinter(this.printer.printerId);
+               this.closeModal();
             }
         },
 

@@ -29,10 +29,12 @@
 #include "wx/textctrl.h"
 #include <wx/timer.h>
 
+namespace webviewIpc {
+    class WebviewIPCManager;
+}
 
 namespace Slic3r {
 namespace GUI {
-
 
 class PrinterWebView : public wxPanel {
 public:
@@ -56,6 +58,7 @@ private:
     void       loadInputUrl();
     void       loadUrl(const wxString& url);
     void runScript(const wxString &javascript);
+    void setupIPCHandlers();
 
     wxWebView* m_browser;
     long m_zoomFactor;
@@ -84,6 +87,9 @@ private:
     std::atomic<bool> m_shouldStop;
     std::thread m_uploadThread;
     std::mutex m_uploadMutex;
+
+private:
+    webviewIpc::WebviewIPCManager *m_ipc=nullptr;
 };
 
 } // GUI

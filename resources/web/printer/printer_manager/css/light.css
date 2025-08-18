@@ -27,7 +27,6 @@ body {
 
 /* ===================== Printer Auth Dialog ===================== */
 
-
 .printer-auth-content {
   padding: 15px 40px;
   text-align: center;
@@ -74,9 +73,9 @@ body {
   height: 48px;
 }
 
-.code-input .el-input__inner{
-    text-align: center;
-    font-size: 16px;
+.code-input .el-input__inner {
+  text-align: center;
+  font-size: 16px;
 }
 
 .help-link {
@@ -459,13 +458,13 @@ body {
 }
 
 .no-printer,
-.discover-empty{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 80%;
-    color: var(--text-primary);
+.discover-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80%;
+  color: var(--text-primary);
 }
 /* ===================== Form Styles (Shared) ===================== */
 .form-group {
@@ -607,7 +606,7 @@ body {
 .printer-setting-delete-btn {
   width: 140px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--bg-primary);
   color: var(--color-danger);
   border: 1px solid var(--color-danger);
@@ -620,7 +619,7 @@ body {
 .printer-setting-delete-btn:hover {
   background: var(--color-danger);
   border-color: var(--color-danger);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .printer-setting-delete-btn:focus {
@@ -648,7 +647,7 @@ body {
   align-items: flex-start;
   padding: 16px 0 0px 0;
   margin-top: -10px;
-  border-bottom: 1px solid var(--border-primary);
+  /* border-bottom: 1px solid var(--border-primary); */
   min-height: 60px;
 }
 
@@ -678,38 +677,16 @@ body {
 }
 
 .printer-setting-info-text {
-  max-width: 300px; 
+  max-width: 300px;
   color: var(--text-primary);
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
 }
 
-.printer-setting-edit-btn,
-.printer-setting-refresh-btn {
-  width: 16px;
-  height: 16px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 0;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-  flex-shrink: 0;
-  margin-left: 8px;
-}
-
-.printer-setting-edit-btn:hover,
-.printer-setting-refresh-btn:hover {
-  opacity: 1;
-}
-
-.printer-setting-edit-btn img,
-.printer-setting-refresh-btn img {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
 
 .printer-setting-update-tag {
   padding: 2px 8px;
@@ -728,12 +705,18 @@ body {
 /* Form item styles for editing mode */
 .printer-setting-form-item {
   width: 100%;
+  margin-bottom: 0px;
 }
 
 .printer-setting-form-item .el-input {
   width: 100%;
-  max-width: calc(100% - 40px);
-  margin-right: 8px;
+  /* max-width: calc(100% - 40px);
+  margin-right: 8px; */
+}
+.printer-setting-form-item .el-input__wrapper {
+  padding: 1px 0px;
+  box-shadow: 0 -1px 0 0 var(--el-input-border-color, var(--el-border-color)) inset;
+  border-radius: 0px;
 }
 
 .printer-setting-form-item .el-input__inner {
@@ -742,6 +725,15 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.printer-setting-form-item .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--el-input-focus-border-color) inset;
+  border-radius: 4px;
+}
+
+/* .printer-setting-form-item .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--el-input-hover-border-color) inset;
+} */
 
 /* Error message styles - prevent wrapping */
 .printer-setting-form-item .el-form-item__error {

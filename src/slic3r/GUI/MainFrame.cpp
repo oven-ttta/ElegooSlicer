@@ -62,6 +62,8 @@
 #include "ConfigWizard.hpp"
 #include "Widgets/WebView.hpp"
 #include "DailyTips.hpp"
+#include "PrinterWebView.hpp"
+#include "PrinterManagerView.hpp"
 
 #ifdef _WIN32
 #include <dbt.h>
