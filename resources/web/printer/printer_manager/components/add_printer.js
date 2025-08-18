@@ -15,7 +15,7 @@ const AddPrinterTemplate = /*html*/`
                         </div>
                         <div v-if="printers && printers.length === 0" class="discover-empty">
                             <img src="./img/discover-empty.svg" width="180" />
-                            <div>未发现任何设备</div>
+                            <div>No Devices Found</div>
                         </div>
                         <div v-else class="add-printer-table-body">
                             <div v-for="(printer, idx) in printers" 
@@ -52,7 +52,7 @@ const AddPrinterTemplate = /*html*/`
                     @add-printer="printerStore.requestAddPrinter"></printer-auth-component>
             </el-dialog>
 
-            <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">刷新</button>
+            <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">Refresh</button>
             <div class="add-printer-footer">
                 <button type="button" class="btn-secondary" @click="closeModal">Close</button>   
                 <button type="button" class="btn-primary" @click="connectPrinter">Connect</button>
@@ -134,7 +134,7 @@ const AddPrinterComponent = {
                 }
 
             } else {
-                // 通过组件引用直接调用方法
+                // call method directly through component reference
                 if (this.$refs.manualFormComponent) {
                     const printer = await this.$refs.manualFormComponent.getFormData();
                     if (printer) {

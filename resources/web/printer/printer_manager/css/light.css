@@ -222,12 +222,13 @@ body {
   max-width: 220px;
 }
 
-.printer-ip {
+.printer-host {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 220px;
 }
 
 .printer-detail-btn {
@@ -567,6 +568,7 @@ body {
 /* ===================== Printer Setting Dialog ===================== */
 .printer-setting-dialog {
   color: var(--text-primary);
+  overflow: hidden;
 }
 
 .printer-setting-content {
@@ -575,6 +577,7 @@ body {
   padding: 24px;
   gap: 48px;
   background: var(--bg-primary);
+  overflow: hidden;
 }
 
 .printer-setting-left {
@@ -671,12 +674,15 @@ body {
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .printer-setting-info-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  max-width: 300px; 
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .printer-setting-edit-btn,
@@ -690,6 +696,7 @@ body {
   opacity: 0.6;
   transition: opacity 0.2s ease;
   flex-shrink: 0;
+  margin-left: 8px;
 }
 
 .printer-setting-edit-btn:hover,
@@ -701,6 +708,7 @@ body {
 .printer-setting-refresh-btn img {
   width: 16px;
   height: 16px;
+  display: block;
 }
 
 .printer-setting-update-tag {
@@ -710,10 +718,42 @@ body {
   font-weight: 500;
   background: var(--color-primary-light);
   color: var(--color-primary);
-  flex-shrink: 0;
 }
 
 .printer-setting-update-tag.available {
   background: var(--color-success);
   color: var(--bg-primary);
+}
+
+/* Form item styles for editing mode */
+.printer-setting-form-item {
+  width: 100%;
+}
+
+.printer-setting-form-item .el-input {
+  width: 100%;
+  max-width: calc(100% - 40px);
+  margin-right: 8px;
+}
+
+.printer-setting-form-item .el-input__inner {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Error message styles - prevent wrapping */
+.printer-setting-form-item .el-form-item__error {
+  position: static;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-danger);
+  font-size: 12px;
+  line-height: 1.2;
+  max-width: 100%;
+  display: block;
+  clear: both;
 }

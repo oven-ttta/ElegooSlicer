@@ -8,72 +8,75 @@ const PrinterSettingTemplate = /*html*/
                     </div>
                     <button class="printer-setting-delete-btn" @click="deleteDevice">Delete Device</button>
                 </div>
-                
+
                 <div class="printer-setting-right">
-                    <div class="printer-setting-info-item">
-                        <span class="printer-setting-info-label">Name</span>
-                        <span class="printer-setting-info-value">
-                            <span v-if="!isEditingName" class="printer-setting-info-text">{{ (printer && printer.printerName) || '' }}</span>
-                            <el-input
-                                v-if="isEditingName"
-                                v-model="editingName"
-                                ref="nameInput"
-                                type="text" 
-                                @keydown="onNameKeydown"
-                                @blur="saveNameChanges"
-                                @input="onNameInput"
-                            />
-                            <button v-if="!isEditingName" class="printer-setting-edit-btn" @click="editPrinterName">
-                                <img src="img/edit.svg" alt="Edit" />
-                            </button>
-                        </span>
-                    </div>
-                    
-                    <div class="printer-setting-info-item">
-                        <span class="printer-setting-info-label">Model</span>
-                        <span class="printer-setting-info-value">{{ (printer && printer.printerModel) || '' }}</span>
-                    </div>
-                    
-                    <div class="printer-setting-info-item">
-                        <span class="printer-setting-info-label">Host</span>
-                        <span class="printer-setting-info-value">
-                            <span v-if="!isEditingHost" class="printer-setting-info-text">{{ (printer && printer.host) || '' }}</span>
-                            <el-input 
-                                v-if="isEditingHost"
-                                v-model="editingHost"
-                                ref="hostInput"
-                                type="text" 
-                                @keydown="onHostKeydown"
-                                @blur="saveHostChanges"
-                                @input="onHostInput"
-                            />
-                            <button v-if="!isEditingHost" class="printer-setting-edit-btn" @click="editPrinterHost">
-                                <img src="img/edit.svg" alt="Edit" />
-                            </button>
-                        </span>
-                    </div>
-                    
-                    <div class="printer-setting-info-item">
-                        <span class="printer-setting-info-label">Firmware</span>
-                        <span class="printer-setting-info-value">
-                            <span class="printer-setting-info-text">
-                                <span class="printer-setting-firmware-version">{{ (printer && printer.firmwareVersion) || '' }}</span>
-                                <span 
-                                    class="printer-setting-update-tag"
-                                    :class="{ available: printer && printer.firmwareUpdate === 1 }"
-                                >
-                                    {{ getFirmwareUpdateText() }}
+                    <el-form
+                        ref="printerForm"
+                        :model="formData"
+                        :rules="formRules"
+                        label-position="top"
+                        autocomplete="off"
+                    >
+                        <div class="printer-setting-info-item">
+                            <span class="printer-setting-info-label">Name</span>
+                            <div class="printer-setting-info-value">
+                                <span v-show="!isEditingName" class="printer-setting-info-text">{{ (printer && printer.printerName) || '' }}</span>
+                                <el-form-item v-show="isEditingName" prop="printerName" class="printer-setting-form-item">
+                                    <el-input
+                                        v-model="formData.printerName"
+                                        ref="nameInput"
+                                        @blur="saveNameChanges"
+                                        @keydown="onNameKeydown"
+                                        size="small"
+                                        placeholder="Enter printer name"
+                                    />
+                                </el-form-item>
+                                <button class="printer-setting-edit-btn" @click="editPrinterName">
+                                    <img src="img/edit.svg" alt="Edit" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="printer-setting-info-item">
+                            <span class="printer-setting-info-label">Model</span>
+                            <span class="printer-setting-info-value">{{ (printer && printer.printerModel) || '' }}</span>
+                        </div>
+
+                        <div class="printer-setting-info-item">
+                            <span class="printer-setting-info-label">Host</span>
+                            <div class="printer-setting-info-value">
+                                <span v-show="!isEditingHost" class="printer-setting-info-text">{{ (printer && printer.host) || '' }}</span>
+                                <el-form-item v-show="isEditingHost" prop="host" class="printer-setting-form-item">
+                                    <el-input
+                                        v-model="formData.host"
+                                        ref="hostInput"
+                                        @blur="saveHostChanges"
+                                        @keydown="onHostKeydown"
+                                        size="small"
+                                        placeholder="Enter host, IP or URL"
+                                    />
+                                </el-form-item>
+                                <button class="printer-setting-edit-btn" @click="editPrinterHost">
+                                    <img src="img/edit.svg" alt="Edit" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="printer-setting-info-item">
+                            <span class="printer-setting-info-label">Firmware</span>
+                            <span class="printer-setting-info-value">
+                                <span class="printer-setting-info-text">
+                                    <span class="printer-setting-firmware-version">{{ (printer && printer.firmwareVersion) || '' }}</span>
+                                    <span class="printer-setting-update-tag" :class="{ available: printer && printer.firmwareUpdate === 1 }">
+                                        {{ getFirmwareUpdateText() }}
+                                    </span>
                                 </span>
+                                <button v-if="showRefreshButton" class="printer-setting-refresh-btn" @click="checkFirmwareUpdate">
+                                    <img src="img/refresh.svg" alt="Refresh" />
+                                </button>
                             </span>
-                            <button 
-                                v-if="showRefreshButton"
-                                class="printer-setting-refresh-btn" 
-                                @click="checkFirmwareUpdate"
-                            >
-                                <img src="img/refresh.svg" alt="Refresh" />
-                            </button>
-                        </span>
-                    </div>
+                        </div>
+                    </el-form>
                 </div>
             </div>
         </div>
@@ -102,8 +105,25 @@ const PrinterSettingComponent = {
         return {
             isEditingName: false,
             isEditingHost: false,
-            editingName: '',
-            editingHost: ''
+            formData: {
+                printerName: '',
+                host: ''
+            },
+            formRules: {
+                printerName: [
+                    { required: true, message: 'Please enter printer name', trigger: 'change' },
+                    { min: 1, max: 50, message: 'Length should be 1 to 50 characters', trigger: 'change' }
+                ],
+                host: [
+                    { required: true, message: 'Please enter host name, IP or URL', trigger: 'blur' },
+                    { 
+                        validator: (rule, value, callback) => {
+                            this.printerStore.validateHost(rule, value, callback);
+                        },
+                        trigger: 'blur'
+                    }
+                ]
+            }
         };
     },
 
@@ -114,36 +134,32 @@ const PrinterSettingComponent = {
     },
 
     mounted() {
+        // Initialize form data with current printer data
+        this.syncFormData();
     },
 
     beforeUnmount() {
+        // Reset editing state when component is unmounted
+        this.resetEditingState();
     },
 
     watch: {
+        // Watch for printer prop changes to sync form data
+        printer: {
+            handler(newPrinter) {
+                if (newPrinter) {
+                    this.syncFormData();
+                    this.resetEditingState();
+                }
+            },
+            immediate: true
+        }
     },
 
     methods: {
-        validatePrinterName(name) {
-            // Only restrict backslash and forward slash, allow other characters
-            const invalidCharsRegex = /[\\\/]/;
-            return !invalidCharsRegex.test(name) && name.length <= 50;
-        },
-
-        validateIPAddress(ip) {
-            // Basic IP address validation: numbers and dots only
-            const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-            if (!ipRegex.test(ip)) {
-                return false;
-            }
-            // Check each octet is between 0-255
-            const octets = ip.split('.');
-            return octets.every(octet => {
-                const num = parseInt(octet, 10);
-                return num >= 0 && num <= 255;
-            });
-        },
-
         closeModal() {
+            // Reset editing state before closing modal
+            this.resetEditingState();
             this.$emit('close-modal');
         },
 
@@ -155,7 +171,7 @@ const PrinterSettingComponent = {
         },
 
         editPrinterName() {
-            this.editingName = (this.printer && this.printer.printerName) || '';
+            this.formData.printerName = (this.printer && this.printer.printerName) || '';
             this.isEditingName = true;
             this.$nextTick(() => {
                 if (this.$refs.nameInput) {
@@ -166,7 +182,7 @@ const PrinterSettingComponent = {
         },
 
         editPrinterHost() {
-            this.editingHost = (this.printer && this.printer.host) || '';
+            this.formData.host = (this.printer && this.printer.host) || '';
             this.isEditingHost = true;
             this.$nextTick(() => {
                 if (this.$refs.hostInput) {
@@ -174,43 +190,6 @@ const PrinterSettingComponent = {
                     this.$refs.hostInput.select();
                 }
             });
-        },
-
-        onNameInput() {
-            // Remove backslash and forward slash in real-time
-            let cleanValue = this.editingName.replace(/[\\\/]/g, '');
-            // Limit to 50 characters
-            if (cleanValue.length > 50) {
-                cleanValue = cleanValue.substring(0, 50);
-            }
-            if (this.editingName !== cleanValue) {
-                this.editingName = cleanValue;
-            }
-        },
-
-        onHostInput() {
-            // Only allow numbers and dots
-            let cleanValue = this.editingHost.replace(/[^\d\.]/g, '');
-            // Prevent multiple consecutive dots
-            cleanValue = cleanValue.replace(/\.+/g, '.');
-            // Prevent dot at the beginning
-            cleanValue = cleanValue.replace(/^\./, '');
-            // Prevent dot at the end
-            cleanValue = cleanValue.replace(/\.$/, '');
-            // Limit to 4 octets (3 dots max)
-            const dots = (cleanValue.match(/\./g) || []).length;
-            if (dots > 3) {
-                const parts = cleanValue.split('.');
-                cleanValue = parts.slice(0, 4).join('.');
-            }
-            // Limit each octet to 3 digits max
-            const parts = cleanValue.split('.');
-            const limitedParts = parts.map(part => part.length > 3 ? part.substring(0, 3) : part);
-            cleanValue = limitedParts.join('.');
-
-            if (this.editingHost !== cleanValue) {
-                this.editingHost = cleanValue;
-            }
         },
 
         onNameKeydown(e) {
@@ -234,55 +213,65 @@ const PrinterSettingComponent = {
         },
 
         saveNameChanges() {
-            console.log('Saving printer name changes...');
-            const newName = this.editingName.trim();
+            const newName = this.formData.printerName.trim();
             const currentName = (this.printer && this.printer.printerName) || '';
-            console.log(`New Name: ${newName}, Current Name: ${currentName}`);
+            
             if (newName && newName !== currentName) {
-                if (!this.validatePrinterName(newName)) {
-                    alert('Printer name cannot contain backslash (\\) or forward slash (/) and must be 50 characters or less.');
-                    this.$nextTick(() => {
-                        if (this.$refs.nameInput) {
-                            this.$refs.nameInput.focus();
-                            this.$refs.nameInput.select();
-                        }
-                    });
-                    return;
-                }
-                this.printer.printerName = newName;
-                this.printerStore.requestUpdatePrinterName(this.printer.printerId, newName);
+                // Use Element Plus form validation
+                this.$refs.printerForm.validateField('printerName', (valid) => {
+                    if (valid) {
+                        this.printer.printerName = newName;
+                        this.printerStore.requestUpdatePrinterName(this.printer.printerId, newName);
+                        this.isEditingName = false;
+                    } else {
+                        // Validation failed, keep editing mode and show error
+                        console.log('Name validation failed');
+                    }
+                });
+            } else {
+                this.isEditingName = false;
             }
-            this.isEditingName = false;
         },
 
         saveHostChanges() {
-            const newHost = this.editingHost.trim();
+            const newHost = this.formData.host.trim();
             const currentHost = (this.printer && this.printer.host) || '';
 
             if (newHost && newHost !== currentHost) {
-                if (!this.validateIPAddress(newHost)) {
-                    alert('Please enter a valid IP address (e.g., 192.168.1.100)');
-                    this.$nextTick(() => {
-                        if (this.$refs.hostInput) {
-                            this.$refs.hostInput.focus();
-                            this.$refs.hostInput.select();
-                        }
-                    });
-                    return;
-                }
-                this.printerStore.updatePrinterHost(this.printer.printerId, newHost);
+                // Use Element Plus form validation
+                this.$refs.printerForm.validateField('host', (valid) => {
+                    if (valid) {
+                        this.printer.host = newHost; 
+                        this.printerStore.requestUpdatePrinterHost(this.printer.printerId, newHost);
+                        this.isEditingHost = false;
+                    } else {
+                        // Validation failed, keep editing mode and show error
+                        console.log('Host validation failed');
+                    }
+                });
+            } else {
+                this.isEditingHost = false;
             }
-            this.isEditingHost = false;
         },
 
         cancelNameChanges() {
             this.isEditingName = false;
-            this.editingName = '';
+            // Restore original value
+            this.formData.printerName = (this.printer && this.printer.printerName) || '';
+            // Clear validation errors
+            if (this.$refs.printerForm) {
+                this.$refs.printerForm.clearValidate('printerName');
+            }
         },
 
         cancelHostChanges() {
             this.isEditingHost = false;
-            this.editingHost = '';
+            // Restore original value
+            this.formData.host = (this.printer && this.printer.host) || '';
+            // Clear validation errors
+            if (this.$refs.printerForm) {
+                this.$refs.printerForm.clearValidate('host');
+            }
         },
 
         checkFirmwareUpdate() {
@@ -294,6 +283,24 @@ const PrinterSettingComponent = {
                 return 'Update Available';
             }
             return 'Latest Version';
+        },
+
+        // Sync form data with current printer data
+        syncFormData() {
+            if (this.printer) {
+                this.formData.printerName = this.printer.printerName || '';
+                this.formData.host = this.printer.host || '';
+            }
+        },
+
+        // Reset editing state to display mode
+        resetEditingState() {
+            this.isEditingName = false;
+            this.isEditingHost = false;
+            // Clear any validation errors
+            if (this.$refs.printerForm) {
+                this.$refs.printerForm.clearValidate();
+            }
         }
     }
 };

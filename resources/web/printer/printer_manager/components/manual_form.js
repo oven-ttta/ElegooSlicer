@@ -66,7 +66,12 @@ const ManualFormTemplate = /*html*/
                 <div class="form-group">
                     <label class="required">Printer Name</label>
                     <el-form-item prop="printerName">
-                        <el-input type="text" v-model="formData.printerName"  required/>
+                        <el-input 
+                            type="text" 
+                            v-model="formData.printerName"  
+                            required
+                            @keydown="onPrinterNameKeydown"
+                        />
                     </el-form-item>
                 </div>
                 
@@ -87,7 +92,12 @@ const ManualFormTemplate = /*html*/
                 <div class="form-group">
                     <label class="required">Host Name, IP or URL</label>
                     <el-form-item prop="host">
-                        <el-input type="text" v-model="formData.host" required/>
+                        <el-input 
+                            type="text" 
+                            v-model="formData.host" 
+                            required
+                            @keydown="onHostKeydown"
+                        />
                     </el-form-item>
                 </div>
                 
@@ -114,7 +124,7 @@ const ManualFormTemplate = /*html*/
     `;
 
 
-// Manual Form Component (可以被其他应用导入)
+// Manual Form Component (can be imported by other applications)
 const ManualFormComponent = {
     template: ManualFormTemplate,
     setup() {
@@ -161,8 +171,9 @@ const ManualFormComponent = {
                 host: [
                     { required: true, message: 'Please enter host name, IP or URL', trigger: 'blur' },
                     { 
-                        pattern: /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$|^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$|^https?:\/\/.+$/,
-                        message: 'Please enter a valid hostname, IP address or URL',
+                        validator: (rule, value, callback) => {
+                            this.printerStore.validateHost(rule, value, callback);
+                        },
                         trigger: 'blur'
                     }
                 ]
@@ -210,34 +221,33 @@ const ManualFormComponent = {
     },
     
     methods: {
-        
         renderPrinterModelList(printerModelList, printer = null) {
             
             if (!printerModelList) return;
             
-            // 提取厂商列表
+            // extract vendor list
             this.vendors = printerModelList.map(vendorModels => vendorModels.vendor);
             
-            // 提取所有模型
+            // extract all models
             this.allModels = [];
             printerModelList.forEach(vendorModels => {
                 this.allModels.push(...vendorModels.models);
             });
             
-            // 提取唯一的主机类型
+            // extract unique host types
             const uniqueHostTypes = new Set();
             this.allModels.forEach(model => {
                 uniqueHostTypes.add(model.hostType);
             });
             this.hostTypes = Array.from(uniqueHostTypes);
             
-            // 如果有厂商，默认选择第一个
+            // if there is vendor, default select the first one
             if (this.vendors.length > 0 && !this.formData.vendor) {
                 this.formData.vendor = this.vendors[0];
                 this.onVendorChange();
             }
             
-            // 如果有打印机数据要填充，在模型列表渲染后执行
+            // if there is printer data to fill, execute after model list rendering
             if (printer) {
                 this.renderPrinter(printer);
             }
@@ -275,13 +285,27 @@ const ManualFormComponent = {
         },
         
         toggleAdvanced() {
-            // showAdvanced 已经通过 v-model 自动更新
+            // showAdvanced is automatically updated through v-model
+        },
+        
+        onPrinterNameKeydown(e) {
+            if (e.keyCode === 13) { // Enter key
+                e.preventDefault();
+                this.$refs.manualForm.validateField('printerName');
+            }
+        },
+        
+        onHostKeydown(e) {
+            if (e.keyCode === 13) { // Enter key
+                e.preventDefault();
+                this.$refs.manualForm.validateField('host');
+            }
         },
         
         renderPrinter(printer) {
             if (!printer) return;
             
-            // 处理厂商和模型选择
+            // handle vendor and model selection
             if (printer.vendor && printer.vendor !== this.formData.vendor) {
                 this.formData.vendor = printer.vendor;
                 this.onVendorChange();
@@ -296,13 +320,13 @@ const ManualFormComponent = {
                 this.formData.hostType = printer.hostType;
             }
             
-            // 如果是现有打印机，禁用厂商和模型选择
+            // if it is an existing printer, disable vendor and model selection
             if (printer.vendor || printer.printerModel) {
                 this.isVendorDisabled = true;
                 this.isModelDisabled = true;
             }
             
-            // 填充其他字段
+            // fill other fields
             if (printer.printerName) {
                 this.formData.printerName = printer.printerName;
             }
@@ -346,12 +370,12 @@ const ManualFormComponent = {
             });
         },
 
-        // 添加表单重置方法
+        // add form reset method
         resetForm() {
             this.$refs.manualForm.resetFields();
         },
 
-        // 添加表单验证方法
+        // add form validation method
         validateForm() {
             return new Promise((resolve) => {
                 this.$refs.manualForm.validate((valid) => {

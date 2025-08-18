@@ -72,12 +72,12 @@ const PrinterSettingPhysicalComponent = {
         handleUpdatePhysicalPrinter(newPrinter) {
             if (!this.printer) return;
 
-            // 检查名称是否有变化
+            // check if name has changed
             if (newPrinter.printerName !== this.printer.printerName) {
                 this.printerStore.requestUpdatePrinterName(this.printer.printerId, newPrinter.printerName);
             }
 
-            // 检查主机是否有变化
+            // check if host has changed
             if (newPrinter.host !== this.printer.host) {
                 this.printerStore.requestUpdatePrinterHost(this.printer.printerId, newPrinter.host);
             }

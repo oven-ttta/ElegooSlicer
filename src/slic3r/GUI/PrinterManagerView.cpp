@@ -71,7 +71,7 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
         return;
     }
     mTabBar->AddPage(mBrowser, FIRST_TAB_NAME);
-
+    mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
     auto _dir = resources_dir();
     std::replace(_dir.begin(), _dir.end(), '\\', '/');
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/printer_manager/printer.html").make_preferred().string());

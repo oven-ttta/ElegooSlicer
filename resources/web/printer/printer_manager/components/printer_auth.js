@@ -92,7 +92,7 @@ const PrinterAuthComponent = {
     },
 
     methods: {
-        // 设置输入框引用
+        // set input box reference
         setInputRef(el, index) {
             if (el) {
                 this.inputRefs[index] = el;
@@ -102,10 +102,10 @@ const PrinterAuthComponent = {
         renderPrinterAuth(printer) {
             if (!printer) return;
 
-            // 清空访问码
+            // clear access code
             this.accessCodes = ["", "", "", "", "", ""];
 
-            // 设置焦点到第一个输入框
+            // set focus to first input box
             this.$nextTick(() => {
                 this.focusFirstInput();
             });
@@ -129,7 +129,7 @@ const PrinterAuthComponent = {
         },
 
         connectPrinter() {
-            // 合并所有输入值
+            // merge all input values
             const accessCode = this.accessCodes.join("");
 
             if (accessCode.length !== 6) {
@@ -148,24 +148,24 @@ const PrinterAuthComponent = {
         },
 
         onCodeInput(index, value) {
-            // Element Plus 的 @input 事件直接传递值，不是事件对象
+            // Element Plus @input event directly passes value, not event object
             console.log('onCodeInput called:', index, value);
 
-            // 确保 value 是字符串
+            // ensure value is a string
             const stringValue = String(value || '');
 
-            // 只允许数字和大小写字母
+            // only allow numbers and uppercase letters
             if (!/^[a-zA-Z0-9]*$/.test(stringValue)) {
                 this.accessCodes[index] = "";
                 return;
             }
 
-            // 如果输入了字符，自动聚焦到下一个输入框
+            // if a character is entered, automatically focus on the next input box
             if (stringValue.length === 1 && index < 5) {
                 this.$nextTick(() => {
                     const nextInput = this.inputRefs[index + 1];
                     if (nextInput) {
-                        // Element Plus 输入框焦点设置
+                        // Element Plus input focus setting
                         if (nextInput.focus) {
                             nextInput.focus();
                         } else if (nextInput.$refs && nextInput.$refs.input) {
@@ -177,7 +177,7 @@ const PrinterAuthComponent = {
         },
 
         onCodeKeydown(index, event) {
-            // 处理退格键
+            // handle backspace key
             if (
                 event.key === "Backspace" &&
                 this.accessCodes[index] === "" &&
@@ -186,7 +186,7 @@ const PrinterAuthComponent = {
                 this.$nextTick(() => {
                     const prevInput = this.inputRefs[index - 1];
                     if (prevInput) {
-                        // Element Plus 输入框焦点设置
+                        // Element Plus input box focus setting
                         if (prevInput.focus) {
                             prevInput.focus();
                         } else if (prevInput.$refs && prevInput.$refs.input) {
@@ -201,7 +201,7 @@ const PrinterAuthComponent = {
             this.$nextTick(() => {
                 const firstInput = this.inputRefs[0];
                 if (firstInput) {
-                    // Element Plus 输入框焦点设置
+                    // Element Plus input box focus setting
                     if (firstInput.focus) {
                         firstInput.focus();
                     } else if (firstInput.$refs && firstInput.$refs.input) {

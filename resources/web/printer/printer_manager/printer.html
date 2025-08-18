@@ -44,10 +44,10 @@
             </div>
         </div>
         <div class="printer-container">
-            <div class="printer-category">本地打印机</div>
+            <div class="printer-category">Local Printers</div>
             <div v-if="printerStore.printers.length === 0" class="no-printer">
                 <img src="./img/printer-empty.png" width="224"/>
-                <div>暂无打印机</div>
+                <div>No Printers Available</div>
             </div>
             <div class="printer-list" v-else>
                 <div v-for="(printer, index) in printerStore.printers" :key="printer.printerId" class="printer-card"

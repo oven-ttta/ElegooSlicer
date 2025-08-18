@@ -1,6 +1,6 @@
 const { createPinia, defineStore } = Pinia;
 
-// 定义一个 store
+// Define a store
 const usePrinterStore = defineStore('printer', {
   state: () => ({
     discoveredPrinters: [],
@@ -9,6 +9,73 @@ const usePrinterStore = defineStore('printer', {
     printerModelList: null,
   }),
   actions: {
+    validateHost(rule, value, callback) {
+      if (!value || value.trim().length === 0) {
+        callback(new Error('Please enter host name, IP or URL'));
+        return;
+      }
+
+      const trimmedValue = value.trim();
+
+      // Helper function to validate IPv4 address
+      const isValidIPv4 = (ip) => {
+        // Must match pattern: number.number.number.number
+        const ipPattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+        const match = ip.match(ipPattern);
+        
+        if (!match) {
+          return { valid: false, error: 'Please enter a valid hostname, IP address or URL' };
+        }
+
+        // Check each segment is between 0-255
+        for (let i = 1; i <= 4; i++) {
+          const segment = parseInt(match[i], 10);
+          if (segment < 0 || segment > 255) {
+            return { valid: false, error: `Please enter a valid hostname, IP address or URL` };
+          }
+        }
+
+        return { valid: true };
+      };
+
+      // Helper function to validate URL
+      const isValidURL = (url) => {
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          return false;
+        }
+        return url.length >= 10; // Basic length check
+      };
+
+      const isValidHostname = (hostname) => {
+        const hostnamePattern = /^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$/;
+        return hostnamePattern.test(hostname);
+      };
+
+      // Validation logic
+      if (/^\d+\./.test(trimmedValue)) {
+        // Starts with number + dot - check if it's a valid IPv4
+        const ipValidation = isValidIPv4(trimmedValue);
+        if (!ipValidation.valid) {
+          callback(new Error(ipValidation.error));
+          return;
+        }
+        callback(); // IPv4 is valid
+        return;
+      }
+
+      if (isValidURL(trimmedValue)) {
+        callback(); // URL is valid
+        return;
+      }
+
+      if (isValidHostname(trimmedValue)) {
+        callback(); // Hostname is valid
+        return;
+      }
+
+      callback(new Error('Please enter a valid hostname, IP address or URL'));
+    },
+
 
     init() {
       window.HandleStudio = (data) => {
@@ -138,7 +205,7 @@ const usePrinterStore = defineStore('printer', {
       };
       SendWXMessage(JSON.stringify(tSend));
     },
-    // 处理打印机信息更新
+    // Handle printer information updates
     updatePrinterInfo(data) {
       if (data.command === 'update_printer_info') {
         this.loadPrinterList();
