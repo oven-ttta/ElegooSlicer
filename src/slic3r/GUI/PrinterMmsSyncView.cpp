@@ -104,7 +104,7 @@ nlohmann::json PrinterMmsSyncView::getPrinterList()
     nlohmann::json printerArray = json::array();
     for (auto& printer : printerList) {
         nlohmann::json printerObj = nlohmann::json::object();
-        printerObj = PrinterManager::convertPrinterNetworkInfoToJson(printer);
+        printerObj = convertPrinterNetworkInfoToJson(printer);
         if (selectedPrinterId.empty() || printer.printerId != selectedPrinterId) {
             printerObj["selected"] = false;
         } else {
@@ -128,7 +128,7 @@ nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& 
     nlohmann::json printerFilamentInfo = nlohmann::json::object();
     std::string printerId = params["printerId"];
     PrinterMmsGroup mmsGroup = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
-    nlohmann::json mmsInfo = PrinterMmsManager::convertPrinterMmsGroupToJson(mmsGroup);
+    nlohmann::json mmsInfo = convertPrinterMmsGroupToJson(mmsGroup);
     printerFilamentInfo["mmsInfo"] = mmsInfo;
 
     auto           preset_bundle = wxGetApp().preset_bundle;
@@ -170,7 +170,7 @@ nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& 
     }
     PrinterMmsManager::getInstance()->getFilamentMmsMapping(printFilamentList, mmsGroup);
     for (auto& printFilament : printFilamentList) {
-        printFilamentArray.push_back(PrinterMmsManager::convertPrintFilamentMmsMappingToJson(printFilament));
+        printFilamentArray.push_back(convertPrintFilamentMmsMappingToJson(printFilament));
     }
     printerFilamentInfo["printFilamentList"] = printFilamentArray;
     nlohmann::json response = {
@@ -187,7 +187,7 @@ nlohmann::json PrinterMmsSyncView::syncMmsFilament(const nlohmann::json& params)
     nlohmann::json printFilamentList = params["printFilamentList"];
     nlohmann::json printer = params["printer"];
 
-    mMmsGroup  = PrinterMmsManager::convertJsonToPrinterMmsGroup(mmsInfo);
+    mMmsGroup  = convertJsonToPrinterMmsGroup(mmsInfo);
 
     nlohmann::json response = {
         {"code", 0},

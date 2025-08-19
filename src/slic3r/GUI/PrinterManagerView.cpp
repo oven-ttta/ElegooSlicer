@@ -262,7 +262,7 @@ bool PrinterManagerView::updatePrinterHost(const std::string& id, const std::str
 }
 std::string PrinterManagerView::addPrinter(const nlohmann::json& printer)
 {
-    PrinterNetworkInfo printerInfo = PrinterManager::convertJsonToPrinterNetworkInfo(printer);
+    PrinterNetworkInfo printerInfo = convertJsonToPrinterNetworkInfo(printer);
     printerInfo.isPhysicalPrinter = false;
     return PrinterManager::getInstance()->addPrinter(printerInfo);
 }
@@ -288,7 +288,7 @@ nlohmann::json PrinterManagerView::discoverPrinter()
     nlohmann::json response = json::array();
     for (auto& printer : printerList) {
         nlohmann::json printer_obj = nlohmann::json::object();
-        printer_obj = PrinterManager::convertPrinterNetworkInfoToJson(printer);
+        printer_obj = convertPrinterNetworkInfoToJson(printer);
         boost::filesystem::path resources_path(Slic3r::resources_dir());
         std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
         printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
@@ -302,7 +302,7 @@ nlohmann::json PrinterManagerView::getPrinterList()
     nlohmann::json response = json::array();
     for (auto& printer : printerList) {
         nlohmann::json printer_obj = nlohmann::json::object();
-        printer_obj = PrinterManager::convertPrinterNetworkInfoToJson(printer);
+        printer_obj = convertPrinterNetworkInfoToJson(printer);
         boost::filesystem::path resources_path(Slic3r::resources_dir());
         std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
         printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
@@ -316,7 +316,7 @@ nlohmann::json PrinterManagerView::getPrinterListStatus()
     nlohmann::json response = json::array();
     for (auto& printer : printerList) {
         nlohmann::json printer_obj = nlohmann::json::object();
-        printer_obj = PrinterManager::convertPrinterNetworkInfoToJson(printer);
+        printer_obj = convertPrinterNetworkInfoToJson(printer);
         response.push_back(printer_obj);
     }
     return response;

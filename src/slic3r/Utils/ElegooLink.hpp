@@ -14,14 +14,12 @@ class ElegooLink : public Singleton<ElegooLink>
 public:
     ElegooLink();
     ~ElegooLink();
-
-    PrinterNetworkResult<PrinterNetworkInfo> addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected);
     PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> disconnectFromPrinter(const std::string& printerId);
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices();
-    PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
-    PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
-    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params);
+    PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params);
+    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
     void close();
 
     static int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo);

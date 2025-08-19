@@ -1,9 +1,7 @@
 #ifndef slic3r_PrinterNetworkInfo_hpp_
 #define slic3r_PrinterNetworkInfo_hpp_
 
-#include <cereal/archives/binary.hpp>
-#include <cereal/types/string.hpp>
-#include <cereal/types/vector.hpp>
+
 #include <string>
 #include <functional>
 #include <nlohmann/json.hpp>
@@ -145,12 +143,7 @@ struct PrinterNetworkInfo
     PrinterConnectStatus connectStatus{PRINTER_CONNECT_STATUS_DISCONNECTED};
     PrinterStatus        printerStatus{PRINTER_STATUS_IDLE};
 
-    template<class Archive> void serialize(Archive& ar)
-    {
-        ar(printerId, printerName, host, port, vendor, printerModel, protocolVersion, firmwareVersion, hostType, mainboardId, deviceType,
-           serialNumber, username, password, authMode, webUrl, connectionUrl, extraInfo, isPhysicalPrinter, addTime, modifyTime,
-           lastActiveTime);
-    }
+
 };
 
 struct PrinterNetworkParams
@@ -173,6 +166,17 @@ using PrinterConnectStatusFn = std::function<void(const std::string& printerId, 
 using PrinterStatusFn        = std::function<void(const std::string& printerId, const PrinterStatus& status)>;
 using PrinterPrintTaskFn     = std::function<void(const std::string& printerId, const PrinterPrintTask& printTask)>;
 using PrinterAttributesFn    = std::function<void(const std::string& printerId, const PrinterNetworkInfo& printerInfo)>;
+
+PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json);
+nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printerNetworkInfo);
+nlohmann::json convertPrinterMmsTrayToJson(const PrinterMmsTray& tray);
+PrinterMmsTray convertJsonToPrinterMmsTray(const nlohmann::json& json);
+nlohmann::json convertPrinterMmsToJson(const PrinterMms& mms);
+PrinterMms convertJsonToPrinterMms(const nlohmann::json& json);
+nlohmann::json convertPrinterMmsGroupToJson(const PrinterMmsGroup& mmsGroup);
+PrinterMmsGroup convertJsonToPrinterMmsGroup(const nlohmann::json& json);
+nlohmann::json convertPrintFilamentMmsMappingToJson(const PrintFilamentMmsMapping& printFilamentMmsMapping);
+PrintFilamentMmsMapping convertJsonToPrintFilamentMmsMapping(const nlohmann::json& json);
 
 } // namespace Slic3r
 

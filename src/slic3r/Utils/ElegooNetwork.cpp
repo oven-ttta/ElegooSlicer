@@ -5,67 +5,44 @@
 
 namespace Slic3r {
 
-ElegooNetwork::ElegooNetwork() = default;
+ElegooNetwork::ElegooNetwork(const PrinterNetworkInfo& printerNetworkInfo) : IPrinterNetwork(printerNetworkInfo) {}
 
-ElegooNetwork::~ElegooNetwork() = default;
+ElegooNetwork::~ElegooNetwork(){
 
-PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected)
-{
-    if (printerNetworkInfo.printerId.empty()) {
-        wxLogError("Invalid printer ID provided to ElegooNetwork::addPrinter");
-        return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::INVALID_PARAMETER, printerNetworkInfo);
-    }
-    return ElegooLink::getInstance()->addPrinter(printerNetworkInfo, connected);
 
 }
 
-PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo)
+PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::connectToPrinter()
 {
-    return ElegooLink::getInstance()->connectToPrinter(printerNetworkInfo);
+    return ElegooLink::getInstance()->connectToPrinter(mPrinterNetworkInfo);
 }
 
-PrinterNetworkResult<bool> ElegooNetwork::disconnectFromPrinter(const std::string& printerId)
+PrinterNetworkResult<bool> ElegooNetwork::disconnectFromPrinter()
 {
-    if (printerId.empty()) {
-        wxLogError("Invalid printer ID provided to ElegooNetwork::disconnectFromPrinter");
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::INVALID_PARAMETER, false);
-    }
-    return ElegooLink::getInstance()->disconnectFromPrinter(printerId);
+    return ElegooLink::getInstance()->disconnectFromPrinter(mPrinterNetworkInfo.printerId);
 }
-
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooNetwork::discoverDevices()   
 {
     return ElegooLink::getInstance()->discoverDevices();
 }
-
-PrinterNetworkResult<bool> ElegooNetwork::sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params)
+PrinterNetworkResult<bool> ElegooNetwork::sendPrintTask(const PrinterNetworkParams& params)
 {
-    if (printerNetworkInfo.printerId.empty()) {
-        wxLogError("Invalid printer ID provided to ElegooNetwork::sendPrintTask");
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::INVALID_PARAMETER, false);
-    }
-    return ElegooLink::getInstance()->sendPrintTask(printerNetworkInfo, params);
+    return ElegooLink::getInstance()->sendPrintTask(params);
 
 }
-
-PrinterNetworkResult<bool> ElegooNetwork::sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params)
+PrinterNetworkResult<bool> ElegooNetwork::sendPrintFile(const PrinterNetworkParams& params)
 {
-    if (printerNetworkInfo.printerId.empty()) {
-        wxLogError("Invalid printer ID provided to ElegooNetwork::sendPrintFile");
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::INVALID_PARAMETER, false);
-    }
-    return ElegooLink::getInstance()->sendPrintFile(printerNetworkInfo, params);
+    return ElegooLink::getInstance()->sendPrintFile(params);
 
 }
-
-int ElegooNetwork::getDeviceType(const PrinterNetworkInfo& printerNetworkInfo)
+int ElegooNetwork::getDeviceType()
 {
-    return ElegooLink::getDeviceType(printerNetworkInfo);
+    return ElegooLink::getDeviceType(mPrinterNetworkInfo);
 }
 
-PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo)
+PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo()
 {
-    return ElegooLink::getInstance()->getPrinterMmsInfo(printerNetworkInfo);
+    return ElegooLink::getInstance()->getPrinterMmsInfo(mPrinterNetworkInfo.printerId);
 }
 
 void ElegooNetwork::close()

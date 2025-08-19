@@ -420,7 +420,7 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
         if(the_job.upload_data.extended_info.find("filamentAmsMapping") != the_job.upload_data.extended_info.end()) {
             nlohmann::json filamentAmsMapping = nlohmann::json::parse(the_job.upload_data.extended_info["filamentAmsMapping"]);
             for(auto& filament : filamentAmsMapping) {
-                PrintFilamentMmsMapping printFilamentMmsMapping = PrinterMmsManager::convertJsonToPrintFilamentMmsMapping(filament);
+                PrintFilamentMmsMapping printFilamentMmsMapping = convertJsonToPrintFilamentMmsMapping(filament);
                 params.filamentMmsMappingList.push_back(printFilamentMmsMapping);
             }
         }

@@ -584,7 +584,9 @@ set(SLIC3R_GUI_SOURCES
     GUI/PrintSendDialogEx.hpp
     Utils/Singleton.hpp
     Utils/PrinterManager.cpp
-    Utils/PrinterManager.hpp 
+    Utils/PrinterManager.hpp
+    Utils/PrinterCache.cpp
+    Utils/PrinterCache.hpp 
     Utils/PrinterNetworkManager.cpp
     Utils/PrinterNetworkManager.hpp
     Utils/PrinterNetwork.cpp

@@ -8,18 +8,19 @@ namespace Slic3r {
 class ElegooNetwork : public IPrinterNetwork
 {
 public:
-    ElegooNetwork();
+    ElegooNetwork(const PrinterNetworkInfo& printerNetworkInfo);
+    ElegooNetwork()=delete;
+    ElegooNetwork(const ElegooNetwork&)=delete;
+    ElegooNetwork& operator=(const ElegooNetwork&)=delete;
     virtual ~ElegooNetwork();
-
-    virtual PrinterNetworkResult<PrinterNetworkInfo> addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected) override;
-    virtual PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
-    virtual PrinterNetworkResult<bool> disconnectFromPrinter(const std::string& printerId) override;
-    virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) override;
-    virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params) override;
+    virtual PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter() override;
+    virtual PrinterNetworkResult<bool> disconnectFromPrinter() override;
+    virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params) override;
+    virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params) override;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices() override;
-    virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo) override;
+    virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() override;
     virtual void close() override;
-    virtual int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo) override;
+    virtual int getDeviceType() override;
 };
 
 } // namespace Slic3r

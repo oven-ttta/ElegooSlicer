@@ -21,14 +21,7 @@ public:
     void getFilamentMmsMapping(std::vector<PrintFilamentMmsMapping>& printFilamentMmsMapping, const PrinterMmsGroup& mmsGroup);
     void saveFilamentMmsMapping(std::vector<PrintFilamentMmsMapping>& printFilamentMmsMapping);
 
-    static nlohmann::json convertPrinterMmsTrayToJson(const PrinterMmsTray& tray);
-    static PrinterMmsTray convertJsonToPrinterMmsTray(const nlohmann::json& json);
-    static nlohmann::json convertPrinterMmsToJson(const PrinterMms& mms);
-    static PrinterMms convertJsonToPrinterMms(const nlohmann::json& json);
-    static nlohmann::json convertPrinterMmsGroupToJson(const PrinterMmsGroup& mmsGroup);
-    static PrinterMmsGroup convertJsonToPrinterMmsGroup(const nlohmann::json& json);
-    static nlohmann::json convertPrintFilamentMmsMappingToJson(const PrintFilamentMmsMapping& printFilamentMmsMapping);
-    static PrintFilamentMmsMapping convertJsonToPrintFilamentMmsMapping(const nlohmann::json& json);
+
 
 private:
     PrinterMmsManager();

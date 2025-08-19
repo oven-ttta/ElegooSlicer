@@ -12,38 +12,43 @@ namespace Slic3r {
 
 class PrinterNetworkManager : public Singleton<PrinterNetworkManager> {
     friend class Singleton<PrinterNetworkManager>;
+
 public:
-    ~PrinterNetworkManager();
-    
+    PrinterNetworkManager(const PrinterNetworkManager&) = delete;
+    PrinterNetworkManager& operator=(const PrinterNetworkManager&) = delete;
+    PrinterNetworkManager(PrinterNetworkManager&&) = delete;
+    PrinterNetworkManager& operator=(PrinterNetworkManager&&) = delete;
+    ~PrinterNetworkManager();  
+    void init();
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters();
-    PrinterNetworkResult<PrinterNetworkInfo> addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool &connected);
-    PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo);
-    PrinterNetworkResult<bool> disconnectFromPrinter(const PrinterNetworkInfo& printerNetworkInfo);
-    PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
-    PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params);
-    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo);
-    void registerCallBack(const PrinterConnectStatusFn& printerConnectStatusCallback, const PrinterStatusFn& printerStatusCallback, const PrinterPrintTaskFn& printerPrintTaskCallback, const PrinterAttributesFn& printerAttributesCallback);
+    PrinterNetworkResult<PrinterNetworkInfo> addPrinter(const PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<bool> deletePrinter(const std::string& printerId);
+    PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params);
+    PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params);
+    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
     void close();
+
     static int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo);
 
 private:
 
-    std::mutex mCallbackMutex;
+    PrinterNetworkManager();
+
+
+    PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo, std::shared_ptr<IPrinterNetwork> &network);
+
+    bool addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network);
+    bool deletePrinterNetwork(const std::string& printerId);
+    std::shared_ptr<IPrinterNetwork> getPrinterNetwork(const std::string& printerId);
+
     std::mutex mConnectionsMutex;
     std::map<std::string, std::shared_ptr<IPrinterNetwork>> mNetworkConnections;
-    PrinterConnectStatusFn mPrinterConnectStatusCallback;
-    PrinterStatusFn mPrinterStatusCallback;
-    PrinterPrintTaskFn mPrinterPrintTaskCallback;
-    PrinterAttributesFn mPrinterAttributesCallback;
 
-    PrinterNetworkManager();
-    PrinterNetworkManager(const PrinterNetworkManager&) = delete;
-    PrinterNetworkManager& operator=(const PrinterNetworkManager&) = delete;
-    std::shared_ptr<IPrinterNetwork> getPrinterNetwork(const std::string& printerId);
-    void onPrinterConnectStatus(const std::string& printerId, const PrinterConnectStatus& status);
-    void onPrinterStatus(const std::string& printerId, const PrinterStatus& status);
-    void onPrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task);
-    void onPrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
+    // thread to monitor printer connections
+    std::atomic<bool> mIsRunning;
+    std::thread mConnectionThread;
+    void monitorPrinterConnections();
+
 };
 
 } // namespace Slic3r

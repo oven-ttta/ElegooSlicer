@@ -340,12 +340,12 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
         mPrintFilamentMmsMappingList.push_back(info);
     }
     auto           mmsGroup = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
-    nlohmann::json mmsInfo  = PrinterMmsManager::convertPrinterMmsGroupToJson(mmsGroup);
+    nlohmann::json mmsInfo  = convertPrinterMmsGroupToJson(mmsGroup);
     printInfo["mmsInfo"]    = mmsInfo;
     PrinterMmsManager::getInstance()->getFilamentMmsMapping(mPrintFilamentMmsMappingList, mmsGroup);
     nlohmann::json filamentList = json::array();
     for (auto& filament : mPrintFilamentMmsMappingList) {
-        filamentList.push_back(PrinterMmsManager::convertPrintFilamentMmsMappingToJson(filament));
+        filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
     }
     printInfo["filamentList"] = filamentList;
     return printInfo;
@@ -356,7 +356,7 @@ nlohmann::json PrintSendDialogEx::getPrinterList()
     std::vector<PrinterNetworkInfo> printerList = PrinterManager::getInstance()->getPrinterList();
     for (auto& printer : printerList) {
         nlohmann::json printerJson = json::object();
-        printerJson                = PrinterManager::convertPrinterNetworkInfoToJson(printer);
+        printerJson                = convertPrinterNetworkInfoToJson(printer);
         boost::filesystem::path resources_path(Slic3r::resources_dir());
         std::string img_path      = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
         printerJson["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
@@ -462,7 +462,7 @@ std::map<std::string, std::string> PrintSendDialogEx::extendedInfo() const
 {
     nlohmann::json filamentList = json::array();
     for (auto& filament : mPrintFilamentMmsMappingList) {
-        filamentList.push_back(PrinterMmsManager::convertPrintFilamentMmsMappingToJson(filament));
+        filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
     }
 
     return {{"bedType", std::to_string(mBedType)},

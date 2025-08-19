@@ -40,8 +40,6 @@ public:
     PrinterMmsGroup getPrinterMmsInfo(const std::string& printerId);
     PrinterNetworkInfo getPrinterNetworkInfo(const std::string& printerId);
 
-    static PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json);
-    static nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printerNetworkInfo);
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
     static std::string imageFileToBase64DataURI(const std::string& image_path);
 
@@ -49,16 +47,6 @@ public:
 
 private:
     PrinterManager();
-
-    void savePrinterList();
-
-    void updatePrinterConnectStatus(const std::string& printerId, const PrinterConnectStatus& status);
-    void updatePrinterStatus(const std::string& printerId, const PrinterStatus& status);
-    void updatePrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task);
-    void updatePrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
-
-    std::map<std::string, PrinterNetworkInfo> mPrinterList;
-    std::mutex mPrinterListMutex;
 
 };
 } // namespace Slic3r::GUI 

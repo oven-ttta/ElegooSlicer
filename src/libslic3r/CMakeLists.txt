@@ -453,6 +453,7 @@ set(lisbslic3r_sources
     Interlocking/VoxelUtils.hpp
     Interlocking/VoxelUtils.cpp
     PrinterNetworkInfo.hpp
+    PrinterNetworkInfo.cpp
     PrinterNetworkResult.hpp
     PrinterNetworkResult.cpp
 )

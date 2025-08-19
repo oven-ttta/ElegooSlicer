@@ -80,39 +80,6 @@ PrinterStatus parseElegooStatus(elink::MachineMainStatus mainStatus, elink::Mach
     return printerStatus;
 }
 
-elink::ConnectDeviceParams setupConnectionParams(const PrinterNetworkInfo& printerNetworkInfo, bool checkConnection = false)
-{
-    elink::ConnectDeviceParams connectionParams;
-    connectionParams.deviceId        = printerNetworkInfo.printerId;
-    if(printerNetworkInfo.isPhysicalPrinter && printerNetworkInfo.deviceType == -1) {
-        connectionParams.deviceType = (elink::DeviceType) ElegooLink::getDeviceType(printerNetworkInfo);
-    } else {
-        connectionParams.deviceType = (elink::DeviceType) printerNetworkInfo.deviceType;
-    } 
-    connectionParams.name            = printerNetworkInfo.printerName;
-    connectionParams.authMode        = printerNetworkInfo.authMode;
-    connectionParams.username        = printerNetworkInfo.username;
-    connectionParams.password        = printerNetworkInfo.password;
-    connectionParams.host            = printerNetworkInfo.host;
-    connectionParams.model           = printerNetworkInfo.printerModel;
-    connectionParams.serialNumber    = printerNetworkInfo.serialNumber;
-    connectionParams.brand           = printerNetworkInfo.vendor;
-    connectionParams.checkConnection = checkConnection;
-
-    if (printerNetworkInfo.authMode == "basic") {
-        connectionParams.username = "";
-        connectionParams.password = "";
-    } else if (printerNetworkInfo.authMode == "token") {
-        nlohmann::json extraInfo = nlohmann::json::parse(printerNetworkInfo.extraInfo);
-        if (extraInfo.contains(PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN)) {
-            connectionParams.token = extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN].get<std::string>();
-        } else {
-            wxLogError("Error connecting to device: %s", "Token is not set");
-        }
-    }
-
-    return connectionParams;
-}
 } // namespace
 
 ElegooLink::ElegooLink()
@@ -132,7 +99,7 @@ ElegooLink::ElegooLink()
     cfg.staticWebPath = webDir + "/web/elegoo-fdm-web";
 
     if (!elink::ElegooLink::getInstance().initialize(cfg)) {
-        std::cerr << "Error initializing ElegooLink" << std::endl;
+        wxLogError("Error initializing ElegooLink");
     }
     std::string version = elink::ElegooLink::getInstance().getVersion();
     wxLogMessage("ElegooLink version: %s", version.c_str());
@@ -189,49 +156,48 @@ void ElegooLink::close()
     }
 }
 
-PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::addPrinter(const PrinterNetworkInfo& printerNetworkInfo, bool& connected)
-{
-    PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
-    connected = false;
-    try {
-        auto params  = setupConnectionParams(printerNetworkInfo, false);
-        auto elinkResult = elink::ElegooLink::getInstance().connectDevice(params);
-        resultCode    = parseElegooResult(elinkResult.code);
-        if (elinkResult.code == elink::ElegooError::SUCCESS) {
-            if (elinkResult.data.has_value() && elinkResult.data.value().isConnected && elinkResult.data.value().deviceInfo.deviceId == printerNetworkInfo.printerId) {      
-                auto addPrinter = elinkResult.data.value().deviceInfo;
-                connected = true;
-                PrinterNetworkInfo info = printerNetworkInfo;
-                info.firmwareVersion = addPrinter.firmwareVersion;
-                info.webUrl          = addPrinter.webUrl;
-
-                return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
-            } else {
-                resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
-            }
-        }      
-    } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::addPrinter: %s", e.what());
-        resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
-    }
-    return PrinterNetworkResult<PrinterNetworkInfo>(resultCode,  printerNetworkInfo);
-}
-
-
 PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     try {
-        auto params      = setupConnectionParams(printerNetworkInfo, true);
-        auto elinkResult = elink::ElegooLink::getInstance().connectDevice(params);
+        elink::ConnectDeviceParams connectionParams;
+        connectionParams.deviceId        = printerNetworkInfo.printerId;
+        if(printerNetworkInfo.isPhysicalPrinter && printerNetworkInfo.deviceType == -1) {
+            connectionParams.deviceType = (elink::DeviceType) getDeviceType(printerNetworkInfo);
+        } else {
+            connectionParams.deviceType = (elink::DeviceType) printerNetworkInfo.deviceType;
+        } 
+        connectionParams.name            = printerNetworkInfo.printerName;
+        connectionParams.authMode        = printerNetworkInfo.authMode;
+        connectionParams.username        = printerNetworkInfo.username;
+        connectionParams.password        = printerNetworkInfo.password;
+        connectionParams.host            = printerNetworkInfo.host;
+        connectionParams.model           = printerNetworkInfo.printerModel;
+        connectionParams.serialNumber    = printerNetworkInfo.serialNumber;
+        connectionParams.brand           = printerNetworkInfo.vendor;
+        connectionParams.autoReconnect   = true;
+        connectionParams.checkConnection = true; 
+        connectionParams.connectionTimeout = 3 * 1000;
+        if (printerNetworkInfo.authMode == "basic") {
+            connectionParams.username = "";
+            connectionParams.password = "";
+        } else if (printerNetworkInfo.authMode == "token") {
+            nlohmann::json extraInfo = nlohmann::json::parse(printerNetworkInfo.extraInfo);
+            if (extraInfo.contains(PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN)) {
+                connectionParams.token = extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN].get<std::string>();
+            } else {
+                wxLogError("Error connecting to device: %s", "Token is not set");
+            }
+        }
+        auto elinkResult = elink::ElegooLink::getInstance().connectDevice(connectionParams);
         resultCode    = parseElegooResult(elinkResult.code);
         if (elinkResult.code == elink::ElegooError::SUCCESS) {
             if (elinkResult.data.has_value() && elinkResult.data.value().isConnected && elinkResult.data.value().deviceInfo.deviceId == printerNetworkInfo.printerId) {      
                 auto addPrinter = elinkResult.data.value().deviceInfo;
                 PrinterNetworkInfo info = printerNetworkInfo;
+                //update printer network info
                 info.firmwareVersion = addPrinter.firmwareVersion;
                 info.webUrl          = addPrinter.webUrl;
-
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
@@ -325,16 +291,16 @@ bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status, int
     return isBusy;
 }
 
-PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params)
+PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams& params)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     try {
         PrinterStatus status;
-        if(isBusy(printerNetworkInfo.printerId, status)) {
+        if(isBusy(params.printerId, status)) {
             return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_BUSY, false, "Printer is busy, status: " + std::to_string(status));
         }
         elink::StartPrintParams startPrintParams;
-        startPrintParams.deviceId        = printerNetworkInfo.printerId;
+        startPrintParams.deviceId        = params.printerId;
         startPrintParams.storageLocation = "local";
         startPrintParams.fileName        = params.fileName;
         startPrintParams.autoBedLeveling = params.heatedBedLeveling;
@@ -359,16 +325,16 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkInfo& p
 }
 
 
-PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkParams& params)
+PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams& params)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     try {
         PrinterStatus status;
-        if(isBusy(printerNetworkInfo.printerId, status , 1)) {
+        if(isBusy(params.printerId, status , 1)) {
             return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_BUSY, false, "Printer is busy, status: " + std::to_string(status));
         }
         elink::FileUploadParams uploadParams;
-        uploadParams.deviceId = printerNetworkInfo.printerId;
+        uploadParams.deviceId = params.printerId;
         uploadParams.storageLocation = "local";
         uploadParams.localFilePath = params.filePath;
         uploadParams.fileName = params.fileName;
@@ -415,12 +381,12 @@ int ElegooLink::getDeviceType(const PrinterNetworkInfo& printerNetworkInfo)
     return printerNetworkInfo.deviceType; 
 }
 
-PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const PrinterNetworkInfo& printerNetworkInfo)
+PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::string& printerId)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     PrinterMmsGroup mmsGroup;
     try {
-        auto elinkResult = elink::ElegooLink::getInstance().GetCanvasStatus({printerNetworkInfo.printerId});
+        auto elinkResult = elink::ElegooLink::getInstance().getCanvasStatus({printerId});
         resultCode = parseElegooResult(elinkResult.code);
         if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if(elinkResult.hasData()) {
