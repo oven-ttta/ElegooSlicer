@@ -26,6 +26,21 @@ const PrinterManager = {
         this.printerStore.init();
     },
 
+    watch: {
+        //Actively request to discover printers when the add printer dialog is shown
+        showAddPrinter: {
+            handler(newVal) {
+                if (newVal) {
+                    if (this.printerStore.isDiscovering) {
+                        return;
+                    }
+                    this.printerStore.requestDiscoverPrinters();
+                }
+            },
+            immediate: true
+        }
+    },
+
     beforeUnmount() {
         this.printerStore.uninit();
         if (this.statusUpdateInterval) {
@@ -81,7 +96,7 @@ const PrinterManager = {
                     backgroundColor: 'var(--printer-status-offline-bg)'
                 };
             }
-            if (printerStatus == 16|| printerStatus == 0) {
+            if (printerStatus == 16 || printerStatus == 0) {
                 return {
                     color: 'var(--printer-status-success-color)',
                     backgroundColor: 'var(--printer-status-success-bg)'

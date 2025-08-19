@@ -599,6 +599,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrinterNetworkEvent.hpp
     Utils/PrinterMmsManager.cpp
     Utils/PrinterMmsManager.hpp
+    Utils/WebviewIPCManager.h
+    Utils/WebviewIPCManager.cpp
 
 )
 

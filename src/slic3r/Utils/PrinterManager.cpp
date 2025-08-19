@@ -1,5 +1,6 @@
 #include "PrinterManager.hpp"
 #include "slic3r/Utils/PrinterNetworkManager.hpp"
+
 #include "libslic3r/PresetBundle.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -106,6 +107,7 @@ std::map<std::string, std::map<std::string, DynamicPrintConfig>> PrinterManager:
 }
 PrinterManager::PrinterManager()
 {
+
     PrinterCache::getInstance()->init();
     PrinterNetworkManager::getInstance()->init();
 }
@@ -130,6 +132,7 @@ bool PrinterManager::deletePrinter(const std::string& printerId)
 }
 bool PrinterManager::updatePrinterName(const std::string& printerId, const std::string& printerName)
 {
+
     return PrinterCache::getInstance()->updatePrinterName(printerId, printerName);
 }
 bool PrinterManager::updatePrinterHost(const std::string& printerId, const std::string& host)
@@ -162,8 +165,8 @@ bool PrinterManager::updatePrinterHost(const std::string& printerId, const std::
 }
 std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
 {
-    // // only generate a unique id for the printer when adding a printer
-    // // the printer info is from the UI, the UI info is from the discover device or manual add
+    // only generate a unique id for the printer when adding a printer
+    // the printer info is from the UI, the UI info is from the discover device or manual add
     std::vector<PrinterNetworkInfo> printers = PrinterCache::getInstance()->getPrinters();
     for (const auto& p : printers) {
         if (p.host == printerNetworkInfo.host) {
@@ -185,6 +188,7 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
         }
     }
     printerNetworkInfo.printerId = boost::uuids::to_string(boost::uuids::random_generator{}());
+
     auto result = PrinterNetworkManager::getInstance()->addPrinter(printerNetworkInfo);
     if (result.isSuccess() && result.data.has_value()) {     
         auto connectedPrinter = result.data.value();
@@ -200,6 +204,7 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
             printerNetworkInfo.authMode = connectedPrinter.authMode;
             printerNetworkInfo.protocolVersion = connectedPrinter.protocolVersion;
         }
+
         PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
         return printerNetworkInfo.printerId;
     } else {
@@ -232,6 +237,7 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
     for (auto& discoverPrinter : discoverPrinterList) {
         // check if the device is already bound, if it is, check if the ip, firmware version, etc. have changed and update them
         bool isSamePrinter = false;
+
         for (auto& p : PrinterCache::getInstance()->getPrinters()) {
             if (!p.mainboardId.empty() && (discoverPrinter.mainboardId == p.mainboardId)) {
                 isSamePrinter = true;
@@ -240,6 +246,7 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
                 isSamePrinter = true;
             }
             if (isSamePrinter) {
+
                 if (p.host != discoverPrinter.host) {
                     wxLogMessage("Printer %s %s %s IP changed, disconnect and connect to new IP, old IP: %s, new IP: %s", p.host,
                                  p.printerName, p.printerModel, p.host, discoverPrinter.host);
@@ -251,10 +258,12 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
                     p.extraInfo       = discoverPrinter.extraInfo;
                     uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
                                        .count();
+
                     p.modifyTime     = now;
                     p.lastActiveTime = now;
                     p.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
                     PrinterCache::getInstance()->updatePrinter(p);
+
 
                     auto disconnectResult = PrinterNetworkManager::getInstance()->deletePrinter(p.printerId);
                     if (disconnectResult.isSuccess()) {
@@ -262,8 +271,10 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
                                      p.printerModel, disconnectResult.message.c_str());
                     }
 
+
                     auto connectResult = PrinterNetworkManager::getInstance()->addPrinter(p);
                     if (connectResult.isError()) {
+
                         wxLogWarning("Failed to connect printer %s %s %s after IP change: %s", p.host, p.printerName,
                                      p.printerModel, connectResult.message.c_str());
                     }
@@ -306,10 +317,12 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
 }
 std::vector<PrinterNetworkInfo> PrinterManager::getPrinterList()
 {
+
    return PrinterCache::getInstance()->getPrinters();
 }
 PrinterNetworkInfo PrinterManager::getPrinterNetworkInfo(const std::string& printerId)
 {
+
     auto printer = PrinterCache::getInstance()->getPrinter(printerId);
     if(printer.has_value()) {
         return printer.value();
@@ -325,15 +338,19 @@ bool PrinterManager::upload(PrinterNetworkParams& params)
         wxLogError("Printer not found, File name: %s", params.fileName.c_str());
         return false;
     }
+
     PrinterNetworkInfo printerNetworkInfo = printer.value();
 
     auto sendFileResult = PrinterNetworkManager::getInstance()->sendPrintFile(params);
     if (sendFileResult.isSuccess()) {
+
         wxLogMessage("File upload success: %s %s %s, file name: %s", printer.value().host, printer.value().printerName,
                      printer.value().printerModel, params.fileName.c_str());
         if (params.uploadAndStartPrint) {          
+
             auto sendTaskResult = PrinterNetworkManager::getInstance()->sendPrintTask(params);
             if (sendTaskResult.isError()) {
+
                 wxLogWarning("Failed to send print task after file upload: %s %s %s, file name: %s, error: %s", printer.value().host,
                              printer.value().printerName, printer.value().printerModel, params.fileName.c_str(),
                              sendTaskResult.message.c_str());
@@ -365,11 +382,11 @@ PrinterMmsGroup PrinterManager::getPrinterMmsInfo(const std::string& printerId)
                 mmsGroup = mmsInfo.data.value();
             }
         } else {
+
             wxLogWarning("Failed to get printer mms info: %s %s %s, error: %s", printer.value().host, printer.value().printerName,
                          printer.value().printerModel, mmsInfo.message.c_str());
         }
     }
     return mmsGroup;
 }
-
 } // namespace Slic3r

@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
 #include <functional>
+#include <atomic>
+#include <memory>
 #include "slic3r/GUI/PrinterWebView.hpp"
 #include <wx/webview.h>
 #include <wx/aui/aui.h>
@@ -25,9 +27,7 @@ public:
     void openPrinterTab(const std::string& printerId);
 
 private:
-    void onScriptMessage(wxWebViewEvent &evt);
-    void handleCommand(const std::string& cmd, const nlohmann::json& root);
-    void sendResponse(const std::string& command, const std::string& sequenceId, const nlohmann::json& response);
+    void setupIPCHandlers();
     void runScript(const wxString &javascript);
     void onClosePrinterTab(wxAuiNotebookEvent& event);
  
@@ -45,7 +45,10 @@ private:
 
     wxAuiNotebook* mTabBar;
     wxWebView* mBrowser;
+    webviewIpc::WebviewIPCManager* m_ipc;
     std::map<std::string, PrinterWebView*> mPrinterViews;
+    std::atomic<bool> m_isDestroying;
+    std::shared_ptr<bool> m_lifeTracker;
    
 };
 }} // namespace Slic3r::GUI 

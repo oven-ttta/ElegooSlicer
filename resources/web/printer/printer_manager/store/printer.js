@@ -7,6 +7,7 @@ const usePrinterStore = defineStore('printer', {
     isDiscovering: false,
     printers: [],
     printerModelList: null,
+    statusUpdateInterval: null,
   }),
   actions: {
     validateHost(rule, value, callback) {
@@ -78,132 +79,189 @@ const usePrinterStore = defineStore('printer', {
 
 
     init() {
-      window.HandleStudio = (data) => {
-        this.handleStudio(data);
-      };
+      // Register event handlers for printer-related events
+      nativeIpc.on('response_printer_list', (data) => {
+        this.printers = data || [];
+      });
+
+      nativeIpc.on('response_printer_list_status', (data) => {
+        this.updatePrinterListStatus(data || []);
+      });
+
+      nativeIpc.on('response_discover_printers', (data) => {
+        this.discoveredPrinters = data || [];
+        this.isDiscovering = false;
+      });
+
+      nativeIpc.on('response_add_printer', () => {
+        this.requestPrinterList();
+      });
+
+      nativeIpc.on('response_update_printer_name', () => {
+        this.requestPrinterList();
+      });
+
+      nativeIpc.on('response_add_physical_printer', () => {
+        this.requestPrinterList();
+      });
+
+      nativeIpc.on('response_update_printer_host', () => {
+        this.requestPrinterList();
+      });
+
+      nativeIpc.on('response_delete_printer', () => {
+        this.requestPrinterList();
+        this.closeModals();
+      });
+
+      nativeIpc.on('response_printer_model_list', (data) => {
+        this.printerModelList = data;
+      });
     },
     uninit() {
-      window.HandleStudio = null;
-    },
+      // Clean up event listeners
+      nativeIpc.off('response_printer_list');
+      nativeIpc.off('response_printer_list_status');
+      nativeIpc.off('response_discover_printers');
+      nativeIpc.off('response_add_printer');
+      nativeIpc.off('response_update_printer_name');
+      nativeIpc.off('response_add_physical_printer');
+      nativeIpc.off('response_update_printer_host');
+      nativeIpc.off('response_delete_printer');
+      nativeIpc.off('response_printer_model_list');
 
-    requestPrinterList() {
-      console.log("Requesting printer list");
-      const tSend = {
-        command: "request_printer_list",
-        sequence_id: Math.round(new Date() / 1000)
-      };
-      SendWXMessage(JSON.stringify(tSend));
-    },
-
-    startStatusUpdates() {
-      this.statusUpdateInterval = setInterval(() => {
-        const tSend = {
-          command: "request_printer_list_status",
-          sequence_id: Math.round(new Date() / 1000)
-        };
-        SendWXMessage(JSON.stringify(tSend));
-      }, 1000);
-    },
-
-    requestPrinterModelList() {
-      const tSend = {
-        command: "request_printer_model_list",
-        sequence_id: Math.round(new Date() / 1000)
-      };
-      SendWXMessage(JSON.stringify(tSend));
-    },
-
-    handleStudio(pVal) {
-      const strCmd = pVal['command'];
-      console.log("received command:", pVal);
-      switch (strCmd) {
-        case "response_printer_list":
-          this.printers = pVal['response'] || [];
-          break;
-
-        case "response_printer_list_status":
-          this.updatePrinterListStatus(pVal['response'] || []);
-          break;
-
-        case "response_discover_printers":
-          this.discoveredPrinters = pVal.response || [];
-          this.isDiscovering = false;
-          break;
-
-        case "response_add_printer":
-        case "response_update_printer_name":
-        case "response_add_physical_printer":
-        case "response_update_printer_host":
-          this.requestPrinterList();
-          break;
-
-        case "response_delete_printer":
-          this.requestPrinterList();
-          this.closeModals();
-          break;
-
-        case "response_printer_model_list":
-          this.printerModelList = pVal['response'];
-          break;
+      // Clear status update interval
+      if (this.statusUpdateInterval) {
+        clearInterval(this.statusUpdateInterval);
+        this.statusUpdateInterval = null;
       }
     },
 
-    requestDiscoverPrinters() {
+    async ipcRequest(method, params, timeout = 10000) {
+      try {
+        const response = await nativeIpc.request(method, params, timeout);
+        return response;
+      } catch (error) {
+        console.error(`IPC: Request ${method} failed`, error);
+        // Show error notification using Element Plus message component
+        if (window.ElementPlus && window.ElementPlus.ElMessage) {
+          window.ElementPlus.ElMessage.error({
+            message: `Request failed: ${method} - ${error.message || 'Unknown error occurred'}`,
+            duration: 5000,
+            showClose: true
+          });
+        }
+        
+        throw error;
+      }
+    },
+
+    async requestPrinterList() {
+      console.log("Requesting printer list");
+      try {
+        const response = await this.ipcRequest('request_printer_list', {});
+        this.printers = response || [];
+      } catch (error) {
+        console.error('Failed to request printer list:', error);
+      }
+    },
+
+    startStatusUpdates() {
+      // Clear any existing interval
+      if (this.statusUpdateInterval) {
+        clearInterval(this.statusUpdateInterval);
+      }
+
+      this.statusUpdateInterval = setInterval(async () => {
+        try {
+          const response = await this.ipcRequest('request_printer_list_status', {});
+          this.updatePrinterListStatus(response || []);
+        } catch (error) {
+          console.error('Failed to update printer status:', error);
+        }
+      }, 3000);
+    },
+
+    stopStatusUpdates() {
+      if (this.statusUpdateInterval) {
+        clearInterval(this.statusUpdateInterval);
+        this.statusUpdateInterval = null;
+      }
+    },
+
+    async requestPrinterModelList() {
+      try {
+        const response = await this.ipcRequest('request_printer_model_list', {});
+        this.printerModelList = response;
+      } catch (error) {
+        console.error('Failed to request printer model list:', error);
+      }
+    },
+
+    async requestDiscoverPrinters() {
       this.isDiscovering = true;
-      const tSend = {
-        command: "request_discover_printers",
-        sequence_id: Math.round(new Date() / 1000)
-      };
-      SendWXMessage(JSON.stringify(tSend));
+      try {
+        const response = await this.ipcRequest('request_discover_printers', {}, 30 * 1000);
+        this.discoveredPrinters = response || [];
+        this.isDiscovering = false;
+      } catch (error) {
+        console.error('Failed to discover printers:', error);
+        this.isDiscovering = false;
+      }
     },
 
-    requestDeletePrinter(printerId) {
+    async requestDeletePrinter(printerId) {
       console.log(`Requesting deletion of printer with ID: ${printerId}`);
-      const tSend = {
-        command: "request_delete_printer",
-        sequence_id: Math.round(new Date() / 1000),
-        printerId: printerId
-      };
-      SendWXMessage(JSON.stringify(tSend));
+      try {
+        await this.ipcRequest('request_delete_printer', { printerId });
+        this.requestPrinterList();
+        // Response handling is done in event listeners
+      } catch (error) {
+        console.error('Failed to delete printer:', error);
+      }
     },
 
-    requestAddPrinter(printer) {
-      const tSend = {
-        command: "request_add_printer",
-        sequence_id: Math.round(new Date() / 1000),
-        printer: printer
-      };
-      SendWXMessage(JSON.stringify(tSend));
+    async requestAddPrinter(printer) {
+      try {
+        await this.ipcRequest('request_add_printer', { printer });
+        this.requestPrinterList();
+      } catch (error) {
+        console.error('Failed to add printer:', error);
+      }
     },
 
-    requestAddPhysicalPrinter(printer) {
+    async requestAddPhysicalPrinter(printer) {
       console.log("Requesting addition of physical printer:", printer);
-      const tSend = {
-        command: "request_add_physical_printer",
-        sequence_id: Math.round(new Date() / 1000),
-        printer: printer
-      };
-      SendWXMessage(JSON.stringify(tSend));
+      try {
+        await this.ipcRequest('request_add_physical_printer', { printer });
+        this.requestPrinterList();
+      } catch (error) {
+        console.error('Failed to add physical printer:', error);
+      }
     },
 
-    requestUpdatePrinterName(printerId, printerName) {
-      const tSend = {
-        command: "request_update_printer_name",
-        sequence_id: Math.round(new Date() / 1000),
-        printerId: printerId,
-        printerName: printerName
-      };
-      SendWXMessage(JSON.stringify(tSend));
+    async requestUpdatePrinterName(printerId, printerName) {
+      try {
+        await this.ipcRequest('request_update_printer_name', {
+          printerId,
+          printerName
+        });
+        // Response handling is done in event listeners
+      } catch (error) {
+        console.error('Failed to update printer name:', error);
+      }
     },
 
-    requestUpdatePrinterHost(printerId, host) {
-      const tSend = {
-        command: "request_update_printer_host",
-        sequence_id: Math.round(new Date() / 1000),
-        printerId: printerId,
-        host: host
-      };
-      SendWXMessage(JSON.stringify(tSend));
+    async requestUpdatePrinterHost(printerId, host) {
+      try {
+        await this.ipcRequest('request_update_printer_host', {
+          printerId,
+          host
+        });
+        // Response handling is done in event listeners
+      } catch (error) {
+        console.error('Failed to update printer host:', error);
+      }
     },
     // Handle printer information updates
     updatePrinterInfo(data) {
@@ -211,13 +269,14 @@ const usePrinterStore = defineStore('printer', {
         this.loadPrinterList();
       }
     },
-    showPrinterDetail(printerId) {
-      const tSend = {
-        command: "request_printer_detail",
-        sequence_id: Math.round(new Date() / 1000),
-        printerId: printerId
-      };
-      SendWXMessage(JSON.stringify(tSend));
+    async showPrinterDetail(printerId) {
+      try {
+        const response = await this.ipcRequest('request_printer_detail', { printerId });
+        return response;
+      } catch (error) {
+        console.error('Failed to get printer detail:', error);
+        return null;
+      }
     },
 
     updatePrinterListStatus(printers) {
@@ -231,6 +290,13 @@ const usePrinterStore = defineStore('printer', {
           };
         }
       });
+    },
+
+    // Helper method for closing modals (to be implemented by UI components)
+    closeModals() {
+      // This method should be overridden or called from UI components
+      // to handle modal closing logic
+      console.log('closeModals called - should be handled by UI components');
     },
   }
 });

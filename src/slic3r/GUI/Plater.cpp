@@ -117,6 +117,7 @@
 #include "Gizmos/GLGizmoSimplify.hpp" // create suggestion notification
 #include "Gizmos/GLGizmoSVG.hpp" // Drop SVG file
 #include "Gizmos/GizmoObjectManipulation.hpp"
+#include "PrinterWebView.hpp"
 
 // BBS
 #include "Widgets/ProgressDialog.hpp"
