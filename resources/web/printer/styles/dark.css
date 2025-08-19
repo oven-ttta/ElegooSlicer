@@ -65,6 +65,7 @@ html.dark {
   --el-bg-color: var(--bg-primary);
   --el-dialog-bg-color: var(--el-bg-color);
   --el-drawer-bg-color: var(--el-dialog-bg-color, var(--el-bg-color));
+  --el-mask-color: rgba(0, 0, 0, 0.7);
 }
 
 /* ===== DARK THEME SPECIFIC ADJUSTMENTS ===== */
@@ -86,4 +87,13 @@ html.dark ::-webkit-scrollbar-thumb {
 
 html.dark ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
+}
+
+
+.linear-loading::after {
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    rgba(30, 30, 30, 0.8) 50%,
+    transparent 100%
+  );
 }

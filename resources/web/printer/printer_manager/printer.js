@@ -1,5 +1,5 @@
 const { createApp } = Vue;
-const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOption, ElForm, ElFormItem } = ElementPlus;
+const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOption, ElForm, ElFormItem, ElLoading } = ElementPlus;
 
 const PrinterManager = {
     setup() {

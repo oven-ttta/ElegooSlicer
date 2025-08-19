@@ -40,7 +40,9 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
         wxLogError("Could not init m_browser");
         return;
     }
-
+    this->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
+    m_browser->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
+    m_browser->SetOwnBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
     m_ipc = new webviewIpc::WebviewIPCManager(m_browser);
     setupIPCHandlers();
     m_browser->Bind(wxEVT_WEBVIEW_ERROR, &PrinterWebView::OnError, this);
@@ -359,7 +361,7 @@ void PrinterWebView::setupIPCHandlers()
                 return webviewIpc::IPCResult::success(data);
             }
         } catch (const std::exception& e) {
-            return webviewIpc::IPCResult::error(-1, "No file selected");
+            return webviewIpc::IPCResult::error("No file selected");
         }
     });
     
@@ -371,7 +373,7 @@ void PrinterWebView::setupIPCHandlers()
         
         // 检查是否已有上传在进行中
         if (m_uploadInProgress) {
-            sendResponse(webviewIpc::IPCResult::error(-1, "Upload already in progress"));
+            sendResponse(webviewIpc::IPCResult::error("Upload already in progress"));
             return;
         }
         
@@ -419,12 +421,12 @@ void PrinterWebView::setupIPCHandlers()
                 
                 // 在主线程中发送响应
                 auto response = ret ? webviewIpc::IPCResult::success() 
-                                    : webviewIpc::IPCResult::error(-1, "Upload failed");
+                                    : webviewIpc::IPCResult::error("Upload failed");
                 sendResponse(response);
             });            
         } catch (...) {
             m_uploadInProgress = false;
-            sendResponse(webviewIpc::IPCResult::error(-1, "Upload initialization failed"));
+            sendResponse(webviewIpc::IPCResult::error("Upload initialization failed"));
         }
     });
 }

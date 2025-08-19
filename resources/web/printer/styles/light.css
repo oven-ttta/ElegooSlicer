@@ -70,6 +70,7 @@
   --el-bg-color: var(--bg-primary);
   --el-dialog-bg-color: var(--el-bg-color);
   --el-drawer-bg-color: var(--el-dialog-bg-color, var(--el-bg-color));
+  --el-mask-color: rgba(255, 255, 255, 0.7);
 }
 
 /* ===== BASE STYLES ===== */
@@ -175,7 +176,7 @@ body {
 .linear-loading {
   width: 100%;
   height: 2px;
-  background: color-mix(in srgb, var(--color-primary), transparent 90%);
+  background: rgba(22, 119, 255, 0.2);
   border-radius: 2px;
   position: relative;
   overflow: hidden;

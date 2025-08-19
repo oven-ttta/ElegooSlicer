@@ -55,8 +55,24 @@ const AddPrinterTemplate = /*html*/`
             <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">Refresh</button>
             <div class="add-printer-footer">
                 <button type="button" class="btn-secondary" @click="closeModal">Close</button>   
+                <span class="help-link" v-show="activeTab==='discover'" @click.prevent="showHelp" style="align-self: flex-end;">Cannot find printer?</span>
                 <button type="button" class="btn-primary" @click="connectPrinter">Connect</button>
             </div>
+
+                        <!-- Help Dialog -->
+            <el-dialog 
+                v-model="showHelpDialog"
+                title="Help"
+                width="400px"
+                center
+            >
+                <p>请确保打印机已经联网，并且与当前软件处于同一个网络，如果刷新后依旧无法发现，可尝试进行手动添加。</p>
+                <template #footer>
+                    <span class="dialog-footer">
+                        <button class="btn-primary" @click="showHelpDialog = false">OK</button>
+                    </span>
+                </template>
+            </el-dialog>
         </div>
     `;
 
@@ -81,6 +97,7 @@ const AddPrinterComponent = {
             selectedPrinterIdx: null,
             showPrinterAuth: false,
             pendingAuthPrinter: null,
+            showHelpDialog: false
         };
     },
 
@@ -157,6 +174,9 @@ const AddPrinterComponent = {
                 'add-printer-table-tr': true,
                 'selected': this.selectedPrinterIdx === idx
             };
+        },
+        showHelp(){
+            this.showHelpDialog = true;
         }
     }
 };
