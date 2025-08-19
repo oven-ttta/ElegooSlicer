@@ -1,0 +1,91 @@
+#pragma once
+
+#include <map>
+#include <mutex>
+#include <vector>
+#include <optional>
+#include "libslic3r/PrinterNetworkInfo.hpp"
+#include "slic3r/Utils/Singleton.hpp"
+
+namespace Slic3r {
+
+/**
+ * @brief Printer Cache Layer
+ */
+class PrinterCache : public Singleton<PrinterCache>
+{
+    friend class Singleton<PrinterCache>;
+
+public:
+    ~PrinterCache();
+    PrinterCache(const PrinterCache&) = delete;
+    PrinterCache& operator=(const PrinterCache&) = delete;
+    
+    /**
+     * @brief Initialize printer cache
+     */
+    void init();
+
+    /**
+     * @brief Get single printer by ID
+     */
+    std::optional<PrinterNetworkInfo> getPrinter(const std::string& printerId) const;
+    
+    /**
+     * @brief Get all printers
+     */
+    std::vector<PrinterNetworkInfo> getPrinters() const;
+    
+    /**
+     * @brief Add new printer
+     */
+    bool addPrinter(const PrinterNetworkInfo& printerInfo);
+    
+    /**
+     * @brief Update printer
+     */
+    bool updatePrinter(const PrinterNetworkInfo& printerInfo);
+
+    /**
+     * @brief Delete printer by ID
+     */
+    bool deletePrinter(const std::string& printerId);
+    
+    /**
+     * @brief Update printer connection status
+     */
+    bool updatePrinterConnectStatus(const std::string& printerId, const PrinterConnectStatus& status);
+    
+    /**
+     * @brief Update printer name
+     */
+    bool updatePrinterName(const std::string& printerId, const std::string& name);
+    
+    /**
+     * @brief Update printer host
+     */
+    bool updatePrinterHost(const std::string& printerId, const std::string& host);
+
+    /**
+     * @brief Update printer attributes
+     */
+    void updatePrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
+
+    /**
+     * @brief Update printer status
+     */
+    void updatePrinterStatus(const std::string& printerId, const PrinterStatus& status);
+    /**
+     * @brief Update printer print task
+     */
+    void updatePrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task);
+
+private:
+    PrinterCache();
+    bool loadPrinterList();
+    bool savePrinterList();
+    mutable std::mutex mMutex;
+    std::map<std::string, PrinterNetworkInfo> mPrinters;
+};
+
+} // namespace Slic3r
