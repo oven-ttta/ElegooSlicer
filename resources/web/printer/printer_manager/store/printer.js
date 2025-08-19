@@ -23,7 +23,7 @@ const usePrinterStore = defineStore('printer', {
         // Must match pattern: number.number.number.number
         const ipPattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
         const match = ip.match(ipPattern);
-        
+
         if (!match) {
           return { valid: false, error: 'Please enter a valid hostname, IP address or URL' };
         }
@@ -142,16 +142,21 @@ const usePrinterStore = defineStore('printer', {
         const response = await nativeIpc.request(method, params, timeout);
         return response;
       } catch (error) {
-        console.error(`IPC: Request ${method} failed`, error);
+        let message = ''
+        if (method === "request_add_printer" || method === "request_add_physical_printer") {
+          message = "Failed to add printer.";
+        } else {
+          message = `${error.message || 'Unknown error occurred'}`
+        }
         // Show error notification using Element Plus message component
         if (window.ElementPlus && window.ElementPlus.ElMessage) {
           window.ElementPlus.ElMessage.error({
-            message: `Request failed: ${method} - ${error.message || 'Unknown error occurred'}`,
+            message: message,
             duration: 5000,
             showClose: true
           });
         }
-        
+
         throw error;
       }
     },
@@ -211,7 +216,6 @@ const usePrinterStore = defineStore('printer', {
     },
 
     async requestDeletePrinter(printerId) {
-      console.log(`Requesting deletion of printer with ID: ${printerId}`);
       try {
         await this.ipcRequest('request_delete_printer', { printerId });
         this.requestPrinterList();
@@ -222,21 +226,33 @@ const usePrinterStore = defineStore('printer', {
     },
 
     async requestAddPrinter(printer) {
+      const loading = ElLoading.service({
+        lock: true,
+      });
       try {
+
+        await new Promise(resolve => setTimeout(resolve, 500));
         await this.ipcRequest('request_add_printer', { printer });
         this.requestPrinterList();
       } catch (error) {
         console.error('Failed to add printer:', error);
+      } finally {
+        loading.close();
       }
     },
 
     async requestAddPhysicalPrinter(printer) {
-      console.log("Requesting addition of physical printer:", printer);
+      const loading = ElLoading.service({
+        lock: true,
+      });
       try {
+        await new Promise(resolve => setTimeout(resolve, 500));
         await this.ipcRequest('request_add_physical_printer', { printer });
         this.requestPrinterList();
       } catch (error) {
         console.error('Failed to add physical printer:', error);
+      } finally {
+        loading.close();
       }
     },
 

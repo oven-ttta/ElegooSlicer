@@ -82,9 +82,10 @@ body {
   color: var(--color-primary);
   text-decoration: none;
   font-size: 14px;
-  margin-bottom: 20px;
   display: inline-block;
   border-bottom: 1px solid var(--color-primary);
+  cursor: pointer;
+
 }
 
 .help-link:hover {
@@ -415,14 +416,14 @@ body {
 .add-printer-name,
 .add-printer-host {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
 .add-printer-status {
   color: var(--color-primary);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .add-printer-table-body div:hover {
@@ -437,7 +438,7 @@ body {
   width: 96px;
   height: 96px;
   border-radius: 4px;
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   object-fit: contain;
   vertical-align: middle;
 }

@@ -28,28 +28,194 @@ namespace GUI {
 
 class TabArt : public wxAuiDefaultTabArt
 {
+private:
+    bool isDarkMode() const {
+        return GUI_App::dark_mode();
+    }
+
+    void getColorScheme(wxColour& activeTab, wxColour& inactiveTab, wxColour& activeText, 
+                       wxColour& inactiveText, wxColour& background, wxColour& border, wxColour &tabHeaderBackground) const {
+        if (isDarkMode()) {
+            // dark mode color scheme
+            activeTab = wxColour(0, 120, 189);      // active tab: dark blue
+            inactiveTab = wxColour(45, 45, 48);   // inactive tab: light gray
+            activeText = wxColour(255, 255, 255);    // active tab text: white
+            inactiveText = wxColour(200, 200, 200);  // inactive tab text: light gray
+            background = wxColour(45, 45, 45);       // tab bar background: dark gray
+            border =  wxColour(45, 45, 45);           // border: dark gray
+            tabHeaderBackground = wxColour(45, 45, 45);   // tab header background: dark gray
+        } else {
+            // light mode color scheme
+            activeTab = wxColour(0, 120, 189);      // active tab: steel blue
+            inactiveTab = wxColour(56, 68, 70);      // inactive tab: dark gray
+            activeText = wxColour(255, 255, 255);    // active tab text: white
+            inactiveText = wxColour(200, 200, 200);     // inactive tab text: dark gray
+            background = wxColour(250, 250, 250);    // tab bar background: almost white
+            border = wxColour(250, 250, 250);  // border: light gray
+            tabHeaderBackground = wxColour(56, 68, 70);
+        }
+    }
+
 public:
+    TabArt() {
+        wxColour activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground;
+        getColorScheme(activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground);
+
+        SetColour(inactiveTab);        // inactive tab background color
+        SetActiveColour(activeTab);    // active tab background color
+    }
+
     wxAuiTabArt* Clone() override { return new TabArt(*this); }
-    void         DrawTab(wxDC&                    dc,
-                         wxWindow*                wnd,
-                         const wxAuiNotebookPage& page,
-                         const wxRect&            in_rect,
-                         int                      close_button_state,
-                         wxRect*                  out_tab_rect,
-                         wxRect*                  out_button_rect,
-                         int*                     x_extent) override
+    
+    void DrawTab(wxDC& dc,
+                 wxWindow* wnd,
+                 const wxAuiNotebookPage& page,
+                 const wxRect& in_rect,
+                 int close_button_state,
+                 wxRect* out_tab_rect,
+                 wxRect* out_button_rect,
+                 int* x_extent) override
     {
         bool isFirstTab = (page.caption == FIRST_TAB_NAME);
-        
+
+        // If it is the first tab, hide the close button
         if (isFirstTab) {
-            
-            wxAuiDefaultTabArt::DrawTab(dc, wnd, page, in_rect,
-                wxAUI_BUTTON_STATE_HIDDEN, out_tab_rect,
-                out_button_rect, x_extent);
+            close_button_state = wxAUI_BUTTON_STATE_HIDDEN;
+        }
+
+        // Completely custom drawing, do not call the parent class method to avoid white edge issues
+        bool isActive = page.active;
+        wxRect tab_rect = in_rect;
+
+        wxColour tab_colour, text_colour, border_colour, background_colour, inactive_tab_colour, inactive_text_colour, tab_header_background_colour;
+        getColorScheme(tab_colour, inactive_tab_colour, text_colour, inactive_text_colour, background_colour, border_colour, tab_header_background_colour);
+
+        //  Select color based on tab state
+        if (isActive) {
         } else {
-            wxAuiDefaultTabArt::DrawTab(dc, wnd, page, in_rect,
-                close_button_state, out_tab_rect,
-                out_button_rect, x_extent);
+            tab_colour = inactive_tab_colour;
+            text_colour = inactive_text_colour;
+        }
+
+        // Calculate the actual size of the tab, text area
+        wxString text = page.caption;
+        wxSize text_size = dc.GetTextExtent(text);
+
+        // Calculate tab width: text width + left/right margin + close button space
+        int tab_width = text_size.x + 16; // Basic left/right margin
+        if (!isFirstTab && close_button_state != wxAUI_BUTTON_STATE_HIDDEN) {
+            tab_width += 20; // Close button space
+        }
+
+        // Adjust tab_rect width
+        tab_rect.width = tab_width;
+
+        // Completely fill the background to avoid white edges
+        dc.SetBrush(wxBrush(tab_colour));
+        dc.SetPen(wxPen(tab_colour, 0));
+        dc.DrawRectangle(tab_rect);
+
+        // Draw text
+        dc.SetTextForeground(text_colour);
+
+        // Calculate text position
+        wxPoint text_pos;
+        text_pos.x = tab_rect.x + 8; // Left margin
+        text_pos.y = tab_rect.y + (tab_rect.height - text_size.y) / 2;
+        dc.DrawText(text, text_pos);
+
+        // Set close button position
+        wxRect close_rect;
+        if (!isFirstTab && close_button_state != wxAUI_BUTTON_STATE_HIDDEN) {
+            close_rect.x = tab_rect.x + tab_rect.width - 18;
+            close_rect.y = tab_rect.y + (tab_rect.height - 14) / 2;
+            close_rect.width = 14;
+            close_rect.height = 14;
+            
+            if (out_button_rect) *out_button_rect = close_rect;
+
+            // Dark mode and light mode close button colors
+            wxColour close_hover_bg, close_normal_colour, close_hover_colour;
+            if (isDarkMode()) {
+                close_hover_bg = wxColour(80, 40, 40);     // Dark red background
+                close_normal_colour = wxColour(200, 200, 200); // Gray X
+                close_hover_colour = wxColour(255, 120, 120);  // Light red X
+            } else {
+                close_hover_bg = wxColour(255, 200, 200);  // Light red background
+                close_normal_colour = wxColour(200, 200, 200); // Gray X
+                close_hover_colour = wxColour(200, 0, 0);      // Red X
+            }
+
+            // Draw close button background
+            if (close_button_state == wxAUI_BUTTON_STATE_HOVER) {
+                dc.SetBrush(wxBrush(close_hover_bg));
+                dc.SetPen(wxPen(tab_colour, 0));
+                dc.DrawRoundedRectangle(close_rect, 3);
+            }
+
+            // Draw close button X - centered in 14x14 area
+            wxColour close_colour = (close_button_state == wxAUI_BUTTON_STATE_HOVER) ? 
+                close_hover_colour : close_normal_colour;
+            dc.SetPen(wxPen(close_colour, 2));
+            
+            // Calculate center point of the 14x14 button
+            int center_x = close_rect.x + close_rect.width / 2;   // 7 pixels from left
+            int center_y = close_rect.y + close_rect.height / 2;  // 7 pixels from top
+            int half_size = 3; // X extends 2 pixels in each direction from center
+
+            // Draw X lines centered in the button
+            dc.DrawLine(center_x - half_size, center_y - half_size, 
+                       center_x + half_size, center_y + half_size);
+            dc.DrawLine(center_x + half_size, center_y - half_size, 
+                       center_x - half_size, center_y + half_size);
+        }
+
+        // Set output parameters
+        if (out_tab_rect) *out_tab_rect = tab_rect;
+        if (x_extent) *x_extent = tab_rect.width;
+    }
+    
+    void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect) override
+    {
+        wxColour activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground;
+        getColorScheme(activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground);
+
+
+        dc.SetPen(wxPen(tabHeaderBackground, 1));
+        dc.SetBrush(wxBrush(tabHeaderBackground));
+        dc.DrawRectangle(rect);
+    }
+
+    int GetBorderWidth(
+        wxWindow* wnd) override{
+            return 0; // No border width needed
+    }
+
+    void DrawBorder(wxDC& dc, wxWindow* wnd, const wxRect& rect) override
+    {
+        wxColour activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground;
+        getColorScheme(activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground);
+
+        // Draw the main background area
+        dc.SetBrush(wxBrush(background));
+        dc.SetPen(wxPen(background, 1));
+        dc.DrawRectangle(rect);
+
+        // Draw only the top 26px area with tabHeaderBackground
+        const int topAreaHeight = 25;
+        if (rect.height >= topAreaHeight) {
+            wxRect topRect = rect;
+            topRect.height = topAreaHeight;
+            dc.SetBrush(wxBrush(tabHeaderBackground));
+            dc.SetPen(wxPen(tabHeaderBackground, 1));
+            dc.DrawRectangle(topRect);
+        }
+        if(isDarkMode()){
+            dc.SetPen(wxPen(wxColour(0x22, 0x22, 0x22), 1));
+            dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y);
+        }else{
+            dc.SetPen(wxPen(wxColour(0x60, 0x60, 0x60), 1));
+            dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y);
         }
     }
 };
@@ -63,9 +229,9 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
     
     mTabBar = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-        wxAUI_NB_TOP | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS);
+        wxAUI_NB_TOP | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS | wxBORDER_NONE);
     mTabBar->SetArtProvider(new TabArt());
-    mTabBar->SetBackgroundColour(wxColour("#FEFFFF"));
+    mTabBar->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
     mainSizer->Add(mTabBar, 1, wxEXPAND);
     SetSizer(mainSizer);
 
@@ -234,31 +400,95 @@ void PrinterManagerView::setupIPCHandlers()
                 }
             } catch (const std::exception& e) {
                 if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error(-1, std::string("Discovery failed: ") + e.what()));
+                    sendResponse(webviewIpc::IPCResult::error(std::string("Discovery failed: ") + e.what()));
                 }
             }
         }).detach();
     });
 
-    // Handle request_add_printer
-    m_ipc->onRequest("request_add_printer", [this](const webviewIpc::IPCRequest& request){
+    // Handle request_add_printer (async)
+    m_ipc->onRequestAsync("request_add_printer", [this](const webviewIpc::IPCRequest& request,
+                                                        std::function<void(const webviewIpc::IPCResult&)> sendResponse) {  
         auto params = request.params;
-        if (params.contains("printer")) {
-            nlohmann::json printer = params["printer"];
-            std::string result = addPrinter(printer);
-            return webviewIpc::IPCResult::success(nlohmann::json(result));
+        if (!params.contains("printer")) {
+            sendResponse(webviewIpc::IPCResult::error("Missing printer parameter"));
+            return;
         }
-        return webviewIpc::IPCResult::error("Missing printer parameter");
+        
+        // Create a weak reference to track object lifetime
+        std::weak_ptr<bool> life_tracker = m_lifeTracker;
+        nlohmann::json printer = params["printer"];
+        
+        // Run the add printer operation in a separate thread
+        std::thread([life_tracker, printer, sendResponse, this]() {
+            try {
+                // Check if the object still exists
+                if (auto tracker = life_tracker.lock()) {
+                    std::string result = addPrinter(printer);
+                    
+                    // Final check before sending response
+                    if (life_tracker.lock()) {
+                        if(result==""){
+                            sendResponse(webviewIpc::IPCResult::error("Add physical printer failed"));
+                        }else{
+                            sendResponse(webviewIpc::IPCResult::success(nlohmann::json(result)));
+                        }
+                    }
+                }
+            } catch (const std::exception& e) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error(std::string("Add printer failed: ") + e.what()));
+                }
+            } catch (...) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error("Add printer failed: Unknown error"));
+                }
+            }
+        }).detach();
     });
 
-    // Handle request_add_physical_printer
-    m_ipc->onRequest("request_add_physical_printer", [this](const webviewIpc::IPCRequest& request){
+    // Handle request_add_physical_printer (async)
+    m_ipc->onRequestAsync("request_add_physical_printer", [this](const webviewIpc::IPCRequest& request,
+                                                                 std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+      
         auto params = request.params;
-        if (params.contains("printer")) {
-            std::string result = addPhysicalPrinter(params["printer"]);
-            return webviewIpc::IPCResult::success(nlohmann::json(result));
+        if (!params.contains("printer")) {
+            sendResponse(webviewIpc::IPCResult::error("Missing printer parameter"));
+            return;
         }
-        return webviewIpc::IPCResult::error("Missing printer parameter");
+        
+        // Create a weak reference to track object lifetime
+        std::weak_ptr<bool> life_tracker = m_lifeTracker;
+        nlohmann::json printer = params["printer"];
+        
+        // Run the add physical printer operation in a separate thread
+        std::thread([life_tracker, printer, sendResponse, this]() {
+            try {
+                // Check if the object still exists
+                if (auto tracker = life_tracker.lock()) {
+                    std::string result = addPhysicalPrinter(printer);   
+                    // Final check before sending response
+                    if (life_tracker.lock()) {
+                        if(result==""){
+                            sendResponse(webviewIpc::IPCResult::error("Add physical printer failed"));
+                        }else{
+                            sendResponse(webviewIpc::IPCResult::success(nlohmann::json(result)));
+                        }
+                    }
+                } else {
+                    // Object was destroyed, don't send response
+                    return;
+                }
+            } catch (const std::exception& e) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error(std::string("Add physical printer failed: ") + e.what()));
+                }
+            } catch (...) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error("Add physical printer failed: Unknown error"));
+                }
+            }
+        }).detach();
     });
 
     // Handle request_update_printer_name
