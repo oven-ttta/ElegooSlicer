@@ -22,12 +22,8 @@ PrinterCache::PrinterCache() {
 PrinterCache::~PrinterCache() {
 }
 
-void PrinterCache::init() {
-    loadPrinterList();
-}
-
 bool PrinterCache::loadPrinterList() {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mLoadSaveMutex);
     fs::path printerListPath = fs::path(Slic3r::data_dir()) / "user" / "printer_list.json";
     // read printer list from file
     std::ifstream ifs(printerListPath.string());
@@ -38,10 +34,8 @@ bool PrinterCache::loadPrinterList() {
     
     try {
         nlohmann::json jsonData;
-        ifs >> jsonData;
-        
+        ifs >> jsonData;      
         mPrinters.clear();
-    
         for (const auto& [printerId, printerJson] : jsonData.items()) {
             PrinterNetworkInfo printerInfo = convertJsonToPrinterNetworkInfo(printerJson);
             mPrinters[printerId] = printerInfo;
@@ -53,10 +47,17 @@ bool PrinterCache::loadPrinterList() {
 }
 
 bool PrinterCache::savePrinterList() {
+    std::lock_guard<std::mutex> lock(mLoadSaveMutex);
     fs::path printerListPath = fs::path(Slic3r::data_dir()) / "user" / "printer_list.json";
     nlohmann::json jsonData;
     for (const auto& [printerId, printerInfo] : mPrinters) {
-        jsonData[printerId] = convertPrinterNetworkInfoToJson(printerInfo);
+        nlohmann::json printerJson = convertPrinterNetworkInfoToJson(printerInfo);  
+        // Remove runtime status fields that shouldn't be persisted
+        printerJson.erase("connectStatus");
+        printerJson.erase("printerStatus");
+        printerJson.erase("printTask");
+        
+        jsonData[printerId] = printerJson;
     }
     std::ofstream ofs(printerListPath.string());
     ofs << jsonData.dump(4);
@@ -64,7 +65,7 @@ bool PrinterCache::savePrinterList() {
 }
 
 std::optional<PrinterNetworkInfo> PrinterCache::getPrinter(const std::string& printerId) const {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
         return it->second;
@@ -73,7 +74,7 @@ std::optional<PrinterNetworkInfo> PrinterCache::getPrinter(const std::string& pr
 }
 
 std::vector<PrinterNetworkInfo> PrinterCache::getPrinters() const {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     std::vector<PrinterNetworkInfo> result;
     result.reserve(mPrinters.size());
     for (const auto& pair : mPrinters) {
@@ -88,25 +89,19 @@ bool PrinterCache::addPrinter(const PrinterNetworkInfo& printerInfo) {
     if (printerInfo.printerId.empty()) {
         return false;
     }   
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     auto result = mPrinters.emplace(printerInfo.printerId, printerInfo);
+    uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    result.first->second.addTime = now;
+    result.first->second.modifyTime = now;
+    result.first->second.lastActiveTime = now;
+    result.first->second.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
     savePrinterList();
     return result.second;
 }
 
-bool PrinterCache::updatePrinter(const PrinterNetworkInfo& printerInfo) {
-    std::lock_guard<std::mutex> lock(mMutex);
-    auto it = mPrinters.find(printerInfo.printerId);
-    if (it != mPrinters.end()) {
-        it->second = printerInfo;
-        savePrinterList();
-        return true;
-    }
-    return false;
-}
-
 bool PrinterCache::deletePrinter(const std::string& printerId) {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
         mPrinters.erase(it);
@@ -115,19 +110,8 @@ bool PrinterCache::deletePrinter(const std::string& printerId) {
     }
     return false;
 }
-
-bool PrinterCache::updatePrinterConnectStatus(const std::string& printerId, const PrinterConnectStatus& status) {
-    std::lock_guard<std::mutex> lock(mMutex);
-    auto it = mPrinters.find(printerId);
-    if (it != mPrinters.end()) {
-        it->second.connectStatus = status;
-        return true;
-    }
-    return false;
-}
-
 bool PrinterCache::updatePrinterName(const std::string& printerId, const std::string& name) {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
         it->second.printerName = name;
@@ -140,22 +124,43 @@ bool PrinterCache::updatePrinterName(const std::string& printerId, const std::st
     return false;
 }
 
-bool PrinterCache::updatePrinterHost(const std::string& printerId, const std::string& host) {
-    std::lock_guard<std::mutex> lock(mMutex);
+bool PrinterCache::updatePrinterHost(const std::string& printerId, const PrinterNetworkInfo& printerInfo) {
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
-        it->second.host = host;
+        it->second.host = printerInfo.host;
+        it->second.webUrl = printerInfo.webUrl;
+        it->second.connectionUrl = printerInfo.connectionUrl;
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        it->second.modifyTime     = now;
+        it->second.lastActiveTime = now;
+        //host changed, disconnect the printer
+        it->second.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
         savePrinterList();
         return true;
     }
     return false;
 }
 
+bool PrinterCache::updatePrinterConnectStatus(const std::string& printerId, const PrinterConnectStatus& status) {
+    std::lock_guard<std::mutex> lock(mCacheMutex);
+    auto it = mPrinters.find(printerId);
+    if (it != mPrinters.end()) {
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        it->second.connectStatus = status;
+        it->second.lastActiveTime = now;
+        return true;
+    }
+    return false;
+}
+
 void PrinterCache::updatePrinterStatus(const std::string& printerId, const PrinterStatus& status) {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
         it->second.printerStatus = status;
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        it->second.lastActiveTime = now;
         if(status == PrinterStatus::PRINTER_STATUS_IDLE) {
             it->second.printTask.taskId = "";
             it->second.printTask.fileName = "";
@@ -168,9 +173,11 @@ void PrinterCache::updatePrinterStatus(const std::string& printerId, const Print
 }
 
 void PrinterCache::updatePrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task) {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        it->second.lastActiveTime = now;
         if(task.taskId.empty() || it->second.printerStatus == PrinterStatus::PRINTER_STATUS_IDLE) {
             it->second.printTask.taskId = "";
             it->second.printTask.fileName = "";
@@ -185,9 +192,11 @@ void PrinterCache::updatePrinterPrintTask(const std::string& printerId, const Pr
 }
 
 void PrinterCache::updatePrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo) {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        it->second.lastActiveTime = now;
         if(printerInfo.firmwareVersion.empty()) {
             it->second.firmwareVersion = printerInfo.firmwareVersion;
         }

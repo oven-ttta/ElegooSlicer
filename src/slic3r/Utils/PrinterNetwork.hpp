@@ -32,6 +32,8 @@ public:
 
 protected:
     PrinterNetworkInfo mPrinterNetworkInfo;
+    // if 1 to 1, implement http websocket etc. network management here
+    // if ElegooLink, just redirect the interface
 
 };
 

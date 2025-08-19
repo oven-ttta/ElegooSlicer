@@ -258,8 +258,8 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
     }
 
     // get printfilament list
-    std::vector<PrintFilamentMmsMapping> printFilamentList;
-    mPrintFilamentMmsMappingList.clear();
+    std::vector<PrintFilamentMmsMapping> projectFilamentList;
+    mPrintFilamentList.clear();
     for (const auto& filamentName : preset_bundle->filament_presets) {
         auto it = nameToPreset.find(filamentName);
         if (it != nameToPreset.end()) {
@@ -283,16 +283,16 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
             filament.filamentAlias   = filamentAlias;
             filament.filamentWeight  = 0;
             filament.filamentDensity = density;
-            printFilamentList.push_back(filament);
+            projectFilamentList.push_back(filament);
         }
     }
     // calculate filament weight
     auto extruders = wxGetApp().plater()->get_partplate_list().get_curr_plate()->get_used_extruders();
     for (auto i = 0; i < extruders.size(); i++) {
         int extruderIdx = extruders[i] - 1;
-        if (extruderIdx < 0 || extruderIdx >= (int) printFilamentList.size())
+        if (extruderIdx < 0 || extruderIdx >= (int) projectFilamentList.size())
             continue;
-        auto info = printFilamentList[extruderIdx];
+        auto info = projectFilamentList[extruderIdx];
         info.index         = extruderIdx;
         auto  colour       = wxGetApp().preset_bundle->project_config.opt_string("filament_colour", (unsigned int) extruderIdx);
         info.filamentColor = colour;
@@ -337,15 +337,24 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
             }
         }
         info.filamentWeight = total_weight;
-        mPrintFilamentMmsMappingList.push_back(info);
+        mPrintFilamentList.push_back(info);
     }
     auto           mmsGroup = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
     nlohmann::json mmsInfo  = convertPrinterMmsGroupToJson(mmsGroup);
     printInfo["mmsInfo"]    = mmsInfo;
-    PrinterMmsManager::getInstance()->getFilamentMmsMapping(mPrintFilamentMmsMappingList, mmsGroup);
+    PrinterMmsManager::getInstance()->getFilamentMmsMapping(mPrintFilamentList, mmsGroup);
     nlohmann::json filamentList = json::array();
-    for (auto& filament : mPrintFilamentMmsMappingList) {
+    for (auto& filament : mPrintFilamentList) {
         filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
+    }
+    if(mmsGroup.mmsList.size() == 0) {
+        mHasMms = false;
+        wxSize pSize = FromDIP(wxSize(860, NO_MMS_HEIGHT));
+        SetSize(pSize);
+    } else {
+        mHasMms = true;
+        wxSize pSize = FromDIP(wxSize(860, HAS_MMS_HEIGHT));
+        SetSize(pSize);
     }
     printInfo["filamentList"] = filamentList;
     return printInfo;
@@ -406,8 +415,8 @@ void PrintSendDialogEx::onPrint(const nlohmann::json& printInfo)
         }
         txt_filename->SetValue(modelName);
 
-        if(uploadAndPrint) {
-             for(auto& printFilament : mPrintFilamentMmsMappingList) {
+        if(uploadAndPrint && mHasMms) {
+             for(auto& printFilament : mPrintFilamentList) {
                 // init mappedMmsFilament
                 printFilament.mappedMmsFilament = PrinterMmsTray();
                 for( int i = 0; i < printInfo["filamentList"].size(); i++) {
@@ -424,7 +433,7 @@ void PrintSendDialogEx::onPrint(const nlohmann::json& printInfo)
                     }
                 }
              }
-             for (auto& printFilament : mPrintFilamentMmsMappingList) {
+             for (auto& printFilament : mPrintFilamentList) {
                  if (printFilament.mappedMmsFilament.trayName.empty() || printFilament.mappedMmsFilament.mmsId.empty() ||
                      printFilament.mappedMmsFilament.trayId.empty() || printFilament.mappedMmsFilament.filamentColor.empty() ||
                      printFilament.mappedMmsFilament.filamentName.empty() || printFilament.mappedMmsFilament.filamentType.empty()) {
@@ -433,7 +442,7 @@ void PrintSendDialogEx::onPrint(const nlohmann::json& printInfo)
                         return;
                  }
              }
-             PrinterMmsManager::getInstance()->saveFilamentMmsMapping(mPrintFilamentMmsMappingList);
+             PrinterMmsManager::getInstance()->saveFilamentMmsMapping(mPrintFilamentList);
         }
         EndModal(wxID_OK);
     } catch (std::exception& e) {
@@ -461,7 +470,7 @@ void PrintSendDialogEx::EndModal(int ret)
 std::map<std::string, std::string> PrintSendDialogEx::extendedInfo() const
 {
     nlohmann::json filamentList = json::array();
-    for (auto& filament : mPrintFilamentMmsMappingList) {
+    for (auto& filament : mPrintFilamentList) {
         filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
     }
 

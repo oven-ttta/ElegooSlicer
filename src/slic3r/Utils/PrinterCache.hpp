@@ -22,9 +22,14 @@ public:
     PrinterCache& operator=(const PrinterCache&) = delete;
     
     /**
-     * @brief Initialize printer cache
+     * @brief Load printer list from file
      */
-    void init();
+    bool loadPrinterList();
+
+    /**
+     * @brief Save printer list to file
+     */
+    bool savePrinterList();
 
     /**
      * @brief Get single printer by ID
@@ -40,11 +45,6 @@ public:
      * @brief Add new printer
      */
     bool addPrinter(const PrinterNetworkInfo& printerInfo);
-    
-    /**
-     * @brief Update printer
-     */
-    bool updatePrinter(const PrinterNetworkInfo& printerInfo);
 
     /**
      * @brief Delete printer by ID
@@ -64,7 +64,7 @@ public:
     /**
      * @brief Update printer host
      */
-    bool updatePrinterHost(const std::string& printerId, const std::string& host);
+    bool updatePrinterHost(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
 
     /**
      * @brief Update printer attributes
@@ -82,9 +82,8 @@ public:
 
 private:
     PrinterCache();
-    bool loadPrinterList();
-    bool savePrinterList();
-    mutable std::mutex mMutex;
+    std::mutex mLoadSaveMutex;
+    mutable std::mutex mCacheMutex;
     std::map<std::string, PrinterNetworkInfo> mPrinters;
 };
 

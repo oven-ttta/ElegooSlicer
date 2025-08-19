@@ -82,27 +82,24 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterNetworkManager::dis
     return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::SUCCESS, printers);
 }
 
-PrinterNetworkResult<PrinterNetworkInfo> PrinterNetworkManager::addPrinter(const PrinterNetworkInfo& printerNetworkInfo)
+bool PrinterNetworkManager::addPrinter(const PrinterNetworkInfo& printerNetworkInfo)
 {
     std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
     if (!network) {
         wxLogError("Failed to create network for printer: %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                    printerNetworkInfo.printerModel);
-        return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::INTERNAL_ERROR, printerNetworkInfo,
-                                          "Failed to create network for host type " + printerNetworkInfo.hostType);
-    }
-    PrinterNetworkResult<PrinterNetworkInfo> result = network->connectToPrinter();
-    if(result.isError()) {
-        wxLogError("Failed to connect to printer: %s %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
-                   printerNetworkInfo.printerModel, result.message.c_str());
-        return PrinterNetworkResult<PrinterNetworkInfo>(result.code, printerNetworkInfo, result.message);
+        return false;
     }
 
     addPrinterNetwork(network);
     wxLogMessage("Added printer: %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName, printerNetworkInfo.printerModel);
-    return result;
+    return true;
 }
-
+PrinterNetworkResult<PrinterNetworkInfo> PrinterNetworkManager::connectToPrinter(const PrinterNetworkInfo&  printerNetworkInfo)
+{
+    std::shared_ptr<IPrinterNetwork> network;
+    return connectToPrinter(printerNetworkInfo, network);
+}
 PrinterNetworkResult<bool> PrinterNetworkManager::deletePrinter(const std::string& printerId)
 {
     PrinterNetworkResult<bool> result(PrinterNetworkErrorCode::UNKNOWN_ERROR, false);
@@ -180,20 +177,48 @@ void PrinterNetworkManager::monitorPrinterConnections()
 {
     while (mIsRunning) {
         auto printerList = PrinterCache::getInstance()->getPrinters();
+        std::vector<std::future<void>> connectionFutures;
         for (const auto& printer : printerList) {
-            if (printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED) {
+            std::shared_ptr<IPrinterNetwork> activeNetwork = getPrinterNetwork(printer.printerId);
+            if (printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED && activeNetwork && activeNetwork->getPrinterNetworkInfo().host == printer.host) {
+                // already connected and the host is the same, no need to connect again
                 continue;
             }
-            std::shared_ptr<IPrinterNetwork> network;
-            auto result = connectToPrinter(printer, network);
-            if (!result.isSuccess())
-                continue;
-            addPrinterNetwork(network);
-            PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_CONNECTED);
+            auto future = std::async(std::launch::async, [this, printer]() {
+                // if printer is connected, disconnect it first
+                if(printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED) {
+                    PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
+                    deletePrinter(printer.printerId);
+                }
+                std::shared_ptr<IPrinterNetwork> network;
+                auto result = connectToPrinter(printer, network);
+                if (result.isSuccess()) {
+                    addPrinterNetwork(network);
+                    PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_CONNECTED);
+                } 
+            });
+            connectionFutures.push_back(std::move(future));
         }
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+        for (auto& future : connectionFutures) {
+            future.wait();
+        }         
+        {
+            // disconnect from printers that are not in the printer list or the host is different, mutex lock is needed
+            std::lock_guard<std::mutex> lock(mConnectionsMutex);
+            for (const auto& [printerId, network] : mNetworkConnections) {
+               auto printer = PrinterCache::getInstance()->getPrinter(printerId);
+               if (!printer.has_value() || printer.value().host != network->getPrinterNetworkInfo().host) {
+                    network->disconnectFromPrinter();
+                    deletePrinterNetwork(printerId);
+                    wxLogWarning("Host changed or printer not in list, disconnect from printer: %s %s %s", network->getPrinterNetworkInfo().host,
+                                 network->getPrinterNetworkInfo().printerName, network->getPrinterNetworkInfo().printerModel);
+               } 
+            }
+        }          
+        std::this_thread::sleep_for(std::chrono::seconds(3));
     }
 }
+
 PrinterNetworkResult<PrinterNetworkInfo> PrinterNetworkManager::connectToPrinter(const PrinterNetworkInfo&  printerNetworkInfo, std::shared_ptr<IPrinterNetwork>& network)
 {
     network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
@@ -211,7 +236,6 @@ PrinterNetworkResult<PrinterNetworkInfo> PrinterNetworkManager::connectToPrinter
         wxLogError("Failed to connect to printer: %s %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                    printerNetworkInfo.printerModel, result.message.c_str());
     }
-
     return result;
 }
 

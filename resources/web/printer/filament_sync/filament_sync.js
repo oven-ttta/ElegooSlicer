@@ -63,14 +63,22 @@ const FilamentSyncApp = {
 
         updatePrinterSelection() {
             if (this.printerList.length === 0) return;
-
-            // Find selected printer or use first one
-            let selectedPrinter = this.printerList.find(p => p.selected);
+            let selectedPrinter;       
+            if (this.curPrinter && this.curPrinter.printerId) {
+                // find the printer by printerId
+                let cur = this.printerList.find(p => p.printerId === this.curPrinter.printerId);
+                if (cur) {
+                    selectedPrinter = cur;
+                }
+            }        
+            // if not found, find the selected printer
             if (!selectedPrinter) {
-                selectedPrinter = this.printerList[0];
-            }
-
-            this.curPrinter = selectedPrinter;  
+                selectedPrinter = this.printerList.find(p => p.selected);
+                if (!selectedPrinter) {
+                    selectedPrinter = this.printerList[0];
+                }
+            }          
+            this.curPrinter = selectedPrinter;       
             // Request filament info for the selected printer
             if (this.curPrinter && this.curPrinter.printerId) {
                 this.requestPrinterFilamentInfo(this.curPrinter.printerId);

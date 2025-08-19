@@ -19,22 +19,23 @@ public:
     PrinterNetworkManager(PrinterNetworkManager&&) = delete;
     PrinterNetworkManager& operator=(PrinterNetworkManager&&) = delete;
     ~PrinterNetworkManager();  
+
     void init();
+    void close();
+    bool addPrinter(const PrinterNetworkInfo& printerNetworkInfo);
+
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters();
-    PrinterNetworkResult<PrinterNetworkInfo> addPrinter(const PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> deletePrinter(const std::string& printerId);
     PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params);
     PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params);
     PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
-    void close();
 
     static int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo);
 
 private:
 
     PrinterNetworkManager();
-
-
     PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo, std::shared_ptr<IPrinterNetwork> &network);
 
     bool addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network);

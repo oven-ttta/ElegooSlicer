@@ -108,13 +108,16 @@ std::map<std::string, std::map<std::string, DynamicPrintConfig>> PrinterManager:
 PrinterManager::PrinterManager()
 {
 
-    PrinterCache::getInstance()->init();
+    PrinterCache::getInstance()->loadPrinterList();
     PrinterNetworkManager::getInstance()->init();
 }
 
 PrinterManager::~PrinterManager() { close(); }
 
-void PrinterManager::close() { PrinterNetworkManager::getInstance()->close(); }
+void PrinterManager::close() { 
+    PrinterNetworkManager::getInstance()->close(); 
+    PrinterCache::getInstance()->savePrinterList();
+}
 
 bool PrinterManager::deletePrinter(const std::string& printerId)
 {
@@ -123,16 +126,11 @@ bool PrinterManager::deletePrinter(const std::string& printerId)
         return false;
     }
     PrinterCache::getInstance()->deletePrinter(printerId);
-    auto result = PrinterNetworkManager::getInstance()->deletePrinter(printerId);
-    if (result.isError()) {
-        wxLogWarning("Failed to disconnect printer %s %s %s during deletion: %s", printer.value().host, printer.value().printerName,
-                     printer.value().printerModel, result.message.c_str());
-    }
+    wxLogMessage("Delete printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
     return true;
 }
 bool PrinterManager::updatePrinterName(const std::string& printerId, const std::string& printerName)
 {
-
     return PrinterCache::getInstance()->updatePrinterName(printerId, printerName);
 }
 bool PrinterManager::updatePrinterHost(const std::string& printerId, const std::string& host)
@@ -141,27 +139,10 @@ bool PrinterManager::updatePrinterHost(const std::string& printerId, const std::
     if (!printer.has_value()) {
         return false;
     }
-
-    PrinterCache::getInstance()->updatePrinterHost(printerId, host);
-    PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
-
-    auto disconnectResult = PrinterNetworkManager::getInstance()->deletePrinter(printerId);
-    if (disconnectResult.isError()) {
-        wxLogWarning("Failed to disconnect printer %s %s %s during host update: %s", printer.value().host, printer.value().printerName,
-                     printer.value().printerModel, disconnectResult.message.c_str());
-    }
-
-    printer.value().host = host; 
-    auto addResult = PrinterNetworkManager::getInstance()->addPrinter(printer.value());
-    if(addResult.isSuccess()) {
-        PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_CONNECTED);
-        return true;
-    } else {      
-        wxLogWarning("Failed to connect printer %s %s %s after host update: %s", printer.value().host, printer.value().printerName,
-                     printer.value().printerModel, addResult.message.c_str());
-    }
-    
-    return false;
+    printer.value().host = host;
+    PrinterCache::getInstance()->updatePrinterHost(printerId, printer.value());
+    wxLogMessage("Update printer host: %s %s %s to %s", printer.value().host, printer.value().printerName, printer.value().printerModel, host);
+    return true;
 }
 std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
 {
@@ -189,10 +170,9 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
     }
     printerNetworkInfo.printerId = boost::uuids::to_string(boost::uuids::random_generator{}());
 
-    auto result = PrinterNetworkManager::getInstance()->addPrinter(printerNetworkInfo);
+    auto result = PrinterNetworkManager::getInstance()->connectToPrinter(printerNetworkInfo);
     if (result.isSuccess() && result.data.has_value()) {     
         auto connectedPrinter = result.data.value();
-        printerNetworkInfo.connectStatus = PRINTER_CONNECT_STATUS_CONNECTED;
         if(printerNetworkInfo.isPhysicalPrinter) {
             // update the printer network info
             printerNetworkInfo.mainboardId = connectedPrinter.mainboardId;
@@ -204,7 +184,6 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
             printerNetworkInfo.authMode = connectedPrinter.authMode;
             printerNetworkInfo.protocolVersion = connectedPrinter.protocolVersion;
         }
-
         PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
         return printerNetworkInfo.printerId;
     } else {
@@ -237,7 +216,6 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
     for (auto& discoverPrinter : discoverPrinterList) {
         // check if the device is already bound, if it is, check if the ip, firmware version, etc. have changed and update them
         bool isSamePrinter = false;
-
         for (auto& p : PrinterCache::getInstance()->getPrinters()) {
             if (!p.mainboardId.empty() && (discoverPrinter.mainboardId == p.mainboardId)) {
                 isSamePrinter = true;
@@ -246,38 +224,13 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
                 isSamePrinter = true;
             }
             if (isSamePrinter) {
-
                 if (p.host != discoverPrinter.host) {
                     wxLogMessage("Printer %s %s %s IP changed, disconnect and connect to new IP, old IP: %s, new IP: %s", p.host,
                                  p.printerName, p.printerModel, p.host, discoverPrinter.host);
-                    p.host            = discoverPrinter.host;
-                    p.protocolVersion = discoverPrinter.protocolVersion;
-                    p.firmwareVersion = discoverPrinter.firmwareVersion;
-                    p.webUrl          = discoverPrinter.webUrl;
-                    p.connectionUrl   = discoverPrinter.connectionUrl;
-                    p.extraInfo       = discoverPrinter.extraInfo;
-                    uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
-                                       .count();
-
-                    p.modifyTime     = now;
-                    p.lastActiveTime = now;
-                    p.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
-                    PrinterCache::getInstance()->updatePrinter(p);
-
-
-                    auto disconnectResult = PrinterNetworkManager::getInstance()->deletePrinter(p.printerId);
-                    if (disconnectResult.isSuccess()) {
-                        wxLogWarning("Failed to disconnect printer %s %s %s during IP change: %s", p.host, p.printerName,
-                                     p.printerModel, disconnectResult.message.c_str());
-                    }
-
-
-                    auto connectResult = PrinterNetworkManager::getInstance()->addPrinter(p);
-                    if (connectResult.isError()) {
-
-                        wxLogWarning("Failed to connect printer %s %s %s after IP change: %s", p.host, p.printerName,
-                                     p.printerModel, connectResult.message.c_str());
-                    }
+                        p.host            = discoverPrinter.host;
+                        p.webUrl          = discoverPrinter.webUrl;
+                        p.connectionUrl   = discoverPrinter.connectionUrl;
+                    PrinterCache::getInstance()->updatePrinterHost(p.printerId, p);
                 }
                 break;
             }
@@ -322,7 +275,6 @@ std::vector<PrinterNetworkInfo> PrinterManager::getPrinterList()
 }
 PrinterNetworkInfo PrinterManager::getPrinterNetworkInfo(const std::string& printerId)
 {
-
     auto printer = PrinterCache::getInstance()->getPrinter(printerId);
     if(printer.has_value()) {
         return printer.value();
@@ -340,7 +292,6 @@ bool PrinterManager::upload(PrinterNetworkParams& params)
     }
 
     PrinterNetworkInfo printerNetworkInfo = printer.value();
-
     auto sendFileResult = PrinterNetworkManager::getInstance()->sendPrintFile(params);
     if (sendFileResult.isSuccess()) {
 

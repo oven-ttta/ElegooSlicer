@@ -198,6 +198,11 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
                 //update printer network info
                 info.firmwareVersion = addPrinter.firmwareVersion;
                 info.webUrl          = addPrinter.webUrl;
+                info.mainboardId     = addPrinter.mainboardId;
+                info.serialNumber    = addPrinter.serialNumber;
+                info.firmwareVersion = addPrinter.firmwareVersion;
+                info.authMode = addPrinter.authMode;
+                info.printerId = addPrinter.deviceId;
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;

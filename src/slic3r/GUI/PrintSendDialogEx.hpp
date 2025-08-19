@@ -53,7 +53,8 @@ private:
     bool    mAutoRefill;
     std::string mSelectedPrinterId;
     std::string mProjectName;
-    std::vector<PrintFilamentMmsMapping> mPrintFilamentMmsMappingList;
+    std::vector<PrintFilamentMmsMapping> mPrintFilamentList;
+    bool mHasMms;
    
 };
 }} // namespace Slic3r::GUI 
