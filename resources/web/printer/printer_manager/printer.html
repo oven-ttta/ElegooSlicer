@@ -31,7 +31,7 @@
         <div class="printer-manager-header">
             <div class="left-actions">
                 <span>Connected Printers</span>
-                <div class="icon-button" @click="handleRefresh">
+                <div class="printer-local-icon icon-button" @click="handleRefresh">
                     <img src="./img/refresh.svg" alt="Refresh" />
                 </div>
             </div>
@@ -45,7 +45,11 @@
             </div>
         </div>
         <div class="printer-container">
-            <div class="printer-category">Local Printers</div>
+            <div class="printer-category">Local Printers
+                <span class="printer-local-icon">
+                    <img src="./img/printer-local.svg" alt="Local Printer" /> 
+                </span>
+            </div>
             <div v-if="printerStore.printers.length === 0" class="no-printer">
                 <img src="./img/printer-empty.png" width="224"/>
                 <div>No Printers Available</div>
@@ -68,7 +72,7 @@
                         </div>
                     </div>
                     <div class="progress-bar-container">
-                        <span class="progress-label">{{ getPrinterProgress(printer) }}%</span>
+                        <span class="progress-label" v-show="printer.printerStatus===1">{{ getPrinterProgress(printer) }}%</span>
                         <div class="progress-bar-bg">
                             <div class="progress-bar" :style="`width:${getPrinterProgress(printer)}%`"></div>
                         </div>

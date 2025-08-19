@@ -141,8 +141,16 @@ const PrinterManager = {
             return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
         },
 
-        handleRefresh() {
-            this.printerStore.requestPrinterList();
+        async handleRefresh() {
+            const loading = ElLoading.service({
+                lock: true,
+            });
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                this.printerStore.requestPrinterList();
+            } finally {
+                loading.close();
+            }
         },
 
         showAddPrinterModal() {
