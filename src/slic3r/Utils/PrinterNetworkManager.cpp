@@ -209,7 +209,7 @@ void PrinterNetworkManager::monitorPrinterConnections()
                auto printer = PrinterCache::getInstance()->getPrinter(printerId);
                if (!printer.has_value() || printer.value().host != network->getPrinterNetworkInfo().host) {
                     network->disconnectFromPrinter();
-                    deletePrinterNetwork(printerId);
+                    mNetworkConnections.erase(printerId);
                     wxLogWarning("Host changed or printer not in list, disconnect from printer: %s %s %s", network->getPrinterNetworkInfo().host,
                                  network->getPrinterNetworkInfo().printerName, network->getPrinterNetworkInfo().printerModel);
                } 

@@ -41,7 +41,7 @@ private:
         const PresetBundle& bundle, 
         const PrinterNetworkInfo& printerNetworkInfo,
         const std::map<std::string, std::string>& printerNameModelMap,
-        bool isGeneric);
+        bool isGeneric, bool compatible);
     
     bool isFilamentCompatible(const Preset& filament,
                              const PrinterNetworkInfo& printerNetworkInfo,
@@ -56,6 +56,11 @@ private:
                      const PresetFilamentInfo& filamentInfo,
                      const PrinterNetworkInfo& printerNetworkInfo,
                      bool isGeneric);
+
+    bool tryMatchFilamentByFilamentType(PrinterMmsTray& tray,
+                                        const std::map<std::string, std::vector<PresetFilamentInfo>>& presetMap,
+                                        const PrinterNetworkInfo& printerNetworkInfo,
+                                        bool isGeneric);
 };
 } // namespace Slic3r::GUI 
 #endif 
