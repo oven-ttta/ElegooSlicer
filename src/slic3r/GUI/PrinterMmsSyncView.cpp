@@ -168,9 +168,12 @@ nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& 
         auto info = allFilamentList[extruderIdx];
         printFilamentList.push_back(info);
     }
-    PrinterMmsManager::getInstance()->getFilamentMmsMapping(printFilamentList, mmsGroup);
-    for (auto& printFilament : printFilamentList) {
-        printFilamentArray.push_back(convertPrintFilamentMmsMappingToJson(printFilament));
+    PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
+    if(!printerNetworkInfo.printerId.empty()) {
+        PrinterMmsManager::getInstance()->getFilamentMmsMapping(printerNetworkInfo, printFilamentList, mmsGroup);
+        for (auto& printFilament : printFilamentList) {
+            printFilamentArray.push_back(convertPrintFilamentMmsMappingToJson(printFilament));
+        }
     }
     printerFilamentInfo["printFilamentList"] = printFilamentArray;
     nlohmann::json response = {

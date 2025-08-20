@@ -38,7 +38,6 @@ void PrinterNetworkManager::init()
 
 void PrinterNetworkManager::close()
 {  
-    std::lock_guard<std::mutex> lock(mConnectionsMutex);
     if(!mIsRunning) {
         return;
     }
@@ -46,6 +45,7 @@ void PrinterNetworkManager::close()
     if (mConnectionThread.joinable()) {
         mConnectionThread.join();
     }
+    std::lock_guard<std::mutex> lock(mConnectionsMutex);
     for (const auto& [printerId, network] : mNetworkConnections) {
         network->disconnectFromPrinter();
     }
@@ -184,9 +184,12 @@ void PrinterNetworkManager::monitorPrinterConnections()
                 // already connected and the host is the same, no need to connect again
                 continue;
             }
-            auto future = std::async(std::launch::async, [this, printer]() {
-                // if printer is connected, disconnect it first
-                if(printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED) {
+            bool ipChanged = false;
+            if(activeNetwork && activeNetwork->getPrinterNetworkInfo().host != printer.host) {
+                ipChanged = true;
+            }
+            auto future = std::async(std::launch::async, [this, printer, ipChanged]() {
+                if(printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED || ipChanged) {
                     PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
                     deletePrinter(printer.printerId);
                 }
@@ -201,21 +204,23 @@ void PrinterNetworkManager::monitorPrinterConnections()
         }
         for (auto& future : connectionFutures) {
             future.wait();
-        }         
-        {
-            // disconnect from printers that are not in the printer list or the host is different, mutex lock is needed
-            std::lock_guard<std::mutex> lock(mConnectionsMutex);
-            for (const auto& [printerId, network] : mNetworkConnections) {
-               auto printer = PrinterCache::getInstance()->getPrinter(printerId);
-               if (!printer.has_value() || printer.value().host != network->getPrinterNetworkInfo().host) {
-                    network->disconnectFromPrinter();
-                    mNetworkConnections.erase(printerId);
-                    wxLogWarning("Host changed or printer not in list, disconnect from printer: %s %s %s", network->getPrinterNetworkInfo().host,
-                                 network->getPrinterNetworkInfo().printerName, network->getPrinterNetworkInfo().printerModel);
-               } 
+        }
+        // disconnect from printers that are not in the printer list or the host is different, mutex lock is needed
+        mConnectionsMutex.lock();
+        std::vector<std::string> printerIdsToRemove;
+        for (const auto& [printerId, network] : mNetworkConnections) {
+            auto printer = PrinterCache::getInstance()->getPrinter(printerId);
+            if (!printer.has_value() || printer.value().host != network->getPrinterNetworkInfo().host) {
+                printerIdsToRemove.push_back(printerId);
+                wxLogWarning("Host changed or printer not in list, disconnect from printer: %s %s %s", network->getPrinterNetworkInfo().host,
+                             network->getPrinterNetworkInfo().printerName, network->getPrinterNetworkInfo().printerModel);
             }
-        }          
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        }
+        mConnectionsMutex.unlock();
+        for (const auto& printerId : printerIdsToRemove) {
+            deletePrinter(printerId);
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
 

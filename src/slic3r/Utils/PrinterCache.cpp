@@ -23,7 +23,7 @@ PrinterCache::~PrinterCache() {
 }
 
 bool PrinterCache::loadPrinterList() {
-    std::lock_guard<std::mutex> lock(mLoadSaveMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     fs::path printerListPath = fs::path(Slic3r::data_dir()) / "user" / "printer_list.json";
     // read printer list from file
     std::ifstream ifs(printerListPath.string());
@@ -47,7 +47,7 @@ bool PrinterCache::loadPrinterList() {
 }
 
 bool PrinterCache::savePrinterList() {
-    std::lock_guard<std::mutex> lock(mLoadSaveMutex);
+    std::lock_guard<std::mutex> lock(mCacheMutex);
     fs::path printerListPath = fs::path(Slic3r::data_dir()) / "user" / "printer_list.json";
     nlohmann::json jsonData;
     for (const auto& [printerId, printerInfo] : mPrinters) {
@@ -95,8 +95,6 @@ bool PrinterCache::addPrinter(const PrinterNetworkInfo& printerInfo) {
     result.first->second.addTime = now;
     result.first->second.modifyTime = now;
     result.first->second.lastActiveTime = now;
-    result.first->second.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
-    savePrinterList();
     return result.second;
 }
 
@@ -105,7 +103,6 @@ bool PrinterCache::deletePrinter(const std::string& printerId) {
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
         mPrinters.erase(it);
-        savePrinterList();
         return true;
     }
     return false;
@@ -118,7 +115,6 @@ bool PrinterCache::updatePrinterName(const std::string& printerId, const std::st
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         it->second.modifyTime     = now;
         it->second.lastActiveTime = now;
-        savePrinterList();
         return true;
     }
     return false;
@@ -134,9 +130,6 @@ bool PrinterCache::updatePrinterHost(const std::string& printerId, const Printer
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         it->second.modifyTime     = now;
         it->second.lastActiveTime = now;
-        //host changed, disconnect the printer
-        it->second.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
-        savePrinterList();
         return true;
     }
     return false;

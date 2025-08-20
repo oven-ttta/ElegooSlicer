@@ -356,8 +356,8 @@ PrinterMmsGroup PrinterMmsManager::getPrinterMmsInfo(const std::string& printerI
     return mmsGroup;
 }
 
-void PrinterMmsManager::getFilamentMmsMapping(std::vector<PrintFilamentMmsMapping>& printFilamentMmsMapping, const PrinterMmsGroup& mmsGroup)
- {
+void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerNetworkInfo, std::vector<PrintFilamentMmsMapping>& printFilamentMmsMapping, const PrinterMmsGroup& mmsGroup)
+{
     AppConfig* app_config = wxGetApp().app_config;
     for (auto& printFilament : printFilamentMmsMapping) {
         std::string filamentStandardColor   = getStandardColor(printFilament.filamentColor);
@@ -380,8 +380,8 @@ void PrinterMmsManager::getFilamentMmsMapping(std::vector<PrintFilamentMmsMappin
         if (!mmsMappingFilamentType.empty() && !mmsMappingFilamentName.empty() && !mmsMappingFilamentColor.empty()) {
             for (auto& mms : mmsGroup.mmsList) {
                 for (auto& tray : mms.trayList) {
-                    if (boost::to_upper_copy(tray.filamentType) == boost::to_upper_copy(mmsMappingFilamentType) && 
-                        boost::to_upper_copy(tray.filamentName) == boost::to_upper_copy(mmsMappingFilamentName) && 
+                    if (boost::to_upper_copy(tray.filamentType) == boost::to_upper_copy(mmsMappingFilamentType) &&
+                        boost::to_upper_copy(tray.filamentName) == boost::to_upper_copy(mmsMappingFilamentName) &&
                         boost::to_upper_copy(tray.filamentColor) == boost::to_upper_copy(mmsMappingFilamentColor)) {
                         printFilament.mappedMmsFilament.trayId           = tray.trayId;
                         printFilament.mappedMmsFilament.mmsId            = tray.mmsId;
@@ -400,41 +400,60 @@ void PrinterMmsManager::getFilamentMmsMapping(std::vector<PrintFilamentMmsMappin
                     }
                 }
             }
+        }
 
-            if (isMapped) {
-                continue;
+        if (isMapped) {
+            continue;
+        }
+        // not mapped or mapped filament not exist
+        std::map<std::string, std::vector<PrinterMmsManager::PresetFilamentInfo>> filamentPresetMap;
+        PrinterMmsManager::PresetFilamentInfo filamentInfo;
+        filamentInfo.filamentId = printFilament.filamentId;
+        filamentInfo.settingId = printFilament.settingId;
+        filamentInfo.filamentAlias = printFilament.filamentAlias;
+        filamentInfo.filamentName = printFilament.filamentName;
+        filamentInfo.filamentType = printFilament.filamentType;
+        filamentPresetMap[boost::to_upper_copy(printFilament.filamentType)].push_back(filamentInfo);
+        PrinterMmsTray mappedTray;
+        for (auto& mms : mmsGroup.mmsList) {
+            for (auto& tray : mms.trayList) {
+                if(boost::to_upper_copy(getStandardColor(tray.filamentColor)) != boost::to_upper_copy(filamentStandardColor)){
+                    continue;
+                }
+                mappedTray = tray;
+                if(tryMatchFilament(mappedTray, filamentPresetMap, printerNetworkInfo, false) || tryMatchFilament(mappedTray, filamentPresetMap, printerNetworkInfo, true)) {
+                    isMapped = true;
+                    break;
+                }
             }
-            // not mapped or mapped filament not exist
+        }
+        if(!isMapped) {
             for (auto& mms : mmsGroup.mmsList) {
                 for (auto& tray : mms.trayList) {
-                    std::string filamentAlias = boost::to_upper_copy(printFilament.filamentAlias);
-                    std::string mmsFilamentName = boost::to_upper_copy(tray.filamentName);
-                    std::string vendor = boost::to_upper_copy(tray.vendor);
-                    boost::erase_all(filamentAlias, vendor);
-                    boost::erase_all(mmsFilamentName, vendor);
-                    boost::erase_all(filamentAlias, "GENERIC");
-                    boost::trim(filamentAlias);
-                    boost::trim(mmsFilamentName);
-                    if (boost::to_upper_copy(tray.filamentType) == boost::to_upper_copy(printFilament.filamentType) && 
-                        filamentAlias == mmsFilamentName && 
-                        boost::to_upper_copy(tray.filamentColor) == boost::to_upper_copy(filamentStandardColor)) {
-                        printFilament.mappedMmsFilament.trayName         = tray.trayName;
-                        printFilament.mappedMmsFilament.trayId           = tray.trayId;
-                        printFilament.mappedMmsFilament.mmsId            = tray.mmsId;
-                        printFilament.mappedMmsFilament.filamentName     = tray.filamentName;
-                        printFilament.mappedMmsFilament.filamentColor    = tray.filamentColor;
-                        printFilament.mappedMmsFilament.filamentType     = tray.filamentType;
-                        printFilament.mappedMmsFilament.filamentDiameter = tray.filamentDiameter;
-                        printFilament.mappedMmsFilament.minNozzleTemp    = tray.minNozzleTemp;
-                        printFilament.mappedMmsFilament.maxNozzleTemp    = tray.maxNozzleTemp;
-                        printFilament.mappedMmsFilament.minBedTemp       = tray.minBedTemp;
-                        printFilament.mappedMmsFilament.maxBedTemp       = tray.maxBedTemp;
-                        printFilament.mappedMmsFilament.status           = tray.status;
-                        isMapped                                         = true;
+                    if(boost::to_upper_copy(getStandardColor(tray.filamentColor)) != boost::to_upper_copy(filamentStandardColor)){
+                        continue;
+                    }
+                    mappedTray = tray;
+                    if(tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, false) || tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, true)) {
+                        isMapped = true;
                         break;
                     }
                 }
             }
+        }
+        if(isMapped) {
+            printFilament.mappedMmsFilament.trayName         = mappedTray.trayName;
+            printFilament.mappedMmsFilament.trayId           = mappedTray.trayId;
+            printFilament.mappedMmsFilament.mmsId            = mappedTray.mmsId;
+            printFilament.mappedMmsFilament.filamentName     = mappedTray.filamentName;
+            printFilament.mappedMmsFilament.filamentColor    = mappedTray.filamentColor;
+            printFilament.mappedMmsFilament.filamentType     = mappedTray.filamentType;
+            printFilament.mappedMmsFilament.filamentDiameter = mappedTray.filamentDiameter;
+            printFilament.mappedMmsFilament.minNozzleTemp    = mappedTray.minNozzleTemp;
+            printFilament.mappedMmsFilament.maxNozzleTemp    = mappedTray.maxNozzleTemp;
+            printFilament.mappedMmsFilament.minBedTemp       = mappedTray.minBedTemp;
+            printFilament.mappedMmsFilament.maxBedTemp       = mappedTray.maxBedTemp;
+            printFilament.mappedMmsFilament.status           = mappedTray.status;
         }
     }
 }

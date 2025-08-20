@@ -82,7 +82,6 @@ public:
 
 private:
     PrinterCache();
-    std::mutex mLoadSaveMutex;
     mutable std::mutex mCacheMutex;
     std::map<std::string, PrinterNetworkInfo> mPrinters;
 };

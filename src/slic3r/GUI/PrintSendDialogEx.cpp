@@ -278,6 +278,7 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
 
             filament.filamentType    = filamentType;
             filament.filamentId      = preset->filament_id;
+            filament.settingId       = preset->setting_id;
             filament.filamentName    = filamentName;
             // alias and filamentType is used to match filament in mms
             filament.filamentAlias   = filamentAlias;
@@ -342,7 +343,10 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
     auto           mmsGroup = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
     nlohmann::json mmsInfo  = convertPrinterMmsGroupToJson(mmsGroup);
     printInfo["mmsInfo"]    = mmsInfo;
-    PrinterMmsManager::getInstance()->getFilamentMmsMapping(mPrintFilamentList, mmsGroup);
+    PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
+    if(!printerNetworkInfo.printerId.empty()) {
+        PrinterMmsManager::getInstance()->getFilamentMmsMapping(printerNetworkInfo, mPrintFilamentList, mmsGroup);
+    }
     nlohmann::json filamentList = json::array();
     for (auto& filament : mPrintFilamentList) {
         filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));

@@ -126,12 +126,15 @@ bool PrinterManager::deletePrinter(const std::string& printerId)
         return false;
     }
     PrinterCache::getInstance()->deletePrinter(printerId);
+    PrinterCache::getInstance()->savePrinterList();
     wxLogMessage("Delete printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
     return true;
 }
 bool PrinterManager::updatePrinterName(const std::string& printerId, const std::string& printerName)
 {
-    return PrinterCache::getInstance()->updatePrinterName(printerId, printerName);
+    PrinterCache::getInstance()->updatePrinterName(printerId, printerName);
+    PrinterCache::getInstance()->savePrinterList();
+    return true;
 }
 bool PrinterManager::updatePrinterHost(const std::string& printerId, const std::string& host)
 {
@@ -141,6 +144,7 @@ bool PrinterManager::updatePrinterHost(const std::string& printerId, const std::
     }
     printer.value().host = host;
     PrinterCache::getInstance()->updatePrinterHost(printerId, printer.value());
+    PrinterCache::getInstance()->savePrinterList();
     wxLogMessage("Update printer host: %s %s %s to %s", printer.value().host, printer.value().printerName, printer.value().printerModel, host);
     return true;
 }
@@ -185,6 +189,7 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
             printerNetworkInfo.protocolVersion = connectedPrinter.protocolVersion;
         }
         PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
+        PrinterCache::getInstance()->savePrinterList();
         return printerNetworkInfo.printerId;
     } else {
         wxLogWarning("Failed to add printer %s %s %s: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
@@ -231,6 +236,7 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
                         p.webUrl          = discoverPrinter.webUrl;
                         p.connectionUrl   = discoverPrinter.connectionUrl;
                     PrinterCache::getInstance()->updatePrinterHost(p.printerId, p);
+                    PrinterCache::getInstance()->savePrinterList();
                 }
                 break;
             }
@@ -270,8 +276,7 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
 }
 std::vector<PrinterNetworkInfo> PrinterManager::getPrinterList()
 {
-
-   return PrinterCache::getInstance()->getPrinters();
+    return PrinterCache::getInstance()->getPrinters();
 }
 PrinterNetworkInfo PrinterManager::getPrinterNetworkInfo(const std::string& printerId)
 {
