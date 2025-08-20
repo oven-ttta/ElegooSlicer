@@ -311,15 +311,15 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
         startPrintParams.autoBedLeveling = params.heatedBedLeveling;
         startPrintParams.heatedBedType   = params.bedType;
         startPrintParams.enableTimeLapse = params.timeLapse;
-
-        std::vector<elink::SlotMapItem> slotMap;
+        startPrintParams.slotMap.clear();
         for(const auto& filamentMmsMapping : params.filamentMmsMappingList) {
             elink::SlotMapItem slotMapItem;
             slotMapItem.t = filamentMmsMapping.index;
-            slotMapItem.canvasId = filamentMmsMapping.mappedMmsFilament.mmsId;
-            slotMapItem.trayId = filamentMmsMapping.mappedMmsFilament.trayId;
-            slotMap.push_back(slotMapItem);
+            slotMapItem.canvasId = std::stoi(filamentMmsMapping.mappedMmsFilament.mmsId);
+            slotMapItem.trayId = std::stoi(filamentMmsMapping.mappedMmsFilament.trayId);
+            startPrintParams.slotMap.push_back(slotMapItem);
         }
+
         auto elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
         resultCode  = parseElegooResult(elinkResult.code);
     } catch (const std::exception& e) {
@@ -398,8 +398,8 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
                 const auto& mmsData = elinkResult.value();
                 mmsGroup.connectNum = 0;
                 mmsGroup.connected = false;
-                mmsGroup.activeMmsId = mmsData.activeCanvasId;
-                mmsGroup.activeTrayId = mmsData.activeTrayId;
+                mmsGroup.activeMmsId = std::to_string(mmsData.activeCanvasId);
+                mmsGroup.activeTrayId = std::to_string(mmsData.activeTrayId);
                 mmsGroup.autoRefill = mmsData.autoRefill;
                 for(const auto& canvas : mmsData.canvases) {
                     PrinterMms mmsInfo;
@@ -414,8 +414,8 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
                     for(const auto& tray : canvas.trays) {
                         PrinterMmsTray trayInfo;
                         trayInfo.trayName = "";
-                        trayInfo.trayId = tray.trayId;
-                        trayInfo.mmsId = canvas.canvasId;
+                        trayInfo.trayId = std::to_string(tray.trayId);
+                        trayInfo.mmsId = std::to_string(canvas.canvasId);
                         trayInfo.vendor = tray.brand;
                         trayInfo.filamentType = tray.filamentType;
                         trayInfo.filamentName = tray.filamentName;

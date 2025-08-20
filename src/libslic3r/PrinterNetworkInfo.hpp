@@ -70,10 +70,10 @@ struct PrinterMmsTray
     std::string filamentName;
     std::string filamentColor;
     std::string filamentDiameter;
-    int         minNozzleTemp;
-    int         maxNozzleTemp;
-    int         minBedTemp;
-    int         maxBedTemp;
+    double      minNozzleTemp;
+    double      maxNozzleTemp;
+    double      minBedTemp;
+    double      maxBedTemp;
     int         status;
 };
 

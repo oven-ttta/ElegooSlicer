@@ -79,56 +79,10 @@ const usePrinterStore = defineStore('printer', {
 
 
     init() {
-      // Register event handlers for printer-related events
-      nativeIpc.on('response_printer_list', (data) => {
-        this.printers = data || [];
-      });
-
-      nativeIpc.on('response_printer_list_status', (data) => {
-        this.updatePrinterListStatus(data || []);
-      });
-
-      nativeIpc.on('response_discover_printers', (data) => {
-        this.discoveredPrinters = data || [];
-        this.isDiscovering = false;
-      });
-
-      nativeIpc.on('response_add_printer', () => {
-        this.requestPrinterList();
-      });
-
-      nativeIpc.on('response_update_printer_name', () => {
-        this.requestPrinterList();
-      });
-
-      nativeIpc.on('response_add_physical_printer', () => {
-        this.requestPrinterList();
-      });
-
-      nativeIpc.on('response_update_printer_host', () => {
-        this.requestPrinterList();
-      });
-
-      nativeIpc.on('response_delete_printer', () => {
-        this.requestPrinterList();
-        this.closeModals();
-      });
-
-      nativeIpc.on('response_printer_model_list', (data) => {
-        this.printerModelList = data;
-      });
+    
     },
     uninit() {
-      // Clean up event listeners
-      nativeIpc.off('response_printer_list');
-      nativeIpc.off('response_printer_list_status');
-      nativeIpc.off('response_discover_printers');
-      nativeIpc.off('response_add_printer');
-      nativeIpc.off('response_update_printer_name');
-      nativeIpc.off('response_add_physical_printer');
-      nativeIpc.off('response_update_printer_host');
-      nativeIpc.off('response_delete_printer');
-      nativeIpc.off('response_printer_model_list');
+
 
       // Clear status update interval
       if (this.statusUpdateInterval) {
@@ -165,6 +119,7 @@ const usePrinterStore = defineStore('printer', {
       console.log("Requesting printer list");
       try {
         const response = await this.ipcRequest('request_printer_list', {});
+        console.log("Printer list:", response);
         this.printers = response || [];
       } catch (error) {
         console.error('Failed to request printer list:', error);
