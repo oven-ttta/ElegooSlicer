@@ -147,18 +147,18 @@ void PrinterMmsManager::getMmsTrayFilamentId(const PrinterNetworkInfo& printerNe
 
             // the worst case, if all above failed, try match the first filament in the type
             if(boost::to_upper_copy(tray.vendor) != "GENERIC") {
-                if(!vendorPresetMap.at(tray.filamentType).empty()) {
+                if(vendorPresetMap.find(tray.filamentType) != vendorPresetMap.end()) {
                     tray.filamentId = vendorPresetMap.at(tray.filamentType)[0].filamentId;
                     tray.settingId = vendorPresetMap.at(tray.filamentType)[0].settingId;
                     continue;
                 }
             }         
-            if(!genericPresetMap.at(tray.filamentType).empty()) {
+            if(genericPresetMap.find(tray.filamentType) != genericPresetMap.end()) {
                 tray.filamentId = genericPresetMap.at(tray.filamentType)[0].filamentId;
                 tray.settingId = genericPresetMap.at(tray.filamentType)[0].settingId;
                 continue;
             }
-            if(!orcaGenericPresetMap.at(tray.filamentType).empty()) {
+            if(orcaGenericPresetMap.find(tray.filamentType) != orcaGenericPresetMap.end()) {
                 tray.filamentId = orcaGenericPresetMap.at(tray.filamentType)[0].filamentId;
                 tray.settingId = orcaGenericPresetMap.at(tray.filamentType)[0].settingId;
                 continue;

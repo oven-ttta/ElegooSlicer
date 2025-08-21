@@ -474,8 +474,10 @@ void PrintSendDialogEx::EndModal(int ret)
 std::map<std::string, std::string> PrintSendDialogEx::extendedInfo() const
 {
     nlohmann::json filamentList = json::array();
-    for (auto& filament : mPrintFilamentList) {
-        filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
+    if(mHasMms) {
+        for (auto& filament : mPrintFilamentList) {
+            filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
+        }
     }
 
     return {{"bedType", std::to_string(mBedType)},

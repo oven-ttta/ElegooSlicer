@@ -313,6 +313,9 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
         startPrintParams.enableTimeLapse = params.timeLapse;
         startPrintParams.slotMap.clear();
         for(const auto& filamentMmsMapping : params.filamentMmsMappingList) {
+            if (filamentMmsMapping.mappedMmsFilament.mmsId.empty() || filamentMmsMapping.mappedMmsFilament.trayId.empty()) {
+                continue;
+            }
             elink::SlotMapItem slotMapItem;
             slotMapItem.t = filamentMmsMapping.index;
             slotMapItem.canvasId = std::stoi(filamentMmsMapping.mappedMmsFilament.mmsId);
@@ -403,7 +406,7 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
                 mmsGroup.autoRefill = mmsData.autoRefill;
                 for(const auto& canvas : mmsData.canvases) {
                     PrinterMms mmsInfo;
-                    mmsInfo.mmsId = canvas.canvasId;
+                    mmsInfo.mmsId = std::to_string(canvas.canvasId);
                     mmsInfo.connected = canvas.connected;
                     if(canvas.connected) {
                         mmsGroup.connected = true;
