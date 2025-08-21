@@ -334,6 +334,9 @@ PrinterMmsGroup PrinterMmsManager::getPrinterMmsInfo(const std::string& printerI
 {
     PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
     PrinterMmsGroup mmsGroup = PrinterManager::getInstance()->getPrinterMmsInfo(printerId);
+    if(!mmsGroup.connected) {
+        return PrinterMmsGroup();
+    }
     getMmsTrayFilamentId(printerNetworkInfo, mmsGroup);
     
     // match filament id in system preset to mms tray
