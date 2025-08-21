@@ -30,7 +30,6 @@
 
 // BBS
 #include "BBLTopbar.hpp"
-#include "PrinterWebView.hpp"
 #include "calib_dlg.hpp"
 #include "MultiMachinePage.hpp"
 
@@ -50,6 +49,8 @@ class PrintHostQueueDialog;
 class Plater;
 class MainFrame;
 class ParamsDialog;
+class PrinterWebView;
+class PrinterManagerView;
 
 enum QuickSlice
 {
@@ -251,7 +252,7 @@ public:
 
     // BBS
     BBLTopbar* topbar() { return m_topbar; }
-
+    
     // for cali to update tab when save new preset
     void update_filament_tab_ui();
 
@@ -317,7 +318,7 @@ public:
     //BBS: GUI refactor
     void        select_tab(wxPanel* panel);
     void        select_tab(size_t tab = size_t(-1));
-    void        request_select_tab(TabPosition pos);
+    void        request_select_tab(TabPosition pos, const std::string& printerId = "");
     int         get_calibration_curr_tab();
     void        select_view(const std::string& direction);
     // Propagate changed configuration from the Tab to the Plater and save changes to the AppConfig
@@ -369,6 +370,7 @@ public:
     CalibrationPanel*     m_calibration{ nullptr };
     WebViewPanel*         m_webview { nullptr };
     PrinterWebView*       m_printer_view{nullptr};
+    PrinterManagerView*   m_printer_manager_view{nullptr};
     wxLogWindow*          m_log_window { nullptr };
     // BBS
     //wxBookCtrlBase*       m_tabpanel { nullptr };

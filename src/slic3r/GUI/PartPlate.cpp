@@ -2732,6 +2732,13 @@ void PartPlate::render(const Transform3d& view_matrix, const Transform3d& projec
 {
     glsafe(::glEnable(GL_DEPTH_TEST));
 
+	if (!bottom && m_selected && !force_background_color) {
+        if (m_partplate_list)
+            render_logo(bottom, m_partplate_list->render_cali_logo && render_cali);
+        else
+            render_logo(bottom);
+    }
+
     GLShaderProgram *shader = wxGetApp().get_shader("flat");
     if (shader != nullptr) {
         shader->start_using();
@@ -2760,13 +2767,6 @@ void PartPlate::render(const Transform3d& view_matrix, const Transform3d& projec
         // }
 
         shader->stop_using();
-    }
-
-    if (!bottom && m_selected && !force_background_color) {
-        if (m_partplate_list)
-            render_logo(bottom, m_partplate_list->render_cali_logo && render_cali);
-        else
-            render_logo(bottom);
     }
 
     render_icons(bottom, only_body, hover_id);

@@ -3,6 +3,14 @@ project(libslic3r_gui)
 
 include(PrecompiledHeader)
 
+# Find and enable OpenMP
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    message(STATUS "OpenMP found and enabled")
+else()
+    message(STATUS "OpenMP not found, will use serial processing")
+endif()
+
 set(SLIC3R_GUI_SOURCES
     pchheader.cpp
     pchheader.hpp
@@ -275,6 +283,10 @@ set(SLIC3R_GUI_SOURCES
     GUI/WebViewDialog.hpp
     GUI/PrinterWebView.cpp
     GUI/PrinterWebView.hpp
+    GUI/PrinterManagerView.cpp
+    GUI/PrinterManagerView.hpp
+    GUI/PrinterMmsSyncView.cpp
+    GUI/PrinterMmsSyncView.hpp
     GUI/WebDownPluginDlg.hpp
     GUI/WebDownPluginDlg.cpp
     GUI/WebGuideDialog.hpp
@@ -494,7 +506,6 @@ set(SLIC3R_GUI_SOURCES
     GUI/TaskManager.hpp
     Utils/Http.cpp
     Utils/Http.hpp
-    Utils/WebSocketClient.hpp
     Utils/FixModelByWin10.cpp
     Utils/FixModelByWin10.hpp
     Utils/EmbossStyleManager.cpp
@@ -528,8 +539,6 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrintHost.cpp
     Utils/NetworkAgent.cpp
     Utils/NetworkAgent.hpp
-    Utils/ElegooLink.cpp
-    Utils/ElegooLink.hpp
     Utils/PrintHost.cpp
     Utils/PrintHost.hpp
     Utils/Serial.cpp
@@ -570,8 +579,29 @@ set(SLIC3R_GUI_SOURCES
     GUI/Jobs/OAuthJob.hpp
     Utils/SimplyPrint.cpp
     Utils/SimplyPrint.hpp
-    GUI/ElegooPrintSend.cpp
-    GUI/ElegooPrintSend.hpp
+    
+    GUI/PrintSendDialogEx.cpp
+    GUI/PrintSendDialogEx.hpp
+    Utils/Singleton.hpp
+    Utils/PrinterManager.cpp
+    Utils/PrinterManager.hpp
+    Utils/PrinterCache.cpp
+    Utils/PrinterCache.hpp 
+    Utils/PrinterNetworkManager.cpp
+    Utils/PrinterNetworkManager.hpp
+    Utils/PrinterNetwork.cpp
+    Utils/PrinterNetwork.hpp
+    Utils/ElegooNetwork.cpp
+    Utils/ElegooNetwork.hpp
+    Utils/ElegooLink.cpp
+    Utils/ElegooLink.hpp
+    Utils/PrinterNetworkEvent.cpp
+    Utils/PrinterNetworkEvent.hpp
+    Utils/PrinterMmsManager.cpp
+    Utils/PrinterMmsManager.hpp
+    Utils/WebviewIPCManager.h
+    Utils/WebviewIPCManager.cpp
+
 )
 
 if (WIN32)
@@ -622,7 +652,13 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SLIC3R_GUI_SOURCES})
 encoding_check(libslic3r_gui)
 
 find_package(libnoise REQUIRED)
-target_link_libraries(libslic3r_gui libslic3r cereal::cereal imgui imguizmo minilzo GLEW::GLEW OpenGL::GL hidapi ${wxWidgets_LIBRARIES} glfw libcurl OpenSSL::SSL OpenSSL::Crypto noise::noise)
+find_package(elegoolink REQUIRED)
+target_link_libraries(libslic3r_gui libslic3r cereal::cereal imgui imguizmo minilzo GLEW::GLEW OpenGL::GL hidapi ${wxWidgets_LIBRARIES} glfw libcurl OpenSSL::SSL OpenSSL::Crypto noise::noise elegoolink::elegoolink)
+
+# Add OpenMP if found
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(libslic3r_gui OpenMP::OpenMP_CXX)
+endif()
 
 if (MSVC)
     target_link_libraries(libslic3r_gui Setupapi.lib)

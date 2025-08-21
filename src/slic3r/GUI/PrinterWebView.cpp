@@ -14,34 +14,44 @@
 
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <wx/webview.h>
-#include"slic3r/GUI/PhysicalPrinterDialog.hpp"
-namespace pt = boost::property_tree;
+#include "slic3r/GUI/PhysicalPrinterDialog.hpp"
+#include "PrinterManager.hpp"
+#include <nlohmann/json.hpp>
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <slic3r/Utils/WebviewIPCManager.h>
 
 #define CONNECTIONG_URL_SUFFIX "/web/orca/connecting.html"
 #define FAILED_URL_SUFFIX "/web/orca/connection-failed.html"
 namespace Slic3r {
 namespace GUI {
-
 PrinterWebView::PrinterWebView(wxWindow *parent)
         : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
  {
+    m_uploadInProgress = false;
+    m_shouldStop = false;
 
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 
-      // Create the webview
+    // Create the webview
     m_browser = WebView::CreateWebView(this, "");
     if (m_browser == nullptr) {
         wxLogError("Could not init m_browser");
         return;
     }
-
+    this->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
+    m_browser->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
+    m_browser->SetOwnBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
+    m_ipc = new webviewIpc::WebviewIPCManager(m_browser);
+    setupIPCHandlers();
     m_browser->Bind(wxEVT_WEBVIEW_ERROR, &PrinterWebView::OnError, this);
     m_browser->Bind(wxEVT_WEBVIEW_LOADED, &PrinterWebView::OnLoaded, this);
     m_browser->Bind(wxEVT_WEBVIEW_NAVIGATING, &PrinterWebView::OnNavgating, this);
     m_browser->Bind(wxEVT_WEBVIEW_NAVIGATED, &PrinterWebView::OnNavgated, this);
     SetSizer(topsizer);
+    // m_browser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrinterWebView::OnScriptMessage, this);
 
-    m_browser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrinterWebView::OnScriptMessage, this);
     auto _dir = resources_dir();
     // replace all "\\" with "/"
     std::replace(_dir.begin(), _dir.end(), '\\', '/');
@@ -92,13 +102,23 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
 
     //Connect the idle events
     Bind(wxEVT_CLOSE_WINDOW, &PrinterWebView::OnClose, this);
-
  }
 
 PrinterWebView::~PrinterWebView()
 {
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " Start";
     SetEvtHandlerEnabled(false);
+    
+    // 优雅退出上传线程
+    m_shouldStop = true;
+    if (m_uploadThread.joinable()) {
+        m_uploadThread.join();
+    }
+
+    if(m_ipc){
+        delete m_ipc;
+        m_ipc=nullptr;
+    }
 
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " End";
 }
@@ -246,33 +266,6 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
 //#if defined(__APPLE__) || defined(__MACH__)
     wxString message = event.GetString();
     wxLogMessage("Received message: %s", message);
-
-    try {
-        //{cmd:'open', data: {url: event.target.href}}
-        boost::property_tree::ptree root;
-        std::stringstream           json_stream(message.ToStdString());
-        boost::property_tree::read_json(json_stream, root);
-        std::string cmd = root.get<std::string>("cmd");
-        if (cmd == "open") {
-            std::string url = root.get<std::string>("data.url");
-            bool needDownload = root.get<bool>("data.needDownload");
-            wxLogMessage("Open URL: %s", url);
-            if(needDownload)
-            {
-                GUI::wxGetApp().download(url);
-            }else{
-                wxLaunchDefaultBrowser(url);
-            }
-        } else if (cmd == "reload"){
-            if (m_url.IsEmpty())return;
-            m_loadState = PWLoadState::URL_LOADING;
-            loadUrl(m_url);
-            //loadConnectingPage();
-            return;
-        }
-    } catch (std::exception& e) {
-        wxLogMessage("Error: %s", e.what());
-    }
 //#endif
 }
 
@@ -315,5 +308,128 @@ void PrinterWebView::loadInputUrl()
 void PrinterWebView::loadUrl(const wxString& url) {
     m_browser->LoadURL(url);
 }
+
+void PrinterWebView::runScript(const wxString& javascript)
+{
+    if (!m_browser)
+        return;
+    WebView::RunScript(m_browser, javascript);
+}
+
+void PrinterWebView::setupIPCHandlers()
+{
+    if (!m_ipc) return;
+
+    // 处理打开URL请求
+    m_ipc->onRequest("open", [this](const webviewIpc::IPCRequest&request){
+        auto params = request.params;
+        std::string url = params.value("url", "");
+        bool needDownload = params.value("needDownload", false);
+        wxLogMessage("Open URL: %s", url);
+        if(needDownload)
+        {
+            GUI::wxGetApp().download(url);
+        }else{
+            wxLaunchDefaultBrowser(url);
+        }
+        return webviewIpc::IPCResult::success();
+    });
+
+    // 处理重新加载请求
+    m_ipc->onRequest("reload", [this](const webviewIpc::IPCRequest&request){
+        auto params = request.params;
+        if (!m_url.IsEmpty()){
+            m_loadState = PWLoadState::URL_LOADING;
+            loadUrl(m_url);
+        }
+        return webviewIpc::IPCResult::success();
+    });
+    
+    // 处理文件对话框请求
+    m_ipc->onRequest("open_file_dialog", [this](const webviewIpc::IPCRequest&request){
+        auto params = request.params;
+        try {
+            auto filter = params.value("filter", "All files (*.*)|*.*");
+            wxFileDialog openFileDialog(this, _L("Open File"), "", "", filter, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+            if (openFileDialog.ShowModal() != wxID_CANCEL) {  
+                nlohmann::json data;
+                data["files"] = {openFileDialog.GetPath().ToStdString()};
+                return webviewIpc::IPCResult::success(data);
+            } else {
+                nlohmann::json data;
+                data["files"] = nlohmann::json::array();
+                return webviewIpc::IPCResult::success(data);
+            }
+        } catch (const std::exception& e) {
+            return webviewIpc::IPCResult::error("No file selected");
+        }
+    });
+    
+    // 处理文件上传请求（使用异步事件处理器）
+    m_ipc->onRequestAsyncWithEvents("upload_file", [this](const webviewIpc::IPCRequest& request, 
+                                                       std::function<void(const webviewIpc::IPCResult&)> sendResponse,
+                                                       std::function<void(const std::string&, const nlohmann::json&)> sendEvent) mutable {
+        auto params = request.params;
+        
+        // 检查是否已有上传在进行中
+        if (m_uploadInProgress) {
+            sendResponse(webviewIpc::IPCResult::error("Upload already in progress"));
+            return;
+        }
+        
+        try {
+            PrinterNetworkParams networkParams;
+            networkParams.fileName = params.value("fileName", "");
+            networkParams.filePath = params.value("filePath", "");
+            networkParams.printerId = params.value("printerId", "");
+            
+            std::string requestId = request.id;
+            networkParams.uploadProgressFn = [this, requestId, sendEvent](const uint64_t uploadedBytes, const uint64_t totalBytes, bool& cancel) {
+                // 检查是否需要停止
+                if (m_shouldStop) {
+                    cancel = true;
+                    return;
+                }
+                
+                nlohmann::json data;
+                data["uploadedBytes"] = uploadedBytes;
+                data["totalBytes"] = totalBytes;
+                
+                // 发送进度事件
+                sendEvent("upload_progress", data);
+            };
+
+            // 设置上传状态
+            m_uploadInProgress = true;
+            
+            // 如果之前的线程还在运行，等待它结束
+            if (m_uploadThread.joinable()) {
+                m_uploadThread.join();
+            }
+            
+            // 启动新的上传线程
+            m_uploadThread = std::thread([this, networkParams, requestId, sendResponse]() mutable {
+                bool ret = false;
+                try {
+                    ret = PrinterManager::getInstance()->upload(networkParams);
+                } catch (...) {
+                    ret = false;
+                }
+                
+                // 重置上传状态
+                m_uploadInProgress = false;
+                
+                // 在主线程中发送响应
+                auto response = ret ? webviewIpc::IPCResult::success() 
+                                    : webviewIpc::IPCResult::error("Upload failed");
+                sendResponse(response);
+            });            
+        } catch (...) {
+            m_uploadInProgress = false;
+            sendResponse(webviewIpc::IPCResult::error("Upload initialization failed"));
+        }
+    });
+}
+
 } // GUI
 } // Slic3r

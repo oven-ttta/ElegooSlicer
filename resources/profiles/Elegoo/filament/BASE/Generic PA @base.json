@@ -46,5 +46,11 @@
     ],
     "slow_down_min_speed": [
         "10"
+    ],
+    "filament_vendor": [
+        "Generic"
+    ],
+    "filament_type": [
+        "PA"
     ]
 }

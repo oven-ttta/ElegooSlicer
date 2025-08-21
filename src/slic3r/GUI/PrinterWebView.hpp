@@ -8,6 +8,9 @@
 #include "wx/settings.h"
 #include <wx/webview.h>
 #include <wx/string.h>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 #if wxUSE_WEBVIEW_EDGE
 #include "wx/msw/webview_edge.h"
@@ -26,10 +29,12 @@
 #include "wx/textctrl.h"
 #include <wx/timer.h>
 
+namespace webviewIpc {
+    class WebviewIPCManager;
+}
 
 namespace Slic3r {
 namespace GUI {
-
 
 class PrinterWebView : public wxPanel {
 public:
@@ -52,6 +57,8 @@ private:
     void       loadFailedPage();
     void       loadInputUrl();
     void       loadUrl(const wxString& url);
+    void runScript(const wxString &javascript);
+    void setupIPCHandlers();
 
     wxWebView* m_browser;
     long m_zoomFactor;
@@ -74,6 +81,15 @@ private:
     // 1 is load url
     // 2 is load failed page
     PWLoadState m_loadState = PWLoadState::CONNECTING_LOADING;
+    
+    // Upload thread management
+    std::atomic<bool> m_uploadInProgress;
+    std::atomic<bool> m_shouldStop;
+    std::thread m_uploadThread;
+    std::mutex m_uploadMutex;
+
+private:
+    webviewIpc::WebviewIPCManager *m_ipc=nullptr;
 };
 
 } // GUI

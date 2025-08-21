@@ -10,6 +10,7 @@
 #include <regex>
 #include <future>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -116,6 +117,7 @@
 #include "Gizmos/GLGizmoSimplify.hpp" // create suggestion notification
 #include "Gizmos/GLGizmoSVG.hpp" // Drop SVG file
 #include "Gizmos/GizmoObjectManipulation.hpp"
+#include "PrinterWebView.hpp"
 
 // BBS
 #include "Widgets/ProgressDialog.hpp"
@@ -152,7 +154,8 @@
 #include "CreatePresetsDialog.hpp"
 #include "FileArchiveDialog.hpp"
 
-#include "ElegooPrintSend.hpp"
+#include "PrintSendDialogEx.hpp"
+#include "PrinterMmsSyncView.hpp"
 
 using boost::optional;
 namespace fs = boost::filesystem;
@@ -1285,13 +1288,16 @@ void Sidebar::update_all_preset_comboboxes()
         p_mainframe->load_printer_url(url, apikey);
         p_mainframe->set_print_button_to_default(print_btn_type);
 
-
-        wxTheApp->CallAfter([this]() {
-            load_ams_list();
-            if(wxGetApp().preset_bundle->filament_ams_list.size() > 0)
-                ams_btn->Show();          
-        });           
-       
+        if (PrintHost::support_device_list_management(cfg)) {
+            connection_btn->Hide();
+        } else {
+            connection_btn->Show();
+        }
+        if (cfg.has("support_multi_filament") && cfg.option<ConfigOptionBool>("support_multi_filament")->value) {
+            ams_btn->Show();
+        } else {
+            ams_btn->Hide();
+        }              
     }
 
     if (cfg.opt_bool("pellet_modded_printer")) {
@@ -1776,87 +1782,47 @@ void Sidebar::load_ams_list(std::string const &device, MachineObject* obj)
     for (auto c : p->combos_filament)
         c->update();
 }
-std::map<int, DynamicPrintConfig> Sidebar::build_filament_ams_list(const std::string& device_id)
+bool Sidebar::load_mms_list()
 {
-    std::map<int, DynamicPrintConfig> filament_ams_list;
-    auto preset_bundle = wxGetApp().preset_bundle;
-    DynamicPrintConfig cfg = preset_bundle->printers.get_edited_preset().config;
-    std::unique_ptr<PrintHost> host(PrintHost::get_print_host(&cfg));
-    if (host) {
-        std::map<std::string, std::string> vendor_filament_type_filament_ids;
-        std::map<std::string, std::string> generic_filament_type_filament_ids;
-        PrinterTechnology tech;
-        const auto opt = cfg.option<ConfigOptionEnum<PrinterTechnology>>("printer_technology");
-        if (opt != nullptr) {
-            tech = opt->value;
-        }
-        const auto& filaments = preset_bundle->materials(tech == ptFFF ? ptFFF : ptSLA);
-        const auto& filaments_presets = filaments.get_presets();
+    auto printerMmsSyncView = new PrinterMmsSyncView(wxGetApp().mainframe);
 
-        for(const auto& filaments_preset : filaments_presets) {
-            if(!filaments_preset.is_system) {
-                continue;
-            }
-            auto* filament_type_opt = dynamic_cast<const ConfigOptionStrings*>(filaments_preset.config.option("filament_type"));
-            if(filament_type_opt == nullptr || filament_type_opt->values.size() == 0){
-                continue;
-            }
-            std::string filament_type = filament_type_opt->values[0];
-            if(filaments_preset.alias.empty() || filament_type.empty() || filaments_preset.filament_id.empty()) {
-                continue;
-            }
-            // std::string vendor  = filaments_preset.vendor->name;
-            std::string alias = filaments_preset.alias;
-            alias = boost::algorithm::to_upper_copy(alias);
-            if(alias.find("GENERIC") != std::string::npos) {
-                generic_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
-            }
-            else {
-                vendor_filament_type_filament_ids[filament_type] = filaments_preset.filament_id;
-            }
-        }
+    if (printerMmsSyncView->ShowModal() != wxID_OK) {
+        delete printerMmsSyncView;
+        return false;
+    }
+    auto mmsInfo = printerMmsSyncView->getSyncedMmsGroup();
+    delete printerMmsSyncView;
+    std::map<int, DynamicPrintConfig> filament_mms_list;
+    int                               filament_index = 0;
+    for (const auto& mms : mmsInfo.mmsList) {
 
-        auto ams_info = host->get_ams(vendor_filament_type_filament_ids, generic_filament_type_filament_ids);
-        for (const auto& ams : ams_info.ams_list) {
-            for (const auto& tray : ams.tray_list) {
-                DynamicPrintConfig filament_config;
-                filament_config.set_key_value("filament_id", new ConfigOptionStrings{ tray.filament_id });
-                filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filament_type });
-                filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filament_name });
-                filament_config.set_key_value("tray_name", new ConfigOptionStrings{ ams.ams_id + "-" + tray.tray_id });
-                filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filament_color});
-                filament_config.set_key_value("filament_exist", new ConfigOptionBools{ true });
-                filament_config.set_key_value("tray_id", new ConfigOptionStrings{ tray.tray_id });
-                filament_config.set_key_value("ams_id", new ConfigOptionStrings{ ams.ams_id });
-                filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
-                filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filament_color);
-               
-                int filament_index = (std::stoi(ams.ams_id) * 4) + std::stoi(tray.tray_id);
-                filament_ams_list.emplace(filament_index, std::move(filament_config));
-            }
+        for (const auto& tray : mms.trayList) {
+            DynamicPrintConfig filament_config;
+            filament_config.set_key_value("filament_id", new ConfigOptionStrings{ tray.filamentId });
+            filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filamentType });
+            filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filamentName });
+            filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filamentColor});
+            filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
+            filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filamentColor);
+            filament_mms_list.emplace(filament_index, std::move(filament_config));
+            filament_index++;
         }
     }
-    return filament_ams_list;
-}
 
-void Sidebar::load_ams_list()
-{
-    std::string device_id = wxGetApp().preset_bundle->printers.get_edited_preset().base_id;
-    //wxGetApp().preset_bundle->printers
-    std::map<int, DynamicPrintConfig> filament_ams_list = build_filament_ams_list(device_id);
-
-    p->ams_list_device = device_id;
-    if (wxGetApp().preset_bundle->filament_ams_list == filament_ams_list)
-        return;
-    wxGetApp().preset_bundle->filament_ams_list = filament_ams_list;
+    p->ams_list_device = wxGetApp().preset_bundle->printers.get_edited_preset().base_id;
+    if (wxGetApp().preset_bundle->filament_ams_list == filament_mms_list)
+        return true;
+    wxGetApp().preset_bundle->filament_ams_list = filament_mms_list;
 
     for (auto c : p->combos_filament)
         c->update();
+    return true;
 }
 
 void Sidebar::sync_ams_list()
 { 
-    load_ams_list();
+    if(!load_mms_list())
+        return;
     auto & list = wxGetApp().preset_bundle->filament_ams_list;
     if (list.empty()) {
         MessageDialog dlg(this,
@@ -3915,7 +3881,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                         load_type  = static_cast<LoadType>(std::stoi(import_project_action));
 
                     // BBS: version check
-                    Semver app_version = *(Semver::parse(ORCA_VERSION));// 暂时使用Orca的版本，不然加载模型会提示一些兼容性问题。
+                    Semver app_version = *(Semver::parse(ORCA_VERSION));// Temporarily use Orca version to avoid compatibility issues when loading models.
                     if (en_3mf_file_type == En3mfType::From_Prusa) {
                         // do not reset the model config
                         load_config = false;
@@ -4119,6 +4085,9 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                                     wxGetApp().app_config->set("no_warn_when_modified_gcodes", "true");
                             }
                             else if ((validated == VALIDATE_PRESETS_PRINTER_NOT_FOUND) || (validated == VALIDATE_PRESETS_FILAMENTS_NOT_FOUND)) {
+
+                                q->auto_load_missing_vendor_presets(preset_bundle, config, modified_gcodes, filename.string());
+
                                 std::string warning_message;
                                 warning_message += "\n";
                                 for (std::set<std::string>::iterator it=modified_gcodes.begin(); it!=modified_gcodes.end(); ++it)
@@ -12875,16 +12844,13 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
 
     {
         auto       preset_bundle = wxGetApp().preset_bundle;
-        const auto opt           = physical_printer_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
-        const auto host_type     = opt != nullptr ? opt->value : htElegooLink;
         auto       config        = get_app_config();
 
         std::unique_ptr<PrintHostSendDialog> pDlg;
-        if (host_type == htElegooLink) {
-            pDlg = std::make_unique<ElegooPrintSend>(this, get_partplate_list().get_curr_plate_index(), default_output_file,
+        if (PrintHost::support_device_list_management(*physical_printer_config)) {
+            pDlg = std::make_unique<PrintSendDialogEx>(this, get_partplate_list().get_curr_plate_index(), default_output_file,
                                                      upload_job.printhost->get_post_upload_actions(), groups, storage_paths, storage_names,
-                                                     config->get_bool("open_device_tab_post_upload"),
-                                                     wxGetApp().preset_bundle->filament_ams_list);
+                                                     config->get_bool("open_device_tab_post_upload"));
         } else {
             pDlg = std::make_unique<PrintHostSendDialog>(default_output_file, upload_job.printhost->get_post_upload_actions(), groups,
                                                          storage_paths, storage_names, config->get_bool("open_device_tab_post_upload"));
@@ -12912,20 +12878,18 @@ void Plater::send_gcode_legacy(int plate_idx, Export3mfProgressFn proFn, bool us
                 return;
         }
     if (use_3mf) {
-            // Process gcode
-            const int result = send_gcode(plate_idx, nullptr);
+        // Process gcode
+        const int result = send_gcode(plate_idx, nullptr);
 
-            if (result < 0) {
-                wxString msg = _L("Abnormal print file data. Please slice again");
-                show_error(this, msg, false);
-                return;
-            }
-
-            upload_job.upload_data.source_path = p->m_print_job_data._3mf_path;
+        if (result < 0) {
+            wxString msg = _L("Abnormal print file data. Please slice again");
+            show_error(this, msg, false);
+            return;
         }
 
-    p->export_gcode(fs::path(), false, std::move(upload_job));           
-
+        upload_job.upload_data.source_path = p->m_print_job_data._3mf_path;    
+    }
+    p->export_gcode(fs::path(), false, std::move(upload_job)); 
 }
 int Plater::send_gcode(int plate_idx, Export3mfProgressFn proFn)
 {
@@ -14835,5 +14799,49 @@ SuppressBackgroundProcessingUpdate::~SuppressBackgroundProcessingUpdate()
 {
     wxGetApp().plater()->schedule_background_process(m_was_scheduled);
 }
+
+// Auto-load missing vendor presets when loading 3MF files
+int Plater::auto_load_missing_vendor_presets(PresetBundle* preset_bundle, DynamicPrintConfig& config, 
+                                            std::set<std::string>& modified_gcodes, const std::string& filename)
+{
+    std::string printer_preset = config.option<ConfigOptionString>("printer_settings_id", true)->value;
+    if (printer_preset.empty()) {
+        return VALIDATE_PRESETS_PRINTER_NOT_FOUND;
+    }
+
+    std::string vendor_name;    
+    PresetBundle temp_bundle;
+    auto [substitutions, errors] = temp_bundle.load_system_models_from_json(ForwardCompatibilitySubstitutionRule::EnableSilent);
+    for (const auto& vendor_pair : temp_bundle.vendors) {
+        const auto& vendor_profile = vendor_pair.second;
+        for (const auto& model : vendor_profile.models) {
+            if (printer_preset.find(model.name) != std::string::npos) {
+                vendor_name = vendor_pair.first;
+                break;
+            }
+        }
+        if (!vendor_name.empty()) break;
+    }  
+    
+    if (vendor_name.empty()) {
+        return VALIDATE_PRESETS_PRINTER_NOT_FOUND;
+    }
+
+    const auto vendor_dir = (boost::filesystem::path(Slic3r::data_dir()) / PRESET_SYSTEM_DIR).make_preferred();
+    auto vendor_file = vendor_dir / (vendor_name + ".json");
+    
+    if (!fs::exists(vendor_file)) {
+        std::unique_ptr<PresetUpdater> updater = std::make_unique<PresetUpdater>();
+        std::vector<std::string> install_bundles;
+        install_bundles.emplace_back(vendor_name);
+        if (!updater->install_bundles_rsrc(std::move(install_bundles), false)) {
+            return VALIDATE_PRESETS_PRINTER_NOT_FOUND;
+        }
+    }
+    preset_bundle->load_presets(*wxGetApp().app_config, ForwardCompatibilitySubstitutionRule::Enable);
+    return VALIDATE_PRESETS_SUCCESS;
+}
+
+
 
 }}    // namespace Slic3r::GUI

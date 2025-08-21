@@ -61,8 +61,9 @@ varying float world_normal_z;
 varying vec3 eye_normal;
 
 vec3 getBackfaceColor(vec3 fill) {
-    float brightness = 0.2126 * fill.r + 0.7152 * fill.g + 0.0722 * fill.b;
-    return (brightness > 0.75) ? vec3(0.11, 0.165, 0.208) : vec3(0.988, 0.988, 0.988);
+      //  float brightness = 0.2126 * fill.r + 0.7152 * fill.g + 0.0722 * fill.b;
+    //return (brightness > 0.75) ? vec3(0.11, 0.165, 0.208) : vec3(0.988, 0.988, 0.988);
+    return vec3(1.0, 1.0, 1.0);
 }
 
 // Silhouette edge detection & rendering algorithem by leoneruggiero
@@ -125,6 +126,37 @@ float DetectSilho(vec2 fragCoord)
         );
 }
 
+// Smooth edge detection function to reduce jagged edges
+float DetectOuterSilhoSmooth(vec2 fragCoord)
+{
+    float threshold = 0.0001;
+    int R = 3; // Increase search radius for smoother detection
+    float totalWeight = 0.0;
+    float weightedSum = 0.0;
+    
+    // Use Gaussian weights for smoothing
+    for (int i = -R; i <= R; ++i) {
+        for (int j = -R; j <= R; ++j) {
+            if (i == 0 && j == 0) continue; // Skip self
+            
+            // Calculate distance weight (farther pixels have lower weight)
+            float distance = sqrt(float(i*i + j*j));
+            float weight = exp(-distance * distance / 8.0); // Gaussian weight
+            
+            // Sample depth value from neighboring pixel
+            float neighbor_depth = texture2D(depth_tex, (fragCoord + vec2(i, j)) / screen_size).r;
+            
+            // Check if neighbor is a background pixel
+            if (abs(neighbor_depth - 1.0) < threshold) {
+                weightedSum += weight;
+            }
+            totalWeight += weight;
+        }
+    }
+    
+    // Return smoothed silhouette intensity
+    return weightedSum / totalWeight;
+}
 void main()
 {
     if (any(lessThan(clipping_planes_dots, ZERO)))
@@ -170,14 +202,14 @@ void main()
     if (is_outline) {
         color = vec4(vec3(intensity.y) + color.rgb * intensity.x, color.a);
         vec2 fragCoord = gl_FragCoord.xy;
-        float s = DetectSilho(fragCoord);
-        // Makes silhouettes thicker.
-        for(int i=1;i<=INFLATE; i++)
-        {
-           s = max(s, DetectSilho(fragCoord.xy + vec2(i, 0)));
-           s = max(s, DetectSilho(fragCoord.xy + vec2(0, i)));
-        }   
-        gl_FragColor = vec4(mix(color.rgb, getBackfaceColor(color.rgb), s), color.a);
+    // Use smooth edge detection to reduce jagged edges
+    float s = DetectOuterSilhoSmooth(fragCoord); // Weight of background color for current pixel
+
+    float threshold = 0.1; // Adjust this threshold to control outline width
+    float outlineStrength = smoothstep(0.0, threshold, s); // 0 if below threshold, 1 if above
+
+    // 1 - model color, 0 - white outline
+    gl_FragColor = vec4(mix(color.rgb, vec3(1.0), outlineStrength), color.a);
     }
 #ifdef ENABLE_ENVIRONMENT_MAP
     else if (use_environment_tex)

@@ -295,7 +295,9 @@ include(CGAL/CGAL.cmake)
 include(NLopt/NLopt.cmake)
 include(libnoise/libnoise.cmake)
 
-
+include(ixwebsocket/ixwebsocket.cmake)
+include(PahoMqttCpp/PahoMqttCpp.cmake)
+include(elegoolink/elegoolink.cmake)
 # I *think* 1.1 is used for *just* md5 hashing?
 # 3.1 has everything in the right place, but the md5 funcs used are deprecated
 # a grep across the repo shows it is used for other things
@@ -376,6 +378,9 @@ set(_dep_list
     ${ZLIB_PKG}
     ${EXPAT_PKG}
     dep_libnoise
+    dep_ixwebsocket
+    dep_PahoMqttCpp
+    dep_elegoolink
     )
 
 if (MSVC)

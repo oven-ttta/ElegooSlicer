@@ -62,6 +62,8 @@
 #include "ConfigWizard.hpp"
 #include "Widgets/WebView.hpp"
 #include "DailyTips.hpp"
+#include "PrinterWebView.hpp"
+#include "PrinterManagerView.hpp"
 
 #ifdef _WIN32
 #include <dbt.h>
@@ -69,6 +71,7 @@
 #include <shellapi.h>
 #endif // _WIN32
 #include <slic3r/GUI/CreatePresetsDialog.hpp>
+#include "../Utils/PrinterManager.hpp"
 
 
 namespace Slic3r {
@@ -346,6 +349,15 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
     Bind(EVT_SELECT_TAB, [this](wxCommandEvent&evt) {
         TabPosition pos = (TabPosition)evt.GetInt();
         m_tabpanel->SetSelection(pos);
+        
+        // Handle printerId if provided (stored in event string)
+        wxString printerIdStr = evt.GetString();
+        if (!printerIdStr.IsEmpty() && m_printer_manager_view) {
+            // Use CallAfter to ensure SetSelection is complete
+            wxGetApp().CallAfter([this, printerIdStr]() {
+                m_printer_manager_view->openPrinterTab(printerIdStr.ToStdString());
+            });
+        }
     });
 
     Bind(EVT_SYNC_CLOUD_PRESET, &MainFrame::on_select_default_preset, this);
@@ -948,7 +960,7 @@ void MainFrame::shutdown()
     wxGetApp().shutdown();
     // BBS: why clear ?
     //wxGetApp().plater_ = nullptr;
-
+    PrinterManager::getInstance()->close();
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << "MainFrame::shutdown exit";
 }
 
@@ -1134,14 +1146,22 @@ void MainFrame::init_tabpanel() {
 // SoftFever
 void MainFrame::show_device(bool bBBLPrinter) {
     auto idx = -1;
+
+    auto remove_page = [&](auto* page) {
+        int idx = m_tabpanel->FindPage(page);
+        if (idx != wxNOT_FOUND) {
+            page->Show(false);
+            m_tabpanel->RemovePage(idx);
+        }
+    };
+
+
     if (bBBLPrinter) {
         if (m_tabpanel->FindPage(m_monitor) != wxNOT_FOUND)
             return;
         // Remove printer view
-        if ((idx = m_tabpanel->FindPage(m_printer_view)) != wxNOT_FOUND) {
-            m_printer_view->Show(false);
-            m_tabpanel->RemovePage(idx);
-        }
+        remove_page(m_printer_view);
+        remove_page(m_printer_manager_view);
 
         // Create/insert monitor page
         if (!m_monitor) {
@@ -1176,33 +1196,41 @@ void MainFrame::show_device(bool bBBLPrinter) {
 #endif // _MSW_DARK_MODE
 
     } else {
-        if (m_tabpanel->FindPage(m_printer_view) != wxNOT_FOUND)
-            return;
+        auto cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+        if (PrintHost::support_device_list_management(cfg)) {
+            if (m_tabpanel->FindPage(m_printer_manager_view) != wxNOT_FOUND)
+                return;
+        } else {
+            if (m_tabpanel->FindPage(m_printer_view) != wxNOT_FOUND)
+                return;
+        }
 
-        if ((idx = m_tabpanel->FindPage(m_calibration)) != wxNOT_FOUND) {
-            m_calibration->Show(false);
-            m_tabpanel->RemovePage(idx);
+        remove_page(m_calibration);
+        remove_page(m_multi_machine);
+        remove_page(m_monitor);   
+
+        if (PrintHost::support_device_list_management(cfg)) {
+            remove_page(m_printer_view);
+            if (m_tabpanel->FindPage(m_printer_manager_view) == wxNOT_FOUND) {
+                m_printer_manager_view = new PrinterManagerView(m_tabpanel);
+            }
+            m_printer_manager_view->Show(false);
+            m_tabpanel->InsertPage(tpMonitor, m_printer_manager_view, _L("Device"), std::string("tab_monitor_active"),
+                                std::string("tab_monitor_active"));
+        } else {     
+            remove_page(m_printer_manager_view);
+            if (m_printer_view == nullptr) {
+                m_printer_view = new PrinterWebView(m_tabpanel);
+                Bind(EVT_LOAD_PRINTER_URL, [this](LoadPrinterViewEvent& evt) {
+                    wxString url = evt.GetString();
+                    wxString key = evt.GetAPIkey();
+                    m_printer_view->load_url(url, key);
+                });
+            }
+            m_printer_view->Show(false);
+            m_tabpanel->InsertPage(tpMonitor, m_printer_view, _L("Device"), std::string("tab_monitor_active"),
+                                std::string("tab_monitor_active"));
         }
-        if ((idx = m_tabpanel->FindPage(m_multi_machine)) != wxNOT_FOUND) {
-            m_multi_machine->Show(false);
-            m_tabpanel->RemovePage(idx);
-        }
-        if ((idx = m_tabpanel->FindPage(m_monitor)) != wxNOT_FOUND) {
-            m_monitor->Show(false);
-            m_tabpanel->RemovePage(idx);
-        }
-        if (m_printer_view == nullptr) {
-            m_printer_view = new PrinterWebView(m_tabpanel);
-            Bind(EVT_LOAD_PRINTER_URL, [this](LoadPrinterViewEvent& evt) {
-                wxString url = evt.GetString();
-                wxString key = evt.GetAPIkey();
-                // select_tab(MainFrame::tpMonitor);
-                m_printer_view->load_url(url, key);
-            });
-        }
-        m_printer_view->Show(false);
-        m_tabpanel->InsertPage(tpMonitor, m_printer_view, _L("Device"), std::string("tab_monitor_active"),
-                               std::string("tab_monitor_active"));
     }
 }
 
@@ -1469,6 +1497,9 @@ bool MainFrame::can_send_gcode() const
     if (m_plater && !m_plater->model().objects.empty())
     {
         auto cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+        if(PrintHost::support_device_list_management(cfg)) {
+            return true;
+        }
         if (const auto *print_host_opt = cfg.option<ConfigOptionString>("print_host"); print_host_opt)
             return !print_host_opt->value.empty();
     }
@@ -2213,7 +2244,7 @@ static wxMenu* generate_help_menu()
     append_menu_item(helpMenu, wxID_ANY, _L("Show Configuration Folder"), _L("Show Configuration Folder"),
         [](wxCommandEvent&) { Slic3r::GUI::desktop_open_datadir_folder(); });
 
-#if 0  //暂时屏蔽 Show Tip of the Day
+#if 0  // Temporarily disable Show Tip of the Day
     append_menu_item(helpMenu, wxID_ANY, _L("Show Tip of the Day"), _L("Show Tip of the Day"), [](wxCommandEvent&) {
         wxGetApp().plater()->get_dailytips()->open();
         wxGetApp().plater()->get_current_canvas3D()->set_as_dirty();
@@ -3520,10 +3551,13 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
     select(false);
 }
 
-void MainFrame::request_select_tab(TabPosition pos)
+void MainFrame::request_select_tab(TabPosition pos, const std::string& printerId)
 {
     wxCommandEvent* evt = new wxCommandEvent(EVT_SELECT_TAB);
     evt->SetInt(pos);
+    if (!printerId.empty()) {
+        evt->SetString(wxString::FromUTF8(printerId));
+    }
     wxQueueEvent(this, evt);
 }
 

@@ -1,83 +1,35 @@
 #ifndef slic3r_ElegooLink_hpp_
 #define slic3r_ElegooLink_hpp_
 
+#include "Singleton.hpp"
 #include <string>
-#include <wx/string.h>
-#include <boost/optional.hpp>
-#include <boost/asio/ip/address.hpp>
+#include <vector>
+#include "libslic3r/PrinterNetworkInfo.hpp"
+#include "libslic3r/PrinterNetworkResult.hpp"
 
-#include "PrintHost.hpp"
-#include "libslic3r/PrintConfig.hpp"
-#include "OctoPrint.hpp"
-#include "WebSocketClient.hpp"
 namespace Slic3r {
 
-class DynamicPrintConfig;
-class Http;
-
-class ElegooLink : public OctoPrint
+class ElegooLink : public Singleton<ElegooLink>
 {
 public:
-    ElegooLink(DynamicPrintConfig *config);
-    ~ElegooLink() override = default;
-    const char* get_name() const override;
-    virtual bool test(wxString &curl_msg) const override;
-    wxString get_test_ok_msg() const override;
-    wxString get_test_failed_msg(wxString& msg) const override;
-    bool upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn) const override;
-    bool has_auto_discovery() const override { return false; }
-    bool can_test() const override { return true; }
-    PrintHostPostUploadActions get_post_upload_actions() const override { return PrintHostPostUploadAction::StartPrint; }
-    bool connect_websocket();
-    PrintAmsInfo get_ams(const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids) override;
+    ElegooLink();
+    ~ElegooLink();
+    PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<bool> disconnectFromPrinter(const std::string& printerId);
+    PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters();
+    PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params);
+    PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params);
+    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
+    void close();
+
+    static int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);
     
-protected:
-#ifdef WIN32
-    virtual bool upload_inner_with_resolved_ip(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn, const boost::asio::ip::address& resolved_addr) const;
-#endif
-    virtual bool validate_version_text(const boost::optional<std::string> &version_text) const;
-    virtual bool upload_inner_with_host(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn) const;
-
-#ifdef WIN32
-    virtual bool test_with_resolved_ip(wxString& curl_msg) const override;
-    bool elegoo_test_with_resolved_ip(wxString& curl_msg) const;
-#endif
-
-private:
-    bool elegoo_test(wxString& curl_msg) const;
-    bool print(WebSocketClient&  client,
-               std::string       timeLapse,
-               std::string       heatedBedLeveling,
-               std::string       bedType,
-               const std::string filename, 
-               std::string       filamentAmsMapping,
-               ErrorFn           error_fn) const;
-    bool checkResult(WebSocketClient&  client,
-               ErrorFn           error_fn) const;
-
-    bool loopUpload(std::string url, PrintHostUpload upload_data,
-                    ProgressFn        prorgess_fn,
-                    ErrorFn           error_fn,
-                    InfoFn            info_fn) const;
-
-    bool uploadPart(Http &http,
-                    std::string       md5,
-                    std::string       uuid,
-                    std::string       path,
-                    std::string       filename,
-                    size_t            filesize,
-                    size_t            offset,
-                    size_t            length,
-                    ProgressFn        prorgess_fn,
-                    ErrorFn           error_fn,
-                    InfoFn            info_fn) const;
-    std::map<std::string, std::string> getAttributes(WebSocketClient& client) const;
-    //std::map<std::string, const Slic3r::Preset*> getAmsConfigMap(const std::map<std::string, const Slic3r::Preset*>& compatible_filaments) const;
-    std::string buildAmsDataString(const std::string& filamentAmsMapping) const;
-    // void fillTrayConfigFromMap(PrintAmsTray& tray, const std::map<std::string, const Preset*>& amsConfigMap);
-    void getTrayFilamentMapping(PrintAmsTray& tray, const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids);
-    PrintAmsInfo amsVirtualTestData(const std::map<std::string, std::string>& vendor_filament_type_filament_ids, const std::map<std::string, std::string>& generic_filament_type_filament_ids);
+    private:
+       bool isBusy(const std::string& printerId, PrinterStatus &status, int tryCount = 10);
+       std::mutex mMutex;
+       bool mIsCleanup = false;
 };
-}
 
-#endif
+} // namespace Slic3r
+
+#endif // slic3r_ElegooLink_hpp_

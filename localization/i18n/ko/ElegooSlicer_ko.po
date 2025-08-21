@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-14 11:50+0800\n"
+"POT-Creation-Date: 2025-08-08 16:43+0800\n"
 "PO-Revision-Date: 2024-05-31 23:33+0900\n"
 "Last-Translator: Hotsolidinfill <138652683+Hotsolidinfill@users.noreply."
 "github.com>, crwusiz <crwusiz@gmail.com>\n"
@@ -1003,6 +1003,10 @@ msgid "Orient the text towards the camera."
 msgstr "텍스트 방향을 카메라 쪽으로 향하게 합니다."
 
 #, boost-format
+msgid "Font \"%1%\" can't be used. Please select another."
+msgstr ""
+
+#, boost-format
 msgid ""
 "Can't load exactly same font(\"%1%\"). Application selected a similar "
 "one(\"%2%\"). You have to specify font for enable edit text."
@@ -1258,6 +1262,9 @@ msgstr "나노 SVG 파서는 파일(%1%)에서 로드할 수 없습니다."
 msgid "SVG file does NOT contain a single path to be embossed (%1%)."
 msgstr "SVG 파일에는 양각할 단일 경로(%1%)가 포함되어 있지 않습니다."
 
+msgid "No feature"
+msgstr ""
+
 msgid "Vertex"
 msgstr "꼭지점"
 
@@ -1282,9 +1289,6 @@ msgstr "가장자리 중심"
 msgid "Center of circle"
 msgstr "원의 중심"
 
-msgid "ShiftLeft mouse button"
-msgstr "Shift + 왼쪽 마우스 버튼"
-
 msgid "Select feature"
 msgstr "기능 선택"
 
@@ -1300,18 +1304,25 @@ msgstr "다시 선택"
 msgid "Esc"
 msgstr "Esc"
 
-msgid "Unselect"
-msgstr "선택 취소"
+msgid "Cancel a feature until exit"
+msgstr ""
 
 msgid "Measure"
 msgstr "측정"
+
+msgid ""
+"Please confirm explosion ratio = 1,and please select at least one object"
+msgstr ""
+
+msgid "Please select at least one object."
+msgstr ""
 
 msgid "Edit to scale"
 msgstr "규모에 맞게 편집"
 
 msgctxt "Verb"
-msgid "Scale"
-msgstr "규모"
+msgid "Scale all"
+msgstr ""
 
 msgid "None"
 msgstr "없음"
@@ -1324,6 +1335,42 @@ msgstr "길이"
 
 msgid "Selection"
 msgstr "선택"
+
+msgid " (Moving)"
+msgstr ""
+
+msgid ""
+"Select 2 faces on objects and \n"
+" make objects assemble together."
+msgstr ""
+
+msgid ""
+"Select 2 points or circles on objects and \n"
+" specify distance between them."
+msgstr ""
+
+msgid "Face"
+msgstr ""
+
+msgid " (Fixed)"
+msgstr ""
+
+msgid "Point"
+msgstr ""
+
+msgid ""
+"Feature 1 has been reset, \n"
+"feature 2 has been feature 1"
+msgstr ""
+
+msgid "Warning:please select Plane's feature."
+msgstr ""
+
+msgid "Warning:please select Point's or Circle's feature."
+msgstr ""
+
+msgid "Warning:please select two different mesh."
+msgstr ""
 
 msgid "Copy to clipboard"
 msgstr "클립보드로 복사"
@@ -1339,6 +1386,27 @@ msgstr "직접적인 거리"
 
 msgid "Distance XYZ"
 msgstr "XYZ 거리"
+
+msgid "Parallel"
+msgstr ""
+
+msgid "Center coincidence"
+msgstr ""
+
+msgid "Featue 1"
+msgstr ""
+
+msgid "Reverse rotation"
+msgstr ""
+
+msgid "Rotate around center:"
+msgstr ""
+
+msgid "Parallel distance:"
+msgstr ""
+
+msgid "Flip by Face 2"
+msgstr ""
 
 msgid "Ctrl+"
 msgstr "Ctrl+"
@@ -1679,10 +1747,6 @@ msgstr "숨기기"
 
 msgid "Show"
 msgstr "보이기"
-
-# 단축키
-msgid "Del"
-msgstr "Del"
 
 msgid "Delete the selected object"
 msgstr "선택된 개체 삭제"
@@ -2774,9 +2838,6 @@ msgstr "입력 값은 %1%보다 크고 %2%보다 작아야 합니다"
 msgid "SN"
 msgstr "SN"
 
-msgid "Setting AMS slot information while printing is not supported"
-msgstr "출력 중에는 AMS 슬롯 정보 설정이 지원되지 않습니다"
-
 msgid "Factors of Flow Dynamics Calibration"
 msgstr "동적 유량 교정 계수"
 
@@ -2788,6 +2849,9 @@ msgstr "K 계수"
 
 msgid "Factor N"
 msgstr "N 계수"
+
+msgid "Setting AMS slot information while printing is not supported"
+msgstr "출력 중에는 AMS 슬롯 정보 설정이 지원되지 않습니다"
 
 msgid "Setting Virtual slot information while printing is not supported"
 msgstr "출력 중에는 가상 슬롯 정보 설정이 지원되지 않습니다"
@@ -2906,8 +2970,8 @@ msgstr "AMS 미사용"
 msgid "Print with the filament mounted on the back of chassis"
 msgstr "섀시 뒷면에 필라멘트를 장착한 상태에서 출력"
 
-msgid "Current Cabin humidity"
-msgstr "현재 기내 습도"
+msgid "Current AMS humidity"
+msgstr ""
 
 msgid ""
 "Please change the desiccant when it is too wet. The indicator may not "
@@ -3086,8 +3150,12 @@ msgid ""
 msgstr ""
 "오류가 발생했습니다. 시스템 메모리가 부족하거나 프로그램의 버그일 수 있습니다"
 
-msgid "Please save project and restart the program. "
-msgstr "프로젝트를 저장하고 프로그램을 다시 시작하세요. "
+#, boost-format
+msgid "A fatal error occurred: \"%1%\""
+msgstr ""
+
+msgid "Please save project and restart the program."
+msgstr ""
 
 msgid "Processing G-Code from Previous file..."
 msgstr "이전 파일의 G코드를 처리하는 중..."
@@ -3572,9 +3640,8 @@ msgstr ""
 
 msgid ""
 "Alternate extra wall does't work well when ensure vertical shell thickness "
-"is set to All. "
+"is set to All."
 msgstr ""
-"세로 셸 두께가 모두로 설정된 경우 대체 여분의 벽이 제대로 작동하지 않습니다. "
 
 msgid ""
 "Change these settings automatically? \n"
@@ -4652,6 +4719,10 @@ msgstr "클립보드 붙여넣기"
 msgid "Delete selected"
 msgstr "선택된 항목 지우기"
 
+# 단축키
+msgid "Del"
+msgstr "Del"
+
 msgid "Deletes the current selection"
 msgstr "현재 선택 삭제"
 
@@ -4691,6 +4762,14 @@ msgstr "원근법 보기 사용"
 msgid "Use Orthogonal View"
 msgstr "평행 투영 보기 사용"
 
+msgid "Auto Perspective"
+msgstr ""
+
+msgid ""
+"Automatically switch between orthographic and perspective when changing from "
+"top/bottom/side views"
+msgstr ""
+
 msgid "Show &G-code Window"
 msgstr "G코드 창 표시 (&G)"
 
@@ -4721,8 +4800,8 @@ msgstr "돌출부 보기 (&O)"
 msgid "Show object overhang highlight in 3D scene"
 msgstr "3D 장면에서 개체 오버행 하이라이트 표시"
 
-msgid "Show Selected Outline (Experimental)"
-msgstr "선택된 개요 표시(실험적)"
+msgid "Show Selected Outline (beta)"
+msgstr ""
 
 msgid "Show outline around selected object in 3D scene"
 msgstr "3D 장면에서 선택한 오브젝트 주변에 윤곽선 표시"
@@ -4831,15 +4910,18 @@ msgid "&Help"
 msgstr "도움말 (&H)"
 
 #, c-format, boost-format
-msgid "A file exists with the same name: %s, do you want to override it."
-msgstr "같은 이름을 가진 파일이 존재합니다: %s, 덮어 쓰겠습니까."
+msgid "A file exists with the same name: %s, do you want to overwrite it?"
+msgstr ""
 
 #, c-format, boost-format
-msgid "A config exists with the same name: %s, do you want to override it."
-msgstr "같은 이름을 가진 설정이 존재합니다: %s, 덮어 쓰겠습니까."
+msgid "A config exists with the same name: %s, do you want to overwrite it?"
+msgstr ""
 
 msgid "Overwrite file"
 msgstr "파일 덮어쓰기"
+
+msgid "Overwrite config"
+msgstr ""
 
 msgid "Yes to All"
 msgstr "모두 예"
@@ -4951,8 +5033,8 @@ msgstr ""
 msgid "The printer has been logged out and cannot connect."
 msgstr "프린터가 로그아웃되어 연결할 수 없습니다."
 
-msgid "Stopped."
-msgstr "중지됨."
+msgid "Video Stopped."
+msgstr ""
 
 msgid "LAN Connection Failed (Failed to start liveview)"
 msgstr "LAN 연결 실패(라이브뷰 시작 실패)"
@@ -5014,10 +5096,6 @@ msgstr "프린터에서 파일 목록을 다시 로드합니다."
 msgid "No printers."
 msgstr "프린터 없음."
 
-#, c-format, boost-format
-msgid "Connect failed [%d]!"
-msgstr "[%d] 연결 실패!"
-
 msgid "Loading file list..."
 msgstr "파일 목록 로드 중..."
 
@@ -5027,9 +5105,6 @@ msgstr "파일 없음"
 msgid "Load failed"
 msgstr "로드 실패"
 
-msgid "Initialize failed (Device connection not ready)!"
-msgstr "초기화 실패 (장치 연결 준비 안 됨)!"
-
 msgid ""
 "Browsing file in SD card is not supported in current firmware. Please update "
 "the printer firmware."
@@ -5037,22 +5112,16 @@ msgstr ""
 "현재 펌웨어에서는 SD 카드의 파일 검색이 지원되지 않습니다. 프린터 펌웨어를 업"
 "데이트하세요."
 
-msgid "Initialize failed (Storage unavailable, insert SD card.)!"
+msgid ""
+"Please check if the SD card is inserted into the printer.\n"
+"If it still cannot be read, you can try formatting the SD card."
 msgstr ""
-"초기화에 실패했습니다(저장소를 사용할 수 없습니다. SD 카드를 삽입하세요.)!"
 
 msgid "LAN Connection Failed (Failed to view sdcard)"
 msgstr "LAN 연결 실패 (sdcard를 볼 수 없음)"
 
 msgid "Browsing file in SD card is not supported in LAN Only Mode."
 msgstr "LAN 전용 모드에서는 SD 카드의 파일 탐색이 지원되지 않습니다."
-
-#, c-format, boost-format
-msgid "Initialize failed (%s)!"
-msgstr "(%s) 초기화 실패!"
-
-msgid "Network unreachable"
-msgstr "네트워크에 연결할 수 없음"
 
 #, c-format, boost-format
 msgid "You are going to delete %u file from printer. Are you sure to continue?"
@@ -5483,6 +5552,25 @@ msgstr "최신 버전: "
 
 msgid "Not for now"
 msgstr "건너뛰기"
+
+msgid "Server Exception"
+msgstr ""
+
+msgid ""
+"The server is unable to respond. Please click the link below to check the "
+"server status."
+msgstr ""
+
+msgid ""
+"If the server is in a fault state, you can temporarily use offline printing "
+"or local network printing."
+msgstr ""
+
+msgid "How to use LAN only mode"
+msgstr ""
+
+msgid "Don't show this dialog again"
+msgstr ""
 
 msgid "3D Mouse disconnected."
 msgstr "3D 마우스가 분리됨."
@@ -6156,6 +6244,22 @@ msgstr ""
 "ElegooSlicer로 가져오는 데 실패했습니다. 파일을 다운로드하여 수동으로 가져오"
 "세요."
 
+msgid "INFO:"
+msgstr ""
+
+msgid ""
+"No accelerations provided for calibration. Use default acceleration value "
+msgstr ""
+
+msgid "mm/s²"
+msgstr "mm/s²"
+
+msgid "No speeds provided for calibration. Use default optimal speed "
+msgstr ""
+
+msgid "mm/s"
+msgstr "mm/s"
+
 msgid "Import SLA archive"
 msgstr "SLA 압축파일 가져오기"
 
@@ -6194,6 +6298,10 @@ msgstr "프로젝트로 열기"
 
 msgid "Import geometry only"
 msgstr "형상만 가져오기"
+
+msgid ""
+"This option can be changed later in preferences, under 'Load Behaviour'."
+msgstr ""
 
 msgid "Only one G-code file can be opened at the same time."
 msgstr "동시에 하나의 G코드 파일만 열 수 있습니다."
@@ -6362,12 +6470,10 @@ msgstr ""
 
 #, c-format, boost-format
 msgid ""
-"Plate% d: %s is not suggested to be used to print filament %s(%s). If you "
+"Plate %d: %s is not suggested to be used to print filament %s(%s). If you "
 "still want to do this printing, please set this filament's bed temperature "
-"to non zero."
+"to non-zero."
 msgstr ""
-"% d: %s플레이트는 %s(%s)필라멘트를 출력하는데 사용하지 않는 것이 좋습니다. "
-"이 출력을 계속하려면 이 필라멘트의 베드 온도를 0이 아닌 값으로 설정하세요."
 
 msgid "Switching the language requires application restart.\n"
 msgstr "언어를 전환하려면 애플리케이션을 다시 시작해야 합니다.\n"
@@ -6607,6 +6713,24 @@ msgstr "ElegooSlicer에 웹 링크 연결"
 msgid "Associate URLs to ElegooSlicer"
 msgstr "ElegooSlicer에 URL 연결"
 
+msgid "Load All"
+msgstr ""
+
+msgid "Ask When Relevant"
+msgstr ""
+
+msgid "Always Ask"
+msgstr ""
+
+msgid "Load Geometry Only"
+msgstr ""
+
+msgid "Load Behaviour"
+msgstr ""
+
+msgid "Should printer/filament/process settings be loaded when opening a .3mf?"
+msgstr ""
+
 msgid "Maximum recent projects"
 msgstr "최근 프로젝트 최대 표시"
 
@@ -6640,6 +6764,9 @@ msgstr "다크 모드"
 
 msgid "Enable Dark mode"
 msgstr "다크 모드 사용"
+
+msgid "Develop mode"
+msgstr "개발자 모드"
 
 msgid "Skip AMS blacklist check"
 msgstr "AMS 블랙리스트 확인 건너뛰기"
@@ -7156,6 +7283,9 @@ msgstr "장치 이름 수정"
 msgid "Bind with Pin Code"
 msgstr "핀 코드로 바인딩"
 
+msgid "Bind with Access Code"
+msgstr ""
+
 msgid "Send to Printer SD card"
 msgstr "프린터 SD 카드로 보내기"
 
@@ -7344,13 +7474,11 @@ msgid "Still print by object?"
 msgstr "아직도 개체별로 출력하시나요?"
 
 msgid ""
-"We have added an experimental style \"Tree Slim\" that features smaller "
-"support volume but weaker strength.\n"
-"We recommend using it with: 0 interface layers, 0 top distance, 2 walls."
+"When using support material for the support interface, We recommend the "
+"following settings:\n"
+"0 top z distance, 0 interface spacing, interlaced rectilinear pattern and "
+"disable independent support layer height"
 msgstr ""
-"지지대 부피는 작지만 강도는 약한 것이 특징인 실험적 모양 \"얇은 나무\"를 추가"
-"했습니다.\n"
-"접점 레이어 0, 상단 Z 거리 0, 벽 루프 2 와 함께 사용하는 것이 좋습니다."
 
 msgid ""
 "Change these settings automatically? \n"
@@ -7360,23 +7488,6 @@ msgstr ""
 "이 설정을 자동으로 변경하시겠습니까?\n"
 "예 - 이 설정을 자동으로 변경합니다\n"
 "아니요 - 이 설정을 변경하지 않습니다"
-
-msgid ""
-"For \"Tree Strong\" and \"Tree Hybrid\" styles, we recommend the following "
-"settings: at least 2 interface layers, at least 0.1mm top z distance or "
-"using support materials on interface."
-msgstr ""
-"\"강한 나무\" 및 \"혼합 나무\" 모양의 경우 최소 접점 레이어 2, 상단 Z 거리 "
-"0.1 또는 접점에서 지지대 재료를 사용하는 설정을 권장합니다."
-
-msgid ""
-"When using support material for the support interface, We recommend the "
-"following settings:\n"
-"0 top z distance, 0 interface spacing, concentric pattern and disable "
-"independent support layer height"
-msgstr ""
-"지지대 접점에 지지대 재료를 사용하는 경우 다음 설정을 권장합니다:\n"
-"상단 Z 거리 0, 접점 간격 0, 접점 패턴 동심원 및 독립적 지지대 높이 비활성화"
 
 msgid ""
 "Enabling this option will modify the model's shape. If your print requires "
@@ -7444,6 +7555,75 @@ msgstr ""
 "습니다\n"
 "빌드 플레이트의 빈 위치를 마우스 오른쪽 버튼으로 클릭하고 \"기본 모델 추가\"-"
 "> \"타임랩스 닦기 타워\"를 선택합니다."
+
+msgid ""
+"A copy of the current system preset will be created, which will be detached "
+"from the system preset."
+msgstr ""
+
+msgid ""
+"The current custom preset will be detached from the parent system preset."
+msgstr ""
+
+msgid "Modifications to the current profile will be saved."
+msgstr ""
+
+msgid ""
+"This action is not revertible.\n"
+"Do you want to proceed?"
+msgstr ""
+
+msgid "Detach preset"
+msgstr ""
+
+msgid "This is a default preset."
+msgstr ""
+
+msgid "This is a system preset."
+msgstr ""
+
+msgid "Current preset is inherited from the default preset."
+msgstr ""
+
+msgid "Current preset is inherited from"
+msgstr ""
+
+msgid "It can't be deleted or modified."
+msgstr ""
+
+msgid ""
+"Any modifications should be saved as a new preset inherited from this one."
+msgstr ""
+
+msgid "To do that please specify a new name for the preset."
+msgstr ""
+
+msgid "Additional information:"
+msgstr ""
+
+msgid "vendor"
+msgstr ""
+
+msgid "printer model"
+msgstr ""
+
+msgid "default print profile"
+msgstr ""
+
+msgid "default filament profile"
+msgstr ""
+
+msgid "default SLA material profile"
+msgstr ""
+
+msgid "default SLA print profile"
+msgstr ""
+
+msgid "full profile name"
+msgstr ""
+
+msgid "symbolic profile name"
+msgstr ""
 
 msgid "Line width"
 msgstr "선 너비"
@@ -7635,6 +7815,14 @@ msgstr ""
 "쿨 플레이트가 설치되었을 때의 베드 온도입니다. 값 0은 필라멘트가 텍스처드 쿨 "
 "플레이트에서 인쇄를 지원하지 않음을 의미합니다"
 
+msgid "Cool Plate (SuperTack)"
+msgstr ""
+
+msgid ""
+"Bed temperature when cool plate is installed. Value 0 means the filament "
+"does not support to print on the Cool Plate SuperTack"
+msgstr ""
+
 msgid "Volumetric speed limitation"
 msgstr "체적 속도 제한"
 
@@ -7698,6 +7886,12 @@ msgstr "래밍 설정"
 
 msgid "Toolchange parameters with multi extruder MM printers"
 msgstr "다중 재료 프린터의 다중 압출기 툴 체인지 매개변수"
+
+msgid "Dependencies"
+msgstr ""
+
+msgid "Profile dependencies"
+msgstr ""
 
 msgid "Printable space"
 msgstr "출력 가능 공간"
@@ -7808,8 +8002,8 @@ msgstr ""
 msgid "Layer height limits"
 msgstr "레이어 높이 한도"
 
-msgid "Lift Z Enforcement"
-msgstr "강제 Z 올리기"
+msgid "Z-Hop"
+msgstr ""
 
 msgid "Retraction when switching material"
 msgstr "재료 전환 시 후퇴"
@@ -7960,8 +8154,8 @@ msgstr ""
 "않은 변경 사항을 포함:"
 
 #, boost-format
-msgid "You have changed some settings of preset \"%1%\". "
-msgstr "사전 설정 \"%1%\"의 일부 설정을 변경했습니다. "
+msgid "You have changed some settings of preset \"%1%\"."
+msgstr ""
 
 msgid ""
 "\n"
@@ -8622,8 +8816,8 @@ msgstr "실시간 보기"
 msgid "Confirm and Update Nozzle"
 msgstr "노즐 확인 및 업데이트"
 
-msgid "LAN Connection Failed (Sending print file)"
-msgstr "LAN 연결 실패(출력 파일 전송 중)"
+msgid "Connect the printer using IP and access code"
+msgstr ""
 
 msgid ""
 "Step 1, please confirm ElegooSlicer and your printer are in the same LAN."
@@ -8642,17 +8836,38 @@ msgstr "IP"
 msgid "Access Code"
 msgstr "액세스 코드"
 
+msgid "Printer model"
+msgstr ""
+
+msgid "Printer name"
+msgstr ""
+
 msgid "Where to find your printer's IP and Access Code?"
 msgstr "프린터의 IP 및 액세스 코드는 어디에서 찾을 수 있습니까?"
 
-msgid "Step 3: Ping the IP address to check for packet loss and latency."
-msgstr "3단계: IP 주소를 ping하여 패킷 손실 및 대기 시간을 확인합니다."
+msgid "Connect"
+msgstr ""
 
-msgid "Test"
-msgstr "테스트"
+msgid "Manual Setup"
+msgstr ""
 
-msgid "IP and Access Code Verified! You may close the window"
-msgstr "IP 및 액세스 코드가 확인되었습니다. 창을 닫아도 됩니다"
+msgid "connecting..."
+msgstr ""
+
+msgid "Failed to connect to printer."
+msgstr ""
+
+msgid "Failed to publish login request."
+msgstr ""
+
+msgid "The printer has already been bound."
+msgstr ""
+
+msgid "The printer mode is incorrect, please switch to LAN Only."
+msgstr ""
+
+msgid "Connecting to printer... The dialog will close later"
+msgstr ""
 
 msgid "Connection failed, please double check IP and Access Code"
 msgstr "연결에 실패했습니다. IP와 액세스 코드를 다시 확인하세요"
@@ -9107,6 +9322,11 @@ msgstr ""
 "프라임 타워는 모든 개체가 동일한 수의 라프트 레이어 위에 출력되어야 합니다"
 
 msgid ""
+"The prime tower is only supported for multiple objects if they are printed "
+"with the same support_top_z_distance"
+msgstr ""
+
+msgid ""
 "The prime tower requires that all objects are sliced with the same layer "
 "heights."
 msgstr "프라임 타워는 모든 개체가 동일한 레이어 높이로 슬라이스되어야 합니다."
@@ -9117,11 +9337,22 @@ msgid ""
 msgstr ""
 "프라임 타워는 모든 개체의 가변 레이어 높이가 동일한 경우에만 지원됩니다"
 
+msgid ""
+"One or more object were assigned an extruder that the printer does not have."
+msgstr ""
+
 msgid "Too small line width"
 msgstr "선 너비가 너무 작습니다"
 
 msgid "Too large line width"
 msgstr "선 너비가 너무 큽니다"
+
+msgid ""
+"Printing with multiple extruders of differing nozzle diameters. If support "
+"is to be printed with the current filament (support_filament == 0 or "
+"support_interface_filament == 0), all nozzles have to be of the same "
+"diameter."
+msgstr ""
 
 msgid ""
 "The prime tower requires that support has the same layer height with object."
@@ -9244,6 +9475,9 @@ msgstr "G코드 생성 중"
 
 msgid "Failed processing of the filename_format template."
 msgstr "파일 이름 형식 템플릿 처리에 실패했습니다."
+
+msgid "Printer technology"
+msgstr ""
 
 msgid "Printable area"
 msgstr "출력 가능 영역"
@@ -9471,6 +9705,11 @@ msgstr "초기 레이어 베드 온도"
 
 msgid ""
 "Bed temperature of the initial layer. Value 0 means the filament does not "
+"support to print on the Cool Plate SuperTack"
+msgstr ""
+
+msgid ""
+"Bed temperature of the initial layer. Value 0 means the filament does not "
 "support to print on the Cool Plate"
 msgstr ""
 "초기 레이어의 베드 온도. 값 0은 필라멘트가 쿨 플레이트 출력을 지원하지 않음"
@@ -9610,45 +9849,47 @@ msgstr "상단 및 하단 표면"
 msgid "Nowhere"
 msgstr "아무데도"
 
-msgid "Force cooling for overhang and bridge"
-msgstr "돌출부 및 브릿지 강제 냉각"
+msgid "Force cooling for overhangs and bridges"
+msgstr ""
 
 msgid ""
-"Enable this option to optimize part cooling fan speed for overhang and "
-"bridge to get better cooling"
+"Enable this option to allow adjustment of the part cooling fan speed for "
+"specifically for overhangs, internal and external bridges. Setting the fan "
+"speed specifically for these features can improve overall print quality and "
+"reduce warping."
 msgstr ""
-"냉각 향상을 위해 돌출부 및 브릿지에 대한 출력물 냉각 팬 속도를 최적화하려면 "
-"이 옵션을 활성화합니다"
 
-msgid "Fan speed for overhang"
-msgstr "돌출부 팬 속도"
+msgid "Overhangs and external bridges fan speed"
+msgstr ""
 
 msgid ""
-"Force part cooling fan to be this speed when printing bridge or overhang "
-"wall which has large overhang degree. Forcing cooling for overhang and "
-"bridge can get better quality for these part"
+"Use this part cooling fan speed when printing bridges or overhang walls with "
+"an overhang threshold that exceeds the value set in the 'Overhangs cooling "
+"threshold' parameter above. Increasing the cooling specifically for "
+"overhangs and bridges can improve the overall print quality of these "
+"features.\n"
+"\n"
+"Please note, this fan speed is clamped on the lower end by the minimum fan "
+"speed threshold set above. It is also adjusted upwards up to the maximum fan "
+"speed threshold when the minimum layer time threshold is not met."
 msgstr ""
-"돌출부 정도가 큰 브릿지나 돌출부 벽을 출력할 때 출력물 냉각 팬을 이 속도로 강"
-"제합니다. 돌출부와 브릿지를 강제 냉각하면 이러한 부품의 품질이 향상될 수 있습"
-"니다"
 
-msgid "Cooling overhang threshold"
-msgstr "돌출부 냉각 임계값"
+msgid "Overhang cooling activation threshold"
+msgstr ""
 
-#, c-format
+#, no-c-format, no-boost-format
 msgid ""
-"Force cooling fan to be specific speed when overhang degree of printed part "
-"exceeds this value. Expressed as percentage which indicates how much width "
-"of the line without support from lower layer. 0% means forcing cooling for "
-"all outer wall no matter how much overhang degree"
+"When the overhang exceeds this specified threshold, force the cooling fan to "
+"run at the 'Overhang Fan Speed' set below. This threshold is expressed as a "
+"percentage, indicating the portion of each line's width that is unsupported "
+"by the layer beneath it. Setting this value to 0% forces the cooling fan to "
+"run for all outer walls, regardless of the overhang degree."
 msgstr ""
-"출력물의 돌출부 정도가 이 값을 초과하면 냉각 팬이 특정 속도가 되도록 강제합니"
-"다. 지지대가 없는 하단 레이어 선 너비의 백분율로 표시됩니다. 0은 돌출부 정도"
-"에 관계없이 모든 외벽을 강제 냉각한다는 의미입니다"
 
-msgid "Bridge infill direction"
-msgstr "브릿지 채우기 방향"
+msgid "External bridge infill direction"
+msgstr ""
 
+#, no-c-format, no-boost-format
 msgid ""
 "Bridging angle override. If left to zero, the bridging angle will be "
 "calculated automatically. Otherwise the provided angle will be used for "
@@ -9658,12 +9899,45 @@ msgstr ""
 "그렇지 않으면 제공된 각도가 외부 브릿지 출력에 사용됩니다. 0도에는 180°를 사"
 "용합니다."
 
-msgid "Bridge density"
-msgstr "브릿지 밀도"
-
-msgid "Density of external bridges. 100% means solid bridge. Default is 100%."
+msgid "Internal bridge infill direction"
 msgstr ""
-"외부 브릿지의 밀도. 100%는 단단한 브릿지를 의미합니다. 기본값은 100%입니다."
+
+msgid ""
+"Internal bridging angle override. If left to zero, the bridging angle will "
+"be calculated automatically. Otherwise the provided angle will be used for "
+"internal bridges. Use 180°for zero angle.\n"
+"\n"
+"It is recommended to leave it at 0 unless there is a specific model need not "
+"to."
+msgstr ""
+
+msgid "External bridge density"
+msgstr ""
+
+msgid ""
+"Controls the density (spacing) of external bridge lines. 100% means solid "
+"bridge. Default is 100%.\n"
+"\n"
+"Lower density external bridges can help improve reliability as there is more "
+"space for air to circulate around the extruded bridge, improving its cooling "
+"speed."
+msgstr ""
+
+msgid "Internal bridge density"
+msgstr ""
+
+msgid ""
+"Controls the density (spacing) of internal bridge lines. 100% means solid "
+"bridge. Default is 100%.\n"
+"\n"
+" Lower density internal bridges can help reduce top surface pillowing and "
+"improve internal bridge reliability as there is more space for air to "
+"circulate around the extruded bridge, improving its cooling speed. \n"
+"\n"
+"This option works particularly well when combined with the second internal "
+"bridge over infill option, further improving internal bridging structure "
+"before solid infill is extruded."
+msgstr ""
 
 msgid "Bridge flow ratio"
 msgstr "브릿지 유량 비율"
@@ -9735,13 +10009,10 @@ msgstr "정밀한 벽"
 
 msgid ""
 "Improve shell precision by adjusting outer wall spacing. This also improves "
-"layer consistency.\n"
-"Note: This setting will only take effect if the wall sequence is configured "
-"to Inner-Outer"
+"layer consistency."
 msgstr ""
 "외벽 간격을 조정하여 쉘 정밀도를 향상시킵니다. 이는 또한 레이어 일관성을 향상"
-"시킵니다.\n"
-"참고: 이 설정은 벽 시퀀스가 내부-외부로 구성된 경우에만 적용됩니다"
+"시킵니다."
 
 msgid "Only one wall on top surfaces"
 msgstr "상단 표면에 단일 벽 생성"
@@ -9789,9 +10060,8 @@ msgstr "돌출부 추가 둘레"
 
 msgid ""
 "Create additional perimeter paths over steep overhangs and areas where "
-"bridges cannot be anchored. "
+"bridges cannot be anchored."
 msgstr ""
-"가파른 돌출부와 브릿지를 고정할 수 없는 지역 위에 추가 둘레 경로를 만듭니다. "
 
 msgid "Reverse on even"
 msgstr "짝수에 반전"
@@ -9947,9 +10217,6 @@ msgstr ""
 "성화된 경우 브릿지의 일부이든 오버행이든 상관없이 오버행 벽의 인쇄 속도는 "
 "13% 미만으로 지원됩니다."
 
-msgid "mm/s"
-msgstr "mm/s"
-
 msgid "Internal"
 msgstr "내부"
 
@@ -9975,6 +10242,9 @@ msgid ""
 msgstr ""
 "모델의 외부 그리고/또는 내부에서 브림의 생성을 제어합니다. 자동은 브림너비가 "
 "자동으로 분석 및 계산됨을 의미합니다."
+
+msgid "Painted"
+msgstr ""
 
 msgid "Brim-object gap"
 msgstr "브림-개체 간격"
@@ -10025,11 +10295,23 @@ msgstr "상향 호환 장치"
 msgid "Compatible machine condition"
 msgstr "호환 장치 상태"
 
+msgid ""
+"A boolean expression using the configuration values of an active printer "
+"profile. If this expression evaluates to true, this profile is considered "
+"compatible with the active printer profile."
+msgstr ""
+
 msgid "Compatible process profiles"
 msgstr "호환 프로세스 사전설정"
 
 msgid "Compatible process profiles condition"
 msgstr "호환 프로세스 사전설정 상태"
+
+msgid ""
+"A boolean expression using the configuration values of an active print "
+"profile. If this expression evaluates to true, this profile is considered "
+"compatible with the active print profile."
+msgstr ""
 
 msgid "Print sequence, layer by layer or object by object"
 msgstr "출력순서, 레이어별 또는 개체별"
@@ -10069,9 +10351,6 @@ msgid ""
 "The default acceleration of both normal printing and travel except initial "
 "layer"
 msgstr "초기 레이어를 제외한 모든 일반 출력 및 이동의 기본 가속"
-
-msgid "mm/s²"
-msgstr "mm/s²"
 
 msgid "Default filament profile"
 msgstr "기본 필라멘트 사전설정"
@@ -10124,8 +10403,8 @@ msgstr ""
 "지지대를 크게 만드는 전체 브릿지 영역에 지지대를 사용하지 않습니다. 브릿지는 "
 "일반적으로 매우 길지 않은 경우 지지대 없이 직접 출력할 수 있습니다"
 
-msgid "Thick bridges"
-msgstr "두꺼운 브릿지"
+msgid "Thick external bridges"
+msgstr ""
 
 msgid ""
 "If enabled, bridges are more reliable, can bridge longer distances, but may "
@@ -10148,60 +10427,87 @@ msgstr ""
 "기능을 켜두세요. 하지만 다음과 같은 경우에는 끄는 것을 고려해 보세요.큰 노즐"
 "을 사용합니다."
 
-msgid "Filter out small internal bridges (beta)"
-msgstr "작은 내부 브릿지 필터링(베타)"
+msgid "Extra bridge layers (beta)"
+msgstr ""
 
 msgid ""
-"This option can help reducing pillowing on top surfaces in heavily slanted "
-"or curved models.\n"
+"This option enables the generation of an extra bridge layer over internal "
+"and/or external bridges.\n"
+"\n"
+"Extra bridge layers help improve bridge appearance and reliability, as the "
+"solid infill is better supported. This is especially useful in fast "
+"printers, where the bridge and solid infill speeds vary greatly. The extra "
+"bridge layer results in reduced pillowing on top surfaces, as well as "
+"reduced separation of the external bridge layer from its surrounding "
+"perimeters.\n"
+"\n"
+"It is generally recommended to set this to at least 'External bridge only', "
+"unless specific issues with the sliced model are found.\n"
+"\n"
+"Options:\n"
+"1. Disabled - does not generate second bridge layers. This is the default "
+"and is set for compatibility purposes.\n"
+"2. External bridge only - generates second bridge layers for external-facing "
+"bridges only. Please note that small bridges that are shorter or narrower "
+"than the set number of perimeters will be skipped as they would not benefit "
+"from a second bridge layer. If generated, the second bridge layer will be "
+"extruded parallel to the first bridge layer to reinforce the bridge "
+"strength.\n"
+"3. Internal bridge only - generates second bridge layers for internal "
+"bridges over sparse infill only. Please note that the internal bridges count "
+"towards the top shell layer count of your model. The second internal bridge "
+"layer will be extruded as close to perpendicular to the first as possible. "
+"If multiple regions in the same island, with varying bridge angles are "
+"present, the last region of that island will be selected as the angle "
+"reference.\n"
+"4. Apply to all - generates second bridge layers for both internal and "
+"external-facing bridges\n"
+msgstr ""
+
+msgid "Disabled"
+msgstr "비활성"
+
+msgid "External bridge only"
+msgstr ""
+
+msgid "Internal bridge only"
+msgstr ""
+
+msgid "Apply to all"
+msgstr ""
+
+msgid "Filter out small internal bridges"
+msgstr ""
+
+msgid ""
+"This option can help reduce pillowing on top surfaces in heavily slanted or "
+"curved models.\n"
 "\n"
 "By default, small internal bridges are filtered out and the internal solid "
 "infill is printed directly over the sparse infill. This works well in most "
 "cases, speeding up printing without too much compromise on top surface "
 "quality. \n"
 "\n"
-"However, in heavily slanted or curved models especially where too low sparse "
-"infill density is used, this may result in curling of the unsupported solid "
-"infill, causing pillowing.\n"
+"However, in heavily slanted or curved models, especially where too low a "
+"sparse infill density is used, this may result in curling of the unsupported "
+"solid infill, causing pillowing.\n"
 "\n"
-"Disabling this option will print internal bridge layer over slightly "
-"unsupported internal solid infill. The options below control the amount of "
-"filtering, i.e. the amount of internal bridges created.\n"
+"Enabling limited filtering or no filtering will print internal bridge layer "
+"over slightly unsupported internal solid infill. The options below control "
+"the sensitivity of the filtering, i.e. they control where internal bridges "
+"are created.\n"
 "\n"
-"Filter - enable this option. This is the default behavior and works well in "
-"most cases.\n"
+"1. Filter - enables this option. This is the default behavior and works well "
+"in most cases.\n"
 "\n"
-"Limited filtering - creates internal bridges on heavily slanted surfaces, "
-"while avoiding creating unnecessary internal bridges. This works well for "
-"most difficult models.\n"
+"2. Limited filtering - creates internal bridges on heavily slanted surfaces "
+"while avoiding unnecessary bridges. This works well for most difficult "
+"models.\n"
 "\n"
-"No filtering - creates internal bridges on every potential internal "
-"overhang. This option is useful for heavily slanted top surface models. "
-"However, in most cases it creates too many unnecessary bridges."
+"3. No filtering - creates internal bridges on every potential internal "
+"overhang. This option is useful for heavily slanted top surface models; "
+"however, in most cases, it creates too many unnecessary bridges."
 msgstr ""
-"이 옵션은 심하게 기울어지거나 곡선이 있는 모델의 상단 표면이 눌리는 현상을 줄"
-"이는 데 도움이 될 수 있습니다.\n"
-"\n"
-"기본적으로 작은 내부 브릿지는 필터링되고 내부 솔리드 채우기는 희박한 채우기 "
-"위에 직접 인쇄됩니다. 이는 대부분의 경우에 잘 작동하여 상단 표면 품질을 크게 "
-"저하시키지 않고 인쇄 속도를 높입니다. \n"
-"\n"
-"그러나 특히 너무 낮은 희박 채우기 밀도가 사용되는 심하게 기울어지거나 곡선 모"
-"델에서는 지지되지 않는 고체 채우기가 말려 베개 현상이 발생할 수 있습니다.\n"
-"\n"
-"이 옵션을 비활성화하면 약간 지원되지 않는 내부 솔리드 채우기 위에 내부 브릿"
-"지 레이어가 인쇄됩니다. 아래 옵션은 필터링 양, 즉 생성된 내부 브릿지 양을 제"
-"어합니다.\n"
-"\n"
-"필터 - 이 옵션을 활성화합니다. 이는 기본 동작이며 대부분의 경우 잘 작동합니"
-"다.\n"
-"\n"
-"제한된 필터링 - 불필요한 내부 브릿지 생성을 방지하면서 심하게 기울어진 표면"
-"에 내부 브릿지를 생성합니다. 이는 대부분의 어려운 모델에 적합합니다.\n"
-"\n"
-"필터링 없음 - 잠재적인 모든 내부 돌출부에 내부 브릿지를 생성합니다. 이 옵션"
-"은 심하게 기울어진 상단 표면 모델에 유용합니다. 그러나 대부분의 경우 불필요"
-"한 브릿지가 너무 많이 생성됩니다."
 
 msgid "Filter"
 msgstr "필터"
@@ -11129,6 +11435,9 @@ msgstr "드문 내부 채우기의 선 패턴"
 msgid "Grid"
 msgstr "격자"
 
+msgid "2D Lattice"
+msgstr ""
+
 msgid "Line"
 msgstr "선"
 
@@ -11158,6 +11467,25 @@ msgstr "번개"
 
 msgid "Cross Hatch"
 msgstr "크로스 해치"
+
+msgid "Quarter Cubic"
+msgstr ""
+
+msgid "Lattice angle 1"
+msgstr ""
+
+msgid ""
+"The angle of the first set of 2D lattice elements in the Z direction. Zero "
+"is vertical."
+msgstr ""
+
+msgid "Lattice angle 2"
+msgstr ""
+
+msgid ""
+"The angle of the second set of 2D lattice elements in the Z direction. Zero "
+"is vertical."
+msgstr ""
 
 msgid "Sparse infill anchor length"
 msgstr "드문 채우기 고정점 길이"
@@ -11367,15 +11695,25 @@ msgid "Support interface fan speed"
 msgstr "지지대 접점 팬 속도"
 
 msgid ""
-"This fan speed is enforced during all support interfaces, to be able to "
-"weaken their bonding with a high fan speed.\n"
-"Set to -1 to disable this override.\n"
-"Can only be overridden by disable_fan_first_layers."
+"This part cooling fan speed is applied when printing support interfaces. "
+"Setting this parameter to a higher than regular speed  reduces the layer "
+"binding strength between supports and the supported part, making them easier "
+"to separate.\n"
+"Set to -1 to disable it.\n"
+"This setting is overridden by disable_fan_first_layers."
 msgstr ""
-"이 설정값은 높은 팬 속도로 접점의 결합을 약화시킬 수 있도록 모든 지지대 접점"
-"(Support interface)에 적용됩니다.\n"
-"사용하지 않으려면 -1로 설정합니다.\n"
-"disable_fan_first_layers로만 재정의할 수 있습니다."
+
+msgid "Internal bridges fan speed"
+msgstr ""
+
+msgid ""
+"The part cooling fan speed used for all internal bridges. Set to -1 to use "
+"the overhang fan speed settings instead.\n"
+"\n"
+"Reducing the internal bridges fan speed, compared to your regular fan speed, "
+"can help reduce part warping due to excessive cooling applied over a large "
+"surface for a prolonged period of time."
+msgstr ""
 
 msgid ""
 "Randomly jitter while printing the wall, so that the surface has a rough "
@@ -11415,6 +11753,59 @@ msgstr "첫 번째 레이어에 퍼지 스킨 적용"
 msgid "Whether to apply fuzzy skin on the first layer"
 msgstr "첫 번째 레이어에 퍼지 스킨을 적용할지 여부"
 
+msgid "Fuzzy skin noise type"
+msgstr ""
+
+msgid ""
+"Noise type to use for fuzzy skin generation.\n"
+"Classic: Classic uniform random noise.\n"
+"Perlin: Perlin noise, which gives a more consistent texture.\n"
+"Billow: Similar to perlin noise, but clumpier.\n"
+"Ridged Multifractal: Ridged noise with sharp, jagged features. Creates "
+"marble-like textures.\n"
+"Voronoi: Divides the surface into voronoi cells, and displaces each one by a "
+"random amount. Creates a patchwork texture."
+msgstr ""
+
+msgid "Classic"
+msgstr "클래식"
+
+msgid "Perlin"
+msgstr ""
+
+msgid "Billow"
+msgstr ""
+
+msgid "Ridged Multifractal"
+msgstr ""
+
+msgid "Voronoi"
+msgstr ""
+
+msgid "Fuzzy skin feature size"
+msgstr ""
+
+msgid ""
+"The base size of the coherent noise features, in mm. Higher values will "
+"result in larger features."
+msgstr ""
+
+msgid "Fuzzy Skin Noise Octaves"
+msgstr ""
+
+msgid ""
+"The number of octaves of coherent noise to use. Higher values increase the "
+"detail of the noise, but also increase computation time."
+msgstr ""
+
+msgid "Fuzzy skin noise persistence"
+msgstr ""
+
+msgid ""
+"The decay rate for higher octaves of the coherent noise. Lower values will "
+"result in smoother noise."
+msgstr ""
+
 msgid "Filter out tiny gaps"
 msgstr "작은 간격 필터링"
 
@@ -11424,11 +11815,8 @@ msgstr "레이어와 윤곽선"
 msgid ""
 "Don't print gap fill with a length is smaller than the threshold specified "
 "(in mm). This setting applies to top, bottom and solid infill and, if using "
-"the classic perimeter generator, to wall gap fill. "
+"the classic perimeter generator, to wall gap fill."
 msgstr ""
-"지정된 임계값(mm 단위)보다 길이가 작은 간격 채우기를 인쇄하지 마십시오. 이 설"
-"정은 상단, 하단 및 솔리드 채우기에 적용되며, 클래식 주변 생성기를 사용하는 경"
-"우 벽 간격 채우기에 적용됩니다. "
 
 msgid ""
 "Speed of gap infill. Gap usually has irregular line width and should be "
@@ -11754,6 +12142,12 @@ msgstr ""
 msgid "Speed of internal sparse infill"
 msgstr "내부 드문 채우기 속도"
 
+msgid "Inherits profile"
+msgstr ""
+
+msgid "Name of parent profile"
+msgstr ""
+
 msgid "Interface shells"
 msgstr "접점 쉘"
 
@@ -11880,6 +12274,14 @@ msgstr "다림질 선 간격"
 
 msgid "The distance between the lines of ironing"
 msgstr "다림질 선 간격"
+
+msgid "Ironing inset"
+msgstr ""
+
+msgid ""
+"The distance to keep from the edges. A value of 0 sets this to half of the "
+"nozzle diameter"
+msgstr ""
 
 msgid "Ironing speed"
 msgstr "다림질 속도"
@@ -12140,15 +12542,18 @@ msgid ""
 "Default value of 3 works well for most cases. If your printer is stuttering, "
 "increase this value to reduce the number of adjustments made\n"
 "\n"
-"Allowed values: 1-5"
+"Allowed values: 0.5-5"
 msgstr ""
-"값이 낮을수록 압출 속도 전환이 더 유연해집니다. 하지만 G코드 파일이 상당히 커"
-"지고 프린터가 처리해야 할 연산이 더 많아집니다.\n"
-"\n"
-"기본값인 3은 대부분의 경우에 적합합니다. 프린터가 끊기는 경우 이 값을 늘려 조"
-"정 횟수를 줄이십시오.\n"
-"\n"
-"허용되는 값: 1-5"
+
+msgid "Apply only on external features"
+msgstr ""
+
+msgid ""
+"Applies extrusion rate smoothing only on external perimeters and overhangs. "
+"This can help reduce artefacts due to sharp speed transitions on externally "
+"visible overhangs without impacting the print speed of features that will "
+"not be visible to the user."
+msgstr ""
 
 msgid "Minimum speed for part cooling fan"
 msgstr "출력물 냉각 팬의 최소 속도"
@@ -12179,12 +12584,10 @@ msgid "Min print speed"
 msgstr "최소 출력 속도"
 
 msgid ""
-"The minimum printing speed that the printer will slow down to to attempt to "
-"maintain the minimum layer time above, when slow down for better layer "
-"cooling is enabled."
+"The minimum print speed to which the printer slows down to maintain the "
+"minimum layer time defined above when the slowdown for better layer cooling "
+"is enabled."
 msgstr ""
-"더 나은 레이어 냉각을 위해 속도를 낮추는 경우 위의 최소 레이어 시간을 유지하"
-"기 위해 프린터가 느려지는 최소 출력 속도입니다."
 
 msgid "Diameter of nozzle"
 msgstr "노즐 직경"
@@ -12462,6 +12865,14 @@ msgstr "레이어 변경 시 후퇴"
 msgid "Force a retraction when changes layer"
 msgstr "레이어 변경 시 강제로 후퇴를 실행합니다"
 
+msgid "Retract on top layer"
+msgstr ""
+
+msgid ""
+"Force a retraction on top layer. Disabling could prevent clog on very slow "
+"patterns with small movements, like Hilbert curve"
+msgstr ""
+
 msgid "Retraction Length"
 msgstr "후퇴 길이"
 
@@ -12472,8 +12883,8 @@ msgstr ""
 "긴 이동 중에 필라멘트가 흘러나오는 것을 방지하기 위해 압출기의 일정량의 재료"
 "를 뒤로 당깁니다. 후퇴를 비활성화하려면 0을 설정하세요"
 
-msgid "Long retraction when cut(experimental)"
-msgstr "절단 시 긴 후퇴(실험적)"
+msgid "Long retraction when cut(beta)"
+msgstr ""
 
 msgid ""
 "Experimental feature.Retracting and cutting off the filament at a longer "
@@ -12493,8 +12904,8 @@ msgid ""
 "change"
 msgstr "실험적 특징.필라멘트 교환시 절단 전 후퇴길이"
 
-msgid "Z hop when retract"
-msgstr "후퇴 시 Z 올리기"
+msgid "Z-hop height"
+msgstr ""
 
 msgid ""
 "Whenever the retraction is done, the nozzle is lifted a little to create "
@@ -12524,6 +12935,9 @@ msgid ""
 msgstr ""
 "이 값이 양수인 경우 Z 올리기는 Z가 매개변수 \"Z 올리기 하한 경계\"보다 높고 "
 "이 값보다 낮을 때만 적용됩니다"
+
+msgid "Z-hop type"
+msgstr ""
 
 msgid "Z hop type"
 msgstr "Z 올리기 유형"
@@ -12874,6 +13288,15 @@ msgstr ""
 "얼마나 많은 스커트 레이어를 생성할지 결정합니다. 일반적으로 한개의 레이어를 "
 "사용합니다"
 
+msgid "Single loop draft shield"
+msgstr ""
+
+msgid ""
+"Limits the draft shield loops to one wall after the first layer. This is "
+"useful, on occasion, to conserve filament but may cause the draft shield to "
+"warp / crack."
+msgstr ""
+
 msgid "Draft shield"
 msgstr "드래프트 쉴드"
 
@@ -12897,9 +13320,6 @@ msgstr ""
 "참고: 드래프트 쉴드가 활성화되면 스커트는 개체로부터 스커트 거리에 인쇄됩니"
 "다. 따라서 챙이 활성화된 경우 챙과 교차할 수 있습니다. 이를 방지하려면 스커"
 "트 거리 값을 늘리십시오.\n"
-
-msgid "Disabled"
-msgstr "비활성"
 
 msgid "Enabled"
 msgstr "활성화"
@@ -12940,15 +13360,8 @@ msgid ""
 "Using a non zero value is useful if the printer is set up to print without a "
 "prime line.\n"
 "Final number of loops is not taling into account whli arranging or "
-"validating objects distance. Increase loop number in such case. "
+"validating objects distance. Increase loop number in such case."
 msgstr ""
-"스커트를 인쇄할 때 최소 필라멘트 압출 길이(mm)입니다. 0은 이 기능이 비활성화"
-"되었음을 의미합니다.\n"
-"\n"
-"프린터가 프라임 라인 없이 인쇄하도록 설정된 경우 0이 아닌 값을 사용하는 것이 "
-"유용합니다.\n"
-"루프의 최종 수는 객체 거리를 정렬하거나 검증하는 동안 고려되지 않습니다. 그러"
-"한 경우에는 루프 수를 늘리십시오. "
 
 msgid ""
 "The printing speed in exported gcode will be slowed down, when the estimated "
@@ -13001,12 +13414,32 @@ msgstr ""
 msgid "Max XY Smoothing"
 msgstr "최대 XY 스무딩"
 
+#, no-c-format, no-boost-format
 msgid ""
-"Maximum distance to move points in XY to try to achieve a smooth spiralIf "
+"Maximum distance to move points in XY to try to achieve a smooth spiral. If "
 "expressed as a %, it will be computed over nozzle diameter"
 msgstr ""
-"부드러운 나선형을 얻기 위해 점을 XY로 이동하는 최대 거리 %로 표시할 경우 노"
-"즐 직경에 대해 계산됩니다"
+
+msgid "Spiral starting flow ratio"
+msgstr ""
+
+#, no-c-format, no-boost-format
+msgid ""
+"Sets the starting flow ratio while transitioning from the last bottom layer "
+"to the spiral. Normally the spiral transition scales the flow ratio from 0% "
+"to 100% during the first loop which can in some cases lead to under "
+"extrusion at the start of the spiral."
+msgstr ""
+
+msgid "Spiral finishing flow ratio"
+msgstr ""
+
+#, no-c-format, no-boost-format
+msgid ""
+"Sets the finishing flow ratio while ending the spiral. Normally the spiral "
+"transition scales the flow ratio from 100% to 0% during the last loop which "
+"can in some cases lead to under extrusion at the end of the spiral."
+msgstr ""
 
 msgid ""
 "If smooth or traditional mode is selected, a timelapse video will be "
@@ -13177,30 +13610,34 @@ msgid "Enable support generation."
 msgstr "지지대 생성을 활성화 합니다."
 
 msgid ""
-"normal(auto) and tree(auto) is used to generate support automatically. If "
-"normal(manual) or tree(manual) is selected, only support enforcers are "
+"Normal (auto) and Tree (auto) is used to generate support automatically. If "
+"Normal (manual) or Tree (manual) is selected, only support enforcers are "
 "generated"
 msgstr ""
-"일반(자동) 및 나무(자동)은 지지대를 자동으로 생성합니다. 일반(수동) 또는 나무"
-"(수동) 선택시에는 강제된 지지대만 생성됩니다"
 
-msgid "normal(auto)"
-msgstr "일반(자동)"
+msgid "Normal (auto)"
+msgstr ""
 
-msgid "tree(auto)"
-msgstr "나무(자동)"
+msgid "Tree (auto)"
+msgstr ""
 
-msgid "normal(manual)"
-msgstr "일반(수동)"
+msgid "Normal (manual)"
+msgstr ""
 
-msgid "tree(manual)"
-msgstr "나무(수동)"
+msgid "Tree (manual)"
+msgstr ""
 
 msgid "Support/object xy distance"
 msgstr "지지대/개체 XY 거리"
 
 msgid "XY separation between an object and its support"
 msgstr "개체와 지지대를 분리하는 XY 간격"
+
+msgid "Support/object first layer gap"
+msgstr ""
+
+msgid "XY separation between an object and its support at the first layer."
+msgstr ""
 
 msgid "Pattern angle"
 msgstr "패턴 각도"
@@ -13369,8 +13806,8 @@ msgstr ""
 "은 재료를 절약합니다(기본값 유기체). 반면 혼합 모양은 크고 평평한 돌출부 아래"
 "에 일반 지지대와 유사한 구조를 만듭니다."
 
-msgid "Default (Grid/Organic"
-msgstr "기본값(그리드/유기적"
+msgid "Default (Grid/Organic)"
+msgstr ""
 
 msgid "Snug"
 msgstr "맞춤"
@@ -13406,6 +13843,15 @@ msgid ""
 "Support will be generated for overhangs whose slope angle is below the "
 "threshold."
 msgstr "경사각이 임계값 미만인 돌출부에 지지대가 생성됩니다."
+
+msgid "Threshold overlap"
+msgstr ""
+
+msgid ""
+"If threshold angle is zero, support will be generated for overhangs whose "
+"overlap is below the threshold. The smaller this value is, the steeper the "
+"overhang that can be printed without support."
+msgstr ""
 
 msgid "Tree support branch angle"
 msgstr "나무 지지대 가지 각도"
@@ -13507,23 +13953,13 @@ msgstr ""
 "께를 가지는 가지가 됩니다. 약간의 각도는 유기체 지지대의 안정성을 증가시킬 "
 "수 있습니다."
 
-msgid "Branch Diameter with double walls"
-msgstr "이중 벽이 있는 가지 직경"
-
-#. TRN PrintSettings: "Organic supports" > "Branch Diameter"
-msgid ""
-"Branches with area larger than the area of a circle of this diameter will be "
-"printed with double walls for stability. Set this value to zero for no "
-"double walls."
-msgstr ""
-"이 직경의 원 면적보다 더 큰 면적을 가진 가지는 안정성을 위해 이중벽으로 출력"
-"됩니다. 이중벽을 허용하지 않으려면 이 값을 0으로 설정합니다."
-
 msgid "Support wall loops"
 msgstr "지지대 벽 루프"
 
-msgid "This setting specify the count of walls around support"
-msgstr "이 설정은 지지대 주변의 벽 수를 지정합니다"
+msgid ""
+"This setting specifies the count of support walls in the range of [0,2]. 0 "
+"means auto."
+msgstr ""
 
 msgid "Tree support with infill"
 msgstr "채우기가 있는 나무 지지대"
@@ -13774,6 +14210,36 @@ msgstr ""
 "\n"
 "와이프 타워 외부 경계의 경우 이 설정에 관계없이 내부 경계 속도가 사용됩니다."
 
+msgid "Wall type"
+msgstr ""
+
+msgid ""
+"Wipe tower outer wall type.\n"
+"1. Rectangle: The default wall type, a rectangle with fixed width and "
+"height.\n"
+"2. Cone: A cone with a fillet at the bottom to help stabilize the wipe "
+"tower.\n"
+"3. Rib: Adds four ribs to the tower wall for enhanced stability."
+msgstr ""
+
+msgid "Extra rib length"
+msgstr ""
+
+msgid ""
+"Positive values can increase the size of the rib wall, while negative values "
+"can reduce the size.However, the size of the rib wall can not be smaller "
+"than that determined by the cleaning volume."
+msgstr ""
+
+msgid "Rib width"
+msgstr ""
+
+msgid "Fillet wall"
+msgstr ""
+
+msgid "The wall of prime tower will fillet."
+msgstr ""
+
 msgid ""
 "The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
 "use the one that is available (non-soluble would be preferred)."
@@ -13960,9 +14426,6 @@ msgstr ""
 "클래식 벽 생성기는 돌출 폭이 일정한 벽을 생성하며 매우 얇은 영역에는 간격 채"
 "움이 사용됩니다. 아라크네 엔진은 압출 폭이 가변적인 벽을 생성합니다."
 
-msgid "Classic"
-msgstr "클래식"
-
 msgid "Arachne"
 msgstr "아라크네"
 
@@ -14105,17 +14568,124 @@ msgstr "너무 넓은 선 너비 "
 msgid " not in range "
 msgstr " 범위를 벗어남 "
 
+msgid "Export 3MF"
+msgstr "3MF 내보내기"
+
+msgid "Export project as 3MF."
+msgstr "프로젝트를 3MF로 내보내기."
+
+msgid "Export slicing data"
+msgstr "슬라이싱 데이터 내보내기"
+
+msgid "Export slicing data to a folder."
+msgstr "슬라이싱 데이터 폴더로 내보내기."
+
+msgid "Load slicing data"
+msgstr "슬라이싱 데이터 로드"
+
+msgid "Load cached slicing data from directory"
+msgstr "디렉토리에 캐시된 슬라이싱 데이터 로드"
+
+msgid "Export STL"
+msgstr "STL 내보내기"
+
+msgid "Export the objects as single STL."
+msgstr ""
+
+msgid "Export multiple STLs"
+msgstr ""
+
+msgid "Export the objects as multiple STLs to directory"
+msgstr ""
+
+msgid "Slice"
+msgstr "슬라이스"
+
+msgid "Slice the plates: 0-all plates, i-plate i, others-invalid"
+msgstr "플레이트 슬라이스: 0-모든 플레이트, i-플레이트 i, 기타-잘못됨"
+
+msgid "Show command help."
+msgstr "명령 도움말을 표시합니다."
+
+msgid "UpToDate"
+msgstr "최신 정보"
+
+msgid "Update the configs values of 3mf to latest."
+msgstr "3mf의 구성 값을 최신으로 업데이트합니다."
+
+msgid "downward machines check"
+msgstr ""
+
+msgid ""
+"check whether current machine downward compatible with the machines in the "
+"list"
+msgstr ""
+
+msgid "Load default filaments"
+msgstr "기본 필라멘트 로드"
+
+msgid "Load first filament as default for those not loaded"
+msgstr "로드되지 않은 경우 기본값으로 첫 번째 필라멘트 로드"
+
 msgid "Minimum save"
 msgstr "최소 크기로 저장"
 
 msgid "export 3mf with minimum size."
 msgstr "최소 크기로 3mf를 내보냅니다."
 
+msgid "mtcpp"
+msgstr "mtcpp"
+
+msgid "max triangle count per plate for slicing."
+msgstr "슬라이싱을 위한 플레이트당 최대 삼각형 개수."
+
+msgid "mstpp"
+msgstr "mstpp"
+
+msgid "max slicing time per plate in seconds."
+msgstr "플레이트당 최대 슬라이싱 시간(초)"
+
 msgid "No check"
 msgstr "확인 안 함"
 
 msgid "Do not run any validity checks, such as gcode path conflicts check."
 msgstr "G코드 경로 충돌 검사와 같은 유효성 검사를 실행하지 마십시오."
+
+msgid "Normative check"
+msgstr "표준 검사"
+
+msgid "Check the normative items."
+msgstr "표준 항목을 확인합니다."
+
+msgid "Output Model Info"
+msgstr "모델 정보 출력"
+
+msgid "Output the model's information."
+msgstr "모델 정보를 출력합니다."
+
+msgid "Export Settings"
+msgstr "설정 내보내기"
+
+msgid "Export settings to a file."
+msgstr "설정을 파일로 내보내기."
+
+msgid "Send progress to pipe"
+msgstr "진행 상황을 파이프로 보내기"
+
+msgid "Send progress to pipe."
+msgstr "진행 상황을 파이프로 보내기."
+
+msgid "Arrange Options"
+msgstr "정렬 옵션"
+
+msgid "Arrange options: 0-disable, 1-enable, others-auto"
+msgstr "정렬 옵션: 0-사용 안 함, 1-사용, 기타-자동"
+
+msgid "Repetions count"
+msgstr "반복 횟수"
+
+msgid "Repetions count of the whole model"
+msgstr "전체 모델의 반복 횟수"
 
 msgid "Ensure on bed"
 msgstr "베드에서 확인"
@@ -14125,6 +14695,17 @@ msgid ""
 msgstr ""
 "개체의 일부가 베드 아래에 있을 때 베드 위로 개체를 들어올립니다. 기본적으로 "
 "비활성화됩니다"
+
+msgid ""
+"Arrange the supplied models in a plate and merge them in a single model in "
+"order to perform actions once."
+msgstr ""
+
+msgid "Convert Unit"
+msgstr "단위 변환"
+
+msgid "Convert the units of model"
+msgstr "모델의 단위를 변환"
 
 msgid "Orient Options"
 msgstr "방향 최적화 옵션"
@@ -14141,6 +14722,66 @@ msgstr "Y를 중심으로 회전"
 msgid "Rotation angle around the Y axis in degrees."
 msgstr "Y축을 중심으로 한 회전 각도입니다."
 
+msgid "Scale the model by a float factor"
+msgstr "부동 소수점 계수로 모델 크기 조정"
+
+msgid "Load General Settings"
+msgstr "일반 설정 로드"
+
+msgid "Load process/machine settings from the specified file"
+msgstr "지정된 파일에서 프로세스/기계 설정 로드"
+
+msgid "Load Filament Settings"
+msgstr "필라멘트 설정 로드"
+
+msgid "Load filament settings from the specified file list"
+msgstr "지정된 파일 목록에서 필라멘트 설정 불러오기"
+
+msgid "Skip Objects"
+msgstr "개체 건너뛰기"
+
+msgid "Skip some objects in this print"
+msgstr "이 출력에서 일부 개체를 건너뜁니다"
+
+msgid "Clone Objects"
+msgstr ""
+
+msgid "Clone objects in the load list"
+msgstr ""
+
+msgid "load uptodate process/machine settings when using uptodate"
+msgstr "uptodate 사용 시 최신 프로세스/프린터 설정 로드"
+
+msgid ""
+"load uptodate process/machine settings from the specified file when using "
+"uptodate"
+msgstr ""
+"uptodate를 사용할 때 지정된 파일에서 최신 프로세스/프린터 설정을 로드합니다"
+
+msgid "load uptodate filament settings when using uptodate"
+msgstr ""
+
+msgid ""
+"load uptodate filament settings from the specified file when using uptodate"
+msgstr ""
+
+msgid ""
+"if enabled, check whether current machine downward compatible with the "
+"machines in the list"
+msgstr ""
+
+msgid "downward machines settings"
+msgstr ""
+
+msgid "the machine settings list need to do downward checking"
+msgstr ""
+
+msgid "Load assemble list"
+msgstr ""
+
+msgid "Load assemble object list from config file"
+msgstr ""
+
 msgid "Data directory"
 msgstr "데이터 디렉토리"
 
@@ -14152,11 +14793,92 @@ msgstr ""
 "지정된 디렉토리에 설정을 로드하고 저장합니다. 이 기능은 서로 다른 사전설정을 "
 "유지하거나 네트워크 스토리지의 구성을 포함하는 데 유용합니다."
 
+msgid "Output directory"
+msgstr "출력 디렉토리"
+
+msgid "Output directory for the exported files."
+msgstr "내보내기 파일의 출력 디렉토리입니다."
+
+msgid "Debug level"
+msgstr "디버그 수준"
+
+msgid ""
+"Sets debug logging level. 0:fatal, 1:error, 2:warning, 3:info, 4:debug, 5:"
+"trace\n"
+msgstr ""
+"디버그 로깅 수준을 설정합니다. 0:치명적, 1:오류, 2:경고, 3:정보, 4:디버그, 5:"
+"추적\n"
+
+msgid "Enable timelapse for print"
+msgstr ""
+
+msgid "If enabled, this slicing will be considered using timelapse"
+msgstr ""
+
 msgid "Load custom gcode"
 msgstr "사용자 정의 G코드 불러오기"
 
 msgid "Load custom gcode from json"
 msgstr "사용자 정의 G코드를 json에서 불러오기"
+
+msgid "Load filament ids"
+msgstr ""
+
+msgid "Load filament ids for each object"
+msgstr ""
+
+msgid "Allow multiple color on one plate"
+msgstr ""
+
+msgid "If enabled, the arrange will allow multiple color on one plate"
+msgstr ""
+
+msgid "Allow rotatations when arrange"
+msgstr ""
+
+msgid "If enabled, the arrange will allow rotations when place object"
+msgstr ""
+
+msgid "Avoid extrusion calibrate region when doing arrange"
+msgstr ""
+
+msgid ""
+"If enabled, the arrange will avoid extrusion calibrate region when place "
+"object"
+msgstr ""
+
+msgid "Skip modified gcodes in 3mf"
+msgstr ""
+
+msgid "Skip the modified gcodes in 3mf from Printer or filament Presets"
+msgstr ""
+
+msgid "MakerLab name"
+msgstr ""
+
+msgid "MakerLab name to generate this 3mf"
+msgstr ""
+
+msgid "MakerLab version"
+msgstr ""
+
+msgid "MakerLab version to generate this 3mf"
+msgstr ""
+
+msgid "metadata name list"
+msgstr ""
+
+msgid "metadata name list added into 3mf"
+msgstr ""
+
+msgid "metadata value list"
+msgstr ""
+
+msgid "metadata value list added into 3mf"
+msgstr ""
+
+msgid "Allow 3mf with newer version to be sliced"
+msgstr ""
 
 msgid "Current z-hop"
 msgstr "현재 Z올리기"
@@ -14434,9 +15156,6 @@ msgstr "채우기 툴 경로 생성 중"
 msgid "Detect overhangs for auto-lift"
 msgstr "Z 올리기를 위한 돌출부 감지"
 
-msgid "Generating support"
-msgstr "지지대 생성 중"
-
 msgid "Checking support necessity"
 msgstr "지지대 필요성 확인"
 
@@ -14456,6 +15175,9 @@ msgid ""
 msgstr ""
 "개체 %s에 %s이(가) 있는 것 같습니다. 물체의 방향을 바꾸거나 지지대 생성을 활"
 "성화하세요."
+
+msgid "Generating support"
+msgstr "지지대 생성 중"
 
 msgid "Optimizing toolpath"
 msgstr "툴 경로 최적화"
@@ -14478,36 +15200,8 @@ msgstr ""
 "개체의 XY 크기 보정은 색으로 칠해져 있기 때문에 사용되지 않습니다.\n"
 "XY 크기 보정은 컬러 페인팅과 결합할 수 없습니다."
 
-#, c-format, boost-format
-msgid "Support: generate toolpath at layer %d"
-msgstr "지지대: 레이어 %d에서 툴 경로 생성"
-
-msgid "Support: detect overhangs"
-msgstr "지지대: 오버행 감지"
-
 msgid "Support: generate contact points"
 msgstr "지지대: 접점 생성"
-
-msgid "Support: propagate branches"
-msgstr "지지대: 가지 증식"
-
-msgid "Support: draw polygons"
-msgstr "지지대: 폴리곤 그리기"
-
-msgid "Support: generate toolpath"
-msgstr "지지대: 툴 경로 생성"
-
-#, c-format, boost-format
-msgid "Support: generate polygons at layer %d"
-msgstr "지지대: 레이어 %d에서 폴리곤 생성"
-
-#, c-format, boost-format
-msgid "Support: fix holes at layer %d"
-msgstr "지지대: 레이어 %d의 구멍 수정"
-
-#, c-format, boost-format
-msgid "Support: propagate branches at layer %d"
-msgstr "지지대: 레이어 %d에서 가지 증식"
 
 msgid ""
 "Unknown file format. Input file must have .stl, .obj, .amf(.xml) extension."
@@ -15123,8 +15817,20 @@ msgstr "종료 PA: "
 msgid "PA step: "
 msgstr "PA 단계: "
 
+msgid "Accelerations: "
+msgstr ""
+
+msgid "Speeds: "
+msgstr ""
+
 msgid "Print numbers"
 msgstr "출력 수"
+
+msgid "Comma-separated list of printing accelerations"
+msgstr ""
+
+msgid "Comma-separated list of printing speeds"
+msgstr ""
 
 msgid ""
 "Please input valid values:\n"
@@ -15240,8 +15946,8 @@ msgstr "후퇴 종료 길이: "
 msgid "mm/mm"
 msgstr "mm/mm"
 
-msgid "Send G-Code to printer host"
-msgstr "G코드를 프린터 호스트로 보내기"
+msgid "Send G-code to printer host"
+msgstr ""
 
 msgid "Upload to Printer Host with the following filename:"
 msgstr "다음 파일 이름으로 프린터 호스트에 업로드:"
@@ -15296,16 +16002,8 @@ msgstr "업로드 중"
 msgid "Cancelling"
 msgstr "취소 중"
 
-msgid ""
-"The selected bed type does not match the file. Please confirm before "
-"starting the print."
-msgstr ""
-
-msgid "Time-lapse"
-msgstr ""
-
-msgid "Heated Bed Leveling"
-msgstr ""
+msgid "Error uploading to print host"
+msgstr "출력 호스트에 업로드하는 중 오류가 발생했습니다"
 
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "선택한 부품에서 부울 연산을 수행할 수 없습니다"
@@ -15914,6 +16612,9 @@ msgstr "물리 프린터"
 msgid "Print Host upload"
 msgstr "출력 호스트 업로드"
 
+msgid "Test"
+msgstr "테스트"
+
 msgid "Could not get a valid Printer Host reference"
 msgstr "유효한 프린터 호스트 참조를 가져올 수 없습니다"
 
@@ -16375,43 +17076,6 @@ msgstr ""
 msgid "User cancelled."
 msgstr "사용자가 취소했습니다."
 
-msgid "Connection to ElegooLink works correctly."
-msgstr ""
-
-msgid "Could not connect to ElegooLink"
-msgstr ""
-
-msgid ""
-"The file has been transferred, but some unknown errors occurred. Please "
-"check the device page for the file and try to start printing again."
-msgstr ""
-
-msgid "Error code not found"
-msgstr ""
-
-msgid ""
-"The printer is busy, Please check the device page for the file and try to "
-"start printing again."
-msgstr ""
-
-msgid "The file is lost, please check and try again."
-msgstr ""
-
-msgid "The file is corrupted, please check and try again."
-msgstr ""
-
-msgid "Transmission abnormality, please check and try again."
-msgstr ""
-
-msgid "The file does not match the printer, please check and try again."
-msgstr ""
-
-msgid "Start print timeout"
-msgstr ""
-
-msgid "Start print failed"
-msgstr ""
-
 msgid ""
 "Connection timed out. Please check if the printer and computer network are "
 "functioning properly, and confirm that they are on the same network."
@@ -16448,6 +17112,50 @@ msgid "Font doesn't have any shape for given text."
 msgstr ""
 
 msgid "There is no valid surface for text projection."
+msgstr ""
+
+msgid "Head diameter"
+msgstr ""
+
+msgid "Max angle"
+msgstr ""
+
+msgid "Detection radius"
+msgstr ""
+
+msgid "Remove selected points"
+msgstr ""
+
+msgid "Remove all"
+msgstr ""
+
+msgid "Auto-generate points"
+msgstr ""
+
+msgid "Add a brim ear"
+msgstr ""
+
+msgid "Delete a brim ear"
+msgstr ""
+
+msgid "Adjust section view"
+msgstr ""
+
+msgid ""
+"Warning: The brim type is not set to \"painted\",the brim ears will not take "
+"effect !"
+msgstr ""
+
+msgid "Set the brim type to \"painted\""
+msgstr ""
+
+msgid " invalid brim ears"
+msgstr ""
+
+msgid "Brim Ears"
+msgstr ""
+
+msgid "Please select single object."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -16760,6 +17468,382 @@ msgstr ""
 "ABS와 같이 뒤틀림이 발생하기 쉬운 소재를 출력할 때, 히트베드 온도를 적절하게 "
 "높이면 뒤틀림 가능성을 줄일 수 있다는 사실을 알고 계셨나요?"
 
+#~ msgid "ShiftLeft mouse button"
+#~ msgstr "Shift + 왼쪽 마우스 버튼"
+
+#~ msgid "Unselect"
+#~ msgstr "선택 취소"
+
+#~ msgctxt "Verb"
+#~ msgid "Scale"
+#~ msgstr "규모"
+
+#~ msgid "Current Cabin humidity"
+#~ msgstr "현재 기내 습도"
+
+#~ msgid "Please save project and restart the program. "
+#~ msgstr "프로젝트를 저장하고 프로그램을 다시 시작하세요. "
+
+#~ msgid ""
+#~ "Alternate extra wall does't work well when ensure vertical shell "
+#~ "thickness is set to All. "
+#~ msgstr ""
+#~ "세로 셸 두께가 모두로 설정된 경우 대체 여분의 벽이 제대로 작동하지 않습니"
+#~ "다. "
+
+#~ msgid "Show Selected Outline (Experimental)"
+#~ msgstr "선택된 개요 표시(실험적)"
+
+#, c-format, boost-format
+#~ msgid "A file exists with the same name: %s, do you want to override it."
+#~ msgstr "같은 이름을 가진 파일이 존재합니다: %s, 덮어 쓰겠습니까."
+
+#, c-format, boost-format
+#~ msgid "A config exists with the same name: %s, do you want to override it."
+#~ msgstr "같은 이름을 가진 설정이 존재합니다: %s, 덮어 쓰겠습니까."
+
+#~ msgid "Stopped."
+#~ msgstr "중지됨."
+
+#, c-format, boost-format
+#~ msgid "Connect failed [%d]!"
+#~ msgstr "[%d] 연결 실패!"
+
+#~ msgid "Initialize failed (Device connection not ready)!"
+#~ msgstr "초기화 실패 (장치 연결 준비 안 됨)!"
+
+#~ msgid "Initialize failed (Storage unavailable, insert SD card.)!"
+#~ msgstr ""
+#~ "초기화에 실패했습니다(저장소를 사용할 수 없습니다. SD 카드를 삽입하세요.)!"
+
+#, c-format, boost-format
+#~ msgid "Initialize failed (%s)!"
+#~ msgstr "(%s) 초기화 실패!"
+
+#~ msgid "Network unreachable"
+#~ msgstr "네트워크에 연결할 수 없음"
+
+#, c-format, boost-format
+#~ msgid ""
+#~ "Plate% d: %s is not suggested to be used to print filament %s(%s). If you "
+#~ "still want to do this printing, please set this filament's bed "
+#~ "temperature to non zero."
+#~ msgstr ""
+#~ "% d: %s플레이트는 %s(%s)필라멘트를 출력하는데 사용하지 않는 것이 좋습니"
+#~ "다. 이 출력을 계속하려면 이 필라멘트의 베드 온도를 0이 아닌 값으로 설정하"
+#~ "세요."
+
+#~ msgid ""
+#~ "We have added an experimental style \"Tree Slim\" that features smaller "
+#~ "support volume but weaker strength.\n"
+#~ "We recommend using it with: 0 interface layers, 0 top distance, 2 walls."
+#~ msgstr ""
+#~ "지지대 부피는 작지만 강도는 약한 것이 특징인 실험적 모양 \"얇은 나무\"를 "
+#~ "추가했습니다.\n"
+#~ "접점 레이어 0, 상단 Z 거리 0, 벽 루프 2 와 함께 사용하는 것이 좋습니다."
+
+#~ msgid ""
+#~ "For \"Tree Strong\" and \"Tree Hybrid\" styles, we recommend the "
+#~ "following settings: at least 2 interface layers, at least 0.1mm top z "
+#~ "distance or using support materials on interface."
+#~ msgstr ""
+#~ "\"강한 나무\" 및 \"혼합 나무\" 모양의 경우 최소 접점 레이어 2, 상단 Z 거"
+#~ "리 0.1 또는 접점에서 지지대 재료를 사용하는 설정을 권장합니다."
+
+#~ msgid ""
+#~ "When using support material for the support interface, We recommend the "
+#~ "following settings:\n"
+#~ "0 top z distance, 0 interface spacing, concentric pattern and disable "
+#~ "independent support layer height"
+#~ msgstr ""
+#~ "지지대 접점에 지지대 재료를 사용하는 경우 다음 설정을 권장합니다:\n"
+#~ "상단 Z 거리 0, 접점 간격 0, 접점 패턴 동심원 및 독립적 지지대 높이 비활성"
+#~ "화"
+
+#~ msgid "Lift Z Enforcement"
+#~ msgstr "강제 Z 올리기"
+
+#, boost-format
+#~ msgid "You have changed some settings of preset \"%1%\". "
+#~ msgstr "사전 설정 \"%1%\"의 일부 설정을 변경했습니다. "
+
+#~ msgid "LAN Connection Failed (Sending print file)"
+#~ msgstr "LAN 연결 실패(출력 파일 전송 중)"
+
+#~ msgid "Step 3: Ping the IP address to check for packet loss and latency."
+#~ msgstr "3단계: IP 주소를 ping하여 패킷 손실 및 대기 시간을 확인합니다."
+
+#~ msgid "IP and Access Code Verified! You may close the window"
+#~ msgstr "IP 및 액세스 코드가 확인되었습니다. 창을 닫아도 됩니다"
+
+#~ msgid "Force cooling for overhang and bridge"
+#~ msgstr "돌출부 및 브릿지 강제 냉각"
+
+#~ msgid ""
+#~ "Enable this option to optimize part cooling fan speed for overhang and "
+#~ "bridge to get better cooling"
+#~ msgstr ""
+#~ "냉각 향상을 위해 돌출부 및 브릿지에 대한 출력물 냉각 팬 속도를 최적화하려"
+#~ "면 이 옵션을 활성화합니다"
+
+#~ msgid "Fan speed for overhang"
+#~ msgstr "돌출부 팬 속도"
+
+#~ msgid ""
+#~ "Force part cooling fan to be this speed when printing bridge or overhang "
+#~ "wall which has large overhang degree. Forcing cooling for overhang and "
+#~ "bridge can get better quality for these part"
+#~ msgstr ""
+#~ "돌출부 정도가 큰 브릿지나 돌출부 벽을 출력할 때 출력물 냉각 팬을 이 속도"
+#~ "로 강제합니다. 돌출부와 브릿지를 강제 냉각하면 이러한 부품의 품질이 향상"
+#~ "될 수 있습니다"
+
+#~ msgid "Cooling overhang threshold"
+#~ msgstr "돌출부 냉각 임계값"
+
+#, c-format
+#~ msgid ""
+#~ "Force cooling fan to be specific speed when overhang degree of printed "
+#~ "part exceeds this value. Expressed as percentage which indicates how much "
+#~ "width of the line without support from lower layer. 0% means forcing "
+#~ "cooling for all outer wall no matter how much overhang degree"
+#~ msgstr ""
+#~ "출력물의 돌출부 정도가 이 값을 초과하면 냉각 팬이 특정 속도가 되도록 강제"
+#~ "합니다. 지지대가 없는 하단 레이어 선 너비의 백분율로 표시됩니다. 0은 돌출"
+#~ "부 정도에 관계없이 모든 외벽을 강제 냉각한다는 의미입니다"
+
+#~ msgid "Bridge infill direction"
+#~ msgstr "브릿지 채우기 방향"
+
+#~ msgid "Bridge density"
+#~ msgstr "브릿지 밀도"
+
+#~ msgid ""
+#~ "Density of external bridges. 100% means solid bridge. Default is 100%."
+#~ msgstr ""
+#~ "외부 브릿지의 밀도. 100%는 단단한 브릿지를 의미합니다. 기본값은 100%입니"
+#~ "다."
+
+#~ msgid ""
+#~ "Improve shell precision by adjusting outer wall spacing. This also "
+#~ "improves layer consistency.\n"
+#~ "Note: This setting will only take effect if the wall sequence is "
+#~ "configured to Inner-Outer"
+#~ msgstr ""
+#~ "외벽 간격을 조정하여 쉘 정밀도를 향상시킵니다. 이는 또한 레이어 일관성을 "
+#~ "향상시킵니다.\n"
+#~ "참고: 이 설정은 벽 시퀀스가 내부-외부로 구성된 경우에만 적용됩니다"
+
+#~ msgid ""
+#~ "Create additional perimeter paths over steep overhangs and areas where "
+#~ "bridges cannot be anchored. "
+#~ msgstr ""
+#~ "가파른 돌출부와 브릿지를 고정할 수 없는 지역 위에 추가 둘레 경로를 만듭니"
+#~ "다. "
+
+#~ msgid "Thick bridges"
+#~ msgstr "두꺼운 브릿지"
+
+#~ msgid "Filter out small internal bridges (beta)"
+#~ msgstr "작은 내부 브릿지 필터링(베타)"
+
+#~ msgid ""
+#~ "This option can help reducing pillowing on top surfaces in heavily "
+#~ "slanted or curved models.\n"
+#~ "\n"
+#~ "By default, small internal bridges are filtered out and the internal "
+#~ "solid infill is printed directly over the sparse infill. This works well "
+#~ "in most cases, speeding up printing without too much compromise on top "
+#~ "surface quality. \n"
+#~ "\n"
+#~ "However, in heavily slanted or curved models especially where too low "
+#~ "sparse infill density is used, this may result in curling of the "
+#~ "unsupported solid infill, causing pillowing.\n"
+#~ "\n"
+#~ "Disabling this option will print internal bridge layer over slightly "
+#~ "unsupported internal solid infill. The options below control the amount "
+#~ "of filtering, i.e. the amount of internal bridges created.\n"
+#~ "\n"
+#~ "Filter - enable this option. This is the default behavior and works well "
+#~ "in most cases.\n"
+#~ "\n"
+#~ "Limited filtering - creates internal bridges on heavily slanted surfaces, "
+#~ "while avoiding creating unnecessary internal bridges. This works well for "
+#~ "most difficult models.\n"
+#~ "\n"
+#~ "No filtering - creates internal bridges on every potential internal "
+#~ "overhang. This option is useful for heavily slanted top surface models. "
+#~ "However, in most cases it creates too many unnecessary bridges."
+#~ msgstr ""
+#~ "이 옵션은 심하게 기울어지거나 곡선이 있는 모델의 상단 표면이 눌리는 현상"
+#~ "을 줄이는 데 도움이 될 수 있습니다.\n"
+#~ "\n"
+#~ "기본적으로 작은 내부 브릿지는 필터링되고 내부 솔리드 채우기는 희박한 채우"
+#~ "기 위에 직접 인쇄됩니다. 이는 대부분의 경우에 잘 작동하여 상단 표면 품질"
+#~ "을 크게 저하시키지 않고 인쇄 속도를 높입니다. \n"
+#~ "\n"
+#~ "그러나 특히 너무 낮은 희박 채우기 밀도가 사용되는 심하게 기울어지거나 곡"
+#~ "선 모델에서는 지지되지 않는 고체 채우기가 말려 베개 현상이 발생할 수 있습"
+#~ "니다.\n"
+#~ "\n"
+#~ "이 옵션을 비활성화하면 약간 지원되지 않는 내부 솔리드 채우기 위에 내부 브"
+#~ "릿지 레이어가 인쇄됩니다. 아래 옵션은 필터링 양, 즉 생성된 내부 브릿지 양"
+#~ "을 제어합니다.\n"
+#~ "\n"
+#~ "필터 - 이 옵션을 활성화합니다. 이는 기본 동작이며 대부분의 경우 잘 작동합"
+#~ "니다.\n"
+#~ "\n"
+#~ "제한된 필터링 - 불필요한 내부 브릿지 생성을 방지하면서 심하게 기울어진 표"
+#~ "면에 내부 브릿지를 생성합니다. 이는 대부분의 어려운 모델에 적합합니다.\n"
+#~ "\n"
+#~ "필터링 없음 - 잠재적인 모든 내부 돌출부에 내부 브릿지를 생성합니다. 이 옵"
+#~ "션은 심하게 기울어진 상단 표면 모델에 유용합니다. 그러나 대부분의 경우 불"
+#~ "필요한 브릿지가 너무 많이 생성됩니다."
+
+#~ msgid ""
+#~ "This fan speed is enforced during all support interfaces, to be able to "
+#~ "weaken their bonding with a high fan speed.\n"
+#~ "Set to -1 to disable this override.\n"
+#~ "Can only be overridden by disable_fan_first_layers."
+#~ msgstr ""
+#~ "이 설정값은 높은 팬 속도로 접점의 결합을 약화시킬 수 있도록 모든 지지대 접"
+#~ "점(Support interface)에 적용됩니다.\n"
+#~ "사용하지 않으려면 -1로 설정합니다.\n"
+#~ "disable_fan_first_layers로만 재정의할 수 있습니다."
+
+#~ msgid ""
+#~ "Don't print gap fill with a length is smaller than the threshold "
+#~ "specified (in mm). This setting applies to top, bottom and solid infill "
+#~ "and, if using the classic perimeter generator, to wall gap fill. "
+#~ msgstr ""
+#~ "지정된 임계값(mm 단위)보다 길이가 작은 간격 채우기를 인쇄하지 마십시오. "
+#~ "이 설정은 상단, 하단 및 솔리드 채우기에 적용되며, 클래식 주변 생성기를 사"
+#~ "용하는 경우 벽 간격 채우기에 적용됩니다. "
+
+#~ msgid ""
+#~ "A lower value results in smoother extrusion rate transitions. However, "
+#~ "this results in a significantly larger gcode file and more instructions "
+#~ "for the printer to process. \n"
+#~ "\n"
+#~ "Default value of 3 works well for most cases. If your printer is "
+#~ "stuttering, increase this value to reduce the number of adjustments made\n"
+#~ "\n"
+#~ "Allowed values: 1-5"
+#~ msgstr ""
+#~ "값이 낮을수록 압출 속도 전환이 더 유연해집니다. 하지만 G코드 파일이 상당"
+#~ "히 커지고 프린터가 처리해야 할 연산이 더 많아집니다.\n"
+#~ "\n"
+#~ "기본값인 3은 대부분의 경우에 적합합니다. 프린터가 끊기는 경우 이 값을 늘"
+#~ "려 조정 횟수를 줄이십시오.\n"
+#~ "\n"
+#~ "허용되는 값: 1-5"
+
+#~ msgid ""
+#~ "The minimum printing speed that the printer will slow down to to attempt "
+#~ "to maintain the minimum layer time above, when slow down for better layer "
+#~ "cooling is enabled."
+#~ msgstr ""
+#~ "더 나은 레이어 냉각을 위해 속도를 낮추는 경우 위의 최소 레이어 시간을 유지"
+#~ "하기 위해 프린터가 느려지는 최소 출력 속도입니다."
+
+#~ msgid "Long retraction when cut(experimental)"
+#~ msgstr "절단 시 긴 후퇴(실험적)"
+
+#~ msgid "Z hop when retract"
+#~ msgstr "후퇴 시 Z 올리기"
+
+#~ msgid ""
+#~ "Minimum filament extrusion length in mm when printing the skirt. Zero "
+#~ "means this feature is disabled.\n"
+#~ "\n"
+#~ "Using a non zero value is useful if the printer is set up to print "
+#~ "without a prime line.\n"
+#~ "Final number of loops is not taling into account whli arranging or "
+#~ "validating objects distance. Increase loop number in such case. "
+#~ msgstr ""
+#~ "스커트를 인쇄할 때 최소 필라멘트 압출 길이(mm)입니다. 0은 이 기능이 비활성"
+#~ "화되었음을 의미합니다.\n"
+#~ "\n"
+#~ "프린터가 프라임 라인 없이 인쇄하도록 설정된 경우 0이 아닌 값을 사용하는 것"
+#~ "이 유용합니다.\n"
+#~ "루프의 최종 수는 객체 거리를 정렬하거나 검증하는 동안 고려되지 않습니다. "
+#~ "그러한 경우에는 루프 수를 늘리십시오. "
+
+#~ msgid ""
+#~ "Maximum distance to move points in XY to try to achieve a smooth spiralIf "
+#~ "expressed as a %, it will be computed over nozzle diameter"
+#~ msgstr ""
+#~ "부드러운 나선형을 얻기 위해 점을 XY로 이동하는 최대 거리 %로 표시할 경우 "
+#~ "노즐 직경에 대해 계산됩니다"
+
+#~ msgid ""
+#~ "normal(auto) and tree(auto) is used to generate support automatically. If "
+#~ "normal(manual) or tree(manual) is selected, only support enforcers are "
+#~ "generated"
+#~ msgstr ""
+#~ "일반(자동) 및 나무(자동)은 지지대를 자동으로 생성합니다. 일반(수동) 또는 "
+#~ "나무(수동) 선택시에는 강제된 지지대만 생성됩니다"
+
+#~ msgid "normal(auto)"
+#~ msgstr "일반(자동)"
+
+#~ msgid "tree(auto)"
+#~ msgstr "나무(자동)"
+
+#~ msgid "normal(manual)"
+#~ msgstr "일반(수동)"
+
+#~ msgid "tree(manual)"
+#~ msgstr "나무(수동)"
+
+#~ msgid "Default (Grid/Organic"
+#~ msgstr "기본값(그리드/유기적"
+
+#~ msgid "Branch Diameter with double walls"
+#~ msgstr "이중 벽이 있는 가지 직경"
+
+#~ msgid ""
+#~ "Branches with area larger than the area of a circle of this diameter will "
+#~ "be printed with double walls for stability. Set this value to zero for no "
+#~ "double walls."
+#~ msgstr ""
+#~ "이 직경의 원 면적보다 더 큰 면적을 가진 가지는 안정성을 위해 이중벽으로 출"
+#~ "력됩니다. 이중벽을 허용하지 않으려면 이 값을 0으로 설정합니다."
+
+#~ msgid "This setting specify the count of walls around support"
+#~ msgstr "이 설정은 지지대 주변의 벽 수를 지정합니다"
+
+#, c-format, boost-format
+#~ msgid "Support: generate toolpath at layer %d"
+#~ msgstr "지지대: 레이어 %d에서 툴 경로 생성"
+
+#~ msgid "Support: detect overhangs"
+#~ msgstr "지지대: 오버행 감지"
+
+#~ msgid "Support: propagate branches"
+#~ msgstr "지지대: 가지 증식"
+
+#~ msgid "Support: draw polygons"
+#~ msgstr "지지대: 폴리곤 그리기"
+
+#~ msgid "Support: generate toolpath"
+#~ msgstr "지지대: 툴 경로 생성"
+
+#, c-format, boost-format
+#~ msgid "Support: generate polygons at layer %d"
+#~ msgstr "지지대: 레이어 %d에서 폴리곤 생성"
+
+#, c-format, boost-format
+#~ msgid "Support: fix holes at layer %d"
+#~ msgstr "지지대: 레이어 %d의 구멍 수정"
+
+#, c-format, boost-format
+#~ msgid "Support: propagate branches at layer %d"
+#~ msgstr "지지대: 레이어 %d에서 가지 증식"
+
+#~ msgid "Send G-Code to printer host"
+#~ msgstr "G코드를 프린터 호스트로 보내기"
+
 #~ msgid "Cool plate"
 #~ msgstr "쿨 플레이트"
 
@@ -16856,9 +17940,6 @@ msgstr ""
 #~ "current print."
 #~ msgstr "현재 프린트에 사용되는지 여부에 관계없이 총 압출기 수입니다."
 
-#~ msgid "Error uploading to print host"
-#~ msgstr "출력 호스트에 업로드하는 중 오류가 발생했습니다"
-
 #~ msgid "ElegooSlicer is based on PrusaSlicer and BambuStudio"
 #~ msgstr "ElegooSlicer는 PrusaSlicer와 BambuStudio를 기반으로 합니다"
 
@@ -16911,9 +17992,6 @@ msgstr ""
 
 #~ msgid "Network"
 #~ msgstr "네트워크"
-
-#~ msgid "Develop mode"
-#~ msgstr "개발자 모드"
 
 #~ msgid "Skip this Version"
 #~ msgstr "이 버전 건너뛰기"
@@ -17424,13 +18502,6 @@ msgstr ""
 #~ msgstr "다음으로 업데이트된 구성 패키지 "
 
 #~ msgid ""
-#~ "Improve shell precision by adjusting outer wall spacing. This also "
-#~ "improves layer consistency."
-#~ msgstr ""
-#~ "외벽 간격을 조정하여 쉘 정밀도를 향상시킵니다. 이는 또한 레이어 일관성을 "
-#~ "향상시킵니다."
-
-#~ msgid ""
 #~ "The minimum printing speed for the filament when slow down for better "
 #~ "layer cooling is enabled, when printing overhangs and when feature speeds "
 #~ "are not specified explicitly."
@@ -17708,157 +18779,14 @@ msgstr ""
 #~ msgid "%%"
 #~ msgstr "%%"
 
-#~ msgid "Export 3MF"
-#~ msgstr "3MF 내보내기"
-
-#~ msgid "Export project as 3MF."
-#~ msgstr "프로젝트를 3MF로 내보내기."
-
-#~ msgid "Export slicing data"
-#~ msgstr "슬라이싱 데이터 내보내기"
-
-#~ msgid "Export slicing data to a folder."
-#~ msgstr "슬라이싱 데이터 폴더로 내보내기."
-
-#~ msgid "Load slicing data"
-#~ msgstr "슬라이싱 데이터 로드"
-
-#~ msgid "Load cached slicing data from directory"
-#~ msgstr "디렉토리에 캐시된 슬라이싱 데이터 로드"
-
-#~ msgid "Export STL"
-#~ msgstr "STL 내보내기"
-
 #~ msgid "Export the objects as multiple STL."
 #~ msgstr "개체를 여러개의 STL로 내보내기."
-
-#~ msgid "Slice"
-#~ msgstr "슬라이스"
-
-#~ msgid "Slice the plates: 0-all plates, i-plate i, others-invalid"
-#~ msgstr "플레이트 슬라이스: 0-모든 플레이트, i-플레이트 i, 기타-잘못됨"
-
-#~ msgid "Show command help."
-#~ msgstr "명령 도움말을 표시합니다."
-
-#~ msgid "UpToDate"
-#~ msgstr "최신 정보"
-
-#~ msgid "Update the configs values of 3mf to latest."
-#~ msgstr "3mf의 구성 값을 최신으로 업데이트합니다."
-
-#~ msgid "Load default filaments"
-#~ msgstr "기본 필라멘트 로드"
-
-#~ msgid "Load first filament as default for those not loaded"
-#~ msgstr "로드되지 않은 경우 기본값으로 첫 번째 필라멘트 로드"
-
-#~ msgid "mtcpp"
-#~ msgstr "mtcpp"
-
-#~ msgid "max triangle count per plate for slicing."
-#~ msgstr "슬라이싱을 위한 플레이트당 최대 삼각형 개수."
-
-#~ msgid "mstpp"
-#~ msgstr "mstpp"
-
-#~ msgid "max slicing time per plate in seconds."
-#~ msgstr "플레이트당 최대 슬라이싱 시간(초)"
-
-#~ msgid "Normative check"
-#~ msgstr "표준 검사"
-
-#~ msgid "Check the normative items."
-#~ msgstr "표준 항목을 확인합니다."
-
-#~ msgid "Output Model Info"
-#~ msgstr "모델 정보 출력"
-
-#~ msgid "Output the model's information."
-#~ msgstr "모델 정보를 출력합니다."
-
-#~ msgid "Export Settings"
-#~ msgstr "설정 내보내기"
-
-#~ msgid "Export settings to a file."
-#~ msgstr "설정을 파일로 내보내기."
-
-#~ msgid "Send progress to pipe"
-#~ msgstr "진행 상황을 파이프로 보내기"
-
-#~ msgid "Send progress to pipe."
-#~ msgstr "진행 상황을 파이프로 보내기."
-
-#~ msgid "Arrange Options"
-#~ msgstr "정렬 옵션"
-
-#~ msgid "Arrange options: 0-disable, 1-enable, others-auto"
-#~ msgstr "정렬 옵션: 0-사용 안 함, 1-사용, 기타-자동"
-
-#~ msgid "Repetions count"
-#~ msgstr "반복 횟수"
-
-#~ msgid "Repetions count of the whole model"
-#~ msgstr "전체 모델의 반복 횟수"
-
-#~ msgid "Convert Unit"
-#~ msgstr "단위 변환"
-
-#~ msgid "Convert the units of model"
-#~ msgstr "모델의 단위를 변환"
 
 #~ msgid "Rotate around X"
 #~ msgstr "X를 중심으로 회전"
 
 #~ msgid "Rotation angle around the X axis in degrees."
 #~ msgstr "X축을 중심으로 한 회전 각도입니다."
-
-#~ msgid "Scale the model by a float factor"
-#~ msgstr "부동 소수점 계수로 모델 크기 조정"
-
-#~ msgid "Load General Settings"
-#~ msgstr "일반 설정 로드"
-
-#~ msgid "Load process/machine settings from the specified file"
-#~ msgstr "지정된 파일에서 프로세스/기계 설정 로드"
-
-#~ msgid "Load Filament Settings"
-#~ msgstr "필라멘트 설정 로드"
-
-#~ msgid "Load filament settings from the specified file list"
-#~ msgstr "지정된 파일 목록에서 필라멘트 설정 불러오기"
-
-#~ msgid "Skip Objects"
-#~ msgstr "개체 건너뛰기"
-
-#~ msgid "Skip some objects in this print"
-#~ msgstr "이 출력에서 일부 개체를 건너뜁니다"
-
-#~ msgid "load uptodate process/machine settings when using uptodate"
-#~ msgstr "uptodate 사용 시 최신 프로세스/프린터 설정 로드"
-
-#~ msgid ""
-#~ "load uptodate process/machine settings from the specified file when using "
-#~ "uptodate"
-#~ msgstr ""
-#~ "uptodate를 사용할 때 지정된 파일에서 최신 프로세스/프린터 설정을 로드합니"
-#~ "다"
-
-#~ msgid "Output directory"
-#~ msgstr "출력 디렉토리"
-
-#~ msgid "Output directory for the exported files."
-#~ msgstr "내보내기 파일의 출력 디렉토리입니다."
-
-#~ msgid "Debug level"
-#~ msgstr "디버그 수준"
-
-#~ msgid ""
-#~ "Sets debug logging level. 0:fatal, 1:error, 2:warning, 3:info, 4:debug, 5:"
-#~ "trace\n"
-#~ msgstr ""
-#~ "디버그 로깅 수준을 설정합니다. 0:치명적, 1:오류, 2:경고, 3:정보, 4:디버"
-#~ "그, 5:추적\n"
 
 #, boost-format
 #~ msgid "The selected preset: %1% is not found."
