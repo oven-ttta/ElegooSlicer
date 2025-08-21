@@ -23,10 +23,10 @@ public:
     virtual PrinterNetworkResult<bool> disconnectFromPrinter() = 0;
     virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params) = 0;
     virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params) = 0;
-    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices() = 0;   
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() = 0;   
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() = 0;
     virtual void close() = 0;
-    virtual int getDeviceType() = 0;
+    virtual int getPrinterType() = 0;
 
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
 

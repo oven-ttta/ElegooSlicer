@@ -165,8 +165,8 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
     printerNetworkInfo.printerId      = "";
 
     if(printerNetworkInfo.isPhysicalPrinter) {
-        printerNetworkInfo.deviceType = PrinterNetworkManager::getDeviceType(printerNetworkInfo);
-        if(printerNetworkInfo.deviceType == -1) {
+        printerNetworkInfo.printerType = PrinterNetworkManager::getPrinterType(printerNetworkInfo);
+        if(printerNetworkInfo.printerType == -1) {
             wxLogWarning("Failed to get device type for printer %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                          printerNetworkInfo.printerModel);
             return "";
@@ -181,7 +181,7 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
             // update the printer network info
             printerNetworkInfo.mainboardId = connectedPrinter.mainboardId;
             printerNetworkInfo.serialNumber = connectedPrinter.serialNumber;
-            printerNetworkInfo.deviceType = connectedPrinter.deviceType;
+            printerNetworkInfo.printerType = connectedPrinter.printerType;
             printerNetworkInfo.webUrl        = connectedPrinter.webUrl;
             printerNetworkInfo.connectionUrl = connectedPrinter.connectionUrl;
             printerNetworkInfo.firmwareVersion = connectedPrinter.firmwareVersion;
@@ -254,7 +254,7 @@ std::vector<PrinterNetworkInfo> PrinterManager::discoverPrinter()
             printerNetworkInfo.printerName  = printerModel.name;
         }
         printerNetworkInfo.printerModel = printerModel.name;
-        if (printerNetworkInfo.deviceType == 2) {
+        if (printerNetworkInfo.printerType == 2) {
             printerNetworkInfo.printerModel = "Elegoo Centauri Carbon 2";
         }
         printerNetworkInfo.isPhysicalPrinter = false;

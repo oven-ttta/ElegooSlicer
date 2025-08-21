@@ -294,7 +294,7 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId)
     PrinterWebView* view = new PrinterWebView(mTabBar);
     wxString url = printerInfo.webUrl;
     
-    if(printerInfo.deviceType == 2) 
+    if(printerInfo.printerType == 2) 
     {
         std::string accessToken="123456";
         if (printerInfo.authMode == "basic") {

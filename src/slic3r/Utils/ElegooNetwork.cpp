@@ -21,9 +21,9 @@ PrinterNetworkResult<bool> ElegooNetwork::disconnectFromPrinter()
 {
     return ElegooLink::getInstance()->disconnectFromPrinter(mPrinterNetworkInfo.printerId);
 }
-PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooNetwork::discoverDevices()   
+PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooNetwork::discoverPrinters()   
 {
-    return ElegooLink::getInstance()->discoverDevices();
+    return ElegooLink::getInstance()->discoverPrinters();
 }
 PrinterNetworkResult<bool> ElegooNetwork::sendPrintTask(const PrinterNetworkParams& params)
 {
@@ -35,9 +35,9 @@ PrinterNetworkResult<bool> ElegooNetwork::sendPrintFile(const PrinterNetworkPara
     return ElegooLink::getInstance()->sendPrintFile(params);
 
 }
-int ElegooNetwork::getDeviceType()
+int ElegooNetwork::getPrinterType()
 {
-    return ElegooLink::getDeviceType(mPrinterNetworkInfo);
+    return ElegooLink::getPrinterType(mPrinterNetworkInfo);
 }
 
 PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo()

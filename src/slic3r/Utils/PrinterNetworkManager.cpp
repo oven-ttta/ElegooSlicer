@@ -65,7 +65,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterNetworkManager::dis
         printerNetworkInfo.hostType = PrintHost::get_print_host_type_str(printerHostType);
         std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
         if (network) {
-            auto result = network->discoverDevices();
+            auto result = network->discoverPrinters();
             if (result.isSuccess() && result.hasData()) {
                 printers.insert(printers.end(), result.data.value().begin(), result.data.value().end());
             } else if (result.isError()) {
@@ -268,11 +268,11 @@ std::shared_ptr<IPrinterNetwork> PrinterNetworkManager::getPrinterNetwork(const 
     return nullptr;
 }
 
-int PrinterNetworkManager::getDeviceType(const PrinterNetworkInfo& printerNetworkInfo)
+int PrinterNetworkManager::getPrinterType(const PrinterNetworkInfo& printerNetworkInfo)
 {
     auto network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
     if (network) {
-        return network->getDeviceType();
+        return network->getPrinterType();
     }
     return -1;
 }
