@@ -601,7 +601,7 @@ static Vec2f calc_cone_wall_size(const DynamicPrintConfig* config, Vec3f box)
     float h = box(2);
     float cone_angle = dynamic_cast<const ConfigOptionFloat*>(config->option("wipe_tower_cone_angle"))->value;
     //(depth > 20 ? 20 : depth) is to ensure that the base length is not too small
-    float base_length = h * std::tan(Geometry::deg2rad(cone_angle / 2.0f)) * 2 + (depth > 20 ? 20 : depth);
+    float base_length = h * std::tan(Geometry::deg2rad(cone_angle / 2.0f)) * 2 + (depth > 16 ? 16 : depth);
 
     return Vec2f(std::ceil(std::max(box(0), 0.f)), std::ceil(std::max(base_length, 0.f)));
 }
