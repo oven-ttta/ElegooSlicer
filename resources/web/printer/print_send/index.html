@@ -191,7 +191,7 @@
                                                         @click="updateFilamentMapping(filament.index, tray)">
                                                         <div class="tray-name">{{ tray.trayName }}</div>
                                                         <div class="tray-dash"></div>
-                                                        <div class="tray-filament-type">{{ tray.filamentType }}</div>
+                                                        <div class="tray-filament-type">{{(tray.status === 1 || tray.status === 3) ? tray.filamentType : (tray.status === 0 ? '/' : "?")}}</div>
                                                     </div>
                                                 </div>
                                             </div>

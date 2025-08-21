@@ -121,7 +121,9 @@ void PrinterMmsManager::getMmsTrayFilamentId(const PrinterNetworkInfo& printerNe
     // match filament id in system preset to mms tray
     for(auto& mms : mmsGroup.mmsList) {
         for(auto& tray : mms.trayList) {
- 
+            if(!checkTrayIsReady(tray)) {
+                continue;
+            }
             if (tryMatchFilament(tray, vendorPresetMap, printerNetworkInfo, false))
                 continue;  
                       
@@ -359,8 +361,20 @@ PrinterMmsGroup PrinterMmsManager::getPrinterMmsInfo(const std::string& printerI
     return mmsGroup;
 }
 
+bool PrinterMmsManager::checkTrayIsReady(const PrinterMmsTray& tray) {
+    if(tray.status != TRAY_STATUS_LOADED && tray.status != TRAY_STATUS_PRELOADED) {
+        return false;
+    }
+    if(tray.filamentType.empty() || tray.filamentName.empty() || tray.filamentColor.empty()) {
+        return false;
+    }
+    return true;
+};
+
 void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerNetworkInfo, std::vector<PrintFilamentMmsMapping>& printFilamentMmsMapping, const PrinterMmsGroup& mmsGroup)
 {
+
+
     AppConfig* app_config = wxGetApp().app_config;
     for (auto& printFilament : printFilamentMmsMapping) {
         std::string filamentStandardColor   = getStandardColor(printFilament.filamentColor);
@@ -383,6 +397,9 @@ void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerN
         if (!mmsMappingFilamentType.empty() && !mmsMappingFilamentName.empty() && !mmsMappingFilamentColor.empty()) {
             for (auto& mms : mmsGroup.mmsList) {
                 for (auto& tray : mms.trayList) {
+                    if(!checkTrayIsReady(tray)) {
+                        continue;
+                    }
                     if (boost::to_upper_copy(tray.filamentType) == boost::to_upper_copy(mmsMappingFilamentType) &&
                         boost::to_upper_copy(tray.filamentName) == boost::to_upper_copy(mmsMappingFilamentName) &&
                         boost::to_upper_copy(tray.filamentColor) == boost::to_upper_copy(mmsMappingFilamentColor)) {
@@ -420,6 +437,9 @@ void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerN
         PrinterMmsTray mappedTray;
         for (auto& mms : mmsGroup.mmsList) {
             for (auto& tray : mms.trayList) {
+                if(!checkTrayIsReady(tray)) {
+                    continue;
+                }
                 if(boost::to_upper_copy(getStandardColor(tray.filamentColor)) != boost::to_upper_copy(filamentStandardColor)){
                     continue;
                 }
@@ -433,6 +453,9 @@ void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerN
         if(!isMapped) {
             for (auto& mms : mmsGroup.mmsList) {
                 for (auto& tray : mms.trayList) {
+                    if(!checkTrayIsReady(tray)) {
+                        continue;
+                    }
                     if(boost::to_upper_copy(getStandardColor(tray.filamentColor)) != boost::to_upper_copy(filamentStandardColor)){
                         continue;
                     }

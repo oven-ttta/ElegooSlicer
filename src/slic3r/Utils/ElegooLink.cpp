@@ -425,7 +425,28 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
                         trayInfo.filamentColor = tray.filamentColor;
                         trayInfo.minNozzleTemp = tray.minNozzleTemp;
                         trayInfo.maxNozzleTemp = tray.maxNozzleTemp;
-                        trayInfo.status = tray.status;
+                        switch (tray.status) {
+                        case 0:
+                            trayInfo.status = TRAY_STATUS_DISCONNECTED;
+                            break;
+                        case 1:
+                            if(tray.filamentType.empty() || tray.filamentName.empty()) {
+                                trayInfo.status = TRAY_STATUS_PRELOADED_UNKNOWN_FILAMENT;
+                            } else {
+                                trayInfo.status = TRAY_STATUS_PRELOADED;
+                            }
+                            break;
+                        case 2:
+                            if(tray.filamentType.empty() || tray.filamentName.empty()) {
+                                trayInfo.status = TRAY_STATUS_LOADED_UNKNOWN_FILAMENT;
+                            } else {
+                                trayInfo.status = TRAY_STATUS_LOADED;
+                            }
+                            break;
+                        default:
+                            trayInfo.status = TRAY_STATUS_ERROR;
+                            break;
+                        }
                         mmsInfo.trayList.push_back(trayInfo);
                     }
                     mmsGroup.mmsList.push_back(mmsInfo);                 

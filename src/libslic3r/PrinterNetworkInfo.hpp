@@ -40,6 +40,15 @@ enum PrinterStatus {
     PRINTER_STATUS_UNKNOWN = 1000, // Unknown status
 };
 
+enum TrayStatus {
+    TRAY_STATUS_UNKNOWN = -1,
+    TRAY_STATUS_DISCONNECTED = 0, // disconnected
+    TRAY_STATUS_PRELOADED = 1, // preloaded
+    TRAY_STATUS_PRELOADED_UNKNOWN_FILAMENT = 2, // preloaded unknown filament info
+    TRAY_STATUS_LOADED = 3, // loaded
+    TRAY_STATUS_LOADED_UNKNOWN_FILAMENT = 4, // loaded unknown filament info
+    TRAY_STATUS_ERROR = 999, // error
+};
 struct PrinterPrintTask
 {
     std::string taskId;
@@ -55,6 +64,7 @@ struct PrinterPrintTask
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_VENDOR "apiKey"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_PIN "pin"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_ACCESS_CODE "accessCode"
+
 
 struct PrinterMmsTray
 {
@@ -74,7 +84,7 @@ struct PrinterMmsTray
     double      maxNozzleTemp;
     double      minBedTemp;
     double      maxBedTemp;
-    int         status;
+    TrayStatus  status{TRAY_STATUS_UNKNOWN};
 };
 
 struct PrinterMms

@@ -61,6 +61,7 @@ private:
                                         const std::map<std::string, std::vector<PresetFilamentInfo>>& presetMap,
                                         const PrinterNetworkInfo& printerNetworkInfo,
                                         bool isGeneric);
+    bool checkTrayIsReady(const PrinterMmsTray& tray);
 };
 } // namespace Slic3r::GUI 
 #endif 
