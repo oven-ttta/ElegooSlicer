@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-08 16:43+0800\n"
+"POT-Creation-Date: 2025-08-21 18:06+0800\n"
 "PO-Revision-Date: 2023-09-30 15:15+0200\n"
 "Last-Translator: René Mošner <Renemosner@seznam.cz>\n"
 "Language-Team: \n"
@@ -3182,7 +3182,7 @@ msgid "A fatal error occurred: \"%1%\""
 msgstr ""
 
 msgid "Please save project and restart the program."
-msgstr ""
+msgstr "Uložte projekt a restartujte program."
 
 msgid "Processing G-Code from Previous file..."
 msgstr "Zpracovává se G-kód z předchozího souboru..."
@@ -4948,11 +4948,11 @@ msgstr "&Pomoc"
 
 #, c-format, boost-format
 msgid "A file exists with the same name: %s, do you want to overwrite it?"
-msgstr ""
+msgstr "Existuje soubor se stejným názvem: %s, chcete jej přepsat."
 
 #, c-format, boost-format
 msgid "A config exists with the same name: %s, do you want to overwrite it?"
-msgstr ""
+msgstr "Existuje konfigurace se stejným názvem: %s, chcete ji přepsat."
 
 msgid "Overwrite file"
 msgstr "Přepsat soubor"
@@ -6080,7 +6080,7 @@ msgid ""
 msgstr ""
 
 msgid "Customized Preset"
-msgstr ""
+msgstr "Přizpůsobená Předvolba"
 
 msgid "Name of components inside step file is not UTF8 format!"
 msgstr "Názvy součástí v souboru kroku nejsou ve formátu UTF8!"
@@ -6459,7 +6459,7 @@ msgid "Custom supports and color painting were removed before repairing."
 msgstr "Vlastní podpěry a barevné malby byly před opravou odstraněny."
 
 msgid "Optimize Rotation"
-msgstr ""
+msgstr "Optimalizovat Orientaci"
 
 msgid "Invalid number"
 msgstr "Neplatné číslo"
@@ -6651,16 +6651,16 @@ msgstr ""
 "omezenou kameru."
 
 msgid "Reverse mouse zoom"
-msgstr ""
+msgstr "Zvětšení/zmenšení myší v opačném směru"
 
 msgid "If enabled, reverses the direction of zoom with mouse wheel."
-msgstr ""
+msgstr "Pokud je povoleno, obrací směr přiblížení kolečkem myši."
 
 msgid "Show splash screen"
 msgstr "Zobrazovat úvodní obrazovku"
 
 msgid "Show the splash screen during startup."
-msgstr ""
+msgstr "Zobrazit úvodní obrazovku během spuštění."
 
 msgid "Show \"Tip of the day\" notification after start"
 msgstr "Zobrazovat \"Tip dne\" po spuštění"
@@ -7588,71 +7588,78 @@ msgstr ""
 msgid ""
 "A copy of the current system preset will be created, which will be detached "
 "from the system preset."
-msgstr ""
+msgstr "Bude vytvořena oddělená  kopie aktuálního systémového přednastavení."
 
 msgid ""
 "The current custom preset will be detached from the parent system preset."
 msgstr ""
+"Aktuální vlastní přednastavení bude odděleno od rodičovského systémového "
+"přednastavení."
 
 msgid "Modifications to the current profile will be saved."
-msgstr ""
+msgstr "Úpravy aktuálního profilu budou uloženy."
 
 msgid ""
 "This action is not revertible.\n"
 "Do you want to proceed?"
 msgstr ""
+"Tato akce není vratná.\n"
+"Chcete pokračovat?"
 
 msgid "Detach preset"
-msgstr ""
+msgstr "Oddělení přednastavení"
 
 msgid "This is a default preset."
-msgstr ""
+msgstr "Toto je výchozí přednastavení."
 
 msgid "This is a system preset."
-msgstr ""
+msgstr "Toto je systémové přednastavení."
 
 msgid "Current preset is inherited from the default preset."
-msgstr ""
+msgstr "Aktuální nastavení je zděděno z výchozího nastavení."
 
 msgid "Current preset is inherited from"
-msgstr ""
+msgstr "Aktuální nastavení je zděděné od"
 
 msgid "It can't be deleted or modified."
-msgstr ""
+msgstr "Nelze smazat nebo upravit."
 
 msgid ""
 "Any modifications should be saved as a new preset inherited from this one."
 msgstr ""
+"Jakékoliv úpravy by měly být uloženy jako nové přednastavení zděděná z "
+"tohoto."
 
 msgid "To do that please specify a new name for the preset."
 msgstr ""
+"Chcete-li akci provést, prosím nejdříve zadejte nový název přednastavení."
 
 msgid "Additional information:"
-msgstr ""
+msgstr "Doplňující informace:"
 
 msgid "vendor"
-msgstr ""
+msgstr "výrobce"
 
 msgid "printer model"
-msgstr ""
+msgstr "model tiskárny"
 
 msgid "default print profile"
-msgstr ""
+msgstr "výchozí tiskový profil"
 
 msgid "default filament profile"
-msgstr ""
+msgstr "výchozí profil filamentu"
 
 msgid "default SLA material profile"
-msgstr ""
+msgstr "výchozí profil pro SLA materiál"
 
 msgid "default SLA print profile"
-msgstr ""
+msgstr "výchozí SLA tiskový profil"
 
 msgid "full profile name"
-msgstr ""
+msgstr "celé jméno profilu"
 
 msgid "symbolic profile name"
-msgstr ""
+msgstr "symbolické jméno profilu"
 
 msgid "Line width"
 msgstr "Šířka Extruze"
@@ -7733,7 +7740,7 @@ msgid "Filament for Features"
 msgstr ""
 
 msgid "Ooze prevention"
-msgstr ""
+msgstr "Prevence odkapávání"
 
 msgid "Skirt"
 msgstr "Obrys"
@@ -7928,7 +7935,7 @@ msgid "Toolchange parameters with multi extruder MM printers"
 msgstr "Parametry při výměně (Multi Material s více extrudery)"
 
 msgid "Dependencies"
-msgstr ""
+msgstr "Závislosti"
 
 msgid "Profile dependencies"
 msgstr ""
@@ -8011,7 +8018,7 @@ msgid "Single extruder multi-material setup"
 msgstr "Nastavení multimateriálu s jedním extruderem"
 
 msgid "Number of extruders of the printer."
-msgstr ""
+msgstr "Počet extrudérů tiskárny."
 
 msgid ""
 "Single Extruder Multi Material is selected, \n"
@@ -8019,6 +8026,10 @@ msgid ""
 "Do you want to change the diameter for all extruders to first extruder "
 "nozzle diameter value?"
 msgstr ""
+"Je zvolená Multi Materiálová tiskárna s jedním extruderem,\n"
+"a proto všechny extrudery musí mít stejný průměr.\n"
+"Chcete nastavit průměry všech extruderových trysek podle průměru prvního "
+"extruderu?"
 
 msgid "Nozzle diameter"
 msgstr "Průměr trysky"
@@ -8937,6 +8948,9 @@ msgid ""
 "printing. Do you want to update now? You can also update later on printer or "
 "update next time starting Orca."
 msgstr ""
+"Verze firmwaru je abnormální. Oprava a aktualizace jsou nutné před tisk. "
+"Chcete provést aktualizaci nyní? Aktualizaci můžete provést také později na "
+"tiskárně nebo aktualizovat při příštím spuštění studia."
 
 msgid "Extension Board"
 msgstr "Rozšiřující deska"
@@ -9034,6 +9048,7 @@ msgid ""
 "Your print is very close to the priming regions. Make sure there is no "
 "collision."
 msgstr ""
+"Váš tisk je velmi blízko čistícím oblastem. Zajistěte, aby nedošlo ke kolizi."
 
 msgid ""
 "Failed to generate gcode for invalid custom G-code.\n"
@@ -9256,6 +9271,8 @@ msgid ""
 "While the object %1% itself fits the build volume, it exceeds the maximum "
 "build volume height because of material shrinkage compensation."
 msgstr ""
+"Ačkoli samotný objekt %1% se vejde do tiskového objemu, kvůli kompenzaci "
+"smrštění materiálu přesahuje maximální výšku tiskového objemu."
 
 #, boost-format
 msgid "The object %1% exceeds the maximum build volume height."
@@ -9296,6 +9313,8 @@ msgid ""
 "Ooze prevention is only supported with the wipe tower when "
 "'single_extruder_multi_material' is off."
 msgstr ""
+"Prevence odkapávání filamentu je podporována pouze u čistící věže, když je "
+"vypnuta funkce 'single_extruder_multi_material'."
 
 msgid ""
 "The prime tower is currently only supported for the Marlin, RepRap/Sprinter, "
@@ -9458,6 +9477,8 @@ msgid ""
 "Filament shrinkage will not be used because filament shrinkage for the used "
 "filaments differs significantly."
 msgstr ""
+"Smrštění filamentu nebude použito, protože se smrštění u použitých filamentů "
+"výrazně liší."
 
 msgid "Generating skirt & brim"
 msgstr "Generování Obrysu a Límce"
@@ -9472,7 +9493,7 @@ msgid "Failed processing of the filename_format template."
 msgstr "Zpracování šablony filename_format se nezdařilo."
 
 msgid "Printer technology"
-msgstr ""
+msgstr "Technologie tisku"
 
 msgid "Printable area"
 msgstr "Oblast pro tisk"
@@ -9823,7 +9844,7 @@ msgid "Top and bottom surfaces"
 msgstr ""
 
 msgid "Nowhere"
-msgstr ""
+msgstr "Nikde"
 
 msgid "Force cooling for overhangs and bridges"
 msgstr ""
@@ -10020,6 +10041,8 @@ msgid ""
 "Create additional perimeter paths over steep overhangs and areas where "
 "bridges cannot be anchored."
 msgstr ""
+"Vytvořte další perimetry přes strmé převisy a oblasti, kde mosty nelze "
+"ukotvit."
 
 msgid "Reverse on even"
 msgstr ""
@@ -10217,6 +10240,9 @@ msgid ""
 "profile. If this expression evaluates to true, this profile is considered "
 "compatible with the active printer profile."
 msgstr ""
+"Logický výraz může používat konfigurační hodnoty aktivního profilu tiskárny. "
+"Pokud je tento logický výraz pravdivý, potom je tento profil považován za "
+"kompatibilní s aktivním profilem tiskárny."
 
 msgid "Compatible process profiles"
 msgstr "Kompatibilní profily procesů"
@@ -10229,6 +10255,9 @@ msgid ""
 "profile. If this expression evaluates to true, this profile is considered "
 "compatible with the active print profile."
 msgstr ""
+"Logický výraz může používat konfigurační hodnoty aktivního profilu tiskárny. "
+"Pokud je tento logický výraz pravdivý, potom je tento profil považován za "
+"kompatibilní s aktivním profilem tiskárny."
 
 msgid "Print sequence, layer by layer or object by object"
 msgstr "Tisková sekvence, vrstva po vrstvě nebo objekt po objektu"
@@ -10427,7 +10456,7 @@ msgid ""
 msgstr ""
 
 msgid "Filter"
-msgstr ""
+msgstr "Filtr"
 
 msgid "Limited filtering"
 msgstr ""
@@ -11056,13 +11085,13 @@ msgstr ""
 "požadovaný počet těchto pohybů."
 
 msgid "Stamping loading speed"
-msgstr ""
+msgstr "Rychlost vtlačení"
 
 msgid "Speed used for stamping."
-msgstr ""
+msgstr "Rychlost používaná pro vtlačení"
 
 msgid "Stamping distance measured from the center of the cooling tube"
-msgstr ""
+msgstr "Vzdálenost vtlačení měřená od středu chladicí trubičky"
 
 msgid ""
 "If set to nonzero value, filament is moved toward the nozzle between the "
@@ -11929,7 +11958,7 @@ msgid "Speed of internal sparse infill"
 msgstr "Rychlost vnitřní výplně"
 
 msgid "Inherits profile"
-msgstr ""
+msgstr "Zdědí profil"
 
 msgid "Name of parent profile"
 msgstr ""
@@ -11963,49 +11992,59 @@ msgid ""
 msgstr ""
 
 msgid "Use beam interlocking"
-msgstr ""
+msgstr "Použít propojení materiálu paprsky"
 
 msgid ""
 "Generate interlocking beam structure at the locations where different "
 "filaments touch. This improves the adhesion between filaments, especially "
 "models printed in different materials."
 msgstr ""
+"Propojení materiálu paprsky (Interlocking) vytváří propojovací paprsky v "
+"místech kontaktu různých filamentů, čímž zlepšuje jejich přilnavost, zejména "
+"při tisku z různých materiálů."
 
 msgid "Interlocking beam width"
-msgstr ""
+msgstr "Šířka propojovacího paprsku"
 
 msgid "The width of the interlocking structure beams."
-msgstr ""
+msgstr "Šířka propojovacího paprsku (Interlocking Struktury)"
 
 msgid "Interlocking direction"
-msgstr ""
+msgstr "Směr propojovací struktury"
 
 msgid "Orientation of interlock beams."
 msgstr ""
 
 msgid "Interlocking beam layers"
-msgstr ""
+msgstr "Počet vrstev propojovacího paprsku"
 
 msgid ""
 "The height of the beams of the interlocking structure, measured in number of "
 "layers. Less layers is stronger, but more prone to defects."
 msgstr ""
+"Definuje výšku paprsků propojení materiálu, udávanou v počtu vrstev "
+"(Interlocking struktury). Méně vrstev zvyšuje pevnost, ale může způsobit "
+"více vad."
 
 msgid "Interlocking depth"
-msgstr ""
+msgstr "Hloubka propojovacích paprsků"
 
 msgid ""
 "The distance from the boundary between filaments to generate interlocking "
 "structure, measured in cells. Too few cells will result in poor adhesion."
 msgstr ""
+"Vzdálenost od hranice mezi filamenty, ve které se generuje propojovací "
+"struktura, měřená v buňkách. Příliš málo buněk zhorší přilnavost."
 
 msgid "Interlocking boundary avoidance"
-msgstr ""
+msgstr "Odstup od hranice propojení"
 
 msgid ""
 "The distance from the outside of a model where interlocking structures will "
 "not be generated, measured in cells."
 msgstr ""
+"Vzdálenost od vnějšího okraje modelu, kde se nebudou vytvářet propojovací "
+"struktury (interlocking), udávaná v buňkách."
 
 msgid "Ironing Type"
 msgstr "Způsob žehlení"
@@ -12466,6 +12505,8 @@ msgid ""
 "This option will drop the temperature of the inactive extruders to prevent "
 "oozing."
 msgstr ""
+"Tato volba sníží teplotu neaktivních extruderů, aby u nich nedocházelo k "
+"ukapávání filamentu."
 
 msgid "Filename format"
 msgstr "Formát názvu souboru"
@@ -12558,7 +12599,7 @@ msgstr ""
 "k nastavení konfigurace ElegooSlicer čtením proměnných prostředí."
 
 msgid "Printer type"
-msgstr ""
+msgstr "Typ tiskárny"
 
 msgid "Type of the printer"
 msgstr ""
@@ -12570,7 +12611,7 @@ msgid "You can put your notes regarding the printer here."
 msgstr "Zde můžete uvést poznámky týkající se tiskárny."
 
 msgid "Printer variant"
-msgstr ""
+msgstr "Varianta tiskárny"
 
 msgid "Raft contact Z distance"
 msgstr "Mezera mezi objektem a raftem v ose Z"
@@ -12708,7 +12749,7 @@ msgstr ""
 "hodnota Z nad dolní mezí Z hop a zároveň pod touto hodnotou"
 
 msgid "Z-hop type"
-msgstr ""
+msgstr "Typ Z-hop"
 
 msgid "Z hop type"
 msgstr "Typ Z hop"
@@ -12923,7 +12964,7 @@ msgid "This factor affects the amount of material for scarf joints."
 msgstr ""
 
 msgid "Scarf start height"
-msgstr ""
+msgstr "Počáteční výška Scarf-spoje"
 
 msgid ""
 "Start height of the scarf.\n"
@@ -13056,18 +13097,20 @@ msgid "Enabled"
 msgstr "Povoleno"
 
 msgid "Skirt type"
-msgstr ""
+msgstr "Typ obrysu"
 
 msgid ""
 "Combined - single skirt for all objects, Per object - individual object "
 "skirt."
 msgstr ""
+"Kombinovaný - jeden obrys pro všechny objekty, Individuální - každý objekt "
+"má vlastní obrys."
 
 msgid "Combined"
-msgstr ""
+msgstr "Kombinovaný "
 
 msgid "Per object"
-msgstr ""
+msgstr "Individuální "
 
 msgid "Skirt loops"
 msgstr "Obrysové smyčky"
@@ -13114,7 +13157,7 @@ msgstr ""
 "vnitřní plnou výplní"
 
 msgid "Solid infill"
-msgstr ""
+msgstr "Plná výplň"
 
 msgid "Filament to print solid infill"
 msgstr ""
@@ -13346,16 +13389,16 @@ msgid ""
 msgstr ""
 
 msgid "Normal (auto)"
-msgstr ""
+msgstr "Normální (auto)"
 
 msgid "Tree (auto)"
-msgstr ""
+msgstr "Strom (auto)"
 
 msgid "Normal (manual)"
-msgstr ""
+msgstr "Normální (manuální)"
 
 msgid "Tree (manual)"
-msgstr ""
+msgstr "Strom (manuální)"
 
 msgid "Support/object xy distance"
 msgstr "Podpěry/Objekt xy vzdálenost"
@@ -14004,16 +14047,19 @@ msgid "Spacing of purge lines on the wipe tower."
 msgstr "Rozteč čistících linek v čistící věži."
 
 msgid "Extra flow for purging"
-msgstr ""
+msgstr "Navýšení průtoku pro čištění"
 
 msgid ""
 "Extra flow used for the purging lines on the wipe tower. This makes the "
 "purging lines thicker or narrower than they normally would be. The spacing "
 "is adjusted automatically."
 msgstr ""
+"Dodatečný průtok používaný pro tisk čistících linek na čistící věži. Díky "
+"tomu jsou čistící linky silnější nebo užší, než by normálně byly. Vzdálenost "
+"mezi nimi se upravuje automaticky."
 
 msgid "Idle temperature"
-msgstr ""
+msgstr "Teplota při nečinnosti"
 
 msgid ""
 "Nozzle temperature when the tool is currently not used in multi-tool setups."
@@ -14394,6 +14440,8 @@ msgid ""
 "Arrange the supplied models in a plate and merge them in a single model in "
 "order to perform actions once."
 msgstr ""
+"Uspořádejte modely na tiskovou podložku a slučte je do jednoho modelu, "
+"abyste s nimi mohli provádět akce jednou."
 
 msgid "Convert Unit"
 msgstr "Převést jednotku"
@@ -14652,13 +14700,13 @@ msgstr "Je extruder použitý?"
 
 msgid ""
 "Vector of booleans stating whether a given extruder is used in the print."
-msgstr ""
+msgstr "Vektor booleanů udávající, zda je při tisku použit daný extruder."
 
 msgid "Has single extruder MM priming"
-msgstr ""
+msgstr "Má jeden extruder MM čištění"
 
 msgid "Are the extra multi-material priming regions used in this print?"
-msgstr ""
+msgstr "Jsou v tomto tisku použity dodatečné vícemateriálové čistící oblasti?"
 
 msgid "Volume per extruder"
 msgstr "Objem pro každý extruder"
@@ -15627,7 +15675,7 @@ msgid "mm/mm"
 msgstr "mm/mm"
 
 msgid "Send G-code to printer host"
-msgstr ""
+msgstr "Odeslat G-Kód do tiskového serveru"
 
 msgid "Upload to Printer Host with the following filename:"
 msgstr "Nahrát do tiskového serveru s následujícím názvem souboru:"
@@ -16675,7 +16723,7 @@ msgid "There is no valid surface for text projection."
 msgstr ""
 
 msgid "Head diameter"
-msgstr ""
+msgstr "Průměr hrotu"
 
 msgid "Max angle"
 msgstr ""
@@ -16684,13 +16732,13 @@ msgid "Detection radius"
 msgstr ""
 
 msgid "Remove selected points"
-msgstr ""
+msgstr "Odebrat označené body"
 
 msgid "Remove all"
 msgstr ""
 
 msgid "Auto-generate points"
-msgstr ""
+msgstr "Automatické generování bodů"
 
 msgid "Add a brim ear"
 msgstr ""
@@ -16710,10 +16758,10 @@ msgid "Set the brim type to \"painted\""
 msgstr ""
 
 msgid " invalid brim ears"
-msgstr ""
+msgstr " neplatný uši Límce"
 
 msgid "Brim Ears"
-msgstr ""
+msgstr "Uši Límce"
 
 msgid "Please select single object."
 msgstr ""

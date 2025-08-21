@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-08 16:43+0800\n"
+"POT-Creation-Date: 2025-08-21 18:06+0800\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1327,13 +1327,13 @@ msgid ""
 msgstr ""
 
 msgid "Face"
-msgstr ""
+msgstr "Face"
 
 msgid " (Fixed)"
-msgstr ""
+msgstr " (Fixed)"
 
 msgid "Point"
-msgstr ""
+msgstr "Point"
 
 msgid ""
 "Feature 1 has been reset, \n"
@@ -3155,7 +3155,7 @@ msgid "A fatal error occurred: \"%1%\""
 msgstr ""
 
 msgid "Please save project and restart the program."
-msgstr ""
+msgstr "Spara projekt och starta om programmet."
 
 msgid "Processing G-Code from Previous file..."
 msgstr "Processera G-Code från Föregående fil…"
@@ -4912,11 +4912,11 @@ msgstr "&Hjälp"
 
 #, c-format, boost-format
 msgid "A file exists with the same name: %s, do you want to overwrite it?"
-msgstr ""
+msgstr "Det finns en fil med samma namn: %s. Vill du åsidosätta den?"
 
 #, c-format, boost-format
 msgid "A config exists with the same name: %s, do you want to overwrite it?"
-msgstr ""
+msgstr "Det finns en konfiguration med samma namn: %s. Vill du åsidosätta den?"
 
 msgid "Overwrite file"
 msgstr "Skriv över fil"
@@ -5120,6 +5120,8 @@ msgid ""
 "Please check if the SD card is inserted into the printer.\n"
 "If it still cannot be read, you can try formatting the SD card."
 msgstr ""
+"Kontrollera om SD-kortet är sitter i printern.\n"
+"Om det fortfarande inte går att läsa kan du försöka formatera SD kortet."
 
 msgid "LAN Connection Failed (Failed to view sdcard)"
 msgstr "LAN Connection Failed (Failed to view sdcard)"
@@ -6603,22 +6605,23 @@ msgstr ""
 "mitt."
 
 msgid "Use free camera"
-msgstr ""
+msgstr "Använd fri kamera"
 
 msgid "If enabled, use free camera. If not enabled, use constrained camera."
 msgstr ""
+"Om aktiverat, använd fri kamera. Om inte aktiverat, använd begränsad kamera."
 
 msgid "Reverse mouse zoom"
-msgstr ""
+msgstr "Omvänd muszoomning"
 
 msgid "If enabled, reverses the direction of zoom with mouse wheel."
-msgstr ""
+msgstr "Om aktiverad, vänder zoomriktningen med mushjulet."
 
 msgid "Show splash screen"
-msgstr ""
+msgstr "Visa välkomstskärm"
 
 msgid "Show the splash screen during startup."
-msgstr ""
+msgstr "Visa välkomstskärmen under uppstart."
 
 msgid "Show \"Tip of the day\" notification after start"
 msgstr "Visa \"Dagens tips\" efter start"
@@ -8668,13 +8671,13 @@ msgid "Gizmo Text emboss / engrave"
 msgstr ""
 
 msgid "Zoom in"
-msgstr ""
+msgstr "Zooma in"
 
 msgid "Zoom out"
-msgstr ""
+msgstr "Zooma ut"
 
 msgid "Switch between Prepare/Preview"
-msgstr ""
+msgstr "Växla mellan Förbered/Förhandsgranska"
 
 msgid "Plater"
 msgstr "Plätering/Förgyllning"
@@ -10127,7 +10130,7 @@ msgstr ""
 "borttagande av brim"
 
 msgid "Brim ears"
-msgstr ""
+msgstr "Brätte öron"
 
 msgid "Only draw brim over the sharp edges of the model."
 msgstr ""
@@ -13136,16 +13139,16 @@ msgid ""
 msgstr ""
 
 msgid "Normal (auto)"
-msgstr ""
+msgstr "normal (auto)"
 
 msgid "Tree (auto)"
-msgstr ""
+msgstr "träd(auto)"
 
 msgid "Normal (manual)"
-msgstr ""
+msgstr "normal (manuell)"
 
 msgid "Tree (manual)"
-msgstr ""
+msgstr "tree (manuell)"
 
 msgid "Support/object xy distance"
 msgstr "Support/objekt xy distans"
@@ -14035,7 +14038,7 @@ msgid "Load cached slicing data from directory"
 msgstr "Ladda cachad berednings data från katalogen"
 
 msgid "Export STL"
-msgstr ""
+msgstr "Exportera STL"
 
 msgid "Export the objects as single STL."
 msgstr ""
@@ -14070,7 +14073,7 @@ msgid ""
 msgstr ""
 
 msgid "Load default filaments"
-msgstr ""
+msgstr "Ladda standard filament"
 
 msgid "Load first filament as default for those not loaded"
 msgstr ""
@@ -16584,10 +16587,10 @@ msgid "Set the brim type to \"painted\""
 msgstr ""
 
 msgid " invalid brim ears"
-msgstr ""
+msgstr " ogiltiga öron"
 
 msgid "Brim Ears"
-msgstr ""
+msgstr "Brätte Öron"
 
 msgid "Please select single object."
 msgstr ""
