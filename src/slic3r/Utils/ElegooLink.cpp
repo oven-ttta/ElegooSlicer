@@ -36,45 +36,45 @@ PrinterNetworkErrorCode parseElegooResult(elink::ElegooError code)
     case elink::ElegooError::TOKEN_INVALID: return PrinterNetworkErrorCode::TOKEN_INVALID;
     case elink::ElegooError::FILE_TRANSFER_FAILED: return PrinterNetworkErrorCode::FILE_TRANSFER_FAILED;
     case elink::ElegooError::FILE_NOT_FOUND: return PrinterNetworkErrorCode::FILE_NOT_FOUND;
-    case elink::ElegooError::DEVICE_BUSY: return PrinterNetworkErrorCode::PRINTER_BUSY;
-    case elink::ElegooError::DEVICE_OFFLINE: return PrinterNetworkErrorCode::PRINTER_OFFLINE;
-    case elink::ElegooError::DEVICE_INITIALIZATION_ERROR: return PrinterNetworkErrorCode::PRINTER_INITIALIZATION_ERROR;
-    case elink::ElegooError::DEVICE_COMMAND_FAILED: return PrinterNetworkErrorCode::PRINTER_COMMAND_FAILED;
-    case elink::ElegooError::DEVICE_ALREADY_CONNECTED: return PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED;
-    case elink::ElegooError::DEVICE_INTERNAL_ERROR: return PrinterNetworkErrorCode::PRINTER_INTERNAL_ERROR;
-    case elink::ElegooError::DEVICE_TASK_NOT_FOUND: return PrinterNetworkErrorCode::PRINTER_TASK_NOT_FOUND;
+    case elink::ElegooError::PRINTER_BUSY: return PrinterNetworkErrorCode::PRINTER_BUSY;
+    case elink::ElegooError::PRINTER_OFFLINE: return PrinterNetworkErrorCode::PRINTER_OFFLINE;
+    case elink::ElegooError::PRINTER_INITIALIZATION_ERROR: return PrinterNetworkErrorCode::PRINTER_INITIALIZATION_ERROR;
+    case elink::ElegooError::PRINTER_COMMAND_FAILED: return PrinterNetworkErrorCode::PRINTER_COMMAND_FAILED;
+    case elink::ElegooError::PRINTER_ALREADY_CONNECTED: return PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED;
+    case elink::ElegooError::PRINTER_INTERNAL_ERROR: return PrinterNetworkErrorCode::PRINTER_INTERNAL_ERROR;
+    case elink::ElegooError::PRINTER_TASK_NOT_FOUND: return PrinterNetworkErrorCode::PRINTER_TASK_NOT_FOUND;
     default: return PrinterNetworkErrorCode::UNKNOWN_ERROR;
     }
 }
 
-PrinterStatus parseElegooStatus(elink::MachineMainStatus mainStatus, elink::MachineSubStatus subStatus)
+PrinterStatus parseElegooStatus(elink::PrinterState mainStatus, elink::PrinterSubState subStatus)
 {
     PrinterStatus printerStatus = PRINTER_STATUS_UNKNOWN;
     switch (mainStatus) {
-    case elink::MachineMainStatus::OFFLINE: printerStatus = PRINTER_STATUS_OFFLINE; break;
-    case elink::MachineMainStatus::IDLE: printerStatus = PRINTER_STATUS_IDLE; break;
-    case elink::MachineMainStatus::PRINTING: printerStatus = PRINTER_STATUS_PRINTING; break;
-    case elink::MachineMainStatus::SELF_CHECKING: printerStatus = PRINTER_STATUS_SELF_CHECKING; break;
-    case elink::MachineMainStatus::AUTO_LEVELING: printerStatus = PRINTER_STATUS_AUTO_LEVELING; break;
-    case elink::MachineMainStatus::PID_CALIBRATING: printerStatus = PRINTER_STATUS_PID_CALIBRATING; break;
-    case elink::MachineMainStatus::RESONANCE_TESTING: printerStatus = PRINTER_STATUS_RESONANCE_TESTING; break;
-    case elink::MachineMainStatus::UPDATING: printerStatus = PRINTER_STATUS_UPDATING; break;
-    case elink::MachineMainStatus::FILE_COPYING: printerStatus = PRINTER_STATUS_FILE_COPYING; break;
-    case elink::MachineMainStatus::FILE_TRANSFERRING: printerStatus = PRINTER_STATUS_FILE_TRANSFERRING; break;
-    case elink::MachineMainStatus::HOMING: printerStatus = PRINTER_STATUS_HOMING; break;
-    case elink::MachineMainStatus::PREHEATING: printerStatus = PRINTER_STATUS_PREHEATING; break;
-    case elink::MachineMainStatus::FILAMENT_OPERATING: printerStatus = PRINTER_STATUS_FILAMENT_OPERATING; break;
-    case elink::MachineMainStatus::EXTRUDER_OPERATING: printerStatus = PRINTER_STATUS_EXTRUDER_OPERATING; break;
-    case elink::MachineMainStatus::UNKNOWN: printerStatus = PRINTER_STATUS_UNKNOWN; break;
-    case elink::MachineMainStatus::EXCEPTION: printerStatus = PRINTER_STATUS_ERROR; break;
+    case elink::PrinterState::OFFLINE: printerStatus = PRINTER_STATUS_OFFLINE; break;
+    case elink::PrinterState::IDLE: printerStatus = PRINTER_STATUS_IDLE; break;
+    case elink::PrinterState::PRINTING: printerStatus = PRINTER_STATUS_PRINTING; break;
+    case elink::PrinterState::SELF_CHECKING: printerStatus = PRINTER_STATUS_SELF_CHECKING; break;
+    case elink::PrinterState::AUTO_LEVELING: printerStatus = PRINTER_STATUS_AUTO_LEVELING; break;
+    case elink::PrinterState::PID_CALIBRATING: printerStatus = PRINTER_STATUS_PID_CALIBRATING; break;
+    case elink::PrinterState::RESONANCE_TESTING: printerStatus = PRINTER_STATUS_RESONANCE_TESTING; break;
+    case elink::PrinterState::UPDATING: printerStatus = PRINTER_STATUS_UPDATING; break;
+    case elink::PrinterState::FILE_COPYING: printerStatus = PRINTER_STATUS_FILE_COPYING; break;
+    case elink::PrinterState::FILE_TRANSFERRING: printerStatus = PRINTER_STATUS_FILE_TRANSFERRING; break;
+    case elink::PrinterState::HOMING: printerStatus = PRINTER_STATUS_HOMING; break;
+    case elink::PrinterState::PREHEATING: printerStatus = PRINTER_STATUS_PREHEATING; break;
+    case elink::PrinterState::FILAMENT_OPERATING: printerStatus = PRINTER_STATUS_FILAMENT_OPERATING; break;
+    case elink::PrinterState::EXTRUDER_OPERATING: printerStatus = PRINTER_STATUS_EXTRUDER_OPERATING; break;
+    case elink::PrinterState::UNKNOWN: printerStatus = PRINTER_STATUS_UNKNOWN; break;
+    case elink::PrinterState::EXCEPTION: printerStatus = PRINTER_STATUS_ERROR; break;
     default: printerStatus = PRINTER_STATUS_UNKNOWN; break;
     }
 
 
     switch (subStatus) {
-    case elink::MachineSubStatus::P_PAUSING: printerStatus = PRINTER_STATUS_PAUSING; break;
-    case elink::MachineSubStatus::P_PAUSED: printerStatus = PRINTER_STATUS_PAUSED; break;
-    case elink::MachineSubStatus::P_PRINTING_COMPLETED: printerStatus = PRINTER_STATUS_PRINT_COMPLETED; break;
+    case elink::PrinterSubState::P_PAUSING: printerStatus = PRINTER_STATUS_PAUSING; break;
+    case elink::PrinterSubState::P_PAUSED: printerStatus = PRINTER_STATUS_PAUSED; break;
+    case elink::PrinterSubState::P_PRINTING_COMPLETED: printerStatus = PRINTER_STATUS_PRINT_COMPLETED; break;
     default: break;
     }
     return printerStatus;
@@ -104,20 +104,20 @@ ElegooLink::ElegooLink()
     std::string version = elink::ElegooLink::getInstance().getVersion();
     wxLogMessage("ElegooLink version: %s", version.c_str());
     // Subscribe to ElegooLink events
-    elink::ElegooLink::getInstance().subscribeEvent<elink::DeviceConnectionEvent>(
-        [&](const std::shared_ptr<elink::DeviceConnectionEvent>& event) {
+    elink::ElegooLink::getInstance().subscribeEvent<elink::PrinterConnectionEvent>(
+        [&](const std::shared_ptr<elink::PrinterConnectionEvent>& event) {
             PrinterConnectStatus status = (event->connectionStatus.status == elink::ConnectionStatus::CONNECTED) ?
                                               PRINTER_CONNECT_STATUS_CONNECTED :
                                               PRINTER_CONNECT_STATUS_DISCONNECTED;
 
             PrinterNetworkEvent::getInstance()->connectStatusChanged.emit(
-                PrinterConnectStatusEvent(event->connectionStatus.deviceId, status));
+                PrinterConnectStatusEvent(event->connectionStatus.printerId, status));
         });
 
-    elink::ElegooLink::getInstance().subscribeEvent<elink::DeviceStatusEvent>([&](const std::shared_ptr<elink::DeviceStatusEvent>& event) {
+    elink::ElegooLink::getInstance().subscribeEvent<elink::PrinterStatusEvent>([&](const std::shared_ptr<elink::PrinterStatusEvent>& event) {
         
-        PrinterStatus status = parseElegooStatus(event->status.machineStatus.status, event->status.machineStatus.subStatus);
-        PrinterNetworkEvent::getInstance()->statusChanged.emit(PrinterStatusEvent(event->status.deviceId, status));
+        PrinterStatus status = parseElegooStatus(event->status.printerStatus.state, event->status.printerStatus.subState);
+        PrinterNetworkEvent::getInstance()->statusChanged.emit(PrinterStatusEvent(event->status.printerId, status));
 
 
         PrinterPrintTask task;
@@ -128,14 +128,14 @@ ElegooLink::ElegooLink()
         task.estimatedTime = event->status.printStatus.estimatedTime;
         task.progress      = event->status.printStatus.progress;
 
-        PrinterNetworkEvent::getInstance()->printTaskChanged.emit(PrinterPrintTaskEvent(event->status.deviceId, task));
+        PrinterNetworkEvent::getInstance()->printTaskChanged.emit(PrinterPrintTaskEvent(event->status.printerId, task));
     });
 
-    elink::ElegooLink::getInstance().subscribeEvent<elink::DeviceAttributesEvent>([&](const std::shared_ptr<elink::DeviceAttributesEvent>& event) {
+    elink::ElegooLink::getInstance().subscribeEvent<elink::PrinterAttributesEvent>([&](const std::shared_ptr<elink::PrinterAttributesEvent>& event) {
         PrinterNetworkInfo info;
-        info.printerId       = event->attributes.deviceId;
+        info.printerId       = event->attributes.printerId;
         info.firmwareVersion = event->attributes.firmwareVersion;
-        PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.deviceId, info));
+        PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.printerId, info));
     });
 
     mIsCleanup = false;
@@ -160,12 +160,12 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     try {
-        elink::ConnectDeviceParams connectionParams;
-        connectionParams.deviceId        = printerNetworkInfo.printerId;
-        if(printerNetworkInfo.isPhysicalPrinter && printerNetworkInfo.deviceType == -1) {
-            connectionParams.deviceType = (elink::DeviceType) getDeviceType(printerNetworkInfo);
+        elink::ConnectPrinterParams connectionParams;
+        connectionParams.printerId        = printerNetworkInfo.printerId;
+        if(printerNetworkInfo.isPhysicalPrinter && printerNetworkInfo.printerType == -1) {
+            connectionParams.printerType = (elink::PrinterType) getPrinterType(printerNetworkInfo);
         } else {
-            connectionParams.deviceType = (elink::DeviceType) printerNetworkInfo.deviceType;
+            connectionParams.printerType = (elink::PrinterType) printerNetworkInfo.printerType;
         } 
         connectionParams.name            = printerNetworkInfo.printerName;
         connectionParams.authMode        = printerNetworkInfo.authMode;
@@ -186,14 +186,14 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
             if (extraInfo.contains(PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN)) {
                 connectionParams.token = extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN].get<std::string>();
             } else {
-                wxLogError("Error connecting to device: %s", "Token is not set");
+                wxLogError("Error connecting to printer: %s", "Token is not set");
             }
         }
-        auto elinkResult = elink::ElegooLink::getInstance().connectDevice(connectionParams);
+        auto elinkResult = elink::ElegooLink::getInstance().connectPrinter(connectionParams);
         resultCode    = parseElegooResult(elinkResult.code);
         if (elinkResult.code == elink::ElegooError::SUCCESS) {
-            if (elinkResult.data.has_value() && elinkResult.data.value().isConnected && elinkResult.data.value().deviceInfo.deviceId == printerNetworkInfo.printerId) {      
-                auto addPrinter = elinkResult.data.value().deviceInfo;
+            if (elinkResult.data.has_value() && elinkResult.data.value().isConnected && elinkResult.data.value().printerInfo.printerId == printerNetworkInfo.printerId) {      
+                auto addPrinter = elinkResult.data.value().printerInfo;
                 PrinterNetworkInfo info = printerNetworkInfo;
                 //update printer network info
                 info.firmwareVersion = addPrinter.firmwareVersion;
@@ -202,7 +202,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
                 info.serialNumber    = addPrinter.serialNumber;
                 info.firmwareVersion = addPrinter.firmwareVersion;
                 info.authMode = addPrinter.authMode;
-                info.printerId = addPrinter.deviceId;
+                info.printerId = addPrinter.printerId;
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
@@ -222,7 +222,7 @@ PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& 
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     try {
-        auto elinkResult = elink::ElegooLink::getInstance().disconnectDevice(printerId);
+        auto elinkResult = elink::ElegooLink::getInstance().disconnectPrinter(printerId);
         resultCode    = parseElegooResult(elinkResult.code);
 
     } catch (const std::exception& e) {
@@ -234,40 +234,40 @@ PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& 
 }
 
 
-PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverDevices()
+PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinters()
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
-    std::vector<PrinterNetworkInfo> discoverDevices;
+    std::vector<PrinterNetworkInfo> discoverPrinters;
     try {
-        elink::DeviceDiscoveryParams discoveryParams;
+        elink::PrinterDiscoveryParams discoveryParams;
         discoveryParams.timeoutMs         = 5 * 1000;
         discoveryParams.broadcastInterval = 1000;
         discoveryParams.enableAutoRetry   = true;
-        auto elinkResult = elink::ElegooLink::getInstance().startDeviceDiscovery(discoveryParams);
+        auto elinkResult = elink::ElegooLink::getInstance().startPrinterDiscovery(discoveryParams);
         resultCode  = parseElegooResult(elinkResult.code);
         if (elinkResult.code == elink::ElegooError::SUCCESS && elinkResult.data.has_value()) {
-            for (const auto& device : elinkResult.value().devices) {
+            for (const auto& printer : elinkResult.value().printers) {
                 PrinterNetworkInfo info;
-                info.printerName     = device.name;
-                info.host            = device.host;
-                info.printerModel    = device.model;
-                info.firmwareVersion = device.firmwareVersion;
-                info.serialNumber    = device.serialNumber;
-                info.vendor          = device.brand;
-                info.deviceType      = static_cast<int>(device.deviceType);
-                info.webUrl          = device.webUrl;
+                info.printerName     = printer.name;
+                info.host            = printer.host;
+                info.printerModel    = printer.model;
+                info.firmwareVersion = printer.firmwareVersion;
+                info.serialNumber    = printer.serialNumber;
+                info.vendor          = printer.brand;
+                info.printerType      = static_cast<int>(printer.printerType);
+                info.webUrl          = printer.webUrl;
 
-                info.authMode        = device.authMode;
-                info.mainboardId     = device.mainboardId;
-                discoverDevices.push_back(info);
+                info.authMode        = printer.authMode;
+                info.mainboardId     = printer.mainboardId;
+                discoverPrinters.push_back(info);
             }
         } 
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::discoverDevices: %s", e.what());
+        wxLogError("Exception in ElegooLink::discoverPrinters: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
 
-    return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, discoverDevices);
+    return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, discoverPrinters);
 }
 
 bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status, int tryCount)
@@ -279,15 +279,15 @@ bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status, int
     status = PRINTER_STATUS_UNKNOWN;
     for(int i = 0; i < tryCount; i++) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        auto elinkResult = elink::ElegooLink::getInstance().getDeviceStatus({printerId});
+        auto elinkResult = elink::ElegooLink::getInstance().getPrinterStatus({printerId});
         if (elinkResult.code == elink::ElegooError::SUCCESS) {
             const auto& statusData = elinkResult.value();
-            if(statusData.machineStatus.status == elink::MachineMainStatus::IDLE) {
+            if(statusData.printerStatus.state == elink::PrinterState::IDLE) {
                 isBusy = false;
                 status = PRINTER_STATUS_IDLE;
                 break;
             } else {
-                status = parseElegooStatus(statusData.machineStatus.status, statusData.machineStatus.subStatus);
+                status = parseElegooStatus(statusData.printerStatus.state, statusData.printerStatus.subState);
             }
         } else {
             return false;
@@ -305,7 +305,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
             return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_BUSY, false, "Printer is busy, status: " + std::to_string(status));
         }
         elink::StartPrintParams startPrintParams;
-        startPrintParams.deviceId        = params.printerId;
+        startPrintParams.printerId        = params.printerId;
         startPrintParams.storageLocation = "local";
         startPrintParams.fileName        = params.fileName;
         startPrintParams.autoBedLeveling = params.heatedBedLeveling;
@@ -342,7 +342,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
             return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_BUSY, false, "Printer is busy, status: " + std::to_string(status));
         }
         elink::FileUploadParams uploadParams;
-        uploadParams.deviceId = params.printerId;
+        uploadParams.printerId = params.printerId;
         uploadParams.storageLocation = "local";
         uploadParams.localFilePath = params.filePath;
         uploadParams.fileName = params.fileName;
@@ -366,7 +366,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
     return networkResult;
 }
 
-int ElegooLink::getDeviceType(const PrinterNetworkInfo& printerNetworkInfo)
+int ElegooLink::getPrinterType(const PrinterNetworkInfo& printerNetworkInfo)
 {
     if(printerNetworkInfo.isPhysicalPrinter) {
         std::string model = printerNetworkInfo.printerModel;
@@ -377,16 +377,16 @@ int ElegooLink::getDeviceType(const PrinterNetworkInfo& printerNetworkInfo)
             model = vendor + " " + model;
         }
         if(model == "elegoo centauri carbon 2" || model == "elegoo centauri 2") {
-            return static_cast<int>(elink::DeviceType::ELEGOO_FDM_CC2);
+            return static_cast<int>(elink::PrinterType::ELEGOO_FDM_CC2);
         } else if(model == "elegoo centauri carbon" || model == "elegoo centauri") {
-            return static_cast<int>(elink::DeviceType::ELEGOO_FDM_CC);  
+            return static_cast<int>(elink::PrinterType::ELEGOO_FDM_CC);  
         } else if (vendor == "elegoo") {
-            return static_cast<int>(elink::DeviceType::ELEGOO_FDM_KLIPPER);
+            return static_cast<int>(elink::PrinterType::ELEGOO_FDM_KLIPPER);
         } else {
-            return static_cast<int>(elink::DeviceType::GENERIC_FDM_KLIPPER);
+            return static_cast<int>(elink::PrinterType::GENERIC_FDM_KLIPPER);
         }
     } 
-    return printerNetworkInfo.deviceType; 
+    return printerNetworkInfo.printerType; 
 }
 
 PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::string& printerId)

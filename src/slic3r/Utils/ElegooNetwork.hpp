@@ -17,10 +17,10 @@ public:
     virtual PrinterNetworkResult<bool> disconnectFromPrinter() override;
     virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params) override;
     virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params) override;
-    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverDevices() override;
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() override;
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() override;
     virtual void close() override;
-    virtual int getDeviceType() override;
+    virtual int getPrinterType() override;
 };
 
 } // namespace Slic3r

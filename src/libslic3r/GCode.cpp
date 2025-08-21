@@ -736,9 +736,11 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
 
         const bool needs_toolchange = gcodegen.writer().need_toolchange(new_extruder_id);
         const bool will_go_down     = !is_approx(z, current_z);
-        const bool is_ramming       = (gcodegen.config().single_extruder_multi_material) ||
-                                (!gcodegen.config().single_extruder_multi_material &&
-                                 gcodegen.config().filament_multitool_ramming.get_at(tcr.initial_tool));
+        // This causes the printer to move to the wipe tower before each material change — temporarily disabled.
+        //const bool is_ramming       = (gcodegen.config().single_extruder_multi_material) ||
+        //                        (!gcodegen.config().single_extruder_multi_material &&
+        //                         gcodegen.config().filament_multitool_ramming.get_at(tcr.initial_tool));
+        const bool is_ramming             = false;
         const bool should_travel_to_tower = !tcr.priming && (tcr.force_travel     // wipe tower says so
                                                              || !needs_toolchange // this is just finishing the tower with no toolchange
                                                              || will_go_down // Make sure to move to prime tower before moving down
@@ -754,6 +756,7 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
         } else {
             // When this is multiextruder printer without any ramming, we can just change
             // the tool without travelling to the tower.
+            gcodegen.m_writer.add_object_end_labels(gcode);
         }
 
         if (will_go_down) {

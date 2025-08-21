@@ -4563,6 +4563,12 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBool(false));
 
+    def = this->add("auto_toolchange_command", coBool);
+    def->label = L("Auto-generate Tool Change Command");
+    def->tooltip = L("Enable this option to automatically generate the tool change (Tn) command in the G-code when switching extruders/tools.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(true));
+
     def = this->add("purge_in_prime_tower", coBool);
     def->label = L("Purge in prime tower");
     def->tooltip = L("Purge remaining filament into prime tower");
@@ -5309,7 +5315,7 @@ void PrintConfigDef::init_fff_params()
     def->label = L("Flush multiplier");
     def->tooltip = L("The actual flushing volumes is equal to the flush multiplier multiplied by the flushing volumes in the table.");
     def->sidetext = "";
-    def->set_default_value(new ConfigOptionFloat(0.3));
+    def->set_default_value(new ConfigOptionFloat(1.0f));
 
     // BBS
     def = this->add("prime_volume", coFloat);

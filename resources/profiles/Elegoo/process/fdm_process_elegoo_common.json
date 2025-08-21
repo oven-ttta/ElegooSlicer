@@ -89,5 +89,6 @@
     "exclude_object": "1",
     "wipe_speed": "100%",
     "print_flow_ratio": "0.97",
-    "wall_sequence": "inner wall/outer wall"
+    "wall_sequence": "inner wall/outer wall",
+    "wipe_tower_wall_type": "rib"
 }

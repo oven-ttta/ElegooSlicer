@@ -31,7 +31,7 @@ public:
     PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params);
     PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
 
-    static int getDeviceType(const PrinterNetworkInfo& printerNetworkInfo);
+    static int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);
 
 private:
 

@@ -136,7 +136,7 @@ struct PrinterNetworkInfo
     std::string firmwareVersion;
     std::string hostType;
     std::string mainboardId;
-    int         deviceType{0};
+    int         printerType{0};
     std::string serialNumber;
     std::string username;
     std::string password;
