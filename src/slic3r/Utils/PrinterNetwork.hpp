@@ -25,6 +25,7 @@ public:
     virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params) = 0;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() = 0;   
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() = 0;
+    virtual PrinterNetworkResult<PrinterAttributes> getPrinterAttributes() = 0;
     virtual void close() = 0;
     virtual int getPrinterType() = 0;
 

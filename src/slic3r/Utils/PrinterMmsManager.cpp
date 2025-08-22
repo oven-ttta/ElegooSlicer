@@ -373,8 +373,6 @@ bool PrinterMmsManager::checkTrayIsReady(const PrinterMmsTray& tray) {
 
 void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerNetworkInfo, std::vector<PrintFilamentMmsMapping>& printFilamentMmsMapping, const PrinterMmsGroup& mmsGroup)
 {
-
-
     AppConfig* app_config = wxGetApp().app_config;
     for (auto& printFilament : printFilamentMmsMapping) {
         std::string filamentStandardColor   = getStandardColor(printFilament.filamentColor);

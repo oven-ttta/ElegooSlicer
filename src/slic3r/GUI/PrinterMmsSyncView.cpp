@@ -103,6 +103,9 @@ nlohmann::json PrinterMmsSyncView::getPrinterList()
     auto printerList = PrinterManager::getInstance()->getPrinterList();
     nlohmann::json printerArray = json::array();
     for (auto& printer : printerList) {
+        if(!printer.printerAttributes.capabilities.supportsMms) {
+            continue;
+        }
         nlohmann::json printerObj = nlohmann::json::object();
         printerObj = convertPrinterNetworkInfoToJson(printer);
         if (selectedPrinterId.empty() || printer.printerId != selectedPrinterId) {

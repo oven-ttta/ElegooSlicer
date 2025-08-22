@@ -21,7 +21,21 @@ const PrintSendApp = {
                 bedType: 'btPEI',
                 filamentList: [],
                 mmsInfo: {
-                    mmsList: []
+                    mmsList: [
+                        {
+                            mmsId: '',
+                            mmsName: '',
+                            trayList: [
+                                {
+                                    trayId: '',
+                                    trayName: '',
+                                    filamentType: '',
+                                    filamentName: '',
+                                    filamentColor: '',
+                                }
+                            ]
+                        }
+                    ]
                 }
             },
             

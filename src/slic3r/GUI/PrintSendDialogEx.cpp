@@ -340,16 +340,16 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
         info.filamentWeight = total_weight;
         mPrintFilamentList.push_back(info);
     }
-    auto           mmsGroup = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
-    nlohmann::json mmsInfo  = convertPrinterMmsGroupToJson(mmsGroup);
-    printInfo["mmsInfo"]    = mmsInfo;
     PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
-    if(!printerNetworkInfo.printerId.empty()) {
+    PrinterMmsGroup mmsGroup;
+
+    if(!printerNetworkInfo.printerId.empty() && printerNetworkInfo.printerAttributes.capabilities.supportsMms) {
+        mmsGroup = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
+        nlohmann::json mmsInfo  = convertPrinterMmsGroupToJson(mmsGroup);
+        printInfo["mmsInfo"]    = mmsInfo;
         PrinterMmsManager::getInstance()->getFilamentMmsMapping(printerNetworkInfo, mPrintFilamentList, mmsGroup);
-    }
-    nlohmann::json filamentList = json::array();
-    for (auto& filament : mPrintFilamentList) {
-        filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
+    } else {
+        printInfo["mmsInfo"] = json::object();
     }
     if(mmsGroup.mmsList.size() == 0) {
         mHasMms = false;
@@ -359,6 +359,11 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
         mHasMms = true;
         wxSize pSize = FromDIP(wxSize(860, HAS_MMS_HEIGHT));
         SetSize(pSize);
+    }
+
+    nlohmann::json filamentList = json::array();
+    for (auto& filament : mPrintFilamentList) {
+        filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
     }
     printInfo["filamentList"] = filamentList;
     return printInfo;

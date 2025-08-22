@@ -105,6 +105,20 @@ PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json)
                 printerNetworkInfo.printTask.progress = json["printTask"]["progress"].get<int>();
             }
         }
+        if (json.contains("printerAttributes")) {
+            if (json["printerAttributes"].contains("supportsAutoBedLeveling")) {
+                printerNetworkInfo.printerAttributes.capabilities.supportsAutoBedLeveling = json["printerAttributes"]["supportsAutoBedLeveling"].get<bool>();
+            }
+            if (json["printerAttributes"].contains("supportsTimeLapse")) {
+                printerNetworkInfo.printerAttributes.capabilities.supportsTimeLapse = json["printerAttributes"]["supportsTimeLapse"].get<bool>();
+            }
+            if (json["printerAttributes"].contains("supportsHeatedBedSwitching")) {
+                printerNetworkInfo.printerAttributes.capabilities.supportsHeatedBedSwitching = json["printerAttributes"]["supportsHeatedBedSwitching"].get<bool>();
+            }
+            if (json["printerAttributes"].contains("supportsMms")) {
+                printerNetworkInfo.printerAttributes.capabilities.supportsMms = json["printerAttributes"]["supportsMms"].get<bool>();
+            }
+        }
     } catch (const std::exception& e) {
         throw std::runtime_error("Failed to convert json to printer network info: " + std::string(e.what()));
     }
@@ -149,6 +163,12 @@ nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printer
     printTaskJson["estimatedTime"] = printerNetworkInfo.printTask.estimatedTime;
     printTaskJson["progress"]      = printerNetworkInfo.printTask.progress;
     json["printTask"]              = printTaskJson;
+    nlohmann::json printerAttributesJson;
+    printerAttributesJson["supportsAutoBedLeveling"] = printerNetworkInfo.printerAttributes.capabilities.supportsAutoBedLeveling;
+    printerAttributesJson["supportsTimeLapse"] = printerNetworkInfo.printerAttributes.capabilities.supportsTimeLapse;
+    printerAttributesJson["supportsHeatedBedSwitching"] = printerNetworkInfo.printerAttributes.capabilities.supportsHeatedBedSwitching;
+    printerAttributesJson["supportsMms"] = printerNetworkInfo.printerAttributes.capabilities.supportsMms;
+    json["printerAttributes"] = printerAttributesJson;
     return json;
 }
 

@@ -82,23 +82,16 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterNetworkManager::dis
     return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::SUCCESS, printers);
 }
 
-bool PrinterNetworkManager::addPrinter(const PrinterNetworkInfo& printerNetworkInfo)
+bool PrinterNetworkManager::addPrinter(const PrinterNetworkInfo& printerNetworkInfo, const std::shared_ptr<IPrinterNetwork> &network)
 {
-    std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
     if (!network) {
-        wxLogError("Failed to create network for printer: %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
+        wxLogError("Failed to add printer: %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                    printerNetworkInfo.printerModel);
         return false;
     }
-
     addPrinterNetwork(network);
     wxLogMessage("Added printer: %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName, printerNetworkInfo.printerModel);
     return true;
-}
-PrinterNetworkResult<PrinterNetworkInfo> PrinterNetworkManager::connectToPrinter(const PrinterNetworkInfo&  printerNetworkInfo)
-{
-    std::shared_ptr<IPrinterNetwork> network;
-    return connectToPrinter(printerNetworkInfo, network);
 }
 PrinterNetworkResult<bool> PrinterNetworkManager::deletePrinter(const std::string& printerId)
 {
@@ -169,6 +162,23 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterNetworkManager::getPrinterMmsInfo(c
     } else {
         wxLogError("No network connection for printer: %s", printerId.c_str());
         return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::NOT_FOUND, PrinterMmsGroup());
+    }
+    return result;
+}
+
+PrinterNetworkResult<PrinterAttributes> PrinterNetworkManager::getPrinterAttributes(const std::string& printerId)
+{
+    std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerId);
+    PrinterNetworkResult<PrinterAttributes> result(PrinterNetworkErrorCode::UNKNOWN_ERROR, PrinterAttributes());
+    if (network) {
+        result = network->getPrinterAttributes();
+        if (result.isError()) {
+            wxLogError("Failed to get printer attributes for printer %s %s %s %s", network->getPrinterNetworkInfo().host, network->getPrinterNetworkInfo().printerName,
+                       network->getPrinterNetworkInfo().printerModel, result.message.c_str());
+        }
+    } else {
+        wxLogError("No network connection for printer: %s", printerId.c_str());
+        result = PrinterNetworkResult<PrinterAttributes>(PrinterNetworkErrorCode::NOT_FOUND, PrinterAttributes());
     }
     return result;
 }

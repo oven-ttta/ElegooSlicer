@@ -94,6 +94,7 @@
                                 
                                 <div 
                                     class="dropdown bed-dropdown" 
+                                    v-if="curPrinter.printerAttributes.supportsHeatedBedSwitching"
                                     v-click-outside="closeBedDropdown"
                                     :class="{ hidden: !showBedDropdown }">
                                     <div 
@@ -230,7 +231,7 @@
                         </div>
                     </div>
                 </section>
-                <section class="print-options-section" :class="{ hidden: !showPrintOptions }">
+                <section class="print-options-section" :class="{ hidden: !showPrintOptions }" v-if="curPrinter.printerAttributes.supportsAutoBedLeveling || curPrinter.printerAttributes.supportsTimeLapse">
                     <div class="section-header">
                         <h3 class="section-title">Print Options</h3>
                         <div class="section-separator"></div>
@@ -238,7 +239,7 @@
                     
                     <div class="print-options-grid">
                         <div class="toggle-item">
-                            <div class="toggle-label trans" tid="heated_bed_leveling">Auto Bed Leveling</div>
+                            <div class="toggle-label trans" v-if="curPrinter.printerAttributes.supportsAutoBedLeveling" tid="heated_bed_leveling">Auto Bed Leveling</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.heatedBedLeveling">
                                 <span class="toggle-slider"></span>
@@ -246,7 +247,7 @@
                         </div>
                         
                         <div class="toggle-item">
-                            <div class="toggle-label trans" tid="time_lapse">Timelapse</div>
+                            <div class="toggle-label trans" v-if="curPrinter.printerAttributes.supportsTimeLapse" tid="time_lapse">Timelapse</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.timeLapse">
                                 <span class="toggle-slider"></span>

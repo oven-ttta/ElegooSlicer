@@ -459,4 +459,27 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
     }
     return PrinterNetworkResult<PrinterMmsGroup>(resultCode, mmsGroup);
 }
+
+PrinterNetworkResult<PrinterAttributes> ElegooLink::getPrinterAttributes(const std::string& printerId)
+{
+    PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    PrinterAttributes printerAttributes;
+    try {
+        elink::PrinterAttributesResult elinkResult = elink::ElegooLink::getInstance().getPrinterAttributes({printerId});
+        resultCode = parseElegooResult(elinkResult.code);
+        if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+            if(elinkResult.hasData()) {
+                const elink::PrinterAttributes& attributes = elinkResult.value();
+                printerAttributes.capabilities.supportsAutoBedLeveling = attributes.capabilities.printCapabilities.supportsAutoBedLeveling;
+                printerAttributes.capabilities.supportsTimeLapse = attributes.capabilities.printCapabilities.supportsTimeLapse;
+                printerAttributes.capabilities.supportsHeatedBedSwitching = attributes.capabilities.printCapabilities.supportsHeatedBedSwitching;
+                printerAttributes.capabilities.supportsMms = attributes.capabilities.printCapabilities.supportsFilamentMapping;
+            }
+        }
+    } catch (const std::exception& e) {
+        wxLogError("Exception in ElegooLink::getPrinterAttributes: %s", e.what());
+        resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
+    }
+    return PrinterNetworkResult<PrinterAttributes>(resultCode, printerAttributes);
+}
 } // namespace Slic3r

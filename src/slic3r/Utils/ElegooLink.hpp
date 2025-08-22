@@ -20,6 +20,7 @@ public:
     PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params);
     PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params);
     PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
+    PrinterNetworkResult<PrinterAttributes> getPrinterAttributes(const std::string& printerId);
     void close();
 
     static int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);

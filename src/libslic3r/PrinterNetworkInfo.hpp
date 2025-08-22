@@ -124,6 +124,20 @@ struct PrintFilamentMmsMapping
     //print mapping mms filament
     PrinterMmsTray mappedMmsFilament;
 };
+
+struct PrinterCapabilities
+{
+    bool supportsAutoBedLeveling = false;    // Supports auto bed leveling
+    bool supportsTimeLapse = false;          // Supports time-lapse printing
+    bool supportsHeatedBedSwitching = false; // Supports heated bed switching
+    bool supportsMms = false;    // Supports multi-material system
+};
+
+struct PrinterAttributes
+{
+    PrinterCapabilities capabilities;  
+};
+
 struct PrinterNetworkInfo
 {
     std::string printerName;
@@ -148,13 +162,12 @@ struct PrinterNetworkInfo
     uint64_t    addTime{0};
     uint64_t    modifyTime{0};
     uint64_t    lastActiveTime{0};
+    PrinterAttributes    printerAttributes;
 
     // not save to file
     PrinterPrintTask     printTask;
     PrinterConnectStatus connectStatus{PRINTER_CONNECT_STATUS_DISCONNECTED};
     PrinterStatus        printerStatus{PRINTER_STATUS_IDLE};
-
-
 };
 
 struct PrinterNetworkParams

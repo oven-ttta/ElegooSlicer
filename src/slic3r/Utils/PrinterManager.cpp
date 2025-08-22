@@ -174,8 +174,18 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
     }
     printerNetworkInfo.printerId = boost::uuids::to_string(boost::uuids::random_generator{}());
 
-    auto result = PrinterNetworkManager::getInstance()->connectToPrinter(printerNetworkInfo);
-    if (result.isSuccess() && result.data.has_value()) {     
+    std::shared_ptr<IPrinterNetwork> network;
+    auto result = PrinterNetworkManager::getInstance()->connectToPrinter(printerNetworkInfo, network);
+    if (network && result.isSuccess() && result.data.has_value()) {    
+        auto attributes = network->getPrinterAttributes();
+        if(attributes.isSuccess() && attributes.hasData()) {
+            printerNetworkInfo.printerAttributes = attributes.data.value();
+        } else {
+            wxLogWarning("Failed to get printer attributes for added printer %s %s %s: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
+                         printerNetworkInfo.printerModel, attributes.message.c_str());
+            network->disconnectFromPrinter();
+            return "";
+        }
         auto connectedPrinter = result.data.value();
         if(printerNetworkInfo.isPhysicalPrinter) {
             // update the printer network info
@@ -188,6 +198,8 @@ std::string PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
             printerNetworkInfo.authMode = connectedPrinter.authMode;
             printerNetworkInfo.protocolVersion = connectedPrinter.protocolVersion;
         }
+        printerNetworkInfo.connectStatus = PRINTER_CONNECT_STATUS_CONNECTED;
+        PrinterNetworkManager::getInstance()->addPrinter(printerNetworkInfo, network);
         PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
         PrinterCache::getInstance()->savePrinterList();
         return printerNetworkInfo.printerId;
