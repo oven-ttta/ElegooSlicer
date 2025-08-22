@@ -30,15 +30,17 @@ public:
     PrinterManager(const PrinterManager&) = delete;
     PrinterManager& operator=(const PrinterManager&) = delete;
 
-    std::vector<PrinterNetworkInfo> getPrinterList();
-    bool upload(PrinterNetworkParams& params);
-    std::vector<PrinterNetworkInfo> discoverPrinter();
-    std::string addPrinter(PrinterNetworkInfo& printerNetworkInfo);
-    bool updatePrinterName(const std::string& printerId, const std::string& name);
-    bool updatePrinterHost(const std::string& printerId, const std::string& host);
-    bool deletePrinter(const std::string& printerId);
-    PrinterMmsGroup getPrinterMmsInfo(const std::string& printerId);
     PrinterNetworkInfo getPrinterNetworkInfo(const std::string& printerId);
+    std::vector<PrinterNetworkInfo> getPrinterList();
+    
+    PrinterNetworkResult<bool> upload(PrinterNetworkParams& params);
+    PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinter();
+    PrinterNetworkResult<bool> addPrinter(PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<bool> updatePrinterName(const std::string& printerId, const std::string& name);
+    PrinterNetworkResult<bool> updatePrinterHost(const std::string& printerId, const std::string& host);
+    PrinterNetworkResult<bool> deletePrinter(const std::string& printerId);
+    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
+
 
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
     static std::string imageFileToBase64DataURI(const std::string& image_path);

@@ -16,7 +16,7 @@ public:
     PrinterMmsManager(const PrinterMmsManager&) = delete;
     PrinterMmsManager& operator=(const PrinterMmsManager&) = delete;
 
-    PrinterMmsGroup getPrinterMmsInfo(const std::string& printerId);
+    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
   
     void getFilamentMmsMapping(const PrinterNetworkInfo& printerNetworkInfo, std::vector<PrintFilamentMmsMapping>& printFilamentMmsMapping, const PrinterMmsGroup& mmsGroup);
     void saveFilamentMmsMapping(std::vector<PrintFilamentMmsMapping>& printFilamentMmsMapping);

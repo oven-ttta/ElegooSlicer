@@ -16,6 +16,7 @@
 #include "wx/msw/webview_edge.h"
 #endif
 
+#include "slic3r/Utils/WebviewIPCManager.h"
 namespace Slic3r { namespace GUI {
 
 class PrinterManagerView : public wxPanel
@@ -32,16 +33,16 @@ private:
     void onClosePrinterTab(wxAuiNotebookEvent& event);
  
 
-    nlohmann::json getPrinterList();
-    nlohmann::json getPrinterListStatus();
-    nlohmann::json discoverPrinter();
-    nlohmann::json getPrinterModelList();
-    std::string addPrinter(const nlohmann::json& printer);
-    std::string addPhysicalPrinter(const nlohmann::json& printer);
-    bool updatePrinterName(const std::string& printerId, const std::string& printerName);
-    bool updatePrinterHost(const std::string& printerId, const std::string& host);
-    bool deletePrinter(const std::string& printerId);
-    std::string browseCAFile();
+    webviewIpc::IPCResult getPrinterList();
+    webviewIpc::IPCResult getPrinterListStatus();
+    webviewIpc::IPCResult discoverPrinter();
+    webviewIpc::IPCResult getPrinterModelList();
+    webviewIpc::IPCResult addPrinter(const nlohmann::json& printer);
+    webviewIpc::IPCResult addPhysicalPrinter(const nlohmann::json& printer);
+    webviewIpc::IPCResult updatePrinterName(const std::string& printerId, const std::string& printerName);
+    webviewIpc::IPCResult updatePrinterHost(const std::string& printerId, const std::string& host);
+    webviewIpc::IPCResult deletePrinter(const std::string& printerId);
+    webviewIpc::IPCResult browseCAFile();
 
     wxAuiNotebook* mTabBar;
     wxWebView* mBrowser;

@@ -332,13 +332,17 @@ bool PrinterMmsManager::tryMatchFilamentByFilamentType(
     return false;
 }
 
-PrinterMmsGroup PrinterMmsManager::getPrinterMmsInfo(const std::string& printerId)
+PrinterNetworkResult<PrinterMmsGroup> PrinterMmsManager::getPrinterMmsInfo(const std::string& printerId)
 {
     PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
-    PrinterMmsGroup mmsGroup = PrinterManager::getInstance()->getPrinterMmsInfo(printerId);
-    if(!mmsGroup.connected) {
-        return PrinterMmsGroup();
+    if(printerNetworkInfo.printerId.empty()) {
+        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterMmsGroup());
     }
+    PrinterNetworkResult<PrinterMmsGroup> mmsGroupResult = PrinterManager::getInstance()->getPrinterMmsInfo(printerId);
+    if(!mmsGroupResult.isSuccess()) {
+        return mmsGroupResult;
+    }
+    PrinterMmsGroup mmsGroup = mmsGroupResult.data.value();
     getMmsTrayFilamentId(printerNetworkInfo, mmsGroup);
     
     // match filament id in system preset to mms tray
@@ -358,7 +362,7 @@ PrinterMmsGroup PrinterMmsManager::getPrinterMmsInfo(const std::string& printerI
             trayIndex++;        
         }
     }
-    return mmsGroup;
+    return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::SUCCESS, mmsGroup);
 }
 
 bool PrinterMmsManager::checkTrayIsReady(const PrinterMmsTray& tray) {

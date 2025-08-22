@@ -355,17 +355,17 @@ void PrinterManagerView::setupIPCHandlers()
 
     // Handle request_printer_list
     m_ipc->onRequest("request_printer_list", [this](const webviewIpc::IPCRequest& request){
-        return webviewIpc::IPCResult::success(getPrinterList());
+        return getPrinterList();
     });
 
     // Handle request_printer_model_list
     m_ipc->onRequest("request_printer_model_list", [this](const webviewIpc::IPCRequest& request){
-        return webviewIpc::IPCResult::success(getPrinterModelList());
+        return getPrinterModelList();
     });
 
     // Handle request_printer_list_status
     m_ipc->onRequest("request_printer_list_status", [this](const webviewIpc::IPCRequest& request){
-        return webviewIpc::IPCResult::success(getPrinterListStatus());
+        return getPrinterListStatus();
     });
 
     // Handle request_printer_detail
@@ -389,10 +389,10 @@ void PrinterManagerView::setupIPCHandlers()
                 // Check if the object still exists
                 if (auto tracker = life_tracker.lock()) {
                     // Call the static method to avoid accessing this pointer
-                    auto printerList = this->discoverPrinter();
+                    auto result = this->discoverPrinter();
                     // Final check before sending response
                     if (life_tracker.lock()) {
-                        sendResponse(webviewIpc::IPCResult::success(printerList));
+                        sendResponse(result);
                     }
                 } else {
                     // Object was destroyed, don't send response
@@ -424,15 +424,11 @@ void PrinterManagerView::setupIPCHandlers()
             try {
                 // Check if the object still exists
                 if (auto tracker = life_tracker.lock()) {
-                    std::string result = addPrinter(printer);
+                    auto result = addPrinter(printer);
                     
                     // Final check before sending response
                     if (life_tracker.lock()) {
-                        if(result==""){
-                            sendResponse(webviewIpc::IPCResult::error("Add physical printer failed"));
-                        }else{
-                            sendResponse(webviewIpc::IPCResult::success(nlohmann::json(result)));
-                        }
+                       sendResponse(result);
                     }
                 }
             } catch (const std::exception& e) {
@@ -466,14 +462,10 @@ void PrinterManagerView::setupIPCHandlers()
             try {
                 // Check if the object still exists
                 if (auto tracker = life_tracker.lock()) {
-                    std::string result = addPhysicalPrinter(printer);   
+                    auto result = addPhysicalPrinter(printer);   
                     // Final check before sending response
                     if (life_tracker.lock()) {
-                        if(result==""){
-                            sendResponse(webviewIpc::IPCResult::error("Add physical printer failed"));
-                        }else{
-                            sendResponse(webviewIpc::IPCResult::success(nlohmann::json(result)));
-                        }
+                        sendResponse(result);
                     }
                 } else {
                     // Object was destroyed, don't send response
@@ -496,8 +488,7 @@ void PrinterManagerView::setupIPCHandlers()
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string printerName = params.value("printerName", "");
-        bool result = updatePrinterName(printerId, printerName);
-        return webviewIpc::IPCResult::success(nlohmann::json(result));
+        return updatePrinterName(printerId, printerName);;
     });
 
     // Handle request_update_printer_host
@@ -505,22 +496,19 @@ void PrinterManagerView::setupIPCHandlers()
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string host = params.value("host", "");
-        bool result = updatePrinterHost(printerId, host);
-        return webviewIpc::IPCResult::success(nlohmann::json(result));
+        return updatePrinterHost(printerId, host);
     });
 
     // Handle request_delete_printer
     m_ipc->onRequest("request_delete_printer", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
-        bool result = deletePrinter(printerId);
-        return webviewIpc::IPCResult::success(nlohmann::json(result));
+        return deletePrinter(printerId);
     });
 
     // Handle request_browse_ca_file
     m_ipc->onRequest("request_browse_ca_file", [this](const webviewIpc::IPCRequest& request){
-        std::string result = browseCAFile();
-        return webviewIpc::IPCResult::success(nlohmann::json(result));
+        return browseCAFile();
     });
 
     // Handle request_refresh_printers
@@ -544,8 +532,9 @@ void PrinterManagerView::setupIPCHandlers()
 
 
 
-bool PrinterManagerView::deletePrinter(const std::string& printerId)
-{
+webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)
+{ 
+    webviewIpc::IPCResult result;
     auto it = mPrinterViews.find(printerId);
     if (it != mPrinterViews.end()) {
         int page = mTabBar->GetPageIndex(it->second);
@@ -556,10 +545,14 @@ bool PrinterManagerView::deletePrinter(const std::string& printerId)
         mPrinterViews.erase(it);
         mTabBar->SetSelection(0);
     }
-    return PrinterManager::getInstance()->deletePrinter(printerId);
+    auto networkResult = PrinterManager::getInstance()->deletePrinter(printerId);
+    result.message = networkResult.message;
+    result.code = static_cast<int>(networkResult.code);
+    return result;
 }
-bool PrinterManagerView::updatePrinterName(const std::string& printerId, const std::string& printerName)
+webviewIpc::IPCResult PrinterManagerView::updatePrinterName(const std::string& printerId, const std::string& printerName)
 {
+    webviewIpc::IPCResult result;
     auto it = mPrinterViews.find(printerId);
     if (it != mPrinterViews.end()) {
         int page = mTabBar->GetPageIndex(it->second);
@@ -567,20 +560,32 @@ bool PrinterManagerView::updatePrinterName(const std::string& printerId, const s
             mTabBar->SetPageText(page, from_u8(printerName));
         }
     }
-    return PrinterManager::getInstance()->updatePrinterName(printerId, printerName);
+    auto networkResult = PrinterManager::getInstance()->updatePrinterName(printerId, printerName);
+    result.message = networkResult.message;
+    result.code = static_cast<int>(networkResult.code);
+    return result;
 }
-bool PrinterManagerView::updatePrinterHost(const std::string& id, const std::string& host)
+webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& id, const std::string& host)
 {
-    return PrinterManager::getInstance()->updatePrinterHost(id, host);
+    webviewIpc::IPCResult result;
+    auto networkResult = PrinterManager::getInstance()->updatePrinterHost(id, host);
+    result.message = networkResult.message;
+    result.code = static_cast<int>(networkResult.code);
+    return result;
 }
-std::string PrinterManagerView::addPrinter(const nlohmann::json& printer)
+webviewIpc::IPCResult PrinterManagerView::addPrinter(const nlohmann::json& printer)
 {
+    webviewIpc::IPCResult result;
     PrinterNetworkInfo printerInfo = convertJsonToPrinterNetworkInfo(printer);
     printerInfo.isPhysicalPrinter = false;
-    return PrinterManager::getInstance()->addPrinter(printerInfo);
+    auto networkResult = PrinterManager::getInstance()->addPrinter(printerInfo);
+    result.message = networkResult.message;
+    result.code = static_cast<int>(networkResult.code);
+    return result;
 }
-std::string PrinterManagerView::addPhysicalPrinter(const nlohmann::json& printer)
+webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::json& printer)
 {
+    webviewIpc::IPCResult result;
     PrinterNetworkInfo printerInfo;
     try {
         printerInfo.isPhysicalPrinter = true;
@@ -593,11 +598,22 @@ std::string PrinterManagerView::addPhysicalPrinter(const nlohmann::json& printer
         wxLogMessage("Add physical printer error: %s", e.what());
         return "";
     }
-    return PrinterManager::getInstance()->addPrinter(printerInfo);
+    auto networkResult = PrinterManager::getInstance()->addPrinter(printerInfo);
+    result.message = networkResult.message;
+    result.code = static_cast<int>(networkResult.code);
+    return result;
 }
-nlohmann::json PrinterManagerView::discoverPrinter()
+webviewIpc::IPCResult PrinterManagerView::discoverPrinter()
 {
-    auto printerList = PrinterManager::getInstance()->discoverPrinter();
+    webviewIpc::IPCResult result;
+    auto printerListResult = PrinterManager::getInstance()->discoverPrinter();
+    if(!printerListResult.isSuccess() || !printerListResult.hasData()) {
+        result.message = printerListResult.message;
+        result.code = static_cast<int>(printerListResult.code);
+        result.data = nlohmann::json::array();
+        return result;
+    }
+    auto printerList = printerListResult.data.value();
     nlohmann::json response = json::array();
     for (auto& printer : printerList) {
         nlohmann::json printer_obj = nlohmann::json::object();
@@ -607,10 +623,12 @@ nlohmann::json PrinterManagerView::discoverPrinter()
         printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
         response.push_back(printer_obj);
     }
-    return response;
+    result.data = response;
+    return result;
 }
-nlohmann::json PrinterManagerView::getPrinterList()
+webviewIpc::IPCResult PrinterManagerView::getPrinterList()
 {  
+    webviewIpc::IPCResult result;
     auto printerList = PrinterManager::getInstance()->getPrinterList();
     nlohmann::json response = json::array();
     for (auto& printer : printerList) {
@@ -621,10 +639,14 @@ nlohmann::json PrinterManagerView::getPrinterList()
         printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
         response.push_back(printer_obj);
     }
-    return response;
+    result.data = response;
+    result.code = 0;
+    result.message = "success";
+    return result;
 }
-nlohmann::json PrinterManagerView::getPrinterListStatus()
+webviewIpc::IPCResult PrinterManagerView::getPrinterListStatus()
 {
+    webviewIpc::IPCResult result;
     auto printerList = PrinterManager::getInstance()->getPrinterList();
     nlohmann::json response = json::array();
     for (auto& printer : printerList) {
@@ -632,10 +654,14 @@ nlohmann::json PrinterManagerView::getPrinterListStatus()
         printer_obj = convertPrinterNetworkInfoToJson(printer);
         response.push_back(printer_obj);
     }
-    return response;
+    result.data = response;
+    result.code = 0;
+    result.message = "success";
+    return result;
 }
-std::string PrinterManagerView::browseCAFile()
+webviewIpc::IPCResult PrinterManagerView::browseCAFile()
 {
+    webviewIpc::IPCResult result;
     try {
         static const auto filemasks = _L("Certificate files (*.crt, *.pem)|*.crt;*.pem|All files|*.*");
         wxFileDialog openFileDialog(this, _L("Open CA certificate file"), "", "", filemasks, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
@@ -645,10 +671,14 @@ std::string PrinterManagerView::browseCAFile()
     } catch (const std::exception& e) {
         wxLogMessage("Browse CA file error: %s", e.what());
     }
-    return "";
+    result.data = "";
+    result.code = 0;
+    result.message = "success";
+    return result;
 }
-nlohmann::json PrinterManagerView::getPrinterModelList()
+webviewIpc::IPCResult PrinterManagerView::getPrinterModelList()
 {
+    webviewIpc::IPCResult result;
     auto vendorPrinterModelConfigMap = PrinterManager::getVendorPrinterModelConfig();   
     nlohmann::json response = nlohmann::json::array();
     for (auto& vendor : vendorPrinterModelConfigMap) {
@@ -669,7 +699,10 @@ nlohmann::json PrinterManagerView::getPrinterModelList()
         }
         response.push_back(vendorObj);
     }
-    return response;
+    result.data = response;
+    result.code = 0;
+    result.message = "success";
+    return result;
 }
 } // GUI
 } // Slic3r

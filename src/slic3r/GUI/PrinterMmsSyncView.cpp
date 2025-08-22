@@ -130,7 +130,11 @@ nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& 
 {
     nlohmann::json printerFilamentInfo = nlohmann::json::object();
     std::string printerId = params["printerId"];
-    PrinterMmsGroup mmsGroup = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
+    auto mmsGroupResult = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
+    if(!mmsGroupResult.isSuccess() || !mmsGroupResult.hasData()) {
+        return nlohmann::json::object();
+    }
+    PrinterMmsGroup mmsGroup = mmsGroupResult.data.value();
     nlohmann::json mmsInfo = convertPrinterMmsGroupToJson(mmsGroup);
     printerFilamentInfo["mmsInfo"] = mmsInfo;
 

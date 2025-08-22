@@ -344,7 +344,10 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
     PrinterMmsGroup mmsGroup;
 
     if(!printerNetworkInfo.printerId.empty() && printerNetworkInfo.printerAttributes.capabilities.supportsMms) {
-        mmsGroup = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
+        PrinterNetworkResult<PrinterMmsGroup> res = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
+        if(res.isSuccess() && res.hasData()) {
+            mmsGroup = res.data.value();
+        }
         nlohmann::json mmsInfo  = convertPrinterMmsGroupToJson(mmsGroup);
         printInfo["mmsInfo"]    = mmsInfo;
         PrinterMmsManager::getInstance()->getFilamentMmsMapping(printerNetworkInfo, mPrintFilamentList, mmsGroup);

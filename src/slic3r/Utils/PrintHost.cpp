@@ -431,7 +431,8 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
         params.errorFn = [this](const std::string& errorMsg) { 
             this->error_fn(wxString::FromUTF8(errorMsg)); 
         };
-        success = PrinterManager::getInstance()->upload(params);
+        auto result = PrinterManager::getInstance()->upload(params);
+        success = result.isSuccess();
     } else {
         success = the_job.printhost->upload(
             std::move(the_job.upload_data),

@@ -411,7 +411,8 @@ void PrinterWebView::setupIPCHandlers()
             m_uploadThread = std::thread([this, networkParams, requestId, sendResponse]() mutable {
                 bool ret = false;
                 try {
-                    ret = PrinterManager::getInstance()->upload(networkParams);
+                    auto networkResult = PrinterManager::getInstance()->upload(networkParams);
+                    ret = networkResult.isSuccess();
                 } catch (...) {
                     ret = false;
                 }
