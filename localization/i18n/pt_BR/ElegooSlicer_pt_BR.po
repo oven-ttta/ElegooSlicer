@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-21 18:13+0800\n"
+"POT-Creation-Date: 2025-08-22 15:34+0800\n"
 "PO-Revision-Date: 2024-06-01 21:51-0300\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese, Brazilian\n"
@@ -13952,6 +13952,14 @@ msgstr ""
 "exemplo, T0) será ignorado durante toda a impressão. Isso é útil para "
 "impressão manual de vários materiais, onde usamos M600/PAUSE para acionar a "
 "ação de troca manual de filamento."
+
+msgid "Auto-generate Tool Change Command"
+msgstr ""
+
+msgid ""
+"Enable this option to automatically generate the tool change (Tn) command in "
+"the G-code when switching extruders/tools."
+msgstr ""
 
 msgid "Purge in prime tower"
 msgstr "Purgar na Torre Prime"
