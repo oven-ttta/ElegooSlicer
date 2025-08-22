@@ -33,7 +33,7 @@
 #include <slic3r/Utils/WebviewIPCManager.h>
 
 
-#define HAS_MMS_HEIGHT 720
+#define HAS_MMS_HEIGHT 730
 #define NO_MMS_HEIGHT 600
 
 using namespace nlohmann;
