@@ -76,6 +76,16 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("printer network exception");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA:
             return _u8L("printer network invalid data");
+        case PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED:
+            return _u8L("printer MMS not connected");
+        case PrinterNetworkErrorCode::PRINTER_NOT_FOUND:
+            return _u8L("printer not found");
+        case PrinterNetworkErrorCode::PRINTER_ALREADY_EXISTS:
+            return _u8L("printer already exists");
+        case PrinterNetworkErrorCode::PRINTER_TYPE_NOT_SUPPORTED:
+            return _u8L("printer type not supported");
+        case PrinterNetworkErrorCode::HOST_TYPE_NOT_SUPPORTED:
+            return _u8L("host type not supported");
         default:
             return _u8L("unknown error occurred");
     }

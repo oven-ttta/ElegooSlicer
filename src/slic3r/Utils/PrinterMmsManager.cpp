@@ -343,6 +343,10 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterMmsManager::getPrinterMmsInfo(const
         return mmsGroupResult;
     }
     PrinterMmsGroup mmsGroup = mmsGroupResult.data.value();
+
+    if(!mmsGroup.connected) {
+        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED, PrinterMmsGroup());
+    }
     getMmsTrayFilamentId(printerNetworkInfo, mmsGroup);
     
     // match filament id in system preset to mms tray

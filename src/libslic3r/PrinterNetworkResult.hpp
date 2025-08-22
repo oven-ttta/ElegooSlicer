@@ -68,7 +68,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_NOT_FOUND = 10001,                // Printer not found
     PRINTER_ALREADY_EXISTS = 10002,           // Printer already exists
     PRINTER_TYPE_NOT_SUPPORTED = 10003,       // Printer type not supported
-
+    PRINTER_MMS_NOT_CONNECTED = 10004,        // Printer MMS not connected
 
 };
 
