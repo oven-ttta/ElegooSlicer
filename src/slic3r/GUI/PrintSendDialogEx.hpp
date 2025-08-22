@@ -13,6 +13,11 @@
 #if wxUSE_WEBVIEW_EDGE
 #include "wx/msw/webview_edge.h"
 #endif
+
+namespace webviewIpc {
+    class WebviewIPCManager;
+}
+
 namespace Slic3r { namespace GUI {
 class PrintSendDialogEx : public PrintHostSendDialog
 {
@@ -33,7 +38,11 @@ public:
     virtual void                               init() override;
     virtual std::map<std::string, std::string> extendedInfo() const override;
 
+protected:
+    void OnCloseWindow(wxCloseEvent& event);
+
 private:
+    void setupIPCHandlers();
     void onScriptMessage(wxWebViewEvent &evt);
     void runScript(const wxString &javascript);
     nlohmann::json getPrinterList();
@@ -45,8 +54,10 @@ private:
     void    refresh();
 
     wxWebView* mBrowser;
+    webviewIpc::WebviewIPCManager* mIpc = nullptr;
     Plater*  mPlater{ nullptr };
     int mPrintPlateIdx;
+
     bool    mTimeLapse{false};
     bool    mHeatedBedLeveling;
     BedType mBedType;
@@ -55,6 +66,12 @@ private:
     std::string mProjectName;
     std::vector<PrintFilamentMmsMapping> mPrintFilamentList;
     bool mHasMms;
+
+    // async operation tracking
+    bool m_isDestroying{false};
+    std::shared_ptr<bool> m_lifeTracker;
+    bool m_asyncOperationInProgress{false};
+    std::string m_cachedModelName;
    
 };
 }} // namespace Slic3r::GUI 

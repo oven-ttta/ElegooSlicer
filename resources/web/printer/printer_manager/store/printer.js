@@ -98,7 +98,13 @@ const usePrinterStore = defineStore('printer', {
       } catch (error) {
         let message = ''
         if (method === "request_add_printer" || method === "request_add_physical_printer") {
-          message = "Failed to add printer.";
+
+          if (params.printer.authMode === 'token' && (error.code === 200 || error.code === 202 || error.code === 203)) {
+            message = "Failed to add printer. Invalid access code.";
+          } else {
+            message = "Failed to add printer.";
+          }
+
         } else {
           message = `${error.message || 'Unknown error occurred'}`
         }
@@ -115,7 +121,7 @@ const usePrinterStore = defineStore('printer', {
       }
     },
 
-    async  requestPrinterList() {
+    async requestPrinterList() {
       try {
         const response = await this.ipcRequest('request_printer_list', {});
         this.printers = response || [];

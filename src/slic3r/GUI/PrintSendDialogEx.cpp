@@ -26,11 +26,14 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+#include <thread>
+#include <memory>
 #include "PrinterManager.hpp"
 #include "PrinterMmsManager.hpp"
+#include <slic3r/Utils/WebviewIPCManager.h>
 
 
-#define HAS_MMS_HEIGHT 815
+#define HAS_MMS_HEIGHT 720
 #define NO_MMS_HEIGHT 600
 
 using namespace nlohmann;
@@ -51,9 +54,25 @@ PrintSendDialogEx::PrintSendDialogEx(Plater*                    plater,
     , mTimeLapse(0)
     , mHeatedBedLeveling(0)
     , mBedType(BedType::btPTE)
-{}
+    , m_isDestroying(false)
+    , m_lifeTracker(std::make_shared<bool>(true))
+    , m_asyncOperationInProgress(false)
+{
+    // Bind close event to handle async operations
+    Bind(wxEVT_CLOSE_WINDOW, &PrintSendDialogEx::OnCloseWindow, this);
+}
 
-PrintSendDialogEx::~PrintSendDialogEx() {}
+PrintSendDialogEx::~PrintSendDialogEx() {
+    m_isDestroying = true;
+    
+    // Reset the life tracker to signal all async operations that this object is being destroyed
+    m_lifeTracker.reset();
+    
+    if (mIpc) {
+        delete mIpc;
+        mIpc = nullptr;
+    }
+}
 
 void PrintSendDialogEx::init()
 {
@@ -70,7 +89,9 @@ void PrintSendDialogEx::init()
         return;
     }
 
-    mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrintSendDialogEx::onScriptMessage, this);
+    mIpc = new webviewIpc::WebviewIPCManager(mBrowser);
+    setupIPCHandlers();
+    // mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrintSendDialogEx::onScriptMessage, this);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/print_send/index.html").make_preferred().string());
     TargetUrl = "file://" + TargetUrl;
@@ -79,7 +100,7 @@ void PrintSendDialogEx::init()
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
     topsizer->Add(mBrowser, wxSizerFlags().Expand().Proportion(1));
-    wxSize pSize = FromDIP(wxSize(860, HAS_MMS_HEIGHT));
+    wxSize pSize = FromDIP(wxSize(860, NO_MMS_HEIGHT));
     SetSize(pSize);
     CenterOnParent();
 
@@ -106,6 +127,12 @@ void PrintSendDialogEx::init()
     }
     recent_path += m_path.filename().wstring();
     txt_filename->SetValue(recent_path);
+    
+    // Cache the model name for use in preparePrintTask
+    m_cachedModelName = recent_path.ToUTF8().data();
+    if (m_cachedModelName.size() >= 6 && m_cachedModelName.compare(m_cachedModelName.size() - 6, 6, ".gcode") == 0)
+        m_cachedModelName = m_cachedModelName.substr(0, m_cachedModelName.size() - 6);
+    
     // if (size_t extension_start = recent_path.find_last_of('.'); extension_start != std::string::npos)
     //     m_valid_suffix = recent_path.substr(extension_start);
     // mProjectName = getCurrentProjectName();
@@ -147,45 +174,128 @@ std::string PrintSendDialogEx::getCurrentProjectName()
     return projectName;
 }
 
+void PrintSendDialogEx::setupIPCHandlers()
+{
+    if (!mIpc) return;
+
+    // Handle request_print_task (async due to time-consuming preparePrintTask operation)
+    mIpc->onRequestAsync("request_print_task", [this](const webviewIpc::IPCRequest& request,
+                                                       std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        std::string printerId = request.params.value("printerId", "");
+        
+        // Create a weak reference to track object lifetime
+        std::weak_ptr<bool> life_tracker = m_lifeTracker;
+        
+        // Mark async operation as in progress to prevent window closing
+        m_asyncOperationInProgress = true;
+        
+        // Send status to web view (optional, for UI feedback)
+        if (!m_isDestroying) {
+            runScript("window.onPrintTaskStarted && window.onPrintTaskStarted();");
+        }
+        
+        // Run the print task preparation in a separate thread to avoid blocking the UI
+        std::thread([life_tracker, printerId, sendResponse, this]() {
+            try {
+                // Check if the object still exists
+                if (auto tracker = life_tracker.lock()) {
+                    nlohmann::json response = this->preparePrintTask(printerId);
+                    
+                    // Final check before sending response
+                    if (life_tracker.lock()) {
+                        // Mark async operation as completed
+                        m_asyncOperationInProgress = false;
+                        
+                        sendResponse(webviewIpc::IPCResult::success(response));
+                    }
+                } else {
+                    // Object was destroyed, don't send response
+                    return;
+                }
+            } catch (const std::exception& e) {
+                if (life_tracker.lock()) {
+                    // Mark async operation as completed even on error
+                    m_asyncOperationInProgress = false;
+                    
+                    wxLogError("Error in request_print_task: %s", e.what());
+                    sendResponse(webviewIpc::IPCResult::error(std::string("Print task preparation failed: ") + e.what()));
+                }
+            } catch (...) {
+                if (life_tracker.lock()) {
+                    // Mark async operation as completed even on unknown error
+                    m_asyncOperationInProgress = false;
+                    
+                    wxLogError("Unknown error in request_print_task");
+                    sendResponse(webviewIpc::IPCResult::error("Print task preparation failed: Unknown error"));
+                }
+            }
+        }).detach();
+    });
+
+    // Handle request_printer_list
+    mIpc->onRequest("request_printer_list", [this](const webviewIpc::IPCRequest& request) {
+        try {
+            nlohmann::json response = getPrinterList();
+            return webviewIpc::IPCResult::success(response);
+        } catch (const std::exception& e) {
+            wxLogError("Error in request_printer_list: %s", e.what());
+            return webviewIpc::IPCResult::error("Failed to get printer list");
+        }
+    });
+
+    // Handle cancel_print
+    mIpc->onRequest("cancel_print", [this](const webviewIpc::IPCRequest& request) {
+        try {
+            onCancel();
+            return webviewIpc::IPCResult::success();
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << "Error in cancel_print: " << e.what();
+            return webviewIpc::IPCResult::error("Failed to cancel print");
+        }
+    });
+
+    // Handle start_upload
+    mIpc->onRequest("start_upload", [this](const webviewIpc::IPCRequest& request) {
+        try {
+            nlohmann::json printInfo = request.params.value("data", nlohmann::json::object());
+            onPrint(printInfo);
+            return webviewIpc::IPCResult::success();
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << "Error in start_upload: " << e.what();
+            return webviewIpc::IPCResult::error("Failed to start upload");
+        }
+    });
+
+    mIpc->onRequest("expand_window", [this](const webviewIpc::IPCRequest& request) {
+        try {
+           bool expand = request.params.value("expand", false);
+            if(!expand) {
+                wxGetApp().CallAfter([this]() {
+                    wxSize pSize = FromDIP(wxSize(860, NO_MMS_HEIGHT));
+                    SetSize(pSize);
+                });
+            } else {
+                wxGetApp().CallAfter([this]() {
+                    wxSize pSize = FromDIP(wxSize(860, HAS_MMS_HEIGHT));
+                    SetSize(pSize);
+                });
+            }
+            return webviewIpc::IPCResult::success();
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << "Error in expand_window: " << e.what();
+            return webviewIpc::IPCResult::error("Failed to expand window");
+        }
+    });
+}
+
 void PrintSendDialogEx::onScriptMessage(wxWebViewEvent& evt)
 {
+    // This method is kept for compatibility but now delegates to WebviewIPCManager
+    // The actual message handling is done in setupIPCHandlers()
     try {
         wxString strInput = evt.GetString();
-        BOOST_LOG_TRIVIAL(trace) << "PrintSendDialogEx::OnScriptMessage;OnRecv:" << strInput.c_str();
-        json     j      = json::parse(strInput);
-        wxString strCmd = j["command"];
-        BOOST_LOG_TRIVIAL(trace) << "PrintSendDialogEx::OnScriptMessage;Command:" << strCmd;
-
-        if (strCmd == "request_print_task") {
-            json        response    = json::object();
-            std::string printerId   = j["printerId"];
-            response["command"]     = "response_print_task";
-            response["sequence_id"] = "10001";
-            response["response"]    = preparePrintTask(printerId);
-
-            wxString strJS = wxString::Format("HandleStudio(%s)", response.dump(-1, ' ', true));
-
-            BOOST_LOG_TRIVIAL(trace) << "PrintSendDialogEx::OnScriptMessage;response_ams_filament_list:" << strJS.c_str();
-            wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
-        } else if (strCmd == "request_printer_list") {
-            json response           = json::object();
-            response["command"]     = "response_printer_list";
-            response["sequence_id"] = "10002";
-            response["response"]    = getPrinterList();
-
-            wxString strJS = wxString::Format("HandleStudio(%s)", response.dump(-1, ' ', true));
-
-            BOOST_LOG_TRIVIAL(trace) << "PrintSendDialogEx::OnScriptMessage;response_printer_list:" << strJS.c_str();
-            wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
-        } else if (strCmd == "cancel_print") {
-            onCancel();
-        } else if (strCmd == "start_upload") {
-            json printInfo = j["data"];
-            onPrint(printInfo);
-        }
-
     } catch (std::exception& e) {
-        BOOST_LOG_TRIVIAL(trace) << "PrintSendDialogEx::OnScriptMessage;Error:" << e.what();
+        BOOST_LOG_TRIVIAL(trace) << "PrintSendDialogEx::onScriptMessage;Error:" << e.what();
     }
 }
 
@@ -214,9 +324,8 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
     }
     printInfo["layerCount"] = layerCount;
 
-    std::string modelName = txt_filename->GetValue().ToUTF8().data();
-    if (modelName.size() >= 6 && modelName.compare(modelName.size() - 6, 6, ".gcode") == 0)
-        modelName = modelName.substr(0, modelName.size() - 6);
+    // Use cached model name instead of getting it from UI control
+    std::string modelName = m_cachedModelName;
 
     printInfo["modelName"]         = modelName;
     printInfo["timeLapse"]         = mTimeLapse == 1;
@@ -354,14 +463,11 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
     } else {
         printInfo["mmsInfo"] = json::object();
     }
+    
     if(mmsGroup.mmsList.size() == 0) {
         mHasMms = false;
-        wxSize pSize = FromDIP(wxSize(860, NO_MMS_HEIGHT));
-        SetSize(pSize);
     } else {
         mHasMms = true;
-        wxSize pSize = FromDIP(wxSize(860, HAS_MMS_HEIGHT));
-        SetSize(pSize);
     }
 
     nlohmann::json filamentList = json::array();
@@ -495,4 +601,20 @@ std::map<std::string, std::string> PrintSendDialogEx::extendedInfo() const
             {"selectedPrinterId", mSelectedPrinterId},
             {"filamentAmsMapping", filamentList.dump()}};
 }
+
+void PrintSendDialogEx::OnCloseWindow(wxCloseEvent& event)
+{
+    // If async operation is in progress, prevent closing
+    if (m_asyncOperationInProgress && !m_isDestroying) {
+        // Show a message to user that operation is in progress
+        // wxMessageBox(_L("Print task preparation is in progress. Please wait..."), 
+        //              _L("Operation in Progress"), wxOK | wxICON_INFORMATION);
+        event.Veto(); // Prevent the window from closing
+        return;
+    }
+    
+    // Allow normal close behavior
+    event.Skip();
+}
+
 }} // namespace Slic3r::GUI

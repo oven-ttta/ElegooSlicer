@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,39 +9,32 @@
     <script src="../../include/jquery-3.6.0.min.js"></script>
     <script src="../thirdparty/vue/vue.global.prod.min.js"></script>
     <script src="../thirdparty/vue/vue-i18n.global.prod.js"></script>
-    <script src="../thirdparty/element-plus/index.full.min.js"></script> 
+    <script src="../thirdparty/element-plus/index.full.min.js"></script>
     <script src="../../include/json2.js"></script>
     <script src="../../include/globalapi.js"></script>
     <script src="../../data/text.js"></script>
     <script src="../locales/index.js"></script>
+    <script src="../utils/ipc.js"></script>
     <script src="./img/filament.js"></script>
 </head>
-  
+
 <body>
     <div id="app">
         <div class="print-task-dialog">
-            <main class="print-task-content">
+            <main v-if="printerList && printerList.length > 0" class="print-task-content">
                 <section class="model-section">
-                    <img :src="modelImageSrc" class="model-preview" alt="3D Model">
-                    
+                    <img v-if="modelImageSrc" :src="modelImageSrc" class="model-preview" alt="3D Model">
+                    <div v-else class="model-preview"></div>
                     <div class="model-info">
                         <div class="model-name-edit">
-                            <el-input 
-                                v-model="printInfo.modelName" 
-                                type="text" 
-                                
-                                @blur="stopEditing"
-                                @keydown.enter="stopEditing"
-                                @input="adjustModelNameWidth"
-                                ref="modelNameInput"
-                                id="model-name"
-                                class="model-name-input"
-                            ></el-input>
+                            <el-input v-model="printInfo.modelName" type="text" @blur="stopEditing"
+                                @keydown.enter="stopEditing" @input="adjustModelNameWidth" ref="modelNameInput"
+                                id="model-name" class="model-name-input"></el-input>
                             <button class="edit-name-btn" @click="startEditing">
-                                <img src="img/edit.svg" alt=""/>
+                                <img src="img/edit.svg" alt="" />
                             </button>
                         </div>
-                        
+
                         <div class="print-stats">
                             <div class="stat-item">
                                 <img class="stat-icon" src="img/clock.svg" alt="">
@@ -55,7 +49,7 @@
                                 <span>{{ printInfo.layerCount || 0 }}</span>
                             </div>
                         </div>
-                        
+
                         <div class="device-selection">
                             <div class="section-header">
                                 <label class="section-title">{{ $t('printSend.printer') }}</label>
@@ -63,25 +57,21 @@
                             </div>
                             <div class="dropdowns-container">
                                 <div class="dropdown" v-click-outside="closePrinterDropdown">
-                                    <div 
-                                        class="dropdown-header"
-                                        :class="{ active: printerDropdownOpen }"
+                                    <div class="dropdown-header" :class="{ active: printerDropdownOpen }"
                                         @click="togglePrinterDropdown">
-                                        <button 
-                                            class="printer-refresh-btn" 
-                                            @click.stop="refreshPrinterList">
+                                        <button class="printer-refresh-btn" @click.stop="refreshPrinterList">
                                             <img src="img/refresh.svg" alt="Refresh">
                                         </button>
                                         <img :src="curPrinter?.printerImg || ''" alt="" class="dropdown-icon">
                                         <div class="dropdown-content">
-                                            <div class="dropdown-title">{{ curPrinter?.printerName || $t('printSend.noPrinter') }}</div>
-                                            <div class="dropdown-subtitle">{{ curPrinter?.printerModel || $t('printSend.pleaseConnectPrinter') }}</div>
+                                            <div class="dropdown-title">{{ curPrinter?.printerName ||
+                                                $t('printSend.noPrinter') }}</div>
+                                            <div class="dropdown-subtitle">{{ curPrinter?.printerModel ||
+                                                $t('printSend.pleaseConnectPrinter') }}</div>
                                         </div>
                                     </div>
                                     <ul class="dropdown-menu" :hidden="!printerDropdownOpen">
-                                        <li 
-                                            v-for="printer in printerList" 
-                                            :key="printer.printerId"
+                                        <li v-for="printer in printerList" :key="printer.printerId"
                                             class="dropdown-item"
                                             :class="{ selected: printer.printerId === curPrinter.printerId }"
                                             @click="selectPrinter(printer)">
@@ -93,15 +83,11 @@
                                         </li>
                                     </ul>
                                 </div>
-                                
-                                <div 
-                                    class="dropdown bed-dropdown" 
+
+                                <div class="dropdown bed-dropdown"
                                     v-if="curPrinter && curPrinter.printerAttributes.supportsHeatedBedSwitching"
-                                    v-click-outside="closeBedDropdown"
-                                    :class="{ hidden: !showBedDropdown }">
-                                    <div 
-                                        class="dropdown-header"
-                                        :class="{ active: bedDropdownOpen }"
+                                    v-click-outside="closeBedDropdown" :class="{ hidden: !showBedDropdown }">
+                                    <div class="dropdown-header" :class="{ active: bedDropdownOpen }"
                                         @click="toggleBedDropdown">
                                         <img :src="selectedBedType.icon" alt="" class="dropdown-icon">
                                         <div class="dropdown-content">
@@ -109,10 +95,7 @@
                                         </div>
                                     </div>
                                     <ul class="dropdown-menu" :hidden="!bedDropdownOpen">
-                                        <li 
-                                            v-for="bedType in bedTypes" 
-                                            :key="bedType.value"
-                                            class="dropdown-item"
+                                        <li v-for="bedType in bedTypes" :key="bedType.value" class="dropdown-item"
                                             :class="{ selected: bedType.value === selectedBedType.value }"
                                             @click="selectBedType(bedType)">
                                             <img :src="bedType.icon" alt="" class="dropdown-item-icon">
@@ -127,7 +110,7 @@
                     </div>
                 </section>
 
-                <section class="filament-section"  v-show="showFilamentSection">
+                <section class="filament-section" v-show="showFilamentSection">
                     <div class="filament-header">
                         <div class="filament-controls">
                             <div class="toggle-item">
@@ -149,63 +132,49 @@
                         </div>
                     </div>
                     <div class="filament-list">
-                        <div 
-                            v-for="filament in currentPageFilaments" 
-                            :key="filament.index"
-                            class="mapping-container">
-                            <div 
-                                class="filament-rect" 
-                                :style="getFilamentStyle(filament)"
+                        <div v-for="filament in currentPageFilaments" :key="filament.index" class="mapping-container">
+                            <div class="filament-rect" :style="getFilamentStyle(filament)"
                                 :title="filament.filamentName">
                                 <div class="filament-type">{{ filament.filamentType }}</div>
                                 <div class="filament-weight">{{ formatWeight(filament.filamentWeight) }}</div>
-                                </div>
-                            <div 
-                                class="tray-rect" 
-                                :title="filament.mappedMmsFilament || 'No mapping'">
+                            </div>
+                            <div class="tray-rect" :title="filament.mappedMmsFilament || 'No mapping'">
                                 <span v-html="getFilamentSvg(filament.mappedMmsFilament)">
                                 </span>
-                                <div class="tray-filament-type">{{ filament.mappedMmsFilament?.filamentType || '?' }}</div>
-                                  <el-popover
-                                    ref="mmsPopover"
-                                    placement="top"
-                                    title=""    
-                                    :width="352"
-                                    trigger="click"
-                                    :show-arrow="false"
-                                >
-                                  <template #default>
-                                    <div>
-                                        <div class="mms-header">
-                                            <span class="mms-title" >{{ $t('printSend.canvas') }}</span>
-                                            <div style="border-bottom: 1px solid #DEDEDE; height: 1px; flex: 1;"></div>
-                                        </div>
-                                        <div class="mms-popover-content">
-                                            <div 
-                                                v-for="mms in printInfo.mmsInfo.mmsList" 
-                                                :key="mms.mmsId"
-                                                class="mms-row">
-                                                <div class="tray-popover-content">
-                                                    <div 
-                                                        v-for="tray in mms.trayList" 
-                                                        :key="tray.trayName"
-                                                        class="tray-popover-card"
-                                                        :style="getMmsCardStyle(tray)"
-                                                        @click="updateFilamentMapping(filament.index, tray)">
-                                                        <div class="tray-name">{{ tray.trayName }}</div>
-                                                        <div class="tray-dash"></div>
-                                                        <div class="tray-filament-type">{{(tray.status === 1 || tray.status === 3) ? tray.filamentType : (tray.status === 0 ? '/' : "?")}}</div>
+                                <div class="tray-filament-type">{{ filament.mappedMmsFilament?.filamentType || '?' }}
+                                </div>
+                                <el-popover ref="mmsPopover" placement="top" title="" :width="352" trigger="click"
+                                    :show-arrow="false">
+                                    <template #default>
+                                        <div>
+                                            <div class="mms-header">
+                                                <span class="mms-title">{{ $t('printSend.canvas') }}</span>
+                                                <div style="border-bottom: 1px solid #DEDEDE; height: 1px; flex: 1;">
+                                                </div>
+                                            </div>
+                                            <div class="mms-popover-content">
+                                                <div v-for="mms in printInfo.mmsInfo.mmsList" :key="mms.mmsId"
+                                                    class="mms-row">
+                                                    <div class="tray-popover-content">
+                                                        <div v-for="tray in mms.trayList" :key="tray.trayName"
+                                                            class="tray-popover-card" :style="getMmsCardStyle(tray)"
+                                                            @click="updateFilamentMapping(filament.index, tray)">
+                                                            <div class="tray-name">{{ tray.trayName }}</div>
+                                                            <div class="tray-dash"></div>
+                                                            <div class="tray-filament-type">{{(tray.status === 1 ||
+                                                                tray.status === 3) ? tray.filamentType : (tray.status
+                                                                === 0 ? '/' : "?")}}</div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                  </template>
+                                    </template>
                                     <template #reference>
-                                            <span><img src="./img/down-arrow.svg" alt=""></span>
+                                        <span><img src="./img/down-arrow.svg" alt=""></span>
                                     </template>
                                 </el-popover>
-                          
+
                                 <!-- <div class="tray-filament-type">{{ filament.amsFilamentType || 'N/A' }}</div> -->
                             </div>
                         </div>
@@ -214,18 +183,20 @@
 
                 <section class="options-section">
                     <div class="options-separator"></div>
-                    
+
                     <div class="toggle-group">
                         <div class="toggle-item">
-                            <div class="toggle-label trans" tid="switch_to_device_tab">{{ $t('printSend.switchToDeviceTab') }}</div>
+                            <div class="toggle-label trans" tid="switch_to_device_tab">{{
+                                $t('printSend.switchToDeviceTab') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.switchToDeviceTab">
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        
+
                         <div class="toggle-item">
-                            <div class="toggle-label trans" tid="upload_and_print">{{ $t('printSend.uploadAndPrint') }}</div>
+                            <div class="toggle-label trans" tid="upload_and_print">{{ $t('printSend.uploadAndPrint') }}
+                            </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.uploadAndPrint">
                                 <span class="toggle-slider"></span>
@@ -233,23 +204,28 @@
                         </div>
                     </div>
                 </section>
-                <section class="print-options-section" :class="{ hidden: !showPrintOptions }" v-if="curPrinter && (curPrinter.printerAttributes.supportsAutoBedLeveling || curPrinter.printerAttributes.supportsTimeLapse)">
+                <section class="print-options-section" :class="{ hidden: !showPrintOptions }"
+                    v-if="curPrinter && (curPrinter.printerAttributes.supportsAutoBedLeveling || curPrinter.printerAttributes.supportsTimeLapse)">
                     <div class="section-header">
                         <h3 class="section-title">{{ $t('printSend.printOptions') }}</h3>
                         <div class="section-separator"></div>
                     </div>
-                    
+
                     <div class="print-options-grid">
                         <div class="toggle-item">
-                            <div class="toggle-label trans" v-if="curPrinter && curPrinter.printerAttributes.supportsAutoBedLeveling" tid="heated_bed_leveling">{{ $t('printSend.autoBedLeveling') }}</div>
+                            <div class="toggle-label trans"
+                                v-if="curPrinter && curPrinter.printerAttributes.supportsAutoBedLeveling"
+                                tid="heated_bed_leveling">{{ $t('printSend.autoBedLeveling') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.heatedBedLeveling">
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        
+
                         <div class="toggle-item">
-                            <div class="toggle-label trans" v-if="curPrinter && curPrinter.printerAttributes.supportsTimeLapse" tid="time_lapse">{{ $t('printSend.timelapse') }}</div>
+                            <div class="toggle-label trans"
+                                v-if="curPrinter && curPrinter.printerAttributes.supportsTimeLapse" tid="time_lapse">{{
+                                $t('printSend.timelapse') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.timeLapse">
                                 <span class="toggle-slider"></span>
@@ -258,15 +234,19 @@
                     </div>
                 </section>
             </main>
-            
-            <div class="status-tip" v-show="statusTip.show">{{ statusTip.message }}</div>
-            
+            <div v-else class="print-task-content no-printer">
+                <img src="../img/printer-empty.png" width="224" />
+                <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
+
+            </div>
             <footer class="action-buttons">
-                <button class="btn btn-secondary trans" @click="cancel" tid="cancel">{{ $t('printSend.cancel') }}</button>
-                <button class="btn btn-primary trans" @click="upload" tid="upload">{{ $t('printSend.upload') }}</button>
+                <button class="btn btn-secondary trans" @click="cancel" tid="cancel">{{ $t('printSend.cancel')
+                    }}</button>
+                <button class="btn btn-primary trans" :disabled="!curPrinter" @click="upload" tid="upload">{{ $t('printSend.upload') }}</button>
             </footer>
         </div>
     </div>
     <script src="./printsend.js"></script>
 </body>
+
 </html>

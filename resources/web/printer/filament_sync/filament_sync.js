@@ -1,6 +1,6 @@
 // Vue.js filament sync application
 const { createApp } = Vue;
-const { ElButton, ElDialog, ElInput, ElSelect, ElOption, ElForm, ElFormItem } = ElementPlus;
+const { ElButton, ElDialog, ElInput, ElSelect, ElOption, ElForm, ElFormItem, ElLoading } = ElementPlus;
 
 const FilamentSyncApp = {
     data() {
@@ -18,50 +18,51 @@ const FilamentSyncApp = {
             return getFilamentSvg(color);
         },
 
+        // IPC Communication methods
+        async ipcRequest(method, params = {}, timeout = 10000) {
+            try {
+                const response = await nativeIpc.request(method, params, timeout);
+                return response;
+            } catch (error) {
+                console.error(`IPC request failed for ${method}:`, error);
+                throw error;
+            }
+        },
+
         // Lifecycle methods
         async init() {
             await this.requestPrinterList();
         },
 
         // Communication with backend
-        requestPrinterList() {
-            const message = {
-                id: Math.round(new Date() / 1000).toString(),
-                method: "getPrinterList",
-                type: "request",
-                params: {
-                }
-            };
-            SendWXMessage(JSON.stringify(message));
-        },
-
-        // Request printer filament info when printer is selected
-        requestPrinterFilamentInfo(printerId) {
-            const message = {
-                id: Math.round(new Date() / 1000).toString(),
-                method: "getPrinterFilamentInfo",
-                type: "request",
-                params: {
-                    printerId: printerId
-                }
-            };
-            SendWXMessage(JSON.stringify(message));
-        },
-
-        // Handle messages from backend
-        handleStudio(response) {
-            const method = response.method;
-
-            if (method === 'getPrinterList') {
-                this.printerList = response.data || [];
+        async requestPrinterList() {
+            try {
+                const response = await this.ipcRequest('getPrinterList', {});
+                this.printerList = response || [];
                 this.updatePrinterSelection();
-            } else if (method === 'getPrinterFilamentInfo') {
-                this.mmsInfo = response.data.mmsInfo;
-                this.printFilamentList = response.data.printFilamentList;
+            } catch (error) {
+                console.error('Failed to request printer list:', error);
             }
         },
 
-        updatePrinterSelection() {
+        // Request printer filament info when printer is selected
+        async requestPrinterFilamentInfo(printerId) {
+           const loading = ElLoading.service({
+                lock: true,
+            });
+            try {
+                const params = { printerId: printerId };
+                const response = await this.ipcRequest('getPrinterFilamentInfo', params);
+                this.mmsInfo = response.mmsInfo;
+                this.printFilamentList = response.printFilamentList;
+            } catch (error) {
+                console.error('Failed to request printer filament info:', error);
+            }finally {
+                loading.close();
+            }
+        },
+
+        async updatePrinterSelection() {
             if (this.printerList.length === 0) return;
             let selectedPrinter;       
             if (this.curPrinter && this.curPrinter.printerId) {
@@ -81,50 +82,44 @@ const FilamentSyncApp = {
             this.curPrinter = selectedPrinter;       
             // Request filament info for the selected printer
             if (this.curPrinter && this.curPrinter.printerId) {
-                this.requestPrinterFilamentInfo(this.curPrinter.printerId);
+                await this.requestPrinterFilamentInfo(this.curPrinter.printerId);
             }
         },
 
 
         // Handle printer selection change
-        onPrinterChanged(printer) {
+        async onPrinterChanged(printer) {
             this.curPrinter = printer;
             if (printer && printer.printerId) {
-                this.requestPrinterFilamentInfo(printer.printerId);
+                await this.requestPrinterFilamentInfo(printer.printerId);
             }
         },
 
-        refreshPrinterList(event, device) {
+        async refreshPrinterList(event, device) {
             event.stopPropagation();
             event.preventDefault();
-            this.requestPrinterList();
+            await this.requestPrinterList();
         },
 
-        cancel() {
-            // Send close dialog method to backend
-            const message = {
-                id: Math.round(new Date() / 1000).toString(),
-                method: "closeDialog",
-                type: "request",
-                params: {
-                }
-            };
-            SendWXMessage(JSON.stringify(message));
+        async cancel() {
+            try {
+                await this.ipcRequest('closeDialog', {});
+            } catch (error) {
+                console.error('Failed to close dialog:', error);
+            }
         },
 
-        sync() {
-            // Send sync method to backend
-            const message = {
-                id: Math.round(new Date() / 1000).toString(),
-                method: "syncMmsFilament",
-                type: "request",
-                params: {
+        async sync() {
+            try {
+                const params = {
                     mmsInfo: this.mmsInfo,
                     printFilamentList: this.printFilamentList,
                     printer: this.curPrinter
-                }
-            };
-            SendWXMessage(JSON.stringify(message));
+                };
+                await this.ipcRequest('syncMmsFilament', params);
+            } catch (error) {
+                console.error('Failed to sync filament:', error);
+            }
         }
     },
 
@@ -132,17 +127,17 @@ const FilamentSyncApp = {
     mounted() {
         // Initialize the application
         this.init();
-
-        // Set up global message handler
-        window.HandleStudio = (response) => {
-            this.handleStudio(response);
-        };
-
-        // Set up global functions that might be called externally
-        window.OnInit = () => {
-            this.init();
-        };
     },
+    computed: {
+        canSync() {
+            return this.curPrinter && 
+                   this.printerList && 
+                   this.printerList.length > 0 &&
+                   this.mmsInfo && 
+                   this.mmsInfo.mmsList && 
+                   this.mmsInfo.mmsList.length > 0;
+        }
+    }
 };
 
 // Create and mount the Vue app

@@ -22,11 +22,17 @@
 namespace Slic3r { namespace GUI {
 
 PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Printer MMS Sync"), _L(""), 0)
+    , m_isDestroying(false)
+    , m_lifeTracker(std::make_shared<bool>(true))
+    , m_asyncOperationInProgress(false)
 {
     const AppConfig* app_config = wxGetApp().app_config;
 
     auto preset_bundle = wxGetApp().preset_bundle;
     auto model_id      = preset_bundle->printers.get_edited_preset().get_printer_type(preset_bundle);
+
+    // Bind close event to handle async operations
+    Bind(wxEVT_CLOSE_WINDOW, &PrinterMmsSyncView::OnCloseWindow, this);
 
     SetIcon(wxNullIcon);
     // DestroyChildren();
@@ -36,7 +42,9 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
         return;
     }
 
-    mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrinterMmsSyncView::onScriptMessage, this);
+    mIpc = new webviewIpc::WebviewIPCManager(mBrowser);
+    setupIPCHandlers();
+    // mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrinterMmsSyncView::onScriptMessage, this);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/filament_sync/index.html").make_preferred().string());
     TargetUrl          = "file://" + TargetUrl;
@@ -50,7 +58,110 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
     CenterOnParent();
 }
 
-PrinterMmsSyncView::~PrinterMmsSyncView() {}
+PrinterMmsSyncView::~PrinterMmsSyncView() {
+    m_isDestroying = true;
+    
+    // Reset the life tracker to signal all async operations that this object is being destroyed
+    m_lifeTracker.reset();
+    
+    if (mIpc) {
+        delete mIpc;
+        mIpc = nullptr;
+    }
+}
+
+void PrinterMmsSyncView::setupIPCHandlers()
+{
+    if (!mIpc) return;
+
+    // Handle getPrinterList
+    mIpc->onRequest("getPrinterList", [this](const webviewIpc::IPCRequest& request) {
+        try {
+            nlohmann::json response = getPrinterList();
+            return webviewIpc::IPCResult::success(response);
+        } catch (const std::exception& e) {
+            wxLogError("Error in getPrinterList: %s", e.what());
+            return webviewIpc::IPCResult::error("Failed to get printer list");
+        }
+    });
+
+    // Handle getPrinterFilamentInfo (async due to potentially time-consuming operations)
+    mIpc->onRequestAsync("getPrinterFilamentInfo", [this](const webviewIpc::IPCRequest& request,
+                                                          std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        nlohmann::json params = request.params;
+        
+        // Create a weak reference to track object lifetime
+        std::weak_ptr<bool> life_tracker = m_lifeTracker;
+        
+        // Mark async operation as in progress to prevent window closing
+        m_asyncOperationInProgress = true;
+        
+        // Send status to web view (optional, for UI feedback)
+        if (!m_isDestroying) {
+            runScript("window.onGetPrinterFilamentInfoStarted && window.onGetPrinterFilamentInfoStarted();");
+        }
+        
+        // Run the filament info retrieval in a separate thread to avoid blocking the UI
+        std::thread([life_tracker, params, sendResponse, this]() {
+            try {
+                // Check if the object still exists
+                if (auto tracker = life_tracker.lock()) {
+                    nlohmann::json response = this->getPrinterFilamentInfo(params);
+                    
+                    // Final check before sending response
+                    if (life_tracker.lock()) {
+                        // Mark async operation as completed
+                        m_asyncOperationInProgress = false;
+                        
+                        sendResponse(webviewIpc::IPCResult::success(response));
+                    }
+                } else {
+                    // Object was destroyed, don't send response
+                    return;
+                }
+            } catch (const std::exception& e) {
+                if (life_tracker.lock()) {
+                    // Mark async operation as completed even on error
+                    m_asyncOperationInProgress = false;
+                    
+                    wxLogError("Error in getPrinterFilamentInfo: %s", e.what());
+                    sendResponse(webviewIpc::IPCResult::error(std::string("Failed to get printer filament info: ") + e.what()));
+                }
+            } catch (...) {
+                if (life_tracker.lock()) {
+                    // Mark async operation as completed even on unknown error
+                    m_asyncOperationInProgress = false;
+                    
+                    wxLogError("Unknown error in getPrinterFilamentInfo");
+                    sendResponse(webviewIpc::IPCResult::error("Failed to get printer filament info: Unknown error"));
+                }
+            }
+        }).detach();
+    });
+
+    // Handle syncMmsFilament
+    mIpc->onRequest("syncMmsFilament", [this](const webviewIpc::IPCRequest& request) {
+        try {
+            nlohmann::json response = syncMmsFilament(request.params);
+            EndModal(wxID_OK);
+            return webviewIpc::IPCResult::success(response);
+        } catch (const std::exception& e) {
+            wxLogError("Error in syncMmsFilament: %s", e.what());
+            return webviewIpc::IPCResult::error("Failed to sync MMS filament");
+        }
+    });
+
+    // Handle closeDialog
+    mIpc->onRequest("closeDialog", [this](const webviewIpc::IPCRequest& request) {
+        try {
+            EndModal(wxID_CANCEL);
+            return webviewIpc::IPCResult::success();
+        } catch (const std::exception& e) {
+            wxLogError("Error in closeDialog: %s", e.what());
+            return webviewIpc::IPCResult::error("Failed to close dialog");
+        }
+    });
+}
 
 void PrinterMmsSyncView::runScript(const wxString& javascript)
 {
@@ -61,34 +172,12 @@ void PrinterMmsSyncView::runScript(const wxString& javascript)
 
 void PrinterMmsSyncView::onScriptMessage(wxWebViewEvent& event)
 {
-    wxString message = event.GetString();
+    // This method is kept for compatibility but now delegates to WebviewIPCManager
+    // The actual message handling is done in setupIPCHandlers()
     try {
-        nlohmann::json root = nlohmann::json::parse(message.ToUTF8().data());
-        std::string    method  = root["method"];
-        std::string    id  = root["id"];
-        nlohmann::json params = root["params"];
-
-        handleCommand(method, id, params);
-
+        wxString strInput = event.GetString();
     } catch (std::exception& e) {
-        wxLogMessage("Error: %s", e.what());
-    }
-}
-
-void PrinterMmsSyncView::handleCommand(const std::string& method, const std::string& id, const nlohmann::json& params)
-{
-    if (method == "getPrinterList") {
-        sendResponse("getPrinterList", id, getPrinterList());
-    } else if (method == "getPrinterFilamentInfo") {
-        sendResponse("getPrinterFilamentInfo", id, getPrinterFilamentInfo(params));
-    } else if (method == "syncMmsFilament") {
-        sendResponse("syncMmsFilament", id, syncMmsFilament(params));
-        EndModal(wxID_OK);
-    }
-    else if (method == "closeDialog") {
-        EndModal(wxID_CANCEL);
-    } else {
-        wxLogWarning("Unknown command: %s", method);
+        wxLogError("PrinterMmsSyncView::onScriptMessage Error: %s", e.what());
     }
 }
 
@@ -118,12 +207,7 @@ nlohmann::json PrinterMmsSyncView::getPrinterList()
         printerObj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
         printerArray.push_back(printerObj);
     }
-    nlohmann::json response = {
-        {"code", 0},
-        {"message", "success"},
-        {"data", printerArray}
-    };
-    return response;
+    return printerArray;
 }
 
 nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& params)
@@ -183,12 +267,7 @@ nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& 
         }
     }
     printerFilamentInfo["printFilamentList"] = printFilamentArray;
-    nlohmann::json response = {
-        {"code", 0},
-        {"message", "success"},
-        {"data", printerFilamentInfo}
-    };
-    return response;
+    return printerFilamentInfo;
 }
 
 nlohmann::json PrinterMmsSyncView::syncMmsFilament(const nlohmann::json& params)
@@ -199,35 +278,16 @@ nlohmann::json PrinterMmsSyncView::syncMmsFilament(const nlohmann::json& params)
 
     mMmsGroup  = convertJsonToPrinterMmsGroup(mmsInfo);
 
-    nlohmann::json response = {
-        {"code", 0},
-        {"message", "success"},
-    };
     std::string selectedPrinterId = printer["printerId"].get<std::string>();
     if(!selectedPrinterId.empty()) {
         wxGetApp().app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, selectedPrinterId);
     }
-    return response;
+    return nlohmann::json();
 }
 
 PrinterMmsGroup PrinterMmsSyncView::getSyncedMmsGroup()
 {
     return mMmsGroup;
-}
-
-void PrinterMmsSyncView::sendResponse(const std::string& method, const std::string& id, const nlohmann::json& response)
-{
-    nlohmann::json jsonResponse = {
-        {"id", id},
-        {"method", method},
-        {"type", "response"},
-        {"code", response["code"]},
-        {"message", response["message"]},
-        {"data", response["data"]}
-    };
-        
-    wxString strJS = wxString::Format("HandleStudio(%s)", jsonResponse.dump(-1, ' ', true));
-    wxGetApp().CallAfter([this, strJS] { runScript(strJS); });
 }
 
 void PrinterMmsSyncView::onShow()
@@ -242,6 +302,21 @@ int PrinterMmsSyncView::ShowModal()
 {
     onShow();
     return MsgDialog::ShowModal();
+}
+
+void PrinterMmsSyncView::OnCloseWindow(wxCloseEvent& event)
+{
+    // If async operation is in progress, prevent closing
+    if (m_asyncOperationInProgress && !m_isDestroying) {
+        // Show a message to user that operation is in progress
+        // wxMessageBox(_L("Filament info retrieval is in progress. Please wait..."), 
+        //              _L("Operation in Progress"), wxOK | wxICON_INFORMATION);
+        event.Veto(); // Prevent the window from closing
+        return;
+    }
+    
+    // Allow normal close behavior
+    event.Skip();
 }
 
 }} // namespace Slic3r::GUI

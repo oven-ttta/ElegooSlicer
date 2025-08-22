@@ -1,6 +1,6 @@
 // Vue.js refactored version of printsend.js
 const { createApp, unref } = Vue;
-const { ElInput, ElButton, ElPopover } = ElementPlus;
+const { ElInput, ElButton, ElPopover, ElLoading } = ElementPlus;
 
 const PrintSendApp = {
     data() {
@@ -38,7 +38,7 @@ const PrintSendApp = {
                     ]
                 }
             },
-            
+
             // Printer management
             printerList: [],
             curPrinter: null,
@@ -59,10 +59,6 @@ const PrintSendApp = {
 
             // UI state
             isEditingName: false,
-            statusTip: {
-                show: false,
-                message: ''
-            },
         };
     },
 
@@ -104,53 +100,83 @@ const PrintSendApp = {
         },
 
         mmsFilamentList() {
-            return this.printInfo.mmsInfo?.mmsList || [];         
+            return this.printInfo.mmsInfo?.mmsList || [];
         }
     },
 
     methods: {
         // Lifecycle methods
         async init() {
-            this.translatePage();
             await this.requestPrinterList();
+        },
+
+        // IPC Communication methods
+        async ipcRequest(method, params = {}, timeout = 10000) {
+            try {
+                const response = await nativeIpc.request(method, params, timeout);
+                return response;
+            } catch (error) {
+                console.error(`IPC request failed for ${method}:`, error);
+                this.showStatusTip(error.message || 'Request failed');
+                throw error;
+            }
         },
 
 
         // Communication with backend
-        requestPrintTask() {
-            const message = {
-                sequence_id: Math.round(new Date() / 1000),
-                command: "request_print_task",
-                printerId: this.curPrinter.printerId
-            };
-            SendWXMessage(JSON.stringify(message));
-        },
-
-        requestPrinterList() {
-            const message = {
-                sequence_id: Math.round(new Date() / 1000),
-                command: "request_printer_list"
-            };
-            console.log('Requesting printer list:', message);
-            SendWXMessage(JSON.stringify(message));
-        },
-
-        refreshPrinterList() {
-            this.requestPrinterList();
-        },
-
-        // Handle messages from backend
-        handleStudio(data) {
-            const command = data.command;
-
-            if (command === 'response_print_task') {
-                console.log('response_print_task', data.response);
-                this.printInfo = { ...this.printInfo, ...data.response };
+        async requestPrintTask() {
+            const loading = ElLoading.service({
+                lock: true,
+            });
+            try {
+                const params = {
+                    printerId: this.curPrinter.printerId
+                };
+                const response = await this.ipcRequest('request_print_task', params);
+                this.printInfo = { ...this.printInfo, ...response };
                 this.updatePrintInfo();
-            } else if (command === 'response_printer_list') {
-                this.printerList = data.response || [];
-                this.updatePrinterSelection();
+            } catch (error) {
+                console.error('Failed to request print task:', error);
+            } finally {
+                loading.close();
             }
+        },
+
+        async requestPrinterList() {
+            // const loading = ElLoading.service({
+            //     lock: true,
+            // });
+            try {
+                const response = await this.ipcRequest('request_printer_list', {});
+                this.printerList = response || [];
+                this.updatePrinterSelection();
+            } catch (error) {
+                console.error('Failed to request printer list:', error);
+            } finally {
+                // loading.close();
+            }
+        },
+
+        async resizeWindow() {
+            let expand = false;
+            if (this.printInfo && this.printInfo.uploadAndPrint &&
+                this.printInfo.mmsInfo &&
+                this.printInfo.mmsInfo.mmsList &&
+                this.printInfo.mmsInfo.mmsList.length > 0
+            ) {
+                expand = true;
+            }
+            try {
+                await this.ipcRequest('expand_window', { expand });
+            } catch (error) {
+                console.error('Failed to request printer list:', error);
+            } finally {
+                // loading.close();
+            }
+        },
+
+        async refreshPrinterList() {
+            await this.requestPrinterList();
         },
 
         updatePrintInfo() {
@@ -174,22 +200,22 @@ const PrintSendApp = {
 
         updatePrinterSelection() {
             if (this.printerList.length === 0) return;
-            let selectedPrinter;       
+            let selectedPrinter;
             if (this.curPrinter && this.curPrinter.printerId) {
                 // find the printer by printerId
                 let cur = this.printerList.find(p => p.printerId === this.curPrinter.printerId);
                 if (cur) {
                     selectedPrinter = cur;
                 }
-            }        
+            }
             // if not found, find the selected printer
             if (!selectedPrinter) {
                 selectedPrinter = this.printerList.find(p => p.selected);
                 if (!selectedPrinter) {
                     selectedPrinter = this.printerList[0];
                 }
-            }          
-            this.curPrinter = selectedPrinter;       
+            }
+            this.curPrinter = selectedPrinter;
             this.onPrinterChanged();
         },
 
@@ -314,8 +340,8 @@ const PrintSendApp = {
         updateFilamentMapping(filamentIndex, tray) {
             document.getElementsByClassName('filament-section')?.[0].click();
             console.log('Selected MMS Tray:', tray);
-            for(let i = 0; i < this.printInfo.filamentList.length; i++) {
-                if(this.printInfo.filamentList[i].index === filamentIndex) {
+            for (let i = 0; i < this.printInfo.filamentList.length; i++) {
+                if (this.printInfo.filamentList[i].index === filamentIndex) {
                     const filament = this.printInfo.filamentList[i];
                     filament.mappedMmsFilament.filamentColor = tray.filamentColor;
                     filament.mappedMmsFilament.filamentName = tray.filamentName;
@@ -343,15 +369,15 @@ const PrintSendApp = {
         },
 
         // Action methods
-        cancel() {
-            const message = {
-                command: 'cancel_print',
-                sequence_id: Math.round(new Date() / 1000)
-            };
-            SendWXMessage(JSON.stringify(message));
+        async cancel() {
+            try {
+                await this.ipcRequest('cancel_print', {});
+            } catch (error) {
+                console.error('Failed to cancel print:', error);
+            }
         },
 
-        upload() {
+        async upload() {
             // Update task with current UI state
             this.printInfo.selectedPrinterId = this.curPrinter.printerId;
             this.printInfo.bedType = this.selectedBedTypeValue;
@@ -362,18 +388,17 @@ const PrintSendApp = {
                 return;
             }
 
-            const message = {
-                command: 'start_upload',
-                sequence_id: Math.round(new Date() / 1000),
-                data: this.printInfo
-            };
-            SendWXMessage(JSON.stringify(message));
+            try {
+                await this.ipcRequest('start_upload', this.printInfo);
+            } catch (error) {
+                console.error('Failed to start upload:', error);
+            }
         },
 
         checkFilamentMapping() {
             return this.printInfo.filamentList.every(filament =>
-                filament.mappedMmsFilament && 
-                filament.mappedMmsFilament.trayName && 
+                filament.mappedMmsFilament &&
+                filament.mappedMmsFilament.trayName &&
                 filament.mappedMmsFilament.trayName.trim() !== ""
             );
         },
@@ -384,32 +409,24 @@ const PrintSendApp = {
         },
 
         showStatusTip(message) {
-            this.statusTip.message = message;
-            this.statusTip.show = true;
-            setTimeout(() => {
-                this.statusTip.show = false;
-            }, 3000);
-        },
-
-        translatePage() {
-            if (typeof TranslatePage === 'function') {
-                TranslatePage();
+            if (window.ElementPlus && window.ElementPlus.ElMessage) {
+                window.ElementPlus.ElMessage.error({
+                    message: message,
+                    duration: 5000,
+                    showClose: true
+                });
             }
         },
 
-        getTranslation(key) {
-            return window.g_translation && window.g_translation[key] ? window.g_translation[key] : key;
-        },
-
         // Event handlers called by external code
-        onPrinterChanged() {
+        async onPrinterChanged() {
             // Update bed types with current translations
             this.bedTypes = [
                 { value: 'btPEI', name: this.$t('printSend.texturedA'), icon: 'img/bt_pei.png' },
                 { value: 'btPC', name: this.$t('printSend.smoothB'), icon: 'img/bt_pc.png' }
             ];
             // Handle printer change logic if needed
-            this.requestPrintTask();
+            await this.requestPrintTask();
         },
 
         onBedTypeChanged(bedType) {
@@ -423,28 +440,35 @@ const PrintSendApp = {
             { value: 'btPEI', name: this.$t('printSend.texturedA'), icon: 'img/bt_pei.png' },
             { value: 'btPC', name: this.$t('printSend.smoothB'), icon: 'img/bt_pc.png' }
         ];
-        
+
         // Initialize the application
         this.init();
-
-        // Set up global message handler
-        window.HandleStudio = (data) => {
-            this.handleStudio(data);
-        };
-
-        // Set up global functions that might be called externally
-        window.OnInit = () => {
-            this.init();
-        };
     },
 
     watch: {
-        'printInfo.uploadAndPrint'(newValue) {
-            // React to upload and print toggle changes
-            if (!newValue) {
-                this.currentPage = 1; // Reset pagination when hiding filament section
-            }
+        'printInfo.uploadAndPrint': {
+            handler(newValue, oldValue) {
+                // React to upload and print toggle changes
+                if (!newValue) {
+                    this.currentPage = 1; // Reset pagination when hiding filament section
+                }
+            },
+            immediate: false
+        },
+
+        'printInfo.mmsInfo.mmsList': {
+            handler(newValue, oldValue) {
+                this.resizeWindow();
+            },
+            immediate: false
+        },
+        'printInfo.uploadAndPrint': {
+            handler(newValue, oldValue) {
+                this.resizeWindow();
+            },
+            immediate: false
         }
+
     }
 };
 

@@ -15,6 +15,7 @@
     <script src="../../include/globalapi.js"></script>
     <script src="../../data/text.js"></script>
     <script src="../locales/index.js"></script>
+    <script src="../utils/ipc.js"></script>
     <script src="./img/filament.js"></script>
 </head>
 
@@ -49,19 +50,23 @@
                         </el-option>
                     </el-select>
                 </div>
-                <div v-if="printerList&&printerList.length >0">
+                <div style="display: flex; flex-direction: column; flex: 1;" v-if="printerList&&printerList.length >0">
                     <div class="filament-title" v-show="curPrinter">{{ $t('filamentSync.filamentInformation') }}</div>
                     <div class="empty-content" v-if="curPrinter && curPrinter.connectStatus !== 1">
                         <img src="./img/offline.svg" />
                         <span class="offline-text">{{ $t('filamentSync.printerOffline') }}</span>
                     </div>
-                    <div class="empty-content" v-else-if="curPrinter && (mmsInfo?.mmsList?.length=== 0)">
+
+                    <div class="empty-content"
+                        v-else-if="curPrinter && (!mmsInfo || !mmsInfo.mmsList || mmsInfo.mmsList.length=== 0)">
                         <img src="./img/no-filament.svg" />
                         <span class="no-filament-text">{{ $t('filamentSync.noFilamentInfo') }}</span>
                     </div>
+
                     <div class="filament-list" v-else-if="curPrinter && mmsInfo?.mmsList?.length>0">
                         <div v-for="mms in mmsInfo.mmsList" :key="mms.mmsId" class="mms-item">
-                            <div v-for="tray in mms.trayList.filter(t => t.status === 1 || t.status === 3)" :key="tray.trayName" class="filament-item">
+                            <div v-for="tray in mms.trayList.filter(t => t.status === 1 || t.status === 3)"
+                                :key="tray.trayName" class="filament-item">
                                 <span class="filament-item-id">{{ tray.trayName }}</span>
                                 <span class="filament-item-line"></span>
                                 <div class="filament-item-info">
@@ -75,12 +80,14 @@
                     </div>
                 </div>
                 <div class="empty-content" v-if="!printerList||printerList.length === 0">
+                    <img src="../img/printer-empty.png" width="224" />
                     <span class="offline-text">{{ $t('filamentSync.noPrinterConnected') }}</span>
                 </div>
             </div>
             <div class="footer">
-                <button class=" btn-secondary trans" @click="cancel" tid="cancel">{{ $t('filamentSync.cancel') }}</button>
-                <button class=" btn-primary trans" @click="sync" tid="upload">{{ $t('filamentSync.sync') }}</button>
+                <button class=" btn-secondary trans" @click="cancel" tid="cancel">{{ $t('filamentSync.cancel')
+                    }}</button>
+                <button class=" btn-primary trans" :disabled="!canSync" @click="sync" tid="upload">{{ $t('filamentSync.sync') }}</button>
             </div>
         </div>
     </div>
