@@ -14,48 +14,53 @@ namespace Slic3r {
 enum class PrinterNetworkErrorCode
 {
     // Success status
-    SUCCESS = 0,                    // Operation successful
+    SUCCESS = 0, // Operation successful
 
     // General errors (1-99)
-    UNKNOWN_ERROR = 1,              // Unknown error
-    INTERNAL_ERROR = 2,             // Internal error
-    INVALID_PARAMETER = 3,          // Invalid parameter (value error, type error, etc.)
-    INVALID_FORMAT = 4,             // Format error (JSON structure, data format, etc.)
-    TIMEOUT = 5,                    // Operation timeout (including connection, file transfer, etc.)
-    CANCELLED = 6,                  // Operation cancelled
-    PERMISSION_DENIED = 7,          // Insufficient permissions
-    NOT_FOUND = 8,                  // Resource not found (printer, file, etc.)
-    ALREADY_EXISTS = 9,             // Resource already exists
-    INSUFFICIENT_SPACE = 10,        // Insufficient storage space
-    BAD_REQUEST = 11,               // Bad request
-    CONNECTION_ERROR = 12,          // Connection error (including connection failure, loss)
-    NETWORK_ERROR = 13,             // Network error
-    SERVICE_UNAVAILABLE = 14,       // Service unavailable (server busy, maintenance, etc.)
-    NOT_IMPLEMENTED = 15,           // Not implemented (not supported by printer or API)
+    UNKNOWN_ERROR = 1,        // Unknown error
+    INTERNAL_ERROR = 2,       // Internal error
+    INVALID_PARAMETER = 3,    // Invalid parameter (value error, type error, etc.)
+    INVALID_FORMAT = 4,       // Format error (JSON structure, data format, etc.)
+    TIMEOUT = 5,              // Operation timeout (including connection, file transfer, etc.)
+    CANCELLED = 6,            // Operation canceled
+    ACCESS_DENIED = 7,        // Insufficient permissions, (e.g., read/write permissions, etc.)
+    NOT_FOUND = 8,            // Resource not found (printer, file, etc.)
+    ALREADY_EXISTS = 9,       // Resource already exists
+    INSUFFICIENT_SPACE = 10,  // Insufficient storage space
+    BAD_REQUEST = 11,         // Bad request
+    CONNECTION_ERROR = 12,    // Connection error (including connection failure, loss)
+    NETWORK_ERROR = 13,       // Network error
+    SERVICE_UNAVAILABLE = 14, // Service unavailable (server busy, maintenance, etc.)
+    NOT_IMPLEMENTED = 15,     // Not implemented (not supported by printer or API)
+    OPERATION_IN_PROGRESS = 16,// Operation in progress
 
-    // Version compatibility errors (100-199)
-    VERSION_NOT_SUPPORTED = 100,    // Version not supported
-    VERSION_TOO_OLD = 101,          // Version too old
-    VERSION_TOO_NEW = 102,          // Version too new
+    // Version compatibility-related errors (100-199)
+    VERSION_NOT_SUPPORTED = 100, // Version not supported
+    VERSION_TOO_OLD = 101,       // Version too old
+    VERSION_TOO_NEW = 102,       // Version too new
 
-    // Authentication errors (200-299)
-    UNAUTHORIZED = 200,             // Unauthorized access
-    AUTHENTICATION_FAILED = 201,    // Login authentication failed
-    TOKEN_EXPIRED = 202,            // Token expired
-    TOKEN_INVALID = 203,            // Token invalid
+    // Authentication-related errors (200-299)
+    INVALID_CREDENTIAL=200, // Invalid username or password
+    TOKEN_EXPIRED,      // Login expired
+    NOT_AUTHENTICATED,  // Not authenticated (not logged in / missing credentials)
+    NOT_AUTHORIZED,      // Authenticated but not authorized
 
-    // File transfer errors (300-399)
-    FILE_TRANSFER_FAILED = 300,     // File transfer failed (including upload, download)
-    FILE_NOT_FOUND = 301,           // File not found
+    // File transfer-related errors (300-399)
+    FILE_TRANSFER_FAILED = 300, // File transfer failed (including upload, download)
+    FILE_NOT_FOUND = 301,       // File not found
+    FILE_ALREADY_EXISTS = 302,  // File already exists
 
-    // Printer business errors (1000-1999)
-    PRINTER_BUSY = 1000,             // Printer busy
-    PRINTER_OFFLINE = 1001,          // Printer offline
+    // 1000-1999 Printer business errors
+    PRINTER_BUSY = 1000,                 // Printer busy
+    PRINTER_OFFLINE = 1001,              // Printer offline
     PRINTER_INITIALIZATION_ERROR = 1002, // Printer initialization error
-    PRINTER_COMMAND_FAILED = 1003,   // Printer command execution failed
-    PRINTER_ALREADY_CONNECTED = 1004, // Printer already connected or connecting
-    PRINTER_INTERNAL_ERROR = 1005,   // Printer internal error
-    PRINTER_TASK_NOT_FOUND = 1006,   // Printer task not found
+    PRINTER_COMMAND_FAILED = 1003,       // Printer command execution failed
+    PRINTER_ALREADY_CONNECTED = 1004,    // Printer already connected or connecting
+    PRINTER_INTERNAL_ERROR = 1005,       // Printer internal error
+    PRINTER_TASK_NOT_FOUND = 1006,       // Printer task not found
+    PRINTER_DATA_FORMAT_ERROR = 1007,    // send data format error
+    PRINTER_RESPONSE_FORMAT_ERROR = 1008, // Printer response format error
+    PRINTER_RESPONSE_INVALID = 1009,      // Printer response invalid data
 
     HOST_TYPE_NOT_SUPPORTED = 9998,          // Host type not supported
     PRINTER_NETWORK_EXCEPTION = 9999,          // External error

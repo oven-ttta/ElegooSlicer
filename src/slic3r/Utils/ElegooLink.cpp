@@ -19,7 +19,7 @@ PrinterNetworkErrorCode parseElegooResult(elink::ElegooError code)
     case elink::ElegooError::INVALID_FORMAT: return PrinterNetworkErrorCode::INVALID_FORMAT;
     case elink::ElegooError::TIMEOUT: return PrinterNetworkErrorCode::TIMEOUT;
     case elink::ElegooError::CANCELLED: return PrinterNetworkErrorCode::CANCELLED;
-    case elink::ElegooError::PERMISSION_DENIED: return PrinterNetworkErrorCode::PERMISSION_DENIED;
+    case elink::ElegooError::ACCESS_DENIED: return PrinterNetworkErrorCode::ACCESS_DENIED;
     case elink::ElegooError::NOT_FOUND: return PrinterNetworkErrorCode::NOT_FOUND;
     case elink::ElegooError::ALREADY_EXISTS: return PrinterNetworkErrorCode::ALREADY_EXISTS;
     case elink::ElegooError::INSUFFICIENT_SPACE: return PrinterNetworkErrorCode::INSUFFICIENT_SPACE;
@@ -30,10 +30,9 @@ PrinterNetworkErrorCode parseElegooResult(elink::ElegooError code)
     case elink::ElegooError::VERSION_NOT_SUPPORTED: return PrinterNetworkErrorCode::VERSION_NOT_SUPPORTED;
     case elink::ElegooError::VERSION_TOO_OLD: return PrinterNetworkErrorCode::VERSION_TOO_OLD;
     case elink::ElegooError::VERSION_TOO_NEW: return PrinterNetworkErrorCode::VERSION_TOO_NEW;
-    case elink::ElegooError::UNAUTHORIZED: return PrinterNetworkErrorCode::UNAUTHORIZED;
-    case elink::ElegooError::AUTHENTICATION_FAILED: return PrinterNetworkErrorCode::AUTHENTICATION_FAILED;
+    case elink::ElegooError::NOT_AUTHORIZED: return PrinterNetworkErrorCode::NOT_AUTHORIZED;
+    case elink::ElegooError::INVALID_CREDENTIAL: return PrinterNetworkErrorCode::INVALID_CREDENTIAL;
     case elink::ElegooError::TOKEN_EXPIRED: return PrinterNetworkErrorCode::TOKEN_EXPIRED;
-    case elink::ElegooError::TOKEN_INVALID: return PrinterNetworkErrorCode::TOKEN_INVALID;
     case elink::ElegooError::FILE_TRANSFER_FAILED: return PrinterNetworkErrorCode::FILE_TRANSFER_FAILED;
     case elink::ElegooError::FILE_NOT_FOUND: return PrinterNetworkErrorCode::FILE_NOT_FOUND;
     case elink::ElegooError::PRINTER_BUSY: return PrinterNetworkErrorCode::PRINTER_BUSY;

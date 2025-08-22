@@ -20,7 +20,7 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("operation timed out");
         case PrinterNetworkErrorCode::CANCELLED:
             return _u8L("operation was cancelled");
-        case PrinterNetworkErrorCode::PERMISSION_DENIED:
+        case PrinterNetworkErrorCode::ACCESS_DENIED:
             return _u8L("permission denied");
         case PrinterNetworkErrorCode::NOT_FOUND:
             return _u8L("resource not found");
@@ -46,14 +46,12 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::VERSION_TOO_NEW:
             return _u8L("version is too new");
             
-        case PrinterNetworkErrorCode::UNAUTHORIZED:
+        case PrinterNetworkErrorCode::NOT_AUTHORIZED:
             return _u8L("unauthorized access");
-        case PrinterNetworkErrorCode::AUTHENTICATION_FAILED:
+        case PrinterNetworkErrorCode::INVALID_CREDENTIAL:
             return _u8L("authentication failed");
         case PrinterNetworkErrorCode::TOKEN_EXPIRED:
             return _u8L("authentication token expired");
-        case PrinterNetworkErrorCode::TOKEN_INVALID:
-            return _u8L("invalid authentication token");
             
         case PrinterNetworkErrorCode::FILE_TRANSFER_FAILED:
             return _u8L("file transfer failed");
