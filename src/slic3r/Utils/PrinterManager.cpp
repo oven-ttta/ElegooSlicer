@@ -307,6 +307,7 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
 {
     auto printer = PrinterCache::getInstance()->getPrinter(params.printerId);
     PrinterNetworkResult<bool> result(PrinterNetworkErrorCode::SUCCESS, false);
+    bool isSendPrintTaskFailed = false;
     if (!printer.has_value()) {
         wxLogError("Printer not found, File name: %s", params.fileName.c_str());
         result.code = PrinterNetworkErrorCode::PRINTER_NOT_FOUND;
@@ -321,20 +322,25 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
                          printer.value().printerModel, params.fileName.c_str());
             if (params.uploadAndStartPrint) {
                 result = PrinterNetworkManager::getInstance()->sendPrintTask(params);
-                if (result.isError()) {
-                    wxLogWarning("Failed to send print task after file upload: %s %s %s, file name: %s, error: %s", printer.value().host,
-                                 printer.value().printerName, printer.value().printerModel, params.fileName.c_str(),
-                                 result.message.c_str());
+                if(result.isError()) {
+                    isSendPrintTaskFailed = true;
                 }
             }
         }
     }
-    if (params.errorFn) {
-        params.errorFn("Error: " + std::to_string(static_cast<int>(result.code)) + " " + result.message);
-    }
+
     if(result.isError()) {
-        wxLogError("Failed to send print file: %s %s %s, file name: %s, error: %s", printer.value().host, printer.value().printerName,
-                   printer.value().printerModel, params.fileName.c_str(), result.message.c_str());
+        if(isSendPrintTaskFailed) {
+            wxLogError("Failed to send print task after file upload: %s %s %s, file name: %s, error: %s", printer.value().host, printer.value().printerName,
+                       printer.value().printerModel, params.fileName.c_str(), result.message.c_str());
+        } else {
+            wxLogError("Failed to send print file: %s %s %s, file name: %s, error: %s", printer.value().host, printer.value().printerName,
+                       printer.value().printerModel, params.fileName.c_str(), result.message.c_str());
+        }
+        if (params.errorFn) {
+            std::string errorMessage = isSendPrintTaskFailed ? "Send print task failed" : "Send print file failed";
+            params.errorFn(errorMessage + "(" + std::to_string(static_cast<int>(result.code)) + ")" + result.message);
+        }
     }
     return result;
 }

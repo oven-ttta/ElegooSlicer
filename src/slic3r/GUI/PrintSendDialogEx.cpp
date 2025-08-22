@@ -257,8 +257,7 @@ void PrintSendDialogEx::setupIPCHandlers()
     // Handle start_upload
     mIpc->onRequest("start_upload", [this](const webviewIpc::IPCRequest& request) {
         try {
-            nlohmann::json printInfo = request.params.value("data", nlohmann::json::object());
-            onPrint(printInfo);
+            onPrint(request.params);
             return webviewIpc::IPCResult::success();
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in start_upload: " << e.what();
