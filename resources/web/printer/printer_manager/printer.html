@@ -13,6 +13,7 @@
     <script type="text/javascript" src="../../data/text.js"></script>
     <script type="text/javascript" src="../thirdparty/vue/vue.global.prod.min.js"></script>
     <script type="text/javascript" src="../thirdparty/vue/pinia.iife.prod.js"></script>
+     <script type="text/javascript" src="../thirdparty/vue/vue-i18n.global.prod.js"></script>
     <script src="../thirdparty/element-plus/index.full.min.js"></script>
 
     <script type="text/javascript" src="./store/printer.js"></script>
@@ -24,13 +25,15 @@
     <script type="text/javascript" src="../utils/util.js"></script>
     <script type="text/javascript" src="../utils/ipc.js"></script>
 
+    <script type="text/javascript" src="../locales/index.js"></script>
+
 </head>
 
 <body>
     <div id="app" >
         <div class="printer-manager-header">
             <div class="left-actions">
-                <span>Connected Printers</span>
+                <span>{{ $t("printerManager.connectedPrinters") }}</span>
                 <div class="printer-local-icon icon-button" @click="handleRefresh">
                     <img src="./img/refresh.svg" alt="Refresh" />
                 </div>
@@ -39,20 +42,20 @@
                 <button class="btn-primary" @click="showAddPrinterModal">
                     <span style="display: flex; align-items: center; justify-content: center;gap: 8px;">
                         <img src="./img/add.svg" width="16px" alt="Add Printer" />
-                        <span>Add Printer</span>
+                        <span>{{ $t("printerManager.addPrinter") }}</span>
                     </span>
                 </button>
             </div>
         </div>
         <div class="printer-container">
-            <div class="printer-category">Local Printers
+            <div class="printer-category">{{ $t("printerManager.localPrinters") }}
                 <span class="printer-local-icon">
                     <img src="./img/printer-local.svg" alt="Local Printer" /> 
                 </span>
             </div>
             <div v-if="printerStore.printers.length === 0" class="no-printer">
                 <img src="./img/printer-empty.png" width="224"/>
-                <div>No Printers Available</div>
+                <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
             </div>
             <div class="printer-list" v-else>
                 <div v-for="(printer, index) in printerStore.printers" :key="printer.printerId" class="printer-card"
@@ -65,7 +68,7 @@
                             <div class="printer-title">{{ printer.printerName }}</div>
                             <div class="printer-host">{{ printer.host || '' }}</div>
                             <button class="printer-detail-btn"
-                                @click="printerStore.showPrinterDetail(printer.printerId)">Details</button>
+                                @click="printerStore.showPrinterDetail(printer.printerId)">{{ $t("printerManager.details") }}</button>
                         </div>
                         <div class="card-menu icon-button" title="more" @click="showPrinterSettingsByIndex(index)">
                             &#8942;
@@ -87,21 +90,21 @@
             </div>
         </div>
 
-        <el-drawer v-model="showAddPrinter" title="Add Printer" :direction="direction" :size="600">
+        <el-drawer v-model="showAddPrinter" :title="$t('addPrinterDialog.addPrinter')" :direction="direction" :size="600">
             <add-printer-component ref="addPrinterComponent" @close-modal="closeModals"
                 ></add-printer-component>
         </el-drawer>
 
 
 
-        <el-dialog v-model="showPrinterAdvancedSettings" title="Printer Settings" width="700" center>
+        <el-dialog v-model="showPrinterAdvancedSettings" :title="$t('printerManager.printerSettings')" width="700" center>
             <printer-setting-component :printer="currentPrinter" @close-modal="closeModals">
             </printer-setting-component>
         </el-dialog>
 
 
 
-        <el-drawer v-model="showPrinterSimpleSettings" title="Physical Printer"  :direction="direction" :size="600">
+        <el-drawer v-model="showPrinterSimpleSettings" :title="$t('printerManager.physicalPrinter')"  :direction="direction" :size="600">
             <printer-setting-physical-component :printer="currentPrinter"  @close-modal="closeModals">
             </printer-setting-physical-component>
         </el-drawer>
@@ -110,6 +113,26 @@
 
     </div>
     <script type="text/javascript" src="printer.js"></script>
+    <script>
+        const { createApp } = Vue;
+        const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOption, ElForm, ElFormItem, ElLoading } = ElementPlus;
+
+        // Create Vue app
+        const app = createApp(PrinterManager);
+
+        // Register all components
+        app.component('add-printer-component', AddPrinterComponent);
+        app.component('manual-form-component', ManualFormComponent);
+        app.component('printer-auth-component', PrinterAuthComponent);
+        app.component('printer-setting-physical-component', PrinterSettingPhysicalComponent);
+        app.component('printer-setting-component', PrinterSettingComponent);
+
+        app.use(createPinia());
+        app.use(ElementPlus);
+        app.use(i18n);
+        // Mount the app
+        app.mount('#app');
+    </script>
 </body>
 
 </html>

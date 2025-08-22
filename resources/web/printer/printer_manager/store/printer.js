@@ -79,7 +79,7 @@ const usePrinterStore = defineStore('printer', {
 
 
     init() {
-    
+
     },
     uninit() {
 
@@ -115,11 +115,9 @@ const usePrinterStore = defineStore('printer', {
       }
     },
 
-    async requestPrinterList() {
-      console.log("Requesting printer list");
+    async  requestPrinterList() {
       try {
         const response = await this.ipcRequest('request_printer_list', {});
-        console.log("Printer list:", response);
         this.printers = response || [];
       } catch (error) {
         console.error('Failed to request printer list:', error);
@@ -171,12 +169,19 @@ const usePrinterStore = defineStore('printer', {
     },
 
     async requestDeletePrinter(printerId) {
+      const loading = ElLoading.service({
+        lock: true,
+      });
       try {
         await this.ipcRequest('request_delete_printer', { printerId });
         this.requestPrinterList();
+        await new Promise(resolve => setTimeout(resolve, 500));
         // Response handling is done in event listeners
       } catch (error) {
         console.error('Failed to delete printer:', error);
+      }
+      finally {
+        loading.close();
       }
     },
 
@@ -212,27 +217,41 @@ const usePrinterStore = defineStore('printer', {
     },
 
     async requestUpdatePrinterName(printerId, printerName) {
+      const loading = ElLoading.service({
+        lock: true,
+      });
       try {
         await this.ipcRequest('request_update_printer_name', {
           printerId,
           printerName
         });
+        await new Promise(resolve => setTimeout(resolve, 1000));
         // Response handling is done in event listeners
       } catch (error) {
         console.error('Failed to update printer name:', error);
+      } finally {
+        loading.close();
       }
+
     },
 
     async requestUpdatePrinterHost(printerId, host) {
+      const loading = ElLoading.service({
+        lock: true,
+      });
       try {
         await this.ipcRequest('request_update_printer_host', {
           printerId,
           host
         });
+        await new Promise(resolve => setTimeout(resolve, 1000));
         // Response handling is done in event listeners
       } catch (error) {
         console.error('Failed to update printer host:', error);
+      } finally {
+        loading.close();
       }
+
     },
     // Handle printer information updates
     updatePrinterInfo(data) {
@@ -240,6 +259,7 @@ const usePrinterStore = defineStore('printer', {
         this.loadPrinterList();
       }
     },
+
     async showPrinterDetail(printerId) {
       try {
         const response = await this.ipcRequest('request_printer_detail', { printerId });

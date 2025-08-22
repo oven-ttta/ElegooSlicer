@@ -46,8 +46,8 @@ const PrintSendApp = {
 
             // Bed type management
             bedTypes: [
-                { value: 'btPEI', name: 'Textured A', icon: 'img/bt_pei.png' },
-                { value: 'btPC', name: 'Smooth B', icon: 'img/bt_pc.png' }
+                { value: 'btPEI', name: this.$t ? this.$t('printSend.texturedA') : 'Textured A', icon: 'img/bt_pei.png' },
+                { value: 'btPC', name: this.$t ? this.$t('printSend.smoothB') : 'Smooth B', icon: 'img/bt_pc.png' }
             ],
             selectedBedTypeValue: 'btPEI',
             bedDropdownOpen: false,
@@ -358,7 +358,7 @@ const PrintSendApp = {
 
             // Validate filament mapping if MMS is present
             if (this.hasMmsInfo && !this.checkFilamentMapping()) {
-                this.showStatusTip(this.getTranslation('some_filaments_not_mapped'));
+                this.showStatusTip(this.$t('printSend.someFilamentsNotMapped'));
                 return;
             }
 
@@ -403,6 +403,11 @@ const PrintSendApp = {
 
         // Event handlers called by external code
         onPrinterChanged() {
+            // Update bed types with current translations
+            this.bedTypes = [
+                { value: 'btPEI', name: this.$t('printSend.texturedA'), icon: 'img/bt_pei.png' },
+                { value: 'btPC', name: this.$t('printSend.smoothB'), icon: 'img/bt_pc.png' }
+            ];
             // Handle printer change logic if needed
             this.requestPrintTask();
         },
@@ -413,6 +418,12 @@ const PrintSendApp = {
     },
 
     mounted() {
+        // Initialize bed types with translations
+        this.bedTypes = [
+            { value: 'btPEI', name: this.$t('printSend.texturedA'), icon: 'img/bt_pei.png' },
+            { value: 'btPC', name: this.$t('printSend.smoothB'), icon: 'img/bt_pc.png' }
+        ];
+        
         // Initialize the application
         this.init();
 
@@ -450,5 +461,6 @@ app.use(ElementPlus, {
 });
 
 // Create and mount the Vue app
+app.use(i18n);
 app.mount('#app');
 

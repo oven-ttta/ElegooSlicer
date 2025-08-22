@@ -148,4 +148,5 @@ const FilamentSyncApp = {
 // Create and mount the Vue app
 const app = createApp(FilamentSyncApp)
     .use(ElementPlus)
+    .use(i18n)
     .mount('#app');

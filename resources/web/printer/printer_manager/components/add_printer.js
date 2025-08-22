@@ -3,19 +3,19 @@ const AddPrinterTemplate = /*html*/`
         <div class="add-printer-dialog">
           
             <el-tabs v-model="activeTab" class="add-printer-tabs" @tab-change="switchTab">
-                <el-tab-pane label="Discover" class="add-printer-tabpane" name="discover">
+                <el-tab-pane :label="$t('addPrinterDialog.discover')" class="add-printer-tabpane" name="discover">
                     <div class="add-printer-table">
                         <div class="add-printer-table-header">
-                                <span>Device</span>
-                                <span>Info</span>
-                                <span>Status</span>
+                                <span>{{ $t('addPrinterDialog.device') }}</span>
+                                <span>{{ $t('addPrinterDialog.info') }}</span>
+                                <span>{{ $t('addPrinterDialog.status') }}</span>
                         </div>
                         <div v-show="isLoading" >
                             <div class="linear-loading"></div>
                         </div>
                         <div v-if="printers && printers.length === 0" class="discover-empty">
                             <img src="./img/discover-empty.svg" width="180" />
-                            <div>No Devices Found</div>
+                            <div>{{ $t('addPrinterDialog.noDevicesFound') }}</div>
                         </div>
                         <div v-else class="add-printer-table-body">
                             <div v-for="(printer, idx) in printers" 
@@ -31,14 +31,14 @@ const AddPrinterTemplate = /*html*/`
                                     <span class="add-printer-host">{{ printer.host }}</span>
                                 </span>
                                 <span>
-                                    <span class="add-printer-status">Connectable</span>
+                                    <span class="add-printer-status">{{ $t('addPrinterDialog.connectable') }}</span>
                                 </span>
                             </div>
                         </div>
 
                     </div>
                 </el-tab-pane>
-                <el-tab-pane label="Manual Add" class="add-printer-tabpane"  name="manual">
+                <el-tab-pane :label="$t('addPrinterDialog.manualAdd')" class="add-printer-tabpane"  name="manual">
                         <div class="add-printer-content">
                                 <manual-form-component 
                                     ref="manualFormComponent"
@@ -47,29 +47,29 @@ const AddPrinterTemplate = /*html*/`
                 </el-tab-pane>
             </el-tabs>
 
-            <el-dialog v-model="showPrinterAuth" title="Connect to Printer" width="600" center>
+            <el-dialog v-model="showPrinterAuth" :title="$t('addPrinterDialog.connectToPrinter')" width="600" center>
                 <printer-auth-component ref="printerAuthComponent" :printer="pendingAuthPrinter" @close-modal="clearAuthData"
                     @add-printer="printerStore.requestAddPrinter"></printer-auth-component>
             </el-dialog>
 
-            <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">Refresh</button>
+            <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">{{ $t('addPrinterDialog.refresh') }}</button>
             <div class="add-printer-footer">
-                <button type="button" class="btn-secondary" @click="closeModal">Close</button>   
-                <span class="help-link" v-show="activeTab==='discover'" @click.prevent="showHelp" style="align-self: flex-end;">Cannot find printer?</span>
-                <button type="button" class="btn-primary" @click="connectPrinter">Connect</button>
+                <button type="button" class="btn-secondary" @click="closeModal">{{ $t('addPrinterDialog.close') }}</button>   
+                <span class="help-link" v-show="activeTab==='discover'" @click.prevent="showHelp" style="align-self: flex-end;">{{ $t('addPrinterDialog.cannotFindPrinter') }}</span>
+                <button type="button" class="btn-primary" @click="connectPrinter">{{ $t('addPrinterDialog.connect') }}</button>
             </div>
 
                         <!-- Help Dialog -->
             <el-dialog 
                 v-model="showHelpDialog"
-                title="Help"
+                :title="$t('addPrinterDialog.help')"
                 width="400px"
                 center
             >
-                <p>请确保打印机已经联网，并且与当前软件处于同一个网络，如果刷新后依旧无法发现，可尝试进行手动添加。</p>
+                <p>{{ $t('addPrinterDialog.helpMessage') }}</p>
                 <template #footer>
                     <span class="dialog-footer">
-                        <button class="btn-primary" @click="showHelpDialog = false">OK</button>
+                        <button class="btn-primary" @click="showHelpDialog = false">{{ $t('addPrinterDialog.ok') }}</button>
                     </span>
                 </template>
             </el-dialog>
@@ -136,7 +136,7 @@ const AddPrinterComponent = {
         async connectPrinter() {
             if (this.activeTab === 'discover') {
                 if (this.selectedPrinterIdx === null) {
-                    alert('Please select a printer');
+                    alert(this.$t('addPrinterDialog.pleaseSelectPrinter'));
                     return;
                 }
                 const printer = this.printers[this.selectedPrinterIdx];

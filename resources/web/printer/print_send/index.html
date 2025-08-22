@@ -7,10 +7,12 @@
 
     <script src="../../include/jquery-3.6.0.min.js"></script>
     <script src="../thirdparty/vue/vue.global.prod.min.js"></script>
+    <script src="../thirdparty/vue/vue-i18n.global.prod.js"></script>
     <script src="../thirdparty/element-plus/index.full.min.js"></script> 
     <script src="../../include/json2.js"></script>
     <script src="../../include/globalapi.js"></script>
     <script src="../../data/text.js"></script>
+    <script src="../locales/index.js"></script>
     <script src="./img/filament.js"></script>
 </head>
   
@@ -56,7 +58,7 @@
                         
                         <div class="device-selection">
                             <div class="section-header">
-                                <label class="section-title">Printer</label>
+                                <label class="section-title">{{ $t('printSend.printer') }}</label>
                                 <div class="section-separator"></div>
                             </div>
                             <div class="dropdowns-container">
@@ -72,8 +74,8 @@
                                         </button>
                                         <img :src="curPrinter?.printerImg || ''" alt="" class="dropdown-icon">
                                         <div class="dropdown-content">
-                                            <div class="dropdown-title">{{ curPrinter?.printerName || 'No printer' }}</div>
-                                            <div class="dropdown-subtitle">{{ curPrinter?.printerModel || 'Please connect a printer' }}</div>
+                                            <div class="dropdown-title">{{ curPrinter?.printerName || $t('printSend.noPrinter') }}</div>
+                                            <div class="dropdown-subtitle">{{ curPrinter?.printerModel || $t('printSend.pleaseConnectPrinter') }}</div>
                                         </div>
                                     </div>
                                     <ul class="dropdown-menu" :hidden="!printerDropdownOpen">
@@ -94,7 +96,7 @@
                                 
                                 <div 
                                     class="dropdown bed-dropdown" 
-                                    v-if="curPrinter.printerAttributes.supportsHeatedBedSwitching"
+                                    v-if="curPrinter && curPrinter.printerAttributes.supportsHeatedBedSwitching"
                                     v-click-outside="closeBedDropdown"
                                     :class="{ hidden: !showBedDropdown }">
                                     <div 
@@ -129,7 +131,7 @@
                     <div class="filament-header">
                         <div class="filament-controls">
                             <div class="toggle-item">
-                                <div class="toggle-label trans" tid="auto_refill">Auto Refill</div>
+                                <div class="toggle-label trans" tid="auto_refill">{{ $t('printSend.autoRefill') }}</div>
                                 <label class="toggle-switch">
                                     <input type="checkbox" v-model="printInfo.autoRefill">
                                     <span class="toggle-slider"></span>
@@ -175,7 +177,7 @@
                                   <template #default>
                                     <div>
                                         <div class="mms-header">
-                                            <span class="mms-title" >"CANVAS"</span>
+                                            <span class="mms-title" >{{ $t('printSend.canvas') }}</span>
                                             <div style="border-bottom: 1px solid #DEDEDE; height: 1px; flex: 1;"></div>
                                         </div>
                                         <div class="mms-popover-content">
@@ -215,7 +217,7 @@
                     
                     <div class="toggle-group">
                         <div class="toggle-item">
-                            <div class="toggle-label trans" tid="switch_to_device_tab">Switch to Device Tab</div>
+                            <div class="toggle-label trans" tid="switch_to_device_tab">{{ $t('printSend.switchToDeviceTab') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.switchToDeviceTab">
                                 <span class="toggle-slider"></span>
@@ -223,7 +225,7 @@
                         </div>
                         
                         <div class="toggle-item">
-                            <div class="toggle-label trans" tid="upload_and_print">Upload and Print</div>
+                            <div class="toggle-label trans" tid="upload_and_print">{{ $t('printSend.uploadAndPrint') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.uploadAndPrint">
                                 <span class="toggle-slider"></span>
@@ -231,15 +233,15 @@
                         </div>
                     </div>
                 </section>
-                <section class="print-options-section" :class="{ hidden: !showPrintOptions }" v-if="curPrinter.printerAttributes.supportsAutoBedLeveling || curPrinter.printerAttributes.supportsTimeLapse">
+                <section class="print-options-section" :class="{ hidden: !showPrintOptions }" v-if="curPrinter && (curPrinter.printerAttributes.supportsAutoBedLeveling || curPrinter.printerAttributes.supportsTimeLapse)">
                     <div class="section-header">
-                        <h3 class="section-title">Print Options</h3>
+                        <h3 class="section-title">{{ $t('printSend.printOptions') }}</h3>
                         <div class="section-separator"></div>
                     </div>
                     
                     <div class="print-options-grid">
                         <div class="toggle-item">
-                            <div class="toggle-label trans" v-if="curPrinter.printerAttributes.supportsAutoBedLeveling" tid="heated_bed_leveling">Auto Bed Leveling</div>
+                            <div class="toggle-label trans" v-if="curPrinter && curPrinter.printerAttributes.supportsAutoBedLeveling" tid="heated_bed_leveling">{{ $t('printSend.autoBedLeveling') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.heatedBedLeveling">
                                 <span class="toggle-slider"></span>
@@ -247,7 +249,7 @@
                         </div>
                         
                         <div class="toggle-item">
-                            <div class="toggle-label trans" v-if="curPrinter.printerAttributes.supportsTimeLapse" tid="time_lapse">Timelapse</div>
+                            <div class="toggle-label trans" v-if="curPrinter && curPrinter.printerAttributes.supportsTimeLapse" tid="time_lapse">{{ $t('printSend.timelapse') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.timeLapse">
                                 <span class="toggle-slider"></span>
@@ -260,8 +262,8 @@
             <div class="status-tip" v-show="statusTip.show">{{ statusTip.message }}</div>
             
             <footer class="action-buttons">
-                <button class="btn btn-secondary trans" @click="cancel" tid="cancel">Cancel</button>
-                <button class="btn btn-primary trans" @click="upload" tid="upload">Upload</button>
+                <button class="btn btn-secondary trans" @click="cancel" tid="cancel">{{ $t('printSend.cancel') }}</button>
+                <button class="btn btn-primary trans" @click="upload" tid="upload">{{ $t('printSend.upload') }}</button>
             </footer>
         </div>
     </div>

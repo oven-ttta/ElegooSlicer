@@ -7,7 +7,7 @@ const PrinterAuthTemplate =
                     <img :src="(printer && printer.printerImg) || ''" />
                 </div>
                 <h3>{{ (printer && printer.printerName) || '' }}</h3>
-                <p class="instruction-text">Please enter the 6-character access code on the printer</p>
+                <p class="instruction-text">{{ $t('printerAuth.enterAccessCode') }}</p>
                 
                 <div class="access-code-inputs">
                     <el-input 
@@ -23,26 +23,26 @@ const PrinterAuthTemplate =
                     />
                 </div>
                 
-                <a href="#" class="help-link" @click.prevent="showHelp">Cannot access code?</a>
+                <a href="#" class="help-link" @click.prevent="showHelp">{{ $t('printerAuth.cannotAccessCode') }}</a>
 
                 
             </div>
             <div class="printer-auth-btn">
-                <button class="btn-secondary" @click="closeModal">Close</button>
-                <button class="btn-primary" @click="connectPrinter">Connect</button>
+                <button class="btn-secondary" @click="closeModal">{{ $t('printerAuth.close') }}</button>
+                <button class="btn-primary" @click="connectPrinter">{{ $t('printerAuth.connect') }}</button>
             </div>
             
             <!-- Help Dialog -->
             <el-dialog 
                 v-model="showHelpDialog"
-                title="Help"
+                :title="$t('printerAuth.help')"
                 width="400px"
                 center
             >
-                <p>Please check the printer screen or manual for the 6-character access code.</p>
+                <p>{{ $t('printerAuth.helpMessage') }}</p>
                 <template #footer>
                     <span class="dialog-footer">
-                        <button class="btn-primary" @click="showHelpDialog = false">OK</button>
+                        <button class="btn-primary" @click="showHelpDialog = false">{{ $t('printerAuth.ok') }}</button>
                     </span>
                 </template>
             </el-dialog>
@@ -116,11 +116,11 @@ const PrinterAuthComponent = {
 
             switch (authMode) {
                 case "token":
-                    return "Connect to Printer";
+                    return this.$t("printerAuth.connectToPrinter");
                 case "pin":
-                    return "Bind Printer";
+                    return this.$t("printerAuth.bindPrinter");
                 default:
-                    return "Connect to Printer";
+                    return this.$t("printerAuth.connectToPrinter");
             }
         },
 
@@ -133,7 +133,7 @@ const PrinterAuthComponent = {
             const accessCode = this.accessCodes.join("");
 
             if (accessCode.length !== 6) {
-                alert("Please enter the complete 6-character access code");
+                alert(this.$t("printerAuth.pleaseEnterCompleteAccessCode"));
                 return;
             }
 

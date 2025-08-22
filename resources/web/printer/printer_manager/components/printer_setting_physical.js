@@ -8,8 +8,8 @@ const PrinterSettingPhysicalTemplate = /*html*/
                 ></manual-form-component>
             </div>
             <div class="add-printer-footer">
-                <el-button type="danger" @click="deletePrinter">Delete</el-button>
-                <el-button type="primary" @click="confirmPrinter">Confirm</el-button>
+                <el-button type="danger" @click="deletePrinter">{{ $t('printerSettingPhysical.delete') }}</el-button>
+                <el-button type="primary" @click="confirmPrinter">{{ $t('printerSettingPhysical.confirm') }}</el-button>
             </div>
         </div>
     `;
@@ -55,7 +55,7 @@ const PrinterSettingPhysicalComponent = {
         },
 
         async deletePrinter() {
-            if (confirm('Are you sure you want to delete this printer?')) {
+            if (confirm(this.$t('printerSettingPhysical.confirmDeletePrinter'))) {
                await this.printerStore.requestDeletePrinter(this.printer.printerId);
                this.closeModal();
             }

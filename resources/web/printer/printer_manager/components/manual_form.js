@@ -11,9 +11,9 @@ const ManualFormTemplate = /*html*/
             <div class="form-group-box">
                 <div class="form-group">
                     <div class="form-group-header">
-                        <label class="required">Printer Model</label>
+                        <label class="required">{{ $t('manualForm.printerModel') }}</label>
                         <div class="form-group-advanced">
-                            <span>Advanced</span>
+                            <span>{{ $t('manualForm.advanced') }}</span>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="showAdvanced" @change="toggleAdvanced"/>
                                 <span class="toggle-slider"></span>
@@ -28,8 +28,8 @@ const ManualFormTemplate = /*html*/
                                     v-model="formData.vendor" 
                                     @change="onVendorChange"
                                     :disabled="isVendorDisabled"
-                                    :title="isVendorDisabled ? 'Vendor cannot be modified for existing printers' : ''"
-                                    placeholder="Select vendor"
+                                    :title="isVendorDisabled ? $t('manualForm.vendorCannotBeModified') : ''"
+                                    :placeholder="$t('manualForm.selectVendor')"
                                 >
                                     <el-option 
                                         v-for="vendor in vendors" 
@@ -47,8 +47,8 @@ const ManualFormTemplate = /*html*/
                                     v-model="formData.printerModel" 
                                     @change="onModelChange"
                                     :disabled="isModelDisabled"
-                                    :title="isModelDisabled ? 'Model cannot be modified for existing printers' : ''"
-                                    placeholder="Select model"
+                                    :title="isModelDisabled ? $t('manualForm.modelCannotBeModified') : ''"
+                                    :placeholder="$t('manualForm.selectModel')"
                                 >
                                     <el-option 
                                         v-for="model in availableModels" 
@@ -64,11 +64,13 @@ const ManualFormTemplate = /*html*/
                 </div>
                 
                 <div class="form-group">
-                    <label class="required">Printer Name</label>
+                    <label class="required">{{ $t('manualForm.printerName') }}</label>
                     <el-form-item prop="printerName">
                         <el-input 
                             type="text" 
                             v-model="formData.printerName"  
+                            :placeholder="formData.printerModel"
+                            maxlength="50"
                             required
                             @keydown="onPrinterNameKeydown"
                         />
@@ -76,9 +78,9 @@ const ManualFormTemplate = /*html*/
                 </div>
                 
                 <div class="form-group">
-                    <label class="required">Host Type</label>
+                    <label class="required">{{ $t('manualForm.hostType') }}</label>
                     <el-form-item prop="hostType">
-                        <el-select v-model="formData.hostType" placeholder="Select host type" :show-arrow="false">
+                        <el-select v-model="formData.hostType" :placeholder="$t('manualForm.selectHostType')" :show-arrow="false">
                             <el-option 
                                 v-for="hostType in hostTypes" 
                                 :key="hostType" 
@@ -90,7 +92,7 @@ const ManualFormTemplate = /*html*/
                 </div>
                 
                 <div class="form-group">
-                    <label class="required">Host Name, IP or URL</label>
+                    <label class="required">{{ $t('manualForm.hostNameIpUrl') }}</label>
                     <el-form-item prop="host">
                         <el-input 
                             type="text" 
@@ -102,22 +104,22 @@ const ManualFormTemplate = /*html*/
                 </div>
                 
                 <div class="form-group advanced-field" v-show="showAdvanced">
-                    <label>Device UI</label>
+                    <label>{{ $t('manualForm.deviceUI') }}</label>
                     <el-input type="text" v-model="formData.deviceUi"/>
                 </div>
                 
                 <div class="form-group advanced-field" v-show="showAdvanced">
-                    <label>API/Password</label>
+                    <label>{{ $t('manualForm.apiPassword') }}</label>
                     <el-input type="password" v-model="formData.apiKey"/>
                 </div>
                 
                 <div class="form-group advanced-field" v-show="showAdvanced">
-                    <label>HTTPS CA File</label>
+                    <label>{{ $t('manualForm.httpsCAFile') }}</label>
                     <div class="input-group">
                         <el-input type="text" v-model="formData.caFile" readonly/>
-                        <button type="button" class="btn-secondary">Preview</button>
+                        <button type="button" class="btn-secondary">{{ $t('manualForm.preview') }}</button>
                     </div>
-                    <label>HTTPS CA file is optional. It is only needed if you use HTTPS with a self-signed certificate.</label>
+                    <label>{{ $t('manualForm.httpsCAFileNote') }}</label>
                 </div>
             </div>
         </el-form>
@@ -156,20 +158,20 @@ const ManualFormComponent = {
             },
             formRules: {
                 vendor: [
-                    { required: true, message: 'Please select a vendor', trigger: 'change' }
+                    { required: true, message: this.$t('manualForm.pleaseSelectVendor'), trigger: 'change' }
                 ],
                 printerModel: [
-                    { required: true, message: 'Please select a printer model', trigger: 'change' }
+                    { required: true, message: this.$t('manualForm.pleaseSelectPrinterModel'), trigger: 'change' }
                 ],
-                printerName: [
-                    { required: true, message: 'Please enter printer name', trigger: 'change' },
-                    { min: 1, max: 50, message: 'Length should be 1 to 50 characters', trigger: 'change' }
-                ],
+                // printerName: [
+                //     { required: true, message: this.$t('manualForm.pleaseEnterPrinterName'), trigger: 'change' },
+                //     // { min: 1, max: 50, message: this.$t('manualForm.lengthShouldBe1To50'), trigger: 'change' }
+                // ],
                 hostType: [
-                    { required: true, message: 'Please select host type', trigger: 'change' }
+                    { required: true, message: this.$t('manualForm.pleaseSelectHostType'), trigger: 'change' }
                 ],
                 host: [
-                    { required: true, message: 'Please enter host name, IP or URL', trigger: 'blur' },
+                    { required: true, message: this.$t('manualForm.pleaseEnterHostNameIpUrl'), trigger: 'blur' },
                     { 
                         validator: (rule, value, callback) => {
                             this.printerStore.validateHost(rule, value, callback);
@@ -277,9 +279,9 @@ const ManualFormComponent = {
                 if (model) {
                     this.formData.hostType = model.hostType;
                     
-                    if (!this.formData.printerName) {
-                        this.formData.printerName = model.modelName;
-                    }
+                    // if (!this.formData.printerName) {
+                    //     this.formData.printerName = model.modelName;
+                    // }
                 }
             }
         },
@@ -353,7 +355,7 @@ const ManualFormComponent = {
                 this.$refs.manualForm.validate((valid) => {
                     if (valid) {
                         const printer = {
-                            printerName: this.formData.printerName,
+                            printerName: this.formData.printerName.trim() ? this.formData.printerName.trim() : this.formData.printerModel,
                             host: this.formData.host,
                             apiKey: this.formData.apiKey,
                             caFile: this.formData.caFile,

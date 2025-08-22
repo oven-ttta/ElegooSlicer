@@ -6,7 +6,7 @@ const PrinterSettingTemplate = /*html*/
                     <div class="printer-setting-image-container">
                         <img class="printer-setting-image" :src="(printer && printer.printerImg) || ''" />
                     </div>
-                    <button class="printer-setting-delete-btn" @click="deleteDevice">Delete Device</button>
+                    <button class="printer-setting-delete-btn" @click="deleteDevice">{{ $t('printerSetting.deleteDevice') }}</button>
                 </div>
 
                 <div class="printer-setting-right">
@@ -18,7 +18,7 @@ const PrinterSettingTemplate = /*html*/
                         autocomplete="off"
                     >
                         <div class="printer-setting-info-item">
-                            <span class="printer-setting-info-label">Name</span>
+                            <span class="printer-setting-info-label">{{ $t('printerSetting.name') }}</span>
                             <div class="printer-setting-info-value">
                                 <el-form-item prop="printerName" class="printer-setting-form-item">
                                     <el-input
@@ -26,7 +26,7 @@ const PrinterSettingTemplate = /*html*/
                                         ref="nameInput"
                                         @blur="saveNameChanges"
                                         @keydown="onNameKeydown"
-                                        placeholder="Enter printer name"
+                                        :placeholder="$t('printerSetting.enterPrinterName')"
                                         maxlength="50"
                                     />
                                 </el-form-item>
@@ -34,12 +34,12 @@ const PrinterSettingTemplate = /*html*/
                         </div>
 
                         <div class="printer-setting-info-item">
-                            <span class="printer-setting-info-label">Model</span>
+                            <span class="printer-setting-info-label">{{ $t('printerSetting.model') }}</span>
                             <span class="printer-setting-info-value">{{ (printer && printer.printerModel) || '' }}</span>
                         </div>
 
                         <div class="printer-setting-info-item">
-                            <span class="printer-setting-info-label">Host</span>
+                            <span class="printer-setting-info-label">{{ $t('printerSetting.host') }}</span>
                             <div class="printer-setting-info-value">
                                 <el-form-item  prop="host" class="printer-setting-form-item">
                                     <el-input
@@ -47,7 +47,7 @@ const PrinterSettingTemplate = /*html*/
                                         ref="hostInput"
                                         @blur="saveHostChanges"
                                         @keydown="onHostKeydown"
-                                        placeholder="Enter host, IP or URL"
+                                        :placeholder="$t('printerSetting.enterHostIpUrl')"
                                         maxlength="30"
                                     />
                                 </el-form-item>
@@ -55,7 +55,7 @@ const PrinterSettingTemplate = /*html*/
                         </div>
 
                         <div class="printer-setting-info-item">
-                            <span class="printer-setting-info-label">Firmware</span>
+                            <span class="printer-setting-info-label">{{ $t('printerSetting.firmware') }}</span>
                             <span class="printer-setting-info-value">
                                 <span class="printer-setting-info-text">
                                     <span class="printer-setting-firmware-version">{{ (printer && printer.firmwareVersion) || '' }}</span>
@@ -101,11 +101,11 @@ const PrinterSettingComponent = {
             },
             formRules: {
                 printerName: [
-                    { required: true, message: 'Please enter printer name', trigger: 'change' },
-                    { min: 1, max: 50, message: 'Length should be 1 to 50 characters', trigger: 'change' }
+                    { required: true, message: this.$t('printerSetting.pleaseEnterPrinterName'), trigger: 'change' },
+                    { min: 1, max: 50, message: this.$t('printerSetting.lengthShouldBe1To50'), trigger: 'change' }
                 ],
                 host: [
-                    { required: true, message: 'Please enter host name, IP or URL', trigger: 'blur' },
+                    { required: true, message: this.$t('printerSetting.pleaseEnterHostNameIpUrl'), trigger: 'blur' },
                     {
                         validator: (rule, value, callback) => {
                             this.printerStore.validateHost(rule, value, callback);
@@ -154,7 +154,7 @@ const PrinterSettingComponent = {
         },
 
         async deleteDevice() {
-            if (!confirm('Are you sure you want to delete this device? This action cannot be undone.')) {
+            if (!confirm(this.$t('printerSetting.confirmDeleteDevice'))) {
                 return;
             }
             await this.printerStore.requestDeletePrinter(this.printer.printerId);
@@ -241,9 +241,9 @@ const PrinterSettingComponent = {
 
         getFirmwareUpdateText() {
             if (this.printer && this.printer.firmwareUpdate === 1) {
-                return 'Update Available';
+                return this.$t('printerSetting.updateAvailable');
             }
-            return 'Latest Version';
+            return this.$t('printerSetting.latestVersion');
         },
 
         // Sync form data with current printer data

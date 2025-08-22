@@ -1,6 +1,3 @@
-const { createApp } = Vue;
-const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOption, ElForm, ElFormItem, ElLoading } = ElementPlus;
-
 const PrinterManager = {
     setup() {
         const printerStore = usePrinterStore();
@@ -59,31 +56,31 @@ const PrinterManager = {
         getPrinterStatus(printerStatus, connectStatus) {
             // If not connected, always show Offline
             if (connectStatus === 0) {
-                return "Offline";
+                return this.$t("printerManager.offline");
             }
 
             const statusMap = {
-                [-1]: "Offline",
-                [0]: "Idle",
-                [1]: "Printing",
-                [2]: "Paused",
-                [3]: "Pausing",
-                [4]: "Canceled",
-                [5]: "Self-checking",
-                [6]: "Auto-leveling",
-                [7]: "PID calibrating",
-                [8]: "Resonance testing",
-                [9]: "Updating",
-                [10]: "File copying",
-                [11]: "File transferring",
-                [12]: "Homing",
-                [13]: "Preheating",
-                [14]: "Filament operating",
-                [15]: "Extruder operating",
-                [16]: "Print completed",
-                [17]: "RFID recognizing",
-                [999]: "Error",
-                [1000]: "Unknown"
+                [-1]: this.$t("printerManager.offline"),
+                [0]: this.$t("printerManager.idle"),
+                [1]: this.$t("printerManager.printing"),
+                [2]: this.$t("printerManager.paused"),
+                [3]: this.$t("printerManager.pausing"),
+                [4]: this.$t("printerManager.canceled"),
+                [5]: this.$t("printerManager.selfChecking"),
+                [6]: this.$t("printerManager.autoLeveling"),
+                [7]: this.$t("printerManager.pidCalibrating"),
+                [8]: this.$t("printerManager.resonanceTesting"),
+                [9]: this.$t("printerManager.updating"),
+                [10]: this.$t("printerManager.fileCopying"),
+                [11]: this.$t("printerManager.fileTransferring"),
+                [12]: this.$t("printerManager.homing"),
+                [13]: this.$t("printerManager.preheating"),
+                [14]: this.$t("printerManager.filamentOperating"),
+                [15]: this.$t("printerManager.extruderOperating"),
+                [16]: this.$t("printerManager.printCompleted"),
+                [17]: this.$t("printerManager.rfidRecognizing"),
+                [999]: this.$t("printerManager.error"),
+                [1000]: this.$t("printerManager.unknown")
             };
 
             return statusMap[printerStatus] || "";
@@ -175,20 +172,6 @@ const PrinterManager = {
     }
 };
 
-// Create Vue app
-const app = createApp(PrinterManager);
-
-// Register all components
-app.component('add-printer-component', AddPrinterComponent);
-app.component('manual-form-component', ManualFormComponent);
-app.component('printer-auth-component', PrinterAuthComponent);
-app.component('printer-setting-physical-component', PrinterSettingPhysicalComponent);
-app.component('printer-setting-component', PrinterSettingComponent);
-
-app.use(createPinia());
-app.use(ElementPlus);
-// Mount the app
-app.mount('#app');
 
 
 
