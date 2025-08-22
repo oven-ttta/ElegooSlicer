@@ -96,11 +96,6 @@ void PrinterMmsSyncView::setupIPCHandlers()
         // Mark async operation as in progress to prevent window closing
         m_asyncOperationInProgress = true;
         
-        // Send status to web view (optional, for UI feedback)
-        if (!m_isDestroying) {
-            runScript("window.onGetPrinterFilamentInfoStarted && window.onGetPrinterFilamentInfoStarted();");
-        }
-        
         // Run the filament info retrieval in a separate thread to avoid blocking the UI
         std::thread([life_tracker, params, sendResponse, this]() {
             try {

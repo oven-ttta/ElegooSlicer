@@ -88,7 +88,9 @@ const langMessages = {
       "ok": "OK",
       "pleaseEnterCompleteAccessCode": "Please enter the complete 6-character access code",
       "connectToPrinter": "Connect to Printer",
-      "bindPrinter": "Bind Printer"
+      "bindPrinter": "Bind Printer",
+      "failedToAddPrinterInvalidAccessCode": "Failed to add printer. Invalid access code.",
+      "failedToAddPrinter": "Failed to add printer."
     },
     "printerSetting": {
       "deleteDevice": "Delete Device",
@@ -117,7 +119,8 @@ const langMessages = {
       "noFilamentInfo": "The printer has no filament information to sync. Please check and refresh or retry.",
       "noPrinterConnected": "No printer connected. Please go to \"Devices\" to discover or add a new printer.",
       "cancel": "Cancel",
-      "sync": "Sync"
+      "sync": "Sync",
+      "failedToSyncFilament": "Failed to sync filament."
     },
     "printSend": {
       "printer": "Printer",
@@ -226,7 +229,9 @@ const langMessages = {
       "ok": "确定",
       "pleaseEnterCompleteAccessCode": "请输入完整的6位访问代码",
       "connectToPrinter": "连接到打印机",
-      "bindPrinter": "绑定打印机"
+      "bindPrinter": "绑定打印机",
+      "failedToAddPrinterInvalidAccessCode": "添加打印机失败。访问代码无效。",
+      "failedToAddPrinter": "添加打印机失败。"
     },
     "printerSetting": {
       "deleteDevice": "删除设备",
@@ -255,7 +260,8 @@ const langMessages = {
       "noFilamentInfo": "打印机没有要同步的耗材信息。请检查并刷新或重试。",
       "noPrinterConnected": "无打印机连接。请前往\"设备\"发现或添加新打印机。",
       "cancel": "取消",
-      "sync": "同步"
+      "sync": "同步",
+      "failedToSyncFilament": "同步耗材失败。"
     },
     "printSend": {
       "printer": "打印机",

@@ -49,7 +49,7 @@ const AddPrinterTemplate = /*html*/`
 
             <el-dialog v-model="showPrinterAuth" :title="$t('addPrinterDialog.connectToPrinter')" width="600" center>
                 <printer-auth-component ref="printerAuthComponent" :printer="pendingAuthPrinter" @close-modal="clearAuthData"
-                    @add-printer="printerStore.requestAddPrinter"></printer-auth-component>
+                    @add-printer="connectPrinter1"></printer-auth-component>
             </el-dialog>
 
             <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">{{ $t('addPrinterDialog.refresh') }}</button>
@@ -127,6 +127,11 @@ const AddPrinterComponent = {
         clearAuthData() {
             // this.pendingAuthPrinter = null;
             this.showPrinterAuth = false;
+            this.$nextTick(() => {
+                if (this.$refs.printerAuthComponent) {
+                    this.$refs.printerAuthComponent.accessCodes = ["", "", "", "", "", ""];
+                }
+            });
         },
 
         closeModal() {
@@ -134,30 +139,52 @@ const AddPrinterComponent = {
         },
 
         async connectPrinter() {
-            if (this.activeTab === 'discover') {
-                if (this.selectedPrinterIdx === null) {
-                    alert(this.$t('addPrinterDialog.pleaseSelectPrinter'));
-                    return;
-                }
-                const printer = this.printers[this.selectedPrinterIdx];
-                if (printer.authMode === 'token' &&
-                    (printer.extraInfo === '' ||
-                        !(printer.extraInfo && printer.extraInfo.token) ||
-                        printer.extraInfo.token === '')) {
-                    this.pendingAuthPrinter = printer;
-                    this.showPrinterAuth = true;
-                } else {
-                    this.printerStore.requestAddPrinter(printer);
-                }
+            try {
+                if (this.activeTab === 'discover') {
+                    if (this.selectedPrinterIdx === null) {
+                        alert(this.$t('addPrinterDialog.pleaseSelectPrinter'));
+                        return;
+                    }
+                    const printer = this.printers[this.selectedPrinterIdx];
+                    if (printer.authMode === 'token' &&
+                        (printer.extraInfo === '' ||
+                            !(printer.extraInfo && printer.extraInfo.token) ||
+                            printer.extraInfo.token === '')) {
+                        this.pendingAuthPrinter = printer;
+                        this.showPrinterAuth = true;
+                        this.$nextTick(() => {
+                            if (this.$refs.printerAuthComponent) {
+                                this.$refs.printerAuthComponent.accessCodes = ["", "", "", "", "", ""];
+                                this.$refs.printerAuthComponent.focusFirstInput();
+                            }
+                        });
 
-            } else {
-                // call method directly through component reference
-                if (this.$refs.manualFormComponent) {
-                    const printer = await this.$refs.manualFormComponent.getFormData();
-                    if (printer) {
-                        this.printerStore.requestAddPhysicalPrinter(printer);
+                    } else {
+                        await this.printerStore.requestAddPrinter(printer);
+                    }
+                    return;
+                } else {
+                    // call method directly through component reference
+                    if (this.$refs.manualFormComponent) {
+                        const printer = await this.$refs.manualFormComponent.getFormData();
+                        if (printer) {
+                            await this.printerStore.requestAddPhysicalPrinter(printer);
+                            this.closeModal();
+                        }
                     }
                 }
+
+            } catch (error) {
+
+            }
+        },
+
+        async connectPrinter1(printer) {
+            try {
+                await this.printerStore.requestAddPrinter(printer);
+                this.clearAuthData();
+            } catch (error) {
+                console.error('Failed to connect printer:', error);
             }
         },
 
@@ -175,7 +202,7 @@ const AddPrinterComponent = {
                 'selected': this.selectedPrinterIdx === idx
             };
         },
-        showHelp(){
+        showHelp() {
             this.showHelpDialog = true;
         }
     }

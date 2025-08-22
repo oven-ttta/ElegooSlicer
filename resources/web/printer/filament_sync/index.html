@@ -58,12 +58,12 @@
                     </div>
 
                     <div class="empty-content"
-                        v-else-if="curPrinter && (!mmsInfo || !mmsInfo.mmsList || mmsInfo.mmsList.length=== 0)">
+                        v-else-if="!hasFilament">
                         <img src="./img/no-filament.svg" />
                         <span class="no-filament-text">{{ $t('filamentSync.noFilamentInfo') }}</span>
                     </div>
 
-                    <div class="filament-list" v-else-if="curPrinter && mmsInfo?.mmsList?.length>0">
+                    <div class="filament-list" v-else-if="hasFilament">
                         <div v-for="mms in mmsInfo.mmsList" :key="mms.mmsId" class="mms-item">
                             <div v-for="tray in mms.trayList.filter(t => t.status === 1 || t.status === 3)"
                                 :key="tray.trayName" class="filament-item">

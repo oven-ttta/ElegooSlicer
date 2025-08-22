@@ -25,6 +25,20 @@ const FilamentSyncApp = {
                 return response;
             } catch (error) {
                 console.error(`IPC request failed for ${method}:`, error);
+                let message = '';
+                if (method === "syncMmsFilament") {
+                    message = i18n.global.t("filamentSync.failedToSyncFilament");
+                } else {
+                    message = `${error.message || 'Unknown error occurred'}`;
+                }
+                // Show error notification using Element Plus message component
+                if (window.ElementPlus && window.ElementPlus.ElMessage) {
+                    window.ElementPlus.ElMessage.error({
+                        message: message,
+                        duration: 5000,
+                        showClose: true
+                    });
+                }
                 throw error;
             }
         },
@@ -120,6 +134,33 @@ const FilamentSyncApp = {
             } catch (error) {
                 console.error('Failed to sync filament:', error);
             }
+        },
+
+        // Helper method to check if MMS has active filaments
+        hasActiveFilaments() {
+            // Check if printer and MMS info are available
+            if (!this.curPrinter || !this.mmsInfo) {
+                return false;
+            }
+            
+            // Check if MMS list exists and has items
+            const mmsList = this.mmsInfo.mmsList;
+            if (!mmsList || mmsList.length === 0) {
+                return false;
+            }
+            
+            // Check if first MMS has tray list with items
+            const firstMms = mmsList[0];
+            if (!firstMms || !firstMms.trayList || firstMms.trayList.length === 0) {
+                return false;
+            }
+            
+            // Check if there are filaments with active status (1: loaded, 3: ready)
+            const activeFilaments = firstMms.trayList.filter(tray => 
+                tray.status === 1 || tray.status === 3
+            );
+            
+            return activeFilaments.length > 0;
         }
     },
 
@@ -130,12 +171,17 @@ const FilamentSyncApp = {
     },
     computed: {
         canSync() {
-            return this.curPrinter && 
-                   this.printerList && 
-                   this.printerList.length > 0 &&
-                   this.mmsInfo && 
-                   this.mmsInfo.mmsList && 
-                   this.mmsInfo.mmsList.length > 0;
+            // Check if printer list is available
+            if (!this.printerList || this.printerList.length === 0) {
+                return false;
+            }
+            
+            // Use shared logic to check for active filaments
+            return this.hasActiveFilaments();
+        },
+        hasFilament() {
+            // Delegate to shared helper method
+            return this.hasActiveFilaments();
         }
     }
 };

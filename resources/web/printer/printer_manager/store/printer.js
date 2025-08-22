@@ -100,9 +100,9 @@ const usePrinterStore = defineStore('printer', {
         if (method === "request_add_printer" || method === "request_add_physical_printer") {
 
           if (params.printer.authMode === 'token' && (error.code === 200 || error.code === 202 || error.code === 203)) {
-            message = "Failed to add printer. Invalid access code.";
+            message = i18n.global.t("printerAuth.failedToAddPrinterInvalidAccessCode");
           } else {
-            message = "Failed to add printer.";
+            message = i18n.global.t("printerAuth.failedToAddPrinter");
           }
 
         } else {
@@ -202,6 +202,7 @@ const usePrinterStore = defineStore('printer', {
         this.requestPrinterList();
       } catch (error) {
         console.error('Failed to add printer:', error);
+        throw error;
       } finally {
         loading.close();
       }
@@ -217,6 +218,7 @@ const usePrinterStore = defineStore('printer', {
         this.requestPrinterList();
       } catch (error) {
         console.error('Failed to add physical printer:', error);
+        throw error;
       } finally {
         loading.close();
       }

@@ -189,11 +189,6 @@ void PrintSendDialogEx::setupIPCHandlers()
         // Mark async operation as in progress to prevent window closing
         m_asyncOperationInProgress = true;
         
-        // Send status to web view (optional, for UI feedback)
-        if (!m_isDestroying) {
-            runScript("window.onPrintTaskStarted && window.onPrintTaskStarted();");
-        }
-        
         // Run the print task preparation in a separate thread to avoid blocking the UI
         std::thread([life_tracker, printerId, sendResponse, this]() {
             try {
