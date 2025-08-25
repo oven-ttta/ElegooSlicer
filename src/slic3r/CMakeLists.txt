@@ -587,8 +587,6 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrinterManager.hpp
     Utils/PrinterCache.cpp
     Utils/PrinterCache.hpp 
-    Utils/PrinterNetworkManager.cpp
-    Utils/PrinterNetworkManager.hpp
     Utils/PrinterNetwork.cpp
     Utils/PrinterNetwork.hpp
     Utils/ElegooNetwork.cpp

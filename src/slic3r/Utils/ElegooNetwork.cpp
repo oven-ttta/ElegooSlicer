@@ -37,7 +37,7 @@ PrinterNetworkResult<bool> ElegooNetwork::sendPrintFile(const PrinterNetworkPara
 }
 int ElegooNetwork::getPrinterType()
 {
-    return ElegooLink::getPrinterType(mPrinterNetworkInfo);
+    return ElegooLink::getInstance()->getPrinterType(mPrinterNetworkInfo);
 }
 
 PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo()
@@ -50,9 +50,14 @@ PrinterNetworkResult<PrinterAttributes> ElegooNetwork::getPrinterAttributes()
     return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId);
 }
 
-void ElegooNetwork::close()
+void ElegooNetwork::uninit()
 {
-    ElegooLink::getInstance()->close();
+    ElegooLink::getInstance()->uninit();
+}
+
+void ElegooNetwork::init()
+{
+    ElegooLink::getInstance()->init();
 }
 
 } // namespace Slic3r 

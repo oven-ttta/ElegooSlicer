@@ -19,9 +19,11 @@ public:
     virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params) override;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() override;
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() override;
-    virtual PrinterNetworkResult<PrinterAttributes> getPrinterAttributes() override;
-    virtual void close() override;
+    virtual PrinterNetworkResult<PrinterAttributes> getPrinterAttributes() override;  
     virtual int getPrinterType() override;
+
+    static void init();
+    static void uninit();
 };
 
 } // namespace Slic3r

@@ -14,21 +14,20 @@ class ElegooLink : public Singleton<ElegooLink>
 public:
     ElegooLink();
     ~ElegooLink();
-    PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo);
-    PrinterNetworkResult<bool> disconnectFromPrinter(const std::string& printerId);
-    PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters();
-    PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params);
-    PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params);
-    PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
-    PrinterNetworkResult<PrinterAttributes> getPrinterAttributes(const std::string& printerId);
-    void close();
+    void init();
+    void uninit();
 
-    static int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);
-    
-    private:
-       bool isBusy(const std::string& printerId, PrinterStatus &status, int tryCount = 10);
-       std::mutex mMutex;
-       bool mIsCleanup = false;
+    PrinterNetworkResult<PrinterNetworkInfo>              connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<bool>                            disconnectFromPrinter(const std::string& printerId);
+    PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters();
+    PrinterNetworkResult<bool>                            sendPrintTask(const PrinterNetworkParams& params);
+    PrinterNetworkResult<bool>                            sendPrintFile(const PrinterNetworkParams& params);
+    PrinterNetworkResult<PrinterMmsGroup>                 getPrinterMmsInfo(const std::string& printerId);
+    PrinterNetworkResult<PrinterAttributes>               getPrinterAttributes(const std::string& printerId);
+    int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);
+
+private:
+    bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10);
 };
 
 } // namespace Slic3r

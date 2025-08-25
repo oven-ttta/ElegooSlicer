@@ -80,8 +80,6 @@ std::vector<PrinterNetworkInfo> PrinterCache::getPrinters() const {
     for (const auto& pair : mPrinters) {
         result.push_back(pair.second);
     }
-    std::sort(result.begin(), result.end(),
-    [](const PrinterNetworkInfo& a, const PrinterNetworkInfo& b) { return a.addTime < b.addTime; });
     return result;
 }
 

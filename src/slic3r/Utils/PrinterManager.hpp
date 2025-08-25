@@ -45,10 +45,23 @@ public:
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
     static std::string imageFileToBase64DataURI(const std::string& image_path);
 
+    void init();
     void close();
 
 private:
     PrinterManager();
+    int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);
+
+    std::mutex mConnectionsMutex;
+    std::map<std::string, std::shared_ptr<IPrinterNetwork>> mNetworkConnections;
+    bool addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network);
+    bool deletePrinterNetwork(const std::string& printerId);
+    std::shared_ptr<IPrinterNetwork> getPrinterNetwork(const std::string& printerId);
+
+    // thread to monitor printer connections
+    std::atomic<bool> mIsRunning;
+    std::thread mConnectionThread;
+    void monitorPrinterConnections();
 
 };
 } // namespace Slic3r::GUI 

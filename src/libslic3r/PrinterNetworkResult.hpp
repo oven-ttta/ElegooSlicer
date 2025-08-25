@@ -69,7 +69,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_ALREADY_EXISTS = 10002,           // Printer already exists
     PRINTER_TYPE_NOT_SUPPORTED = 10003,       // Printer type not supported
     PRINTER_MMS_NOT_CONNECTED = 10004,        // Printer MMS not connected
-
+    CREATE_NETWORK_FOR_HOST_TYPE_FAILED = 10005, // Failed to create network for host type
 };
 
 

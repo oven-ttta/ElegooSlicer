@@ -83,6 +83,16 @@ PrinterStatus parseElegooStatus(elink::PrinterState mainStatus, elink::PrinterSu
 
 ElegooLink::ElegooLink()
 {
+   
+}
+
+ElegooLink::~ElegooLink()
+{
+    
+}
+
+void ElegooLink::init()
+{
     elink::ElegooLink::Config cfg;
 
     cfg.logLevel         = 1;
@@ -137,22 +147,11 @@ ElegooLink::ElegooLink()
         PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.printerId, info));
     });
 
-    mIsCleanup = false;
 }
 
-ElegooLink::~ElegooLink()
+void ElegooLink::uninit()
 {
-    close();    
-}
-
-void ElegooLink::close()
-{
-    //only cleanup once
-    std::lock_guard<std::mutex> lock(mMutex);
-    if(!mIsCleanup) {
-        mIsCleanup = true;
-        elink::ElegooLink::getInstance().cleanup(); 
-    }
+    elink::ElegooLink::getInstance().cleanup();    
 }
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo)

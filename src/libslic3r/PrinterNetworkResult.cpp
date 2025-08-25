@@ -86,6 +86,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("printer type not supported");
         case PrinterNetworkErrorCode::HOST_TYPE_NOT_SUPPORTED:
             return _u8L("host type not supported");
+        case PrinterNetworkErrorCode::CREATE_NETWORK_FOR_HOST_TYPE_FAILED:
+            return _u8L("failed to create network for host type");
         default:
             return _u8L("unknown error occurred");
     }
