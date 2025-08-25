@@ -177,3 +177,4 @@ src/slic3r/Utils/ElegooLink.cpp
 src/slic3r/Utils/PrintHost.cpp
 src/slic3r/GUI/Jobs/EmbossJob.cpp
 src/slic3r/GUI/Gizmos/GLGizmoBrimEars.cpp
+src/slic3r/GUI/Gizmos/GLGizmoAssembly.cpp

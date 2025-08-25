@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-22 15:34+0800\n"
+"POT-Creation-Date: 2025-08-25 10:20+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -6496,10 +6496,10 @@ msgid "If enabled, useful hints are displayed at startup."
 msgstr "如果启用，将在启动时显示有用的提示。"
 
 msgid "Flushing volumes: Auto-calculate everytime the color changed."
-msgstr ""
+msgstr "冲洗体积：每一次颜色改变时自动计算。"
 
 msgid "If enabled, auto-calculate everytime the color changed."
-msgstr ""
+msgstr "如果启用，会在每一次颜色改变时自动计算。"
 
 msgid ""
 "Flushing volumes: Auto-calculate every time when the filament is changed."
@@ -6517,7 +6517,7 @@ msgid ""
 msgstr ""
 
 msgid "Multi-device Management(Take effect after restarting ElegooSlicer)."
-msgstr ""
+msgstr "多设备管理 （重启ElegooSlicer后生效）"
 
 msgid ""
 "With this option enabled, you can send a task to multiple devices at the "
@@ -6525,7 +6525,7 @@ msgid ""
 msgstr "启用此选项后，您可以同时向多个设备发送任务并管理多个设备。"
 
 msgid "Auto arrange plate after cloning"
-msgstr ""
+msgstr "克隆后自动排列板"
 
 msgid "Auto arrange plate after object cloning"
 msgstr ""
@@ -16374,10 +16374,10 @@ msgstr "调整剖面视图"
 msgid ""
 "Warning: The brim type is not set to \"painted\",the brim ears will not take "
 "effect !"
-msgstr ""
+msgstr "警告：Brim类型未设置为绘制模式，耳状Brim将不会生效！"
 
 msgid "Set the brim type to \"painted\""
-msgstr ""
+msgstr "将Brim类型设置为绘制模式"
 
 msgid " invalid brim ears"
 msgstr "个无效耳状帽檐"
@@ -16387,6 +16387,27 @@ msgstr "耳状帽檐"
 
 msgid "Please select single object."
 msgstr "请选中单个对象。"
+
+msgid "Please confirm explosion ratio = 1 and select at least two volumes."
+msgstr ""
+
+msgid "Please select at least two volumes."
+msgstr ""
+
+msgid "(Moving)"
+msgstr ""
+
+msgid "Point and point assembly"
+msgstr "点对点组装"
+
+msgid ""
+"It is recommended to assemble the objects first,\n"
+"because the objects is restriced to bed \n"
+"and only parts can be lifted."
+msgstr ""
+
+msgid "Face and face assembly"
+msgstr "面与面的组装"
 
 #: resources/data/hints.ini: [hint:G-code window]
 msgid ""
