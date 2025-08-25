@@ -186,6 +186,13 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterName(const std::string& 
 
 PrinterNetworkResult<bool> PrinterManager::updatePrinterHost(const std::string& printerId, const std::string& host)
 {
+    std::vector<PrinterNetworkInfo> printers = PrinterCache::getInstance()->getPrinters();
+    for (auto& p : printers) {
+        if (p.host == host && p.printerId != printerId) {
+            wxLogWarning("Printer already exists, host: %s, printerId: %s", p.host, printerId);
+            return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_ALREADY_EXISTS, false);
+        }
+    }
     auto printer = PrinterCache::getInstance()->getPrinter(printerId);
     if (!printer.has_value()) {
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
