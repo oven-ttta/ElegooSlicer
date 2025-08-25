@@ -422,7 +422,7 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
         }
         if (params.errorFn) {
             std::string errorMessage = isSendPrintTaskFailed ? "Send print task failed" : "Send print file failed";
-            params.errorFn(errorMessage + "(" + std::to_string(static_cast<int>(result.code)) + ")" + result.message);
+            params.errorFn(errorMessage + ", " + result.message + "(" + std::to_string(static_cast<int>(result.code)) + ")");
         }
     }
     return result;

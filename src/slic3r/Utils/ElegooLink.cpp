@@ -337,7 +337,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
     try {
         PrinterStatus status;
         if(isBusy(params.printerId, status , 1)) {
-            return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_BUSY, false, "Printer is busy, status: " + std::to_string(status));
+            return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_BUSY, false);
         }
         elink::FileUploadParams uploadParams;
         uploadParams.printerId = params.printerId;

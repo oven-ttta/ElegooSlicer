@@ -383,7 +383,7 @@ const PrintSendApp = {
             this.printInfo.bedType = this.selectedBedTypeValue;
 
             // Validate filament mapping if MMS is present
-            if (this.hasMmsInfo && !this.checkFilamentMapping()) {
+            if (this.hasMmsInfo && this.printInfo.uploadAndPrint && !this.checkFilamentMapping()) {
                 this.showStatusTip(this.$t('printSend.someFilamentsNotMapped'));
                 return;
             }
@@ -398,8 +398,11 @@ const PrintSendApp = {
         checkFilamentMapping() {
             return this.printInfo.filamentList.every(filament =>
                 filament.mappedMmsFilament &&
-                filament.mappedMmsFilament.trayName &&
-                filament.mappedMmsFilament.trayName.trim() !== ""
+                filament.mappedMmsFilament.trayName.trim() !== "" &&
+                filament.mappedMmsFilament.filamentName.trim() !== "" &&
+                filament.mappedMmsFilament.filamentType.trim() !== "" &&
+                filament.mappedMmsFilament.mmsId.trim() !== "" &&
+                filament.mappedMmsFilament.trayId.trim() !== ""
             );
         },
 
