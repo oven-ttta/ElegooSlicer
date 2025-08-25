@@ -28,7 +28,11 @@ const PrinterSettingTemplate = /*html*/
                                         @keydown="onNameKeydown"
                                         :placeholder="$t('printerSetting.enterPrinterName')"
                                         maxlength="50"
-                                    />
+                                    >
+                                        <template #suffix>
+                                           <img src="./img/edit.svg" alt="Edit"/>
+                                        </template>
+                                    </el-input>
                                 </el-form-item>
                             </div>
                         </div>
@@ -49,7 +53,11 @@ const PrinterSettingTemplate = /*html*/
                                         @keydown="onHostKeydown"
                                         :placeholder="$t('printerSetting.enterHostIpUrl')"
                                         maxlength="30"
-                                    />
+                                    >
+                                        <template #suffix>
+                                            <img src="./img/edit.svg" alt="Edit"/>
+                                        </template>
+                                    </el-input>
                                 </el-form-item>
                             </div>
                         </div>

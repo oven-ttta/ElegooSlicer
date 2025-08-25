@@ -158,7 +158,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -590,7 +590,7 @@ body {
 .printer-setting-content {
   flex: 1;
   display: flex;
-  padding: 24px;
+  padding: 8px;
   gap: 48px;
   background: var(--bg-primary);
   overflow: hidden;
@@ -729,7 +729,7 @@ body {
   margin-right: 8px; */
 }
 .printer-setting-form-item .el-input__wrapper {
-  padding: 1px 0px;
+  padding: 1px 4px;
   box-shadow: 0 -1px 0 0 var(--el-input-border-color, var(--el-border-color)) inset;
   border-radius: 0px;
 }
@@ -739,11 +739,13 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
 }
 
 .printer-setting-form-item .el-input__wrapper.is-focus {
   box-shadow: 0 0 0 1px var(--el-input-focus-border-color) inset;
   border-radius: 4px;
+  /* padding: 1px 4px; */
 }
 
 /* .printer-setting-form-item .el-input__wrapper:hover {
