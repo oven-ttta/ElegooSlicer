@@ -141,7 +141,8 @@ const langMessages = {
       "cancel": "Cancel",
       "upload": "Upload",
       "someFilamentsNotMapped": "Some filaments are not mapped to MMS trays",
-      "filamentMapping": "Filament Mapping"
+      "filamentMapping": "Filament Mapping",
+      "filamentTypeNotMatch": "Filament type not match"
     }
   },
   zh_CN: {
@@ -287,7 +288,8 @@ const langMessages = {
       "cancel": "取消",
       "upload": "上传",
       "someFilamentsNotMapped": "某些耗材未映射到MMS托盘",
-      "filamentMapping": "耗材映射"
+      "filamentMapping": "耗材映射",
+      "filamentTypeNotMatch": "耗材类型不匹配"
     }
   }
 };

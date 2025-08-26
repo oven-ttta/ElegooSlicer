@@ -343,6 +343,10 @@ const PrintSendApp = {
             for (let i = 0; i < this.printInfo.filamentList.length; i++) {
                 if (this.printInfo.filamentList[i].index === filamentIndex) {
                     const filament = this.printInfo.filamentList[i];
+                    if(filament.filamentType !== tray.filamentType && tray.filamentType !== '') {
+                        this.showStatusTip(this.$t('printSend.filamentTypeNotMatch'));
+                        return;
+                    }
                     filament.mappedMmsFilament.filamentColor = tray.filamentColor;
                     filament.mappedMmsFilament.filamentName = tray.filamentName;
                     filament.mappedMmsFilament.filamentType = tray.filamentType;

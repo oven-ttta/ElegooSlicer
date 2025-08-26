@@ -212,7 +212,7 @@
                                         </div>
                                     </template>
                                     <template #reference>
-                                        <div class="tray-rect">
+                                        <div class="tray-rect" :title="filament.mappedMmsFilament?.filamentName">
                                             <span v-html="getFilamentSvg(filament.mappedMmsFilament)">
                                             </span>
                                             <div class="tray-filament-type">{{ filament.mappedMmsFilament?.filamentType
