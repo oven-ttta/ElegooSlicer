@@ -49,29 +49,113 @@ void WebviewIPCManager::onScriptMessage(wxWebViewEvent& event){
 void WebviewIPCManager::onMessageReceived(const std::string& message) {
     try {
         json jsonMessage = parseMessage(message);
+        if (jsonMessage.is_null()) {
+            wxLogError("IPC: Message parsing resulted in null JSON");
+            return;
+        }
         handleMessage(jsonMessage);
+    } catch (const json::parse_error& e) {
+        wxLogError("IPC: JSON parse error: %s", e.what());
     } catch (const std::exception& e) {
         wxLogError("IPC: Failed to parse message: %s", e.what());
     }
 }
 
+// Helper function to safely extract string from JSON
+std::string WebviewIPCManager::safeGetString(const json& j, const std::string& key, const std::string& defaultValue) {
+    try {
+        if (j.contains(key) && j[key].is_string()) {
+            return j[key].get<std::string>();
+        }
+        return defaultValue;
+    } catch (const std::exception& e) {
+        wxLogWarning("IPC: Failed to extract string field '%s': %s", key.c_str(), e.what());
+        return defaultValue;
+    }
+}
+
+// Helper function to safely extract integer from JSON
+int WebviewIPCManager::safeGetInt(const json& j, const std::string& key, int defaultValue) {
+    try {
+        if (j.contains(key)) {
+            if (j[key].is_number_integer()) {
+                return j[key].get<int>();
+            } else if (j[key].is_string()) {
+                // Try to convert string to int
+                std::string str = j[key].get<std::string>();
+                return std::stoi(str);
+            }
+        }
+        return defaultValue;
+    } catch (const std::exception& e) {
+        wxLogWarning("IPC: Failed to extract integer field '%s': %s", key.c_str(), e.what());
+        return defaultValue;
+    }
+}
+
+// Helper function to safely extract JSON object
+json WebviewIPCManager::safeGetObject(const json& j, const std::string& key, const json& defaultValue) {
+    try {
+        if (j.contains(key)) {
+            if (j[key].is_object()) {
+                return j[key];
+            } else if (j[key].is_null()) {
+                return json::object();
+            }
+        }
+        return defaultValue;
+    } catch (const std::exception& e) {
+        wxLogWarning("IPC: Failed to extract object field '%s': %s", key.c_str(), e.what());
+        return defaultValue;
+    }
+}
+
 std::string WebviewIPCManager::serializeMessage(const json& message) {
-    return message.dump();
+    try {
+        if (message.is_null()) {
+            wxLogWarning("IPC: Attempting to serialize null JSON message");
+            return "{}";
+        }
+        
+        return message.dump(-1, ' ', false, json::error_handler_t::replace);
+    } catch (const json::type_error& e) {
+        wxLogError("IPC: JSON type error during serialization: %s", e.what());
+        return "{}";
+    } catch (const std::exception& e) {
+        wxLogError("IPC: Unexpected error during message serialization: %s", e.what());
+        return "{}";
+    }
 }
 
 json WebviewIPCManager::parseMessage(const std::string& jsonStr) {
-    return json::parse(jsonStr);
+    if (jsonStr.empty()) {
+        wxLogError("IPC: Received empty message");
+        return json();
+    }
+    
+    try {
+        json parsed = json::parse(jsonStr);
+        if (parsed.is_null()) {
+            wxLogError("IPC: Parsed JSON is null");
+            return json();
+        }
+        return parsed;
+    } catch (const json::parse_error& e) {
+        wxLogError("IPC: JSON parse error at byte %lu: %s", e.byte, e.what());
+        return json();
+    } catch (const std::exception& e) {
+        wxLogError("IPC: Unexpected error during JSON parsing: %s", e.what());
+        return json();
+    }
 }
 
 void WebviewIPCManager::handleMessage(const json& message) {
-     std::string type;
-    if (!message.contains("type")) {
-        // wxLogError("IPC: Message missing type field");
-        // return;
-        type = "request";
-    }else{
-        type = message["type"];
+    if (!message.is_object()) {
+        wxLogError("IPC: Message is not a valid JSON object");
+        return;
     }
+    
+    std::string type = safeGetString(message, "type", "request");
     
     if (type == "request") {
         handleRequest(message);
@@ -85,14 +169,27 @@ void WebviewIPCManager::handleMessage(const json& message) {
 }
 
 void WebviewIPCManager::handleRequest(const json& message) {
-    if (!message.contains("id") || !message.contains("method")) {
-        wxLogError("IPC: Request message format error");
+    if (!message.is_object()) {
+        wxLogError("IPC: Request message is not a valid JSON object");
+        return;
+    }
+
+    std::string id = safeGetString(message, "id", "");
+    std::string method = safeGetString(message, "method", "");
+    
+    if (id.empty()) {
+        wxLogError("IPC: Request message missing or invalid id field");
         return;
     }
     
-    std::string id = message["id"];
-    std::string method = message["method"];
-    json params = message.contains("params") ? message["params"] : json::object();
+    if (method.empty()) {
+        wxLogError("IPC: Request message missing or invalid method field");
+        IPCResponse errorResponse = IPCResponse::error(id, "", 400, "Missing method field");
+        sendResponse(errorResponse);
+        return;
+    }
+    
+    json params = safeGetObject(message, "params", json::object());
     
     IPCRequest request(id, method, params);
     
@@ -101,36 +198,54 @@ void WebviewIPCManager::handleRequest(const json& message) {
     // Check asynchronous handlers with event sending
     auto asyncWithEventsIt = m_asyncRequestHandlersWithEvents.find(method);
     if (asyncWithEventsIt != m_asyncRequestHandlersWithEvents.end()) {
-        asyncWithEventsIt->second(request, 
-            [this, id, method](const IPCResult& result) {
-                // Convert IPCResult to IPCResponse for sending
-                IPCResponse response(id, method, result.code, result.message, result.data);
-                sendResponse(response);
-            },
-            [this, id](const std::string& eventMethod, const json& eventData) {
-                sendEvent(eventMethod, eventData, id);
-            });
+        try {
+            asyncWithEventsIt->second(request, 
+                [this, id, method](const IPCResult& result) {
+                    // Convert IPCResult to IPCResponse for sending
+                    IPCResponse response(id, method, result.code, result.message, result.data);
+                    sendResponse(response);
+                },
+                [this, id](const std::string& eventMethod, const json& eventData) {
+                    sendEvent(eventMethod, eventData, id);
+                });
+        } catch (const std::exception& e) {
+            wxLogError("IPC: Async handler with events execution failed for method '%s': %s", method.c_str(), e.what());
+            IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
+            sendResponse(errorResponse);
+        }
         return;
     }
     
     // Check regular asynchronous handlers
     auto asyncIt = m_asyncRequestHandlers.find(method);
     if (asyncIt != m_asyncRequestHandlers.end()) {
-        asyncIt->second(request, [this, id, method](const IPCResult& result) {
-            // Convert IPCResult to IPCResponse for sending
-            IPCResponse response(id, method, result.code, result.message, result.data);
-            sendResponse(response);
-        });
+        try {
+            asyncIt->second(request, [this, id, method](const IPCResult& result) {
+                // Convert IPCResult to IPCResponse for sending
+                IPCResponse response(id, method, result.code, result.message, result.data);
+                sendResponse(response);
+            });
+        } catch (const std::exception& e) {
+            wxLogError("IPC: Async handler execution failed for method '%s': %s", method.c_str(), e.what());
+            IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
+            sendResponse(errorResponse);
+        }
         return;
     }
     
     // Check synchronous handlers
     auto syncIt = m_requestHandlers.find(method);
     if (syncIt != m_requestHandlers.end()) {
-        IPCResult result = syncIt->second(request);
-        // Convert IPCResult to IPCResponse for sending
-        IPCResponse response(request.id, request.method, result.code, result.message, result.data);
-        sendResponse(response);
+        try {
+            IPCResult result = syncIt->second(request);
+            // Convert IPCResult to IPCResponse for sending
+            IPCResponse response(request.id, request.method, result.code, result.message, result.data);
+            sendResponse(response);
+        } catch (const std::exception& e) {
+            wxLogError("IPC: Sync handler execution failed for method '%s': %s", method.c_str(), e.what());
+            IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
+            sendResponse(errorResponse);
+        }
         return;
     }
     
@@ -140,44 +255,60 @@ void WebviewIPCManager::handleRequest(const json& message) {
 }
 
 void WebviewIPCManager::handleResponse(const json& message) {
-    if (!message.contains("id")) {
-        wxLogError("IPC: Response message missing id field");
+    if (!message.is_object()) {
+        wxLogError("IPC: Response message is not a valid JSON object");
         return;
     }
     
-    std::string id = message["id"];
-    
+    std::string id = safeGetString(message, "id", "");
+    if (id.empty()) {
+        wxLogError("IPC: Response message missing or invalid id field");
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(m_pendingRequestsMutex);
     auto it = m_pendingRequests.find(id);
     if (it != m_pendingRequests.end()) {
         auto& pendingRequest = it->second;
-        
-        // Create IPCResult from response message
-        int code = message.contains("code") ? message["code"].get<int>() : 0;
-        std::string msg = message.contains("message") ? message["message"].get<std::string>() : "";
-        json data = message.contains("data") ? message["data"] : json::object();
+
+        // Create IPCResult from response message with safe extraction
+        int code = safeGetInt(message, "code", 0);
+        std::string msg = safeGetString(message, "message", "");
+        json data = safeGetObject(message, "data", json::object());
+
         IPCResult result(code, msg, data);
         
         // Execute callback
         if (pendingRequest->callback) {
-            pendingRequest->callback(result);
+            try {
+                pendingRequest->callback(result);
+            } catch (const std::exception& e) {
+                wxLogError("IPC: Response callback execution failed for request '%s': %s", id.c_str(), e.what());
+            }
         }
         
         // Remove request
         m_pendingRequests.erase(it);
+    } else {
+        wxLogWarning("IPC: Received response for unknown request id: %s", id.c_str());
     }
 }
 
 void WebviewIPCManager::handleEvent(const json& message) {
-    if (!message.contains("method")) {
-        wxLogError("IPC: Event message missing method field");
+    if (!message.is_object()) {
+        wxLogError("IPC: Event message is not a valid JSON object");
         return;
     }
     
-    std::string method = message["method"];
-    std::string id = message.contains("id") ? message["id"].get<std::string>() : "";
-    json data = message.contains("data") ? message["data"] : json::object();
+    std::string method = safeGetString(message, "method", "");
+    if (method.empty()) {
+        wxLogError("IPC: Event message missing or invalid method field");
+        return;
+    }
     
+    std::string id = safeGetString(message, "id", "");
+    json data = safeGetObject(message, "data", json::object());
+
     IPCEvent event(method, data, id);
     
     // First check if there's an associated request event callback
@@ -188,7 +319,8 @@ void WebviewIPCManager::handleEvent(const json& message) {
             try {
                 it->second->eventCallback(event);
             } catch (const std::exception& e) {
-                wxLogError("IPC: Request event callback execution failed %s: %s", method.c_str(), e.what());
+                wxLogError("IPC: Request event callback execution failed for method '%s', id '%s': %s", 
+                          method.c_str(), id.c_str(), e.what());
             }
         }
     }
@@ -201,7 +333,8 @@ void WebviewIPCManager::handleEvent(const json& message) {
             try {
                 handler(event);
             } catch (const std::exception& e) {
-                wxLogError("IPC: Global event handler execution failed %s: %s", method.c_str(), e.what());
+                wxLogError("IPC: Global event handler execution failed for method '%s': %s", 
+                          method.c_str(), e.what());
             }
         }
     }
@@ -211,6 +344,7 @@ void WebviewIPCManager::request(const std::string& method, const json& params,
                         ResponseHandler callback, int timeout) {
     std::string id = generateRequestId();
     
+    if(callback)
     // Store pending request
     {
         std::lock_guard<std::mutex> lock(m_pendingRequestsMutex);
@@ -232,7 +366,8 @@ void WebviewIPCManager::requestWithEvents(const std::string& method, const json&
                                   ResponseHandler responseCallback, RequestEventHandler eventCallback,
                                   int timeout) {
     std::string id = generateRequestId();
-    
+
+    if(eventCallback!=nullptr||responseCallback!=nullptr)
     // Store pending request with event callback
     {
         std::lock_guard<std::mutex> lock(m_pendingRequestsMutex);
@@ -360,9 +495,38 @@ void WebviewIPCManager::sendMessage(const json& message) {
         return;
     }
     
-    // std::string jsonStr = serializeMessage(message);
-    wxString strJS = wxString::Format("HandleStudio(%s)", message.dump(-1, ' ', true));
-    Slic3r::GUI::wxGetApp().CallAfter([this, strJS] { WebView::RunScript(m_webView, strJS); });
+    if (!m_running) {
+        wxLogWarning("IPC: Manager is not running, message not sent");
+        return;
+    }
+    
+    try {
+        // Validate message before sending
+        if (message.is_null() || !message.is_object()) {
+            wxLogError("IPC: Invalid message format - not a JSON object");
+            return;
+        }
+        
+        // Use compact dump for transmission efficiency, with error handling
+        std::string jsonStr = message.dump(-1, ' ', false, json::error_handler_t::replace);
+        if (jsonStr.empty()) {
+            wxLogError("IPC: Failed to serialize message to JSON");
+            return;
+        }
+        
+        wxString strJS = wxString::Format("HandleStudio(%s)", jsonStr);
+        Slic3r::GUI::wxGetApp().CallAfter([this, strJS] { 
+            try {
+                WebView::RunScript(m_webView, strJS); 
+            } catch (const std::exception& e) {
+                wxLogError("IPC: Failed to execute script: %s", e.what());
+            }
+        });
+    } catch (const json::type_error& e) {
+        wxLogError("IPC: JSON type error when sending message: %s", e.what());
+    } catch (const std::exception& e) {
+        wxLogError("IPC: Unexpected error when sending message: %s", e.what());
+    }
 }
 
 void WebviewIPCManager::checkTimeouts() {

@@ -37,6 +37,11 @@ public:
     virtual void EndModal(int ret) override;
 
     virtual void                               init() override;
+    virtual boost::filesystem::path filename() const override{
+        return m_cachedModelName;
+    }
+    virtual std::string group() const override {return "";}
+    virtual std::string storage() const override {return "";}
     virtual std::map<std::string, std::string> extendedInfo() const override;
 
 protected:

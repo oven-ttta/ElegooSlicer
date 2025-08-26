@@ -79,7 +79,9 @@ const usePrinterStore = defineStore('printer', {
 
 
     init() {
-
+        this.requestPrinterModelList();
+        this.requestPrinterList();
+        this.startStatusUpdates();
     },
     uninit() {
 

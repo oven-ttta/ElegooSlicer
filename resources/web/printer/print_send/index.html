@@ -21,10 +21,10 @@
 
 <body>
     <div id="app">
-        <div class="print-task-dialog" v-show="!isIniting">
+        <div class="print-task-dialog" style="display: none;" v-show="!isIniting">
             <main v-if="printerList && printerList.length > 0" class="print-task-content">
                 <section class="model-section">
-                    <img v-if="modelImageSrc" :src="modelImageSrc" class="model-preview" alt="3D Model">
+                    <img v-if="modelImageSrc" :src="modelImageSrc" class="model-preview" alt="3D Model"/>
                     <div v-else class="model-preview"></div>
                     <div class="model-info">
                         <div class="model-name-edit">
@@ -38,15 +38,15 @@
 
                         <div class="print-stats">
                             <div class="stat-item">
-                                <img class="stat-icon" src="img/clock.svg" alt="">
+                                <img class="stat-icon" src="img/clock.svg" alt=""/>
                                 <span>{{ printInfo.printTime || '00:00:00' }}</span>
                             </div>
                             <div class="stat-item">
-                                <img class="stat-icon" src="img/est-weight.svg" alt="">
+                                <img class="stat-icon" src="img/est-weight.svg" alt=""/>
                                 <span>{{ formatWeight(printInfo.totalWeight) }}</span>
                             </div>
                             <div class="stat-item">
-                                <img class="stat-icon" src="img/layer-num.svg" alt="">
+                                <img class="stat-icon" src="img/layer-num.svg" alt=""/>
                                 <span>{{ printInfo.layerCount || 0 }}</span>
                             </div>
                         </div>
@@ -61,9 +61,9 @@
                                     <div class="dropdown-header" :class="{ active: printerDropdownOpen }"
                                         @click="togglePrinterDropdown">
                                         <button class="printer-refresh-btn" @click.stop="refreshPrinterList">
-                                            <img src="img/refresh.svg" alt="Refresh">
+                                            <img src="img/refresh.svg" alt="Refresh"/>
                                         </button>
-                                        <img :src="curPrinter?.printerImg || ''" alt="" class="dropdown-icon">
+                                        <img :src="curPrinter?.printerImg || ''" alt="" class="dropdown-icon"/>
                                         <div class="dropdown-content">
                                             <div class="dropdown-title">{{ curPrinter?.printerName ||
                                                 $t('printSend.noPrinter') }}</div>
@@ -76,7 +76,7 @@
                                             class="dropdown-item"
                                             :class="{ selected: printer.printerId === curPrinter.printerId }"
                                             @click="selectPrinter(printer)">
-                                            <img :src="printer.printerImg" alt="" class="dropdown-item-icon">
+                                            <img :src="printer.printerImg" alt="" class="dropdown-item-icon"/>
                                             <div class="dropdown-item-content">
                                                 <div class="dropdown-item-title">{{ printer.printerName }}</div>
                                                 <!-- <div v-if="printer.printerModel" class="dropdown-item-subtitle">{{ printer.printerModel }}</div> -->
@@ -90,7 +90,7 @@
                                     v-click-outside="closeBedDropdown" :class="{ hidden: !showBedDropdown }">
                                     <div class="dropdown-header" :class="{ active: bedDropdownOpen }"
                                         @click="toggleBedDropdown">
-                                        <img :src="selectedBedType.icon" alt="" class="dropdown-icon">
+                                        <img :src="selectedBedType.icon" alt="" class="dropdown-icon"/>
                                         <div class="dropdown-content">
                                             <div class="dropdown-title">{{ selectedBedType.name }}</div>
                                         </div>
@@ -99,7 +99,7 @@
                                         <li v-for="bedType in bedTypes" :key="bedType.value" class="dropdown-item"
                                             :class="{ selected: bedType.value === selectedBedType.value }"
                                             @click="selectBedType(bedType)">
-                                            <img :src="bedType.icon" alt="" class="dropdown-item-icon">
+                                            <img :src="bedType.icon" alt="" class="dropdown-item-icon"/>
                                             <div class="dropdown-item-content">
                                                 <div class="dropdown-item-title">{{ bedType.name }}</div>
                                             </div>
@@ -118,7 +118,7 @@
                             <div class="toggle-label trans" tid="switch_to_device_tab">{{
                                 $t('printSend.switchToDeviceTab') }}</div>
                             <label class="toggle-switch">
-                                <input type="checkbox" v-model="printInfo.switchToDeviceTab">
+                                <input type="checkbox" v-model="printInfo.switchToDeviceTab"/>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -127,7 +127,7 @@
                             <div class="toggle-label trans" tid="upload_and_print">{{ $t('printSend.uploadAndPrint') }}
                             </div>
                             <label class="toggle-switch">
-                                <input type="checkbox" v-model="printInfo.uploadAndPrint">
+                                <input type="checkbox" v-model="printInfo.uploadAndPrint"/>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -145,7 +145,7 @@
                                     <div class="toggle-label trans" tid="auto_refill">{{ $t('printSend.autoRefill') }}
                                     </div>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" v-model="printInfo.autoRefill">
+                                        <input type="checkbox" v-model="printInfo.autoRefill"/>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </div>
@@ -219,7 +219,7 @@
                                                 ||
                                                 '?' }}
                                             </div>
-                                            <span><img src="./img/down-arrow.svg" alt=""></span>
+                                            <span><img src="./img/down-arrow.svg" alt=""/></span>
                                         </div>
                                     </template>
                                 </el-popover>
@@ -243,7 +243,7 @@
                                 v-if="curPrinter && curPrinter.printerAttributes.supportsAutoBedLeveling"
                                 tid="heated_bed_leveling">{{ $t('printSend.autoBedLeveling') }}</div>
                             <label class="toggle-switch">
-                                <input type="checkbox" v-model="printInfo.heatedBedLeveling">
+                                <input type="checkbox" v-model="printInfo.heatedBedLeveling"/>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -253,7 +253,7 @@
                                 v-if="curPrinter && curPrinter.printerAttributes.supportsTimeLapse" tid="time_lapse">{{
                                 $t('printSend.timelapse') }}</div>
                             <label class="toggle-switch">
-                                <input type="checkbox" v-model="printInfo.timeLapse">
+                                <input type="checkbox" v-model="printInfo.timeLapse"/>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>

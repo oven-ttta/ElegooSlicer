@@ -141,25 +141,21 @@ void PrinterMmsSyncView::setupIPCHandlers()
     });
 
     // Handle syncMmsFilament
-    mIpc->onRequest("syncMmsFilament", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onEvent("syncMmsFilament", [this](const webviewIpc::IPCEvent& event) {
         try {
-            webviewIpc::IPCResult response = syncMmsFilament(request.params);
+            syncMmsFilament(event.data);
             EndModal(wxID_OK);
-            return response;
         } catch (const std::exception& e) {
             wxLogError("Error in syncMmsFilament: %s", e.what());
-            return webviewIpc::IPCResult::error("Failed to sync MMS filament");
         }
     });
 
     // Handle closeDialog
-    mIpc->onRequest("closeDialog", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onEvent("closeDialog", [this](const webviewIpc::IPCEvent& event) {
         try {
             EndModal(wxID_CANCEL);
-            return webviewIpc::IPCResult::success();
         } catch (const std::exception& e) {
             wxLogError("Error in closeDialog: %s", e.what());
-            return webviewIpc::IPCResult::error("Failed to close dialog");
         }
     });
 }

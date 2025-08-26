@@ -120,7 +120,7 @@ const FilamentSyncApp = {
 
         async cancel() {
             try {
-                await this.ipcRequest('closeDialog', {});
+                nativeIpc.sendEvent('closeDialog', {});
             } catch (error) {
                 console.error('Failed to close dialog:', error);
             }
@@ -133,7 +133,7 @@ const FilamentSyncApp = {
                     printFilamentList: this.printFilamentList,
                     printer: this.curPrinter
                 };
-                await this.ipcRequest('syncMmsFilament', params);
+                nativeIpc.sendEvent('syncMmsFilament', params);
             } catch (error) {
                 console.error('Failed to sync filament:', error);
             }

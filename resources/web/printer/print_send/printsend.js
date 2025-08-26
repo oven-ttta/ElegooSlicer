@@ -167,12 +167,10 @@ const PrintSendApp = {
                 expand = true;
             }
             try {
-                await this.ipcRequest('expand_window', { expand });
+                nativeIpc.sendEvent('expand_window', { expand });
             } catch (error) {
                 console.error('Failed to request printer list:', error);
-            } finally {
-                // loading.close();
-            }
+            } 
         },
 
         async refreshPrinterList() {
@@ -375,7 +373,7 @@ const PrintSendApp = {
         // Action methods
         async cancel() {
             try {
-                await this.ipcRequest('cancel_print', {});
+                nativeIpc.sendEvent('cancel_print', {});
             } catch (error) {
                 console.error('Failed to cancel print:', error);
             }
@@ -393,7 +391,7 @@ const PrintSendApp = {
             }
 
             try {
-                await this.ipcRequest('start_upload', this.printInfo);
+                nativeIpc.sendEvent('start_upload', this.printInfo);
             } catch (error) {
                 console.error('Failed to start upload:', error);
             }
