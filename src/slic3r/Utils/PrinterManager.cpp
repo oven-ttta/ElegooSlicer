@@ -18,6 +18,7 @@
 #include <algorithm>
 #include "PrinterCache.hpp"
 #include "PrinterNetworkEvent.hpp"
+#include "slic3r/GUI/I18N.hpp"
 namespace Slic3r {
 
 VendorProfile getMachineProfile(const std::string& vendorName, const std::string& machineModel, VendorProfile::PrinterModel& printerModel)
@@ -421,7 +422,7 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
                        printer.value().printerModel, params.fileName.c_str(), result.message.c_str());
         }
         if (params.errorFn) {
-            std::string errorMessage = isSendPrintTaskFailed ? "Send print task failed" : "Send print file failed";
+            std::string errorMessage = isSendPrintTaskFailed ? _u8L("Send print task failed") : _u8L("Send print file failed");
             params.errorFn(errorMessage + ", " + result.message + "(" + std::to_string(static_cast<int>(result.code)) + ")");
         }
     }

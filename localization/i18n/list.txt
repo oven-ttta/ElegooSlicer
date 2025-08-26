@@ -173,8 +173,14 @@ src/slic3r/Utils/SimplyPrint.cpp
 src/slic3r/Utils/Flashforge.cpp
 src/slic3r/GUI/Jobs/OAuthJob.cpp
 src/slic3r/GUI/BackgroundSlicingProcess.cpp
-src/slic3r/Utils/ElegooLink.cpp
 src/slic3r/Utils/PrintHost.cpp
 src/slic3r/GUI/Jobs/EmbossJob.cpp
 src/slic3r/GUI/Gizmos/GLGizmoBrimEars.cpp
 src/slic3r/GUI/Gizmos/GLGizmoAssembly.cpp
+src/slic3r/GUI/PrinterManagerView.cpp
+src/slic3r/GUI/PrinterMmsSyncView.cpp
+src/slic3r/GUI/PrintSendDialogEx.cpp
+src/slic3r/Utils/PrinterManager.cpp
+src/slic3r/Utils/PrinterMmsManager.cpp
+src/slic3r/Utils/WebviewIPCManager.cpp
+src/libslic3r/PrinterNetworkResult.cpp

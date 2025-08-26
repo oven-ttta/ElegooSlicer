@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-25 10:20+0800\n"
+"POT-Creation-Date: 2025-08-26 10:22+0800\n"
 "PO-Revision-Date: 2024-05-31 23:33+0900\n"
 "Last-Translator: Hotsolidinfill <138652683+Hotsolidinfill@users.noreply."
 "github.com>, crwusiz <crwusiz@gmail.com>\n"
@@ -17271,6 +17271,129 @@ msgid ""
 msgstr ""
 
 msgid "Face and face assembly"
+msgstr ""
+
+msgid "Connected Printer"
+msgstr ""
+
+msgid "Printer MMS Sync"
+msgstr ""
+
+msgid "Success"
+msgstr ""
+
+msgid "An unknown error occurred"
+msgstr ""
+
+msgid "An internal error occurred"
+msgstr ""
+
+msgid "Invalid parameter provided"
+msgstr ""
+
+msgid "Invalid data format"
+msgstr ""
+
+msgid "Operation timed out"
+msgstr ""
+
+msgid "Operation was cancelled"
+msgstr ""
+
+msgid "Access denied"
+msgstr ""
+
+msgid "Resource not found"
+msgstr ""
+
+msgid "Resource already exists"
+msgstr ""
+
+msgid "Insufficient storage space"
+msgstr ""
+
+msgid "Bad request"
+msgstr ""
+
+msgid "Connection failed"
+msgstr ""
+
+msgid "Network error occurred"
+msgstr ""
+
+msgid "Service temporarily unavailable"
+msgstr ""
+
+msgid "Feature not available"
+msgstr ""
+
+msgid "Version not supported"
+msgstr ""
+
+msgid "Version is too old"
+msgstr ""
+
+msgid "Version is too new"
+msgstr ""
+
+msgid "Access unauthorized"
+msgstr ""
+
+msgid "Authentication failed"
+msgstr ""
+
+msgid "Login session expired"
+msgstr ""
+
+msgid "File upload failed"
+msgstr ""
+
+msgid "File not found"
+msgstr ""
+
+msgid "Printer is busy"
+msgstr ""
+
+msgid "Printer is offline"
+msgstr ""
+
+msgid "Printer initialization failed"
+msgstr ""
+
+msgid "Printer command failed"
+msgstr ""
+
+msgid "Printer is already connected"
+msgstr ""
+
+msgid "Printer internal error"
+msgstr ""
+
+msgid "Print task not found"
+msgstr ""
+
+msgid "Printer network error"
+msgstr ""
+
+msgid "Invalid printer data received"
+msgstr ""
+
+msgid "Printer MMS connection failed"
+msgstr ""
+
+msgid "Printer not found"
+msgstr ""
+
+msgid "Printer already exists"
+msgstr ""
+
+msgid "Printer type not supported"
+msgstr ""
+
+msgid "Host type not supported"
+msgstr ""
+
+msgid "Failed to create network connection"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
