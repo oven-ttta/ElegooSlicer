@@ -150,7 +150,7 @@ void PrinterWebView::OnNavgating(wxWebViewEvent& event) {
         loadConnectingPage();
     }  
 }
-void PrinterWebView::OnNavgated(wxWebViewEvent& event) {
+void PrinterWebView::OnNavgated(const wxWebViewEvent& event) {
 
 }
 void PrinterWebView::reload()
@@ -172,7 +172,7 @@ void PrinterWebView::UpdateState() {
 
 }
 
-void PrinterWebView::OnClose(wxCloseEvent& evt)
+void PrinterWebView::OnClose(const wxCloseEvent& evt)
 {
     this->Hide();
 }
@@ -200,7 +200,7 @@ void PrinterWebView::SendAPIKey()
     m_browser->Reload();
 }
 
-void PrinterWebView::OnError(wxWebViewEvent &evt)
+void PrinterWebView::OnError(const wxWebViewEvent& evt)
 {
     auto e = "unknown error";
     switch (evt.GetInt()) {
@@ -248,7 +248,7 @@ void PrinterWebView::OnError(wxWebViewEvent &evt)
     }
 }
 
-void PrinterWebView::OnLoaded(wxWebViewEvent &evt)
+void PrinterWebView::OnLoaded(const wxWebViewEvent& evt)
 {
     if (m_loadState == PWLoadState::CONNECTING_LOADING) {
         m_loadState = PWLoadState::CONNECTING_LOADED;
@@ -261,7 +261,7 @@ void PrinterWebView::OnLoaded(wxWebViewEvent &evt)
         m_loadState = PWLoadState::FAILED_LOADED;
     }
 }
-void PrinterWebView::OnScriptMessage(wxWebViewEvent& event)
+void PrinterWebView::OnScriptMessage(const wxWebViewEvent& event)
 {
 //#if defined(__APPLE__) || defined(__MACH__)
     wxString message = event.GetString();
