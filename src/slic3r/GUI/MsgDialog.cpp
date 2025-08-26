@@ -332,7 +332,9 @@ ErrorDialog::ErrorDialog(wxWindow *parent, const wxString &msg, bool monospaced_
                         wxString::Format(_(L("%s has encountered an error")), SLIC3R_APP_FULL_NAME), wxOK)
 	, msg(msg)
 {
-    add_msg_content(this, content_sizer, msg, monospaced_font);
+    if(msg.IsEmpty())
+        this->msg = _L("An unknown error has occurred.");
+    add_msg_content(this, content_sizer, this->msg, monospaced_font);
 
 	// Use a small bitmap with monospaced font, as the error text will not be wrapped.
 	logo->SetBitmap(create_scaled_bitmap("ElegooSlicer_192px_grayscale.png", this, monospaced_font ? 48 : /*1*/84));
