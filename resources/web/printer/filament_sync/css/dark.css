@@ -15,7 +15,7 @@ html.dark .icon-button:active {
 }
 
 html.dark .model-select .el-select__wrapper {
-  background: var(--bg-secondary);
+  background: transparent;
   border-color: var(--border-primary);
 }
 
@@ -42,8 +42,7 @@ html.dark .empty-content {
 }
 
 html.dark .filament-item {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
+
 }
 
 html.dark .filament-item-id,
