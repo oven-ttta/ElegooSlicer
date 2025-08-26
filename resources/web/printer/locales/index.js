@@ -142,7 +142,8 @@ const langMessages = {
       "upload": "Upload",
       "someFilamentsNotMapped": "Some filaments are not mapped to MMS trays",
       "filamentMapping": "Filament Mapping",
-      "filamentTypeNotMatch": "Filament type not match"
+      "filamentTypeNotMatch": "Filament type not match",
+      "printerModelNotMatch": "The selected printer does not match the gcode file. It may cause printing failure or even printer damage! It is recommended to re-slice or select the correct printer to start printing."
     }
   },
   zh_CN: {
@@ -289,7 +290,8 @@ const langMessages = {
       "upload": "上传",
       "someFilamentsNotMapped": "某些耗材未映射到MMS托盘",
       "filamentMapping": "耗材映射",
-      "filamentTypeNotMatch": "耗材类型不匹配"
+      "filamentTypeNotMatch": "耗材类型不匹配",
+      "printerModelNotMatch": "当前选中的打印机与gcode文件不匹配，可能会导致打印失败甚至打印机损坏！建议重新切片或者选择正确的打印机启动打印。"
     }
   }
 };

@@ -267,6 +267,14 @@ webviewIpc::IPCResult PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann:
             printFilamentArray.push_back(convertPrintFilamentMmsMappingToJson(printFilament));
         }
     }
+
+    auto        cfg               = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    std::string printerModel      = "";
+    auto        printerModelValue = cfg.option<ConfigOptionString>("printer_model");
+    if (printerModelValue) {
+        printerModel = printerModelValue->value;
+    }
+    printerFilamentInfo["currentProjectPrinterModel"] = printerModel;
     printerFilamentInfo["printFilamentList"] = printFilamentArray;
     result.data = printerFilamentInfo;
     result.code = 0;

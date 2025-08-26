@@ -19,6 +19,7 @@ const PrintSendApp = {
                 switchToDeviceTab: false,
                 autoRefill: false,
                 bedType: 'btPEI',
+                currentProjectPrinterModel: '',
                 filamentList: [],
                 mmsInfo: {
                     mmsList: [
@@ -191,6 +192,12 @@ const PrintSendApp = {
                 this.hasMmsInfo = false;
             }
 
+            if (printInfo.currentProjectPrinterModel) {
+                if(this.curPrinter && this.curPrinter.printerModel !== printInfo.currentProjectPrinterModel) {
+                    this.showStatusTip(this.$t('printSend.printerModelNotMatch'));
+                }
+            }
+            
             this.$nextTick(() => {
                 this.adjustModelNameWidth();
             });

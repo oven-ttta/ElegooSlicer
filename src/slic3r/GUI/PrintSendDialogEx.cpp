@@ -432,6 +432,15 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
         info.filamentWeight = total_weight;
         mPrintFilamentList.push_back(info);
     }
+
+    auto        cfg               = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    std::string printerModel      = "";
+    auto        printerModelValue = cfg.option<ConfigOptionString>("printer_model");
+    if (printerModelValue) {
+        printerModel = printerModelValue->value;
+    }
+    printInfo["currentProjectPrinterModel"] = printerModel;
+
     PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
     PrinterMmsGroup mmsGroup;
 
