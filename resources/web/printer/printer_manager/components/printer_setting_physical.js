@@ -8,8 +8,8 @@ const PrinterSettingPhysicalTemplate = /*html*/
                 ></manual-form-component>
             </div>
             <div class="add-printer-footer">
-                <el-button type="danger" @click="deletePrinter">{{ $t('printerSettingPhysical.delete') }}</el-button>
-                <el-button type="primary" @click="confirmPrinter">{{ $t('printerSettingPhysical.confirm') }}</el-button>
+                <el-button type="danger" @click="deletePrinter">{{ $t('delete') }}</el-button>
+                <el-button type="primary" @click="confirmPrinter">{{ $t('confirm') }}</el-button>
             </div>
         </div>
     `;
