@@ -596,7 +596,9 @@ webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::jso
         printerInfo.printerModel = printer["printerModel"];
     } catch (const std::exception& e) {
         wxLogMessage("Add physical printer error: %s", e.what());
-        return "";
+        result.message = e.what();
+        result.code = static_cast<int>(PrinterNetworkErrorCode::INVALID_FORMAT);
+        return result;
     }
     auto networkResult = PrinterManager::getInstance()->addPrinter(printerInfo);
     result.message = networkResult.message;
@@ -662,16 +664,17 @@ webviewIpc::IPCResult PrinterManagerView::getPrinterListStatus()
 webviewIpc::IPCResult PrinterManagerView::browseCAFile()
 {
     webviewIpc::IPCResult result;
+    std::string path = "";
     try {
         static const auto filemasks = _L("Certificate files (*.crt, *.pem)|*.crt;*.pem|All files|*.*");
         wxFileDialog openFileDialog(this, _L("Open CA certificate file"), "", "", filemasks, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
         if (openFileDialog.ShowModal() != wxID_CANCEL) {
-            return openFileDialog.GetPath().ToStdString();
+            path = openFileDialog.GetPath().ToStdString();
         }
     } catch (const std::exception& e) {
         wxLogMessage("Browse CA file error: %s", e.what());
     }
-    result.data = "";
+    result.data = path;
     result.code = 0;
     result.message = "success";
     return result;
