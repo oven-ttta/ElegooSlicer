@@ -124,20 +124,21 @@ void PrintSendDialogEx::init()
         recent_path += '/';
     }
     recent_path += m_path.filename().wstring();
-    txt_filename->SetValue(recent_path);
-    //Hide to prevent flickering
-    txt_filename->Hide();
-    if (logo) {
-        logo->Hide();
-    }
-    //hide content_sizer child
-
-    if(content_sizer){
-        int size = content_sizer->GetChildren().size();
-        for (int i = 0; i < size; i++) {
-            content_sizer->Hide(i);
-        }
-    }
+    // txt_filename->SetValue(recent_path);
+    // //Hide to prevent flickering
+    // txt_filename->Hide();
+    // if (logo) {
+    //     logo->Hide();
+    // }
+    // //hide content_sizer child
+    // if(content_sizer){
+    //     auto child = content_sizer->GetChildren();
+    //     for (auto& item : child) {
+    //         if(item->IsWindow() && item->GetWindow()!=nullptr) {
+    //             item->GetWindow()->Hide();
+    //         }
+    //     }
+    // }
 
     // Cache the model name for use in preparePrintTask
     m_cachedModelName = recent_path.ToUTF8().data();
@@ -249,34 +250,31 @@ void PrintSendDialogEx::setupIPCHandlers()
     });
 
     // Handle cancel_print
-    mIpc->onRequest("cancel_print", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onEvent("cancel_print", [this](const webviewIpc::IPCEvent& event) {
         try {
             onCancel();
-            return webviewIpc::IPCResult::success();
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in cancel_print: " << e.what();
-            return webviewIpc::IPCResult::error("Failed to cancel print");
         }
     });
 
     // Handle start_upload
-    mIpc->onRequest("start_upload", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onEvent("start_upload", [this](const webviewIpc::IPCEvent& event) {
         try {
-            webviewIpc::IPCResult result = onPrint(request.params);
-            if(result.code == 0) {
-                EndModal(wxID_OK);
-            }
-            return result;
+           auto result = onPrint(event.data);
+           if(result.code == 0)
+           {
+             EndModal(wxID_OK);
+           }
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in start_upload: " << e.what();
-            return webviewIpc::IPCResult::error("Failed to start upload");
         }
     });
 
-    mIpc->onRequest("expand_window", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onEvent("expand_window", [this](const webviewIpc::IPCEvent& event) {
         try {
-           bool expand = request.params.value("expand", false);
-            if(!expand) {
+            bool expand = event.data.value("expand", false);
+            if (!expand) {
                 wxGetApp().CallAfter([this]() {
                     wxSize pSize = FromDIP(wxSize(860, NO_MMS_HEIGHT));
                     SetSize(pSize);
@@ -287,10 +285,8 @@ void PrintSendDialogEx::setupIPCHandlers()
                     SetSize(pSize);
                 });
             }
-            return webviewIpc::IPCResult::success();
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in expand_window: " << e.what();
-            return webviewIpc::IPCResult::error("Failed to expand window");
         }
     });
 }
@@ -538,7 +534,7 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         if (!modelName.EndsWith(".gcode")) {
             modelName += ".gcode";
         }
-        txt_filename->SetValue(modelName);
+        // txt_filename->SetValue(modelName);
 
         if(uploadAndPrint && mHasMms) {
              for(auto& printFilament : mPrintFilamentList) {

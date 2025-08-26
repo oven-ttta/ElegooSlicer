@@ -21,7 +21,7 @@
 
 <body>
     <div id="app">
-        <div class="filament-sync-container">
+        <div class="filament-sync-container" style="display: none;" v-show="!isIniting">
             <div class="main">
                 <div v-if="printerList&&printerList.length >0">
                     <el-select v-model="curPrinter" class="model-select" :show-arrow="false"

@@ -162,6 +162,11 @@ private:
     std::string serializeMessage(const json& message);
     json parseMessage(const std::string& jsonStr);
     
+    // JSON parsing helper functions for robustness
+    std::string safeGetString(const json& j, const std::string& key, const std::string& defaultValue = "");
+    int safeGetInt(const json& j, const std::string& key, int defaultValue = 0);
+    json safeGetObject(const json& j, const std::string& key, const json& defaultValue = json::object());
+    
     // Internal processing methods
     void handleMessage(const json& message);
     void handleRequest(const json& message);

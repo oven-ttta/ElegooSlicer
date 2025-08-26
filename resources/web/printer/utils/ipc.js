@@ -274,6 +274,7 @@ class IPCManager {
             window.wx.postMessage(JSON.stringify(message));
         } else {
             console.error('IPC: Unable to send message, no valid communication interface found');
+            throw new Error('IPC: No valid communication interface found');
         }
     }
 
@@ -329,8 +330,13 @@ class IPCManager {
                 type: 'request',
                 params
             };
-
-            this.sendMessage(message);
+            try {
+                this.sendMessage(message);
+            } catch (error) {
+                console.error('Failed to send IPC message:', error);
+                this.pendingRequests.delete(id);
+                reject(error);
+            }
         });
     }
 
@@ -432,8 +438,13 @@ class IPCManager {
                 type: 'request',
                 params
             };
-
-            this.sendMessage(message);
+            try {
+                this.sendMessage(message);
+            } catch (error) {
+                console.error('Failed to send IPC message:', error);
+                this.pendingRequests.delete(id);
+                reject(error);
+            }
         });
     }
 
