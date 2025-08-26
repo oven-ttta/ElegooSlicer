@@ -32,12 +32,10 @@ public:
 
 private:
     void setupIPCHandlers();
-    void onScriptMessage(wxWebViewEvent &evt);
     void OnCloseWindow(wxCloseEvent& event);
-    nlohmann::json getPrinterList();
-    nlohmann::json getPrinterFilamentInfo(const nlohmann::json& params);
-    nlohmann::json syncMmsFilament(const nlohmann::json& params);
-    void runScript(const wxString &javascript);
+    webviewIpc::IPCResult getPrinterList();
+    webviewIpc::IPCResult getPrinterFilamentInfo(const nlohmann::json& params);
+    webviewIpc::IPCResult syncMmsFilament(const nlohmann::json& params);
     void onShow();
 
     wxWebView* mBrowser;   

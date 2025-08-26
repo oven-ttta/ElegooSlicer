@@ -84,6 +84,10 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Host type not supported");
         case PrinterNetworkErrorCode::CREATE_NETWORK_FOR_HOST_TYPE_FAILED:
             return _u8L("Failed to create network connection");
+        case PrinterNetworkErrorCode::PRINTER_NOT_SELECTED:
+            return _u8L("Printer not selected");
+        case PrinterNetworkErrorCode::PRINTER_MMS_FILAMENT_NOT_MAPPED:
+            return _u8L("Some filaments are not mapped");
         default:
             return _u8L("An unknown error occurred");
     }

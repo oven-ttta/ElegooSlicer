@@ -7,6 +7,7 @@
 #include "Plater.hpp"
 #include "PrintHostDialogs.hpp"
 #include "libslic3r/PrinterNetworkInfo.hpp"
+#include <slic3r/Utils/WebviewIPCManager.h>
 #if wxUSE_WEBVIEW_IE
 #include "wx/msw/webview_ie.h"
 #endif
@@ -43,11 +44,9 @@ protected:
 
 private:
     void setupIPCHandlers();
-    void onScriptMessage(wxWebViewEvent &evt);
-    void runScript(const wxString &javascript);
-    nlohmann::json getPrinterList();
-    nlohmann::json preparePrintTask(const std::string &printerId);
-    void onPrint(const nlohmann::json &printInfo);
+    webviewIpc::IPCResult getPrinterList();
+    webviewIpc::IPCResult preparePrintTask(const std::string &printerId);
+    webviewIpc::IPCResult onPrint(const nlohmann::json &printInfo);
     void onCancel();
     std::string getCurrentProjectName(); 
     BedType appBedType() const;

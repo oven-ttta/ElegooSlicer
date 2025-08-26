@@ -29,7 +29,6 @@ public:
 
 private:
     void setupIPCHandlers();
-    void runScript(const wxString &javascript);
     void onClosePrinterTab(wxAuiNotebookEvent& event);
  
 

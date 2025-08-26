@@ -84,8 +84,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
     // Handle getPrinterList
     mIpc->onRequest("getPrinterList", [this](const webviewIpc::IPCRequest& request) {
         try {
-            nlohmann::json response = getPrinterList();
-            return webviewIpc::IPCResult::success(response);
+            return getPrinterList();
         } catch (const std::exception& e) {
             wxLogError("Error in getPrinterList: %s", e.what());
             return webviewIpc::IPCResult::error("Failed to get printer list");
@@ -108,14 +107,14 @@ void PrinterMmsSyncView::setupIPCHandlers()
             try {
                 // Check if the object still exists
                 if (auto tracker = life_tracker.lock()) {
-                    nlohmann::json response = this->getPrinterFilamentInfo(params);
+                    webviewIpc::IPCResult response = this->getPrinterFilamentInfo(params);
                     
                     // Final check before sending response
                     if (life_tracker.lock()) {
                         // Mark async operation as completed
                         m_asyncOperationInProgress = false;
                         
-                        sendResponse(webviewIpc::IPCResult::success(response));
+                        sendResponse(response);
                     }
                 } else {
                     // Object was destroyed, don't send response
@@ -144,9 +143,9 @@ void PrinterMmsSyncView::setupIPCHandlers()
     // Handle syncMmsFilament
     mIpc->onRequest("syncMmsFilament", [this](const webviewIpc::IPCRequest& request) {
         try {
-            nlohmann::json response = syncMmsFilament(request.params);
+            webviewIpc::IPCResult response = syncMmsFilament(request.params);
             EndModal(wxID_OK);
-            return webviewIpc::IPCResult::success(response);
+            return response;
         } catch (const std::exception& e) {
             wxLogError("Error in syncMmsFilament: %s", e.what());
             return webviewIpc::IPCResult::error("Failed to sync MMS filament");
@@ -165,31 +164,14 @@ void PrinterMmsSyncView::setupIPCHandlers()
     });
 }
 
-void PrinterMmsSyncView::runScript(const wxString& javascript)
-{
-    if (!mBrowser)
-        return;
-    WebView::RunScript(mBrowser, javascript);
-}
-
-void PrinterMmsSyncView::onScriptMessage(wxWebViewEvent& event)
-{
-    // This method is kept for compatibility but now delegates to WebviewIPCManager
-    // The actual message handling is done in setupIPCHandlers()
-    try {
-        wxString strInput = event.GetString();
-    } catch (std::exception& e) {
-        wxLogError("PrinterMmsSyncView::onScriptMessage Error: %s", e.what());
-    }
-}
-
 void PrinterMmsSyncView::EndModal(int ret)
 {
     MsgDialog::EndModal(ret);
 }
 
-nlohmann::json PrinterMmsSyncView::getPrinterList()
+webviewIpc::IPCResult PrinterMmsSyncView::getPrinterList()
 {
+    webviewIpc::IPCResult result;
     std::string selectedPrinterId = wxGetApp().app_config->get("recent", CONFIG_KEY_SELECTED_PRINTER_ID);
     auto printerList = PrinterManager::getInstance()->getPrinterList();
     nlohmann::json printerArray = json::array();
@@ -209,22 +191,28 @@ nlohmann::json PrinterMmsSyncView::getPrinterList()
         printerObj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
         printerArray.push_back(printerObj);
     }
-    return printerArray;
+    result.data = printerArray;
+    result.code = 0;
+    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
+    return result;
 }
 
-nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& params)
+webviewIpc::IPCResult PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& params)
 {
+    webviewIpc::IPCResult result;
     nlohmann::json printerFilamentInfo = nlohmann::json::object();
     std::string printerId = params["printerId"];
     auto mmsGroupResult = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
     if(!mmsGroupResult.isSuccess() || !mmsGroupResult.hasData()) {
-        return nlohmann::json::object();
+        result.code = static_cast<int>(PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED);
+        result.message = mmsGroupResult.message;
+        return result;
     }
     PrinterMmsGroup mmsGroup = mmsGroupResult.data.value();
     nlohmann::json mmsInfo = convertPrinterMmsGroupToJson(mmsGroup);
     printerFilamentInfo["mmsInfo"] = mmsInfo;
 
-    auto           preset_bundle = wxGetApp().preset_bundle;
+    auto  preset_bundle = wxGetApp().preset_bundle;
     std::vector<PrintFilamentMmsMapping> printFilamentList;
     nlohmann::json printFilamentArray     = json::array();
 
@@ -269,11 +257,15 @@ nlohmann::json PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann::json& 
         }
     }
     printerFilamentInfo["printFilamentList"] = printFilamentArray;
-    return printerFilamentInfo;
+    result.data = printerFilamentInfo;
+    result.code = 0;
+    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
+    return result;
 }
 
-nlohmann::json PrinterMmsSyncView::syncMmsFilament(const nlohmann::json& params)
+webviewIpc::IPCResult PrinterMmsSyncView::syncMmsFilament(const nlohmann::json& params)
 {
+    webviewIpc::IPCResult result;
     nlohmann::json mmsInfo = params["mmsInfo"];
     nlohmann::json printFilamentList = params["printFilamentList"];
     nlohmann::json printer = params["printer"];
@@ -284,7 +276,9 @@ nlohmann::json PrinterMmsSyncView::syncMmsFilament(const nlohmann::json& params)
     if(!selectedPrinterId.empty()) {
         wxGetApp().app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, selectedPrinterId);
     }
-    return nlohmann::json();
+    result.code = 0;
+    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
+    return result;
 }
 
 PrinterMmsGroup PrinterMmsSyncView::getSyncedMmsGroup()

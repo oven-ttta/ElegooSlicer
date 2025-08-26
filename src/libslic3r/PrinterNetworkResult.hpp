@@ -41,9 +41,9 @@ enum class PrinterNetworkErrorCode
 
     // Authentication-related errors (200-299)
     INVALID_CREDENTIAL=200, // Invalid username or password
-    TOKEN_EXPIRED,      // Login expired
-    NOT_AUTHENTICATED,  // Not authenticated (not logged in / missing credentials)
-    NOT_AUTHORIZED,      // Authenticated but not authorized
+    TOKEN_EXPIRED = 201,      // Login expired
+    NOT_AUTHENTICATED = 202,  // Not authenticated (not logged in / missing credentials)
+    NOT_AUTHORIZED = 203,      // Authenticated but not authorized
 
     // File transfer-related errors (300-399)
     FILE_TRANSFER_FAILED = 300, // File transfer failed (including upload, download)
@@ -70,6 +70,8 @@ enum class PrinterNetworkErrorCode
     PRINTER_TYPE_NOT_SUPPORTED = 10003,       // Printer type not supported
     PRINTER_MMS_NOT_CONNECTED = 10004,        // Printer MMS not connected
     CREATE_NETWORK_FOR_HOST_TYPE_FAILED = 10005, // Failed to create network for host type
+    PRINTER_NOT_SELECTED = 10006,                // Printer not selected
+    PRINTER_MMS_FILAMENT_NOT_MAPPED = 10007,     // Printer MMS filament not mapped
 };
 
 

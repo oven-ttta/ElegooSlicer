@@ -321,13 +321,6 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId)
     Layout();
 }
 
-void PrinterManagerView::runScript(const wxString& javascript)
-{
-    if (!mBrowser)
-        return;
-    WebView::RunScript(mBrowser, javascript);
-}
-
 void PrinterManagerView::onClose(wxCloseEvent& evt)
 {
     this->Hide();
@@ -530,8 +523,6 @@ void PrinterManagerView::setupIPCHandlers()
     });
 }
 
-
-
 webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)
 { 
     webviewIpc::IPCResult result;
@@ -547,7 +538,7 @@ webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& print
     }
     auto networkResult = PrinterManager::getInstance()->deletePrinter(printerId);
     result.message = networkResult.message;
-    result.code = static_cast<int>(networkResult.code);
+    result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::updatePrinterName(const std::string& printerId, const std::string& printerName)
@@ -562,7 +553,7 @@ webviewIpc::IPCResult PrinterManagerView::updatePrinterName(const std::string& p
     }
     auto networkResult = PrinterManager::getInstance()->updatePrinterName(printerId, printerName);
     result.message = networkResult.message;
-    result.code = static_cast<int>(networkResult.code);
+    result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& id, const std::string& host)
@@ -570,7 +561,7 @@ webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& i
     webviewIpc::IPCResult result;
     auto networkResult = PrinterManager::getInstance()->updatePrinterHost(id, host);
     result.message = networkResult.message;
-    result.code = static_cast<int>(networkResult.code);
+    result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::addPrinter(const nlohmann::json& printer)
@@ -580,12 +571,13 @@ webviewIpc::IPCResult PrinterManagerView::addPrinter(const nlohmann::json& print
     printerInfo.isPhysicalPrinter = false;
     auto networkResult = PrinterManager::getInstance()->addPrinter(printerInfo);
     result.message = networkResult.message;
-    result.code = static_cast<int>(networkResult.code);
+    result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::json& printer)
 {
     webviewIpc::IPCResult result;
+    PrinterNetworkErrorCode errorCode = PrinterNetworkErrorCode::SUCCESS;
     PrinterNetworkInfo printerInfo;
     try {
         printerInfo.isPhysicalPrinter = true;
@@ -594,28 +586,25 @@ webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::jso
         printerInfo.printerName = printer["printerName"];
         printerInfo.vendor = printer["vendor"];
         printerInfo.printerModel = printer["printerModel"];
+        auto networkResult = PrinterManager::getInstance()->addPrinter(printerInfo);
+        result.message = networkResult.message;
+        errorCode = networkResult.code;
     } catch (const std::exception& e) {
         wxLogMessage("Add physical printer error: %s", e.what());
-        result.message = e.what();
-        result.code = static_cast<int>(PrinterNetworkErrorCode::INVALID_FORMAT);
-        return result;
+        errorCode = PrinterNetworkErrorCode::INVALID_FORMAT;
+        result.message = getErrorMessage(errorCode);
     }
-    auto networkResult = PrinterManager::getInstance()->addPrinter(printerInfo);
-    result.message = networkResult.message;
-    result.code = static_cast<int>(networkResult.code);
+    result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::discoverPrinter()
 {
     webviewIpc::IPCResult result;
     auto printerListResult = PrinterManager::getInstance()->discoverPrinter();
-    if(!printerListResult.isSuccess() || !printerListResult.hasData()) {
-        result.message = printerListResult.message;
-        result.code = static_cast<int>(printerListResult.code);
-        result.data = nlohmann::json::array();
-        return result;
+    std::vector<PrinterNetworkInfo> printerList;
+    if(printerListResult.hasData()) {
+        printerList = printerListResult.data.value();
     }
-    auto printerList = printerListResult.data.value();
     nlohmann::json response = json::array();
     for (auto& printer : printerList) {
         nlohmann::json printer_obj = nlohmann::json::object();
@@ -626,6 +615,8 @@ webviewIpc::IPCResult PrinterManagerView::discoverPrinter()
         response.push_back(printer_obj);
     }
     result.data = response;
+    result.code = printerListResult.isSuccess() ? 0 : static_cast<int>(printerListResult.code);
+    result.message = printerListResult.message;
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::getPrinterList()
@@ -643,7 +634,7 @@ webviewIpc::IPCResult PrinterManagerView::getPrinterList()
     }
     result.data = response;
     result.code = 0;
-    result.message = "success";
+    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::getPrinterListStatus()
@@ -658,12 +649,13 @@ webviewIpc::IPCResult PrinterManagerView::getPrinterListStatus()
     }
     result.data = response;
     result.code = 0;
-    result.message = "success";
+    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::browseCAFile()
 {
     webviewIpc::IPCResult result;
+    PrinterNetworkErrorCode errorCode = PrinterNetworkErrorCode::SUCCESS;
     std::string path = "";
     try {
         static const auto filemasks = _L("Certificate files (*.crt, *.pem)|*.crt;*.pem|All files|*.*");
@@ -673,10 +665,11 @@ webviewIpc::IPCResult PrinterManagerView::browseCAFile()
         }
     } catch (const std::exception& e) {
         wxLogMessage("Browse CA file error: %s", e.what());
+        errorCode = PrinterNetworkErrorCode::INTERNAL_ERROR;
     }
     result.data = path;
-    result.code = 0;
-    result.message = "success";
+    result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
+    result.message = getErrorMessage(errorCode);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::getPrinterModelList()
@@ -704,7 +697,7 @@ webviewIpc::IPCResult PrinterManagerView::getPrinterModelList()
     }
     result.data = response;
     result.code = 0;
-    result.message = "success";
+    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
     return result;
 }
 } // GUI

@@ -205,14 +205,14 @@ void PrintSendDialogEx::setupIPCHandlers()
             try {
                 // Check if the object still exists
                 if (auto tracker = life_tracker.lock()) {
-                    nlohmann::json response = this->preparePrintTask(printerId);
+                    webviewIpc::IPCResult response = this->preparePrintTask(printerId);
                     
                     // Final check before sending response
                     if (life_tracker.lock()) {
                         // Mark async operation as completed
                         m_asyncOperationInProgress = false;
                         
-                        sendResponse(webviewIpc::IPCResult::success(response));
+                        sendResponse(response);
                     }
                 } else {
                     // Object was destroyed, don't send response
@@ -241,8 +241,7 @@ void PrintSendDialogEx::setupIPCHandlers()
     // Handle request_printer_list
     mIpc->onRequest("request_printer_list", [this](const webviewIpc::IPCRequest& request) {
         try {
-            nlohmann::json response = getPrinterList();
-            return webviewIpc::IPCResult::success(response);
+            return getPrinterList();
         } catch (const std::exception& e) {
             wxLogError("Error in request_printer_list: %s", e.what());
             return webviewIpc::IPCResult::error("Failed to get printer list");
@@ -263,8 +262,11 @@ void PrintSendDialogEx::setupIPCHandlers()
     // Handle start_upload
     mIpc->onRequest("start_upload", [this](const webviewIpc::IPCRequest& request) {
         try {
-            onPrint(request.params);
-            return webviewIpc::IPCResult::success();
+            webviewIpc::IPCResult result = onPrint(request.params);
+            if(result.code == 0) {
+                EndModal(wxID_OK);
+            }
+            return result;
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in start_upload: " << e.what();
             return webviewIpc::IPCResult::error("Failed to start upload");
@@ -292,27 +294,7 @@ void PrintSendDialogEx::setupIPCHandlers()
         }
     });
 }
-
-void PrintSendDialogEx::onScriptMessage(wxWebViewEvent& evt)
-{
-    // This method is kept for compatibility but now delegates to WebviewIPCManager
-    // The actual message handling is done in setupIPCHandlers()
-    try {
-        wxString strInput = evt.GetString();
-    } catch (std::exception& e) {
-        BOOST_LOG_TRIVIAL(trace) << "PrintSendDialogEx::onScriptMessage;Error:" << e.what();
-    }
-}
-
-void PrintSendDialogEx::runScript(const wxString& javascript)
-{
-    if (!mBrowser)
-        return;
-
-    WebView::RunScript(mBrowser, javascript);
-}
-
-nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
+webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& printerId)
 {
     nlohmann::json printTask     = json::object();
     auto           preset_bundle = wxGetApp().preset_bundle;
@@ -479,11 +461,15 @@ nlohmann::json PrintSendDialogEx::preparePrintTask(const std::string& printerId)
     for (auto& filament : mPrintFilamentList) {
         filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
     }
-    printInfo["filamentList"] = filamentList;
-    return printInfo;
+    webviewIpc::IPCResult result;
+    result.data = printInfo;
+    result.code = 0;
+    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
+    return result;
 }
-nlohmann::json PrintSendDialogEx::getPrinterList()
+webviewIpc::IPCResult PrintSendDialogEx::getPrinterList()
 {
+    webviewIpc::IPCResult result;
     nlohmann::json                  printers    = json::array();
     std::vector<PrinterNetworkInfo> printerList = PrinterManager::getInstance()->getPrinterList();
     for (auto& printer : printerList) {
@@ -502,11 +488,17 @@ nlohmann::json PrintSendDialogEx::getPrinterList()
             printer["selected"] = true;
         }
     }
-    return printers;
+    result.data = printers;
+    result.code = 0;
+    result.message = "success";
+    return result;
 }
 
-void PrintSendDialogEx::onPrint(const nlohmann::json& printInfo)
+webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo)
 {
+    webviewIpc::IPCResult result;
+    result.data = nlohmann::json::object();
+    PrinterNetworkErrorCode errorCode = PrinterNetworkErrorCode::SUCCESS;
     try {
         mSelectedPrinterId     = "";
         mTimeLapse             = printInfo["timeLapse"].get<bool>();
@@ -526,8 +518,9 @@ void PrintSendDialogEx::onPrint(const nlohmann::json& printInfo)
         if (!mSelectedPrinterId.empty()) {
             wxGetApp().app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, mSelectedPrinterId);
         } else {
-            wxMessageBox("Please select a printer!", "Error", wxOK | wxICON_ERROR);
-            return;
+            errorCode = PrinterNetworkErrorCode::PRINTER_NOT_SELECTED;
+            result.message = getErrorMessage(errorCode);
+            return result;
         }
 
         post_upload_action = uploadAndPrint ? PrintHostPostUploadAction::StartPrint : PrintHostPostUploadAction::None;
@@ -560,18 +553,20 @@ void PrintSendDialogEx::onPrint(const nlohmann::json& printInfo)
                  if (printFilament.mappedMmsFilament.trayName.empty() || printFilament.mappedMmsFilament.mmsId.empty() ||
                      printFilament.mappedMmsFilament.trayId.empty() || printFilament.mappedMmsFilament.filamentColor.empty() ||
                      printFilament.mappedMmsFilament.filamentName.empty() || printFilament.mappedMmsFilament.filamentType.empty()) {
-                        wxMessageBox("Some filaments are not mapped!", "Error", wxOK | wxICON_ERROR);
-                        EndModal(wxID_CANCEL);
-                        return;
+                        errorCode = PrinterNetworkErrorCode::PRINTER_MMS_FILAMENT_NOT_MAPPED;
+                        result.message = getErrorMessage(errorCode);
+                        return result;
                  }
              }
              PrinterMmsManager::getInstance()->saveFilamentMmsMapping(mPrintFilamentList);
         }
-        EndModal(wxID_OK);
     } catch (std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "Print Error: " << e.what();
-        EndModal(wxID_CANCEL);
+        errorCode = PrinterNetworkErrorCode::INTERNAL_ERROR;
     }
+    result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
+    result.message = getErrorMessage(errorCode);
+    return result;
 }
 
 void PrintSendDialogEx::onCancel() { EndModal(wxID_CANCEL); }
