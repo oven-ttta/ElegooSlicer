@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 10:22+0800\n"
+"POT-Creation-Date: 2025-08-26 11:23+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -16336,13 +16336,13 @@ msgid "Emboss attribute change"
 msgstr ""
 
 msgid "Add Emboss text Volume"
-msgstr ""
+msgstr "添加浮雕文字体积"
 
 msgid "Font doesn't have any shape for given text."
-msgstr ""
+msgstr "字体不具有给定文本的任何形状。"
 
 msgid "There is no valid surface for text projection."
-msgstr ""
+msgstr "没有有效的文本投影表面。"
 
 msgid "Head diameter"
 msgstr "Brim 直径"
@@ -16389,13 +16389,13 @@ msgid "Please select single object."
 msgstr "请选中单个对象。"
 
 msgid "Please confirm explosion ratio = 1 and select at least two volumes."
-msgstr ""
+msgstr "请确认爆炸比例为 1，并至少选择两个模型体。"
 
 msgid "Please select at least two volumes."
-msgstr ""
+msgstr "请至少选择两个模型体。"
 
 msgid "(Moving)"
-msgstr ""
+msgstr "移动中"
 
 msgid "Point and point assembly"
 msgstr "点对点组装"
@@ -16404,133 +16404,139 @@ msgid ""
 "It is recommended to assemble the objects first,\n"
 "because the objects is restriced to bed \n"
 "and only parts can be lifted."
-msgstr ""
+msgstr "建议先组装对象，因为对象会被限制在打印平台上，只有部件可以被抬起。"
 
 msgid "Face and face assembly"
 msgstr "面与面的组装"
 
 msgid "Connected Printer"
-msgstr ""
+msgstr "已连接打印机"
 
 msgid "Printer MMS Sync"
-msgstr ""
+msgstr "打印机MMS同步"
+
+msgid "Send print task failed"
+msgstr "发送打印任务失败"
+
+msgid "Send print file failed"
+msgstr "发送打印文件失败"
 
 msgid "Success"
-msgstr ""
+msgstr "成功"
 
 msgid "An unknown error occurred"
-msgstr ""
+msgstr "发生未知错误"
 
 msgid "An internal error occurred"
-msgstr ""
+msgstr "发生内部错误"
 
 msgid "Invalid parameter provided"
-msgstr ""
+msgstr "提供的参数无效"
 
 msgid "Invalid data format"
-msgstr ""
+msgstr "数据格式无效"
 
 msgid "Operation timed out"
-msgstr ""
+msgstr "操作超时"
 
 msgid "Operation was cancelled"
-msgstr ""
+msgstr "操作已取消"
 
 msgid "Access denied"
-msgstr ""
+msgstr "访问被拒绝"
 
 msgid "Resource not found"
-msgstr ""
+msgstr "未找到资源"
 
 msgid "Resource already exists"
-msgstr ""
+msgstr "资源已存在"
 
 msgid "Insufficient storage space"
-msgstr ""
+msgstr "存储空间不足"
 
 msgid "Bad request"
-msgstr ""
+msgstr "请求错误"
 
 msgid "Connection failed"
-msgstr ""
+msgstr "连接失败"
 
 msgid "Network error occurred"
-msgstr ""
+msgstr "发生网络错误"
 
 msgid "Service temporarily unavailable"
-msgstr ""
+msgstr "服务暂时不可用"
 
 msgid "Feature not available"
-msgstr ""
+msgstr "功能不可用"
 
 msgid "Version not supported"
-msgstr ""
+msgstr "版本不受支持"
 
 msgid "Version is too old"
-msgstr ""
+msgstr "版本太旧"
 
 msgid "Version is too new"
-msgstr ""
+msgstr "版本太新"
 
 msgid "Access unauthorized"
-msgstr ""
+msgstr "访问未授权"
 
 msgid "Authentication failed"
-msgstr ""
+msgstr "身份验证失败"
 
 msgid "Login session expired"
-msgstr ""
+msgstr "登录会话已过期"
 
 msgid "File upload failed"
-msgstr ""
+msgstr "文件上传失败"
 
 msgid "File not found"
-msgstr ""
+msgstr "未找到文件"
 
 msgid "Printer is busy"
-msgstr ""
+msgstr "打印机正忙"
 
 msgid "Printer is offline"
-msgstr ""
+msgstr "打印机离线"
 
 msgid "Printer initialization failed"
-msgstr ""
+msgstr "打印机初始化失败"
 
 msgid "Printer command failed"
-msgstr ""
+msgstr "打印机命令失败"
 
 msgid "Printer is already connected"
-msgstr ""
+msgstr "打印机已连接"
 
 msgid "Printer internal error"
-msgstr ""
+msgstr "打印机内部错误"
 
 msgid "Print task not found"
-msgstr ""
+msgstr "未找到打印任务"
 
 msgid "Printer network error"
-msgstr ""
+msgstr "打印机网络错误"
 
 msgid "Invalid printer data received"
-msgstr ""
+msgstr "收到无效的打印机数据"
 
 msgid "Printer MMS connection failed"
-msgstr ""
+msgstr "打印机MMS连接失败"
 
 msgid "Printer not found"
-msgstr ""
+msgstr "未找到打印机"
 
 msgid "Printer already exists"
-msgstr ""
+msgstr "打印机已存在"
 
 msgid "Printer type not supported"
-msgstr ""
+msgstr "不支持的打印机类型"
 
 msgid "Host type not supported"
-msgstr ""
+msgstr "不支持的主机类型"
 
 msgid "Failed to create network connection"
-msgstr ""
+msgstr "创建网络连接失败"
 
 #: resources/data/hints.ini: [hint:G-code window]
 msgid ""

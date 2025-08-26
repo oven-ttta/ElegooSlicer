@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 10:22+0800\n"
+"POT-Creation-Date: 2025-08-26 11:23+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Guislain Cyril, Thomas Lété\n"
@@ -18346,6 +18346,12 @@ msgid "Connected Printer"
 msgstr ""
 
 msgid "Printer MMS Sync"
+msgstr ""
+
+msgid "Send print task failed"
+msgstr ""
+
+msgid "Send print file failed"
 msgstr ""
 
 msgid "Success"
