@@ -460,7 +460,9 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
     nlohmann::json filamentList = json::array();
     for (auto& filament : mPrintFilamentList) {
         filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
-    }
+    }  
+    printInfo["filamentList"] = filamentList;
+    
     webviewIpc::IPCResult result;
     result.data = printInfo;
     result.code = 0;

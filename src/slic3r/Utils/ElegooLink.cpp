@@ -254,7 +254,6 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
                 info.vendor          = printer.brand;
                 info.printerType      = static_cast<int>(printer.printerType);
                 info.webUrl          = printer.webUrl;
-
                 info.authMode        = printer.authMode;
                 info.mainboardId     = printer.mainboardId;
                 discoverPrinters.push_back(info);
