@@ -1,6 +1,4 @@
 #include "PrinterMmsSyncView.hpp"
-#include <WebView2.h>
-#include <WebView2EnvironmentOptions.h>
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include "I18N.hpp"
 #include "libslic3r/AppConfig.hpp"

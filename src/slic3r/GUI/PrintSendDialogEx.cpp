@@ -1,7 +1,5 @@
 #include "PrintSendDialogEx.hpp"
 #include "ConfigWizard.hpp"
-#include <WebView2.h>
-#include <WebView2EnvironmentOptions.h>
 #include <string.h>
 #include "I18N.hpp"
 #include "libslic3r/AppConfig.hpp"
