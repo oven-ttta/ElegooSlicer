@@ -32,7 +32,8 @@ public:
 
     PrinterNetworkInfo getPrinterNetworkInfo(const std::string& printerId);
     std::vector<PrinterNetworkInfo> getPrinterList();
-    
+    PrinterNetworkInfo getSelectedPrinter(const std::string &printerModel, const std::string &printerId);
+
     PrinterNetworkResult<bool> upload(PrinterNetworkParams& params);
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinter();
     PrinterNetworkResult<bool> addPrinter(PrinterNetworkInfo& printerNetworkInfo);

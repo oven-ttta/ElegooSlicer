@@ -517,7 +517,43 @@ void PrinterManager::monitorPrinterConnections()
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
-
+// first get selected printer by modelName and printerId
+// if not found, get selected printer by modelName
+// if not found, get selected printer by printerId
+// if not found, return first printer
+PrinterNetworkInfo PrinterManager::getSelectedPrinter(const std::string &printerModel, const std::string &printerId)
+{
+    auto printers = getPrinterList();
+    PrinterNetworkInfo selectedPrinter;
+    if (!printerModel.empty() && !printerId.empty()) {
+        for (auto& printer : printers) {
+            if (printer.printerModel == printerModel && printer.printerId == printerId) {
+                selectedPrinter = printer;
+                break;
+            }
+        }
+    }
+    if (!printerModel.empty() && selectedPrinter.printerId.empty()) {
+        for (auto& printer : printers) {
+            if (printer.printerModel == printerModel) {
+                selectedPrinter = printer;
+                break;
+            }
+        }
+    }
+    if (!printerId.empty() && selectedPrinter.printerId.empty()) {
+        for (auto& printer : printers) {
+            if (printer.printerId == printerId) {
+                selectedPrinter = printer;
+                break;
+            }
+        }
+    }
+    if (selectedPrinter.printerId.empty() && !printers.empty()) {
+        selectedPrinter = printers[0];
+    }
+    return selectedPrinter;
+}
 bool PrinterManager::addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network)
 {
     std::lock_guard<std::mutex> lock(mConnectionsMutex);

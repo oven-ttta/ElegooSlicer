@@ -191,6 +191,21 @@ webviewIpc::IPCResult PrinterMmsSyncView::getPrinterList()
         printerObj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
         printerArray.push_back(printerObj);
     }
+
+    std::string printerModel = "";
+    auto cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    auto printerModelValue = cfg.option<ConfigOptionString>("printer_model");
+    if (printerModelValue) {
+        printerModel = printerModelValue->value;
+    }
+    PrinterNetworkInfo selectedPrinter = PrinterManager::getInstance()->getSelectedPrinter(printerModel, selectedPrinterId);
+    for(auto& printer : printerArray) {
+        if(printer["printerId"].get<std::string>() == selectedPrinter.printerId) {
+            printer["selected"] = true;
+        } else {
+            printer["selected"] = false;
+        }
+    }
     result.data = printerArray;
     result.code = 0;
     result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);

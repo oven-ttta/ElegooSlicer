@@ -483,11 +483,18 @@ webviewIpc::IPCResult PrintSendDialogEx::getPrinterList()
         printers.push_back(printerJson);
     }
     std::string selectedPrinterId = wxGetApp().app_config->get("recent", CONFIG_KEY_SELECTED_PRINTER_ID);
-    for (auto& printer : printers) {
-        if (selectedPrinterId.empty() || printer["printerId"].get<std::string>() != selectedPrinterId) {
-            printer["selected"] = false;
-        } else {
+    auto cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    std::string printerModel = "";
+    auto printerModelValue = cfg.option<ConfigOptionString>("printer_model");
+    if (printerModelValue) {
+        printerModel = printerModelValue->value;
+    }
+    PrinterNetworkInfo selectedPrinter = PrinterManager::getInstance()->getSelectedPrinter(printerModel, selectedPrinterId);
+    for(auto& printer : printers) {
+        if(printer["printerId"].get<std::string>() == selectedPrinter.printerId) {
             printer["selected"] = true;
+        } else {
+            printer["selected"] = false;
         }
     }
     result.data = printers;
