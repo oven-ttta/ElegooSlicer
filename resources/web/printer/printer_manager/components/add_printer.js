@@ -21,7 +21,8 @@ const AddPrinterTemplate = /*html*/`
                             <div v-for="(printer, idx) in printers" 
                                     :key="idx"
                                     :class="printerLineClass(idx)"
-                                    @click="selectPrinter(idx)">
+                                    @click="selectPrinter(idx)"
+                                    @dblclick="connectPrinter">
                             
                                 <span>
                                     <img :src="printer.printerImg" class="add-printer-img"/>

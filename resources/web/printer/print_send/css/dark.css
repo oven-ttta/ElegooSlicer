@@ -7,15 +7,6 @@ html.dark ::selection {
   color: var(--text-primary);
 }
 
-/* Specific component adjustments for dark theme */
-html.dark .model-preview {
-  border: 1px solid var(--border-primary);
-}
-
-html.dark .dropdown-menu {
-  box-shadow: 0 4px 20px var(--shadow-light);
-  backdrop-filter: blur(8px);
-}
 
 html.dark .tray-popover-content {
   background: var(--bg-tertiary);
@@ -44,28 +35,7 @@ html.dark .btn-secondary:hover {
   color: var(--text-primary);
 }
 
-/* Dropdown specific dark theme adjustments */
-html.dark .dropdown-header {
-  background: var(--bg-secondary);
-  border-color: var(--border-primary);
-}
 
-html.dark .dropdown-header:hover {
-  background: var(--bg-hover);
-  border-color: var(--color-primary);
-}
-
-html.dark .dropdown-header.active {
-  background: var(--bg-hover);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-shadow);
-}
-
-/* Filament section adjustments */
-html.dark .filament-section {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-}
 
 html.dark .mapping-container {
   background: var(--bg-tertiary);
@@ -78,21 +48,6 @@ html.dark .mapping-container:hover {
 html.dark .tray-rect {
   box-shadow: 0 -1px 0 var(--border-secondary);
   background: var(--bg-secondary);
-}
-
-/* Pagination button adjustments */
-html.dark .pagination-btn {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-primary);
-}
-
-html.dark .pagination-btn:hover {
-  background: var(--shadow-hover);
-  border-color: var(--border-tertiary);
-}
-
-html.dark .pagination-btn:active {
-  background: var(--shadow-active);
 }
 
 /* Icon color adjustments for better visibility */

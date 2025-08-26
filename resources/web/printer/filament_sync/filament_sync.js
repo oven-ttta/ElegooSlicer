@@ -9,6 +9,7 @@ const FilamentSyncApp = {
             printerList: [],
             mmsInfo: null,
             printFilamentList: [],
+            isIniting: false
         };
     },
 
@@ -45,7 +46,9 @@ const FilamentSyncApp = {
 
         // Lifecycle methods
         async init() {
+            this.isIniting = true;
             await this.requestPrinterList();
+            this.isIniting = false;
         },
 
         // Communication with backend

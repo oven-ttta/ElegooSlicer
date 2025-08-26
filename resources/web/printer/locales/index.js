@@ -3,6 +3,10 @@ const langMessages = {
   en: {
     "connectedPrinters": "Connected Printers",
     "addPrinter": "Add Printer",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "noPrinterConnected": "No printer connected. Please go to \"Devices\" to discover or add a new printer.",
     "multiColor": {
       "CanvasPro": "CANVAS PRO",
     },
@@ -34,7 +38,9 @@ const langMessages = {
       "error": "Error",
       "unknown": "Unknown",
       "printerSettings": "Printer Settings",
-      "physicalPrinter": "Physical Printer"
+      "physicalPrinter": "Physical Printer",
+      "addPrinterSuccess": "Printer added successfully.",
+      "modifySuccess": "Printer modified successfully."
     },
     "addPrinterDialog": {
       "addPrinter": "Add Printer",
@@ -105,19 +111,15 @@ const langMessages = {
       "pleaseEnterPrinterName": "Please enter printer name",
       "lengthShouldBe1To50": "Length should be 1 to 50 characters",
       "pleaseEnterHostNameIpUrl": "Please enter host name, IP or URL",
-      "confirmDeleteDevice": "Are you sure you want to delete this device? This action cannot be undone."
+      "confirmDeletePrinter": "Are you sure you want to delete this printer?"
     },
     "printerSettingPhysical": {
-      "delete": "Delete",
-      "confirm": "Confirm",
-      "confirmDeletePrinter": "Are you sure you want to delete this printer?"
     },
     "filamentSync": {
       "pleaseSelectPrinter": "Please select a printer",
       "filamentInformation": "Filament Information",
       "printerOffline": "The printer is offline. Please check and refresh or retry.",
       "noFilamentInfo": "The printer has no filament information to sync. Please check and refresh or retry.",
-      "noPrinterConnected": "No printer connected. Please go to \"Devices\" to discover or add a new printer.",
       "cancel": "Cancel",
       "sync": "Sync",
       "failedToSyncFilament": "Failed to sync filament."
@@ -129,7 +131,7 @@ const langMessages = {
       "texturedA": "Textured A",
       "smoothB": "Smooth B",
       "autoRefill": "Auto Refill",
-      "switchToDeviceTab": "Switch to Device Tab",
+      "switchToDeviceTab": "Upload and switch to device tab",
       "uploadAndPrint": "Upload and Print",
       "printOptions": "Print Options",
       "autoBedLeveling": "Auto Bed Leveling",
@@ -138,12 +140,17 @@ const langMessages = {
       "noMapping": "No mapping",
       "cancel": "Cancel",
       "upload": "Upload",
-      "someFilamentsNotMapped": "Some filaments are not mapped to MMS trays"
+      "someFilamentsNotMapped": "Some filaments are not mapped to MMS trays",
+      "filamentMapping": "Filament Mapping"
     }
   },
   zh_CN: {
     "connectedPrinters": "已连接的打印机",
     "addPrinter": "添加打印机",
+    "delete": "删除",
+    "confirm": "确认",
+    "cancel": "取消",
+    "noPrinterConnected": "无打印机连接。请前往\"设备\"发现或添加新打印机。",
     "multiColor": {
       "CanvasPro": "画布专业版",
     },
@@ -175,7 +182,9 @@ const langMessages = {
       "error": "错误",
       "unknown": "未知",
       "printerSettings": "打印机设置",
-      "physicalPrinter": "物理打印机"
+      "physicalPrinter": "物理打印机",
+      "addPrinterSuccess": "添加打印机成功",
+      "modifySuccess": "修改成功"
     },
     "addPrinterDialog": {
       "addPrinter": "添加打印机",
@@ -246,19 +255,17 @@ const langMessages = {
       "pleaseEnterPrinterName": "请输入打印机名称",
       "lengthShouldBe1To50": "长度应为1到50个字符",
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
-      "confirmDeleteDevice": "您确定要删除此设备吗？此操作无法撤消。"
+      "confirmDeletePrinter": "您确定要删除此打印机吗？"
     },
     "printerSettingPhysical": {
-      "delete": "删除",
-      "confirm": "确认",
-      "confirmDeletePrinter": "您确定要删除此打印机吗？"
+
+
     },
     "filamentSync": {
       "pleaseSelectPrinter": "请选择一台打印机",
       "filamentInformation": "耗材信息",
       "printerOffline": "打印机离线。请检查并刷新或重试。",
       "noFilamentInfo": "打印机没有要同步的耗材信息。请检查并刷新或重试。",
-      "noPrinterConnected": "无打印机连接。请前往\"设备\"发现或添加新打印机。",
       "cancel": "取消",
       "sync": "同步",
       "failedToSyncFilament": "同步耗材失败。"
@@ -270,7 +277,7 @@ const langMessages = {
       "texturedA": "纹理 A",
       "smoothB": "光滑 B",
       "autoRefill": "自动补料",
-      "switchToDeviceTab": "切换到设备标签",
+      "switchToDeviceTab": "上传后并切换到设备标签",
       "uploadAndPrint": "上传并打印",
       "printOptions": "打印选项",
       "autoBedLeveling": "自动热床调平",
@@ -279,7 +286,8 @@ const langMessages = {
       "noMapping": "无映射",
       "cancel": "取消",
       "upload": "上传",
-      "someFilamentsNotMapped": "某些耗材未映射到MMS托盘"
+      "someFilamentsNotMapped": "某些耗材未映射到MMS托盘",
+      "filamentMapping": "耗材映射"
     }
   }
 };

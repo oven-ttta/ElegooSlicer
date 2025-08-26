@@ -54,11 +54,13 @@ const PrintSendApp = {
 
             // Filament management
             currentPage: 1,
-            pageSize: 8,
+            pageSize: 5,
             hasMmsInfo: false,
 
             // UI state
             isEditingName: false,
+            showFilamentSection: false,
+            isIniting: false
         };
     },
 
@@ -76,10 +78,6 @@ const PrintSendApp = {
 
         showBedDropdown() {
             return this.printInfo.uploadAndPrint;
-        },
-
-        showFilamentSection() {
-            return this.printInfo.uploadAndPrint && this.hasMmsInfo;
         },
 
         showPrintOptions() {
@@ -107,7 +105,9 @@ const PrintSendApp = {
     methods: {
         // Lifecycle methods
         async init() {
+            this.isIniting = true;
             await this.requestPrinterList();
+            this.isIniting = false;
         },
 
         // IPC Communication methods
@@ -149,7 +149,7 @@ const PrintSendApp = {
             try {
                 const response = await this.ipcRequest('request_printer_list', {});
                 this.printerList = response || [];
-                this.updatePrinterSelection();
+                await this.updatePrinterSelection();
             } catch (error) {
                 console.error('Failed to request printer list:', error);
             } finally {
@@ -198,7 +198,7 @@ const PrintSendApp = {
             });
         },
 
-        updatePrinterSelection() {
+        async updatePrinterSelection() {
             if (this.printerList.length === 0) return;
             let selectedPrinter;
             if (this.curPrinter && this.curPrinter.printerId) {
@@ -216,7 +216,7 @@ const PrintSendApp = {
                 }
             }
             this.curPrinter = selectedPrinter;
-            this.onPrinterChanged();
+            await this.onPrinterChanged();
         },
 
         // Printer dropdown methods
@@ -434,6 +434,12 @@ const PrintSendApp = {
 
         onBedTypeChanged(bedType) {
             // Handle bed type change logic if needed
+        },
+
+        refreshShowFilamentSection() {
+            setTimeout(() => {
+                this.showFilamentSection = this.printInfo.uploadAndPrint && this.hasMmsInfo;
+            }, this.printInfo.uploadAndPrint&&this.hasMmsInfo ? 100 : 0);
         }
     },
 
@@ -449,25 +455,21 @@ const PrintSendApp = {
     },
 
     watch: {
+        'printInfo.mmsInfo.mmsList': {
+            async handler(newValue, oldValue) {
+                this.resizeWindow();
+                this.refreshShowFilamentSection();
+            },
+            immediate: false
+        },
         'printInfo.uploadAndPrint': {
-            handler(newValue, oldValue) {
+            async handler(newValue, oldValue) {
                 // React to upload and print toggle changes
                 if (!newValue) {
                     this.currentPage = 1; // Reset pagination when hiding filament section
                 }
-            },
-            immediate: false
-        },
-
-        'printInfo.mmsInfo.mmsList': {
-            handler(newValue, oldValue) {
                 this.resizeWindow();
-            },
-            immediate: false
-        },
-        'printInfo.uploadAndPrint': {
-            handler(newValue, oldValue) {
-                this.resizeWindow();
+                this.refreshShowFilamentSection();
             },
             immediate: false
         }

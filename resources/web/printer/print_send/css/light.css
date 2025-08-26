@@ -18,7 +18,7 @@
 }
 
 .print-task-content {
-  padding: 32px 32px 18px 32px;
+  padding: 24px 32px 20px 32px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -35,7 +35,7 @@
   display: flex;
   align-items: flex-start;
   gap: 24px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   width: 100%;
 }
 
@@ -44,7 +44,7 @@
   height: 210px;
   object-fit: contain;
   border-radius: 12px;
-  background: var(--bg-secondary);
+  /* background: var(--bg-secondary); */
   flex-shrink: 0;
 }
 
@@ -121,7 +121,7 @@
   display: flex;
   flex-direction: row;
   gap: 32px;
-  margin-bottom: 16px;
+  margin-bottom: 6px;
   margin-top: 16px;
 }
 
@@ -142,7 +142,7 @@
 .device-selection {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* gap: 12px; */
   width: 100%;
 }
 
@@ -350,10 +350,13 @@
 /* ===== FILAMENT SECTION ===== */
 .filament-section {
   width: 100%;
-  margin-bottom: 4px;
+}
+
+.filament-section .filament-container{
+  width: 100%;
   background-color: var(--bg-tertiary);
   border-radius: 12px;
-  padding: 14px 20px;
+  padding: 14px 20px 20px 20px;
 }
 
 .filament-header {
@@ -392,6 +395,7 @@
   border-radius: 50%;
   width: 26px;
   height: 26px;
+  color: var(--text-primary);
 }
 
 .pagination-btn:hover {
@@ -409,8 +413,7 @@
 .filament-list {
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 24px;
   flex-wrap: wrap;
   justify-content: flex-start;
 }
@@ -419,15 +422,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 84px;
-  width: 84px;
+  height: 100px;
+  width: 126px;
   border-radius: 4px;
   /* outline: 2px solid red; */
   box-shadow: 0 0 0 2px var(--border-secondary);
   padding: 0px;
   border: none;
   box-sizing: border-box;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .mapping-container:hover {
@@ -448,16 +451,17 @@
 .tray-rect {
   box-shadow: 0 -1px 0 var(--border-secondary);
   border-radius: 0px 0px 4px 4px;
-  height: 41px;
+  height: 49px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 4px 6px 0px 6px;
+  cursor: pointer;
 }
 
 .filament-rect,
 .tray-rect {
-  width: 84px;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -465,11 +469,11 @@
   width: 36px;
   height: 1px;
   background: currentColor;
-  margin: 10px 0;
+  margin: 16px 0;
 }
 
+.filament-type,
 .filament-weight {
-  font-size: 10px;
 }
 
 .tray-filament-type {
@@ -527,12 +531,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 4px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  width: 56px;
-  height: 72px;
+  width: 80px;
+  height: 90px;
 }
 
 .tray-popover-card:hover {
@@ -543,15 +547,13 @@
 .options-section {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 12px;
   width: 100%;
 }
 
 .options-separator {
   height: 1px;
   background: var(--border-primary);
-  margin: 2px 0;
+  margin: 12px 0;
 }
 
 .toggle-group {
@@ -584,15 +586,13 @@
 .print-options-section {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 12px;
   width: 100%;
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  margin-bottom: 0px;
+  margin: 16px 0px;
   width: 100%;
 }
 
@@ -603,9 +603,8 @@
   margin: 0;
   color: var(--text-tertiary);
   font-family: Source Han Sans;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
-  line-height: 14px;
   cursor: default;
 }
 
@@ -693,7 +692,7 @@
 /* ===== ACTION BUTTONS ===== */
 .action-buttons {
   position: relative;
-  padding: 0px 20px 20px 0px;
+  padding: 0px 32px 20px 0px;
   height: 70px;
   display: flex;
   width: 100%;
@@ -720,12 +719,12 @@
   min-width: 200px;
 }
 
-
-.no-printer{
+.no-printer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 80%;
   color: var(--text-primary);
+  font-size: 16px;
 }

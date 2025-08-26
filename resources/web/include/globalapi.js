@@ -406,12 +406,21 @@ function SwitchDarkMode( DarkCssPath )
 
 function ExecuteDarkMode( DarkCssPath )
 {
-	
-	document.documentElement.classList.add("dark");
     let nMode=0;
 	let bDarkMode=navigator.userAgent.match(  RegExp('dark','i') );	
 	if( bDarkMode!=null )
+	{
+		if(document.documentElement)
+		{
+			document.documentElement.classList.add("dark");
+		}
 		nMode=1;
+	}else{
+		if(document.documentElement)
+		{
+			document.documentElement.classList.remove("dark");
+		}
+	}
 	
 	let nNow=CheckCssLinkExist(DarkCssPath);
 	if( nMode==0 )

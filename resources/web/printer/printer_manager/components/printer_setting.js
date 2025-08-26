@@ -6,7 +6,16 @@ const PrinterSettingTemplate = /*html*/
                     <div class="printer-setting-image-container">
                         <img class="printer-setting-image" :src="(printer && printer.printerImg) || ''" />
                     </div>
-                    <button class="printer-setting-delete-btn" @click="deleteDevice">{{ $t('printerSetting.deleteDevice') }}</button>
+                      <el-popconfirm :title="$t('printerSetting.confirmDeletePrinter')" :confirm-button-text="$t('confirm')" 
+                                     :cancel-button-text="$t('cancel')" 
+                                     @confirm="deleteDevice" 
+                                     width="200"
+                                     cancel-button-type="info"
+                                     placement="top-start">
+                        <template #reference>
+                            <button class="printer-setting-delete-btn" >{{ $t('printerSetting.deleteDevice') }}</button>
+                        </template>
+                    </el-popconfirm>
                 </div>
 
                 <div class="printer-setting-right">
@@ -162,17 +171,16 @@ const PrinterSettingComponent = {
         },
 
         async deleteDevice() {
-            if (!confirm(this.$t('printerSetting.confirmDeleteDevice'))) {
-                return;
-            }
             await this.printerStore.requestDeletePrinter(this.printer.printerId);
             this.closeModal();
+
         },
 
         onNameKeydown(e) {
             if (e.keyCode === 13) { // Enter
                 e.preventDefault();
                 this.saveNameChanges();
+                this.$refs.nameInput.blur(); // 失去焦点
             } else if (e.keyCode === 27) { // Escape
                 e.preventDefault();
                 this.cancelNameChanges();
@@ -183,6 +191,7 @@ const PrinterSettingComponent = {
             if (e.keyCode === 13) { // Enter
                 e.preventDefault();
                 this.saveHostChanges();
+                this.$refs.hostInput.blur(); // 失去焦点
             } else if (e.keyCode === 27) { // Escape
                 e.preventDefault();
                 this.cancelHostChanges();

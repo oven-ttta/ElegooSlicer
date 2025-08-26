@@ -91,6 +91,8 @@ const usePrinterStore = defineStore('printer', {
       }
     },
 
+
+
     async ipcRequest(method, params, timeout = 10000) {
       try {
         const response = await nativeIpc.request(method, params, timeout);
@@ -200,6 +202,10 @@ const usePrinterStore = defineStore('printer', {
         await new Promise(resolve => setTimeout(resolve, 500));
         await this.ipcRequest('request_add_printer', { printer });
         this.requestPrinterList();
+        ElementPlus.ElMessage.success({
+          message: i18n.global.t("printerManager.addPrinterSuccess"),
+          duration: 3000,
+        });
       } catch (error) {
         console.error('Failed to add printer:', error);
         throw error;
@@ -225,39 +231,43 @@ const usePrinterStore = defineStore('printer', {
     },
 
     async requestUpdatePrinterName(printerId, printerName) {
-      const loading = ElLoading.service({
-        lock: true,
-      });
+      // const loading = ElLoading.service({
+      //   lock: true,
+      // });
       try {
         await this.ipcRequest('request_update_printer_name', {
           printerId,
           printerName
         });
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Response handling is done in event listeners
+        ElementPlus.ElMessage.success({
+          message: i18n.global.t("printerManager.modifySuccess"),
+          duration: 3000,
+        });
       } catch (error) {
         console.error('Failed to update printer name:', error);
       } finally {
-        loading.close();
+        // loading.close();
       }
 
     },
 
     async requestUpdatePrinterHost(printerId, host) {
-      const loading = ElLoading.service({
-        lock: true,
-      });
+      // const loading = ElLoading.service({
+      //   lock: true,
+      // });
       try {
         await this.ipcRequest('request_update_printer_host', {
           printerId,
           host
         });
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Response handling is done in event listeners
+        ElementPlus.ElMessage.success({
+          message: i18n.global.t("printerManager.modifySuccess"),
+          duration: 3000,
+        });
       } catch (error) {
         console.error('Failed to update printer host:', error);
       } finally {
-        loading.close();
+        // loading.close();
       }
 
     },

@@ -4,10 +4,11 @@
 html.dark {
   /* Background Colors */
   --bg-primary: #2D2D31;
-  --bg-secondary: #2d2d2d;
-  --bg-tertiary: #363636;
-  --bg-hover: #4D4C55;
-  --bg-active: #0d47a1;
+  --bg-secondary: #363636;
+  --bg-tertiary: #35363D;
+  --bg-quaternary: #242428;
+  --bg-hover: #444444;
+  --bg-active: rgba(22, 119, 255, 0.2);
   
   /* Text Colors */
   --text-primary: #ffffff;

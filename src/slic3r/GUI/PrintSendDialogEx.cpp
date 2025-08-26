@@ -31,7 +31,7 @@
 #include <slic3r/Utils/WebviewIPCManager.h>
 
 
-#define HAS_MMS_HEIGHT 730
+#define HAS_MMS_HEIGHT 796
 #define NO_MMS_HEIGHT 600
 
 using namespace nlohmann;
@@ -125,7 +125,20 @@ void PrintSendDialogEx::init()
     }
     recent_path += m_path.filename().wstring();
     txt_filename->SetValue(recent_path);
-    
+    //Hide to prevent flickering
+    txt_filename->Hide();
+    if (logo) {
+        logo->Hide();
+    }
+    //hide content_sizer child
+
+    if(content_sizer){
+        int size = content_sizer->GetChildren().size();
+        for (int i = 0; i < size; i++) {
+            content_sizer->Hide(i);
+        }
+    }
+
     // Cache the model name for use in preparePrintTask
     m_cachedModelName = recent_path.ToUTF8().data();
     if (m_cachedModelName.size() >= 6 && m_cachedModelName.compare(m_cachedModelName.size() - 6, 6, ".gcode") == 0)

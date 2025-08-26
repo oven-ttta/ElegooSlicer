@@ -79,9 +79,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="empty-content" v-if="!printerList||printerList.length === 0">
+                <div class="empty-content" v-if="!printerList||printerList.length === 0&&!isIniting">
                     <img src="../img/printer-empty.png" width="224" />
-                    <span class="offline-text">{{ $t('filamentSync.noPrinterConnected') }}</span>
+                    <span class="offline-text">{{ $t('noPrinterConnected') }}</span>
                 </div>
             </div>
             <div class="footer">

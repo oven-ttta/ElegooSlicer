@@ -31,6 +31,15 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
 
     // Bind close event to handle async operations
     Bind(wxEVT_CLOSE_WINDOW, &PrinterMmsSyncView::OnCloseWindow, this);
+    
+    // Bind ESC key hook to disable ESC key closing the dialog
+    Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& e) {
+        if (e.GetKeyCode() == WXK_ESCAPE) {
+            // Do nothing - disable ESC key closing the dialog
+            return;
+        }
+        e.Skip();
+    });
 
     SetIcon(wxNullIcon);
     // DestroyChildren();

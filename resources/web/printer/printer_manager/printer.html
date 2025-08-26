@@ -6,6 +6,7 @@
     <meta http-equiv="Cache-Control" content="max-age=7200" />
 
     <link rel="stylesheet" type="text/css" href="./css/light.css" />
+    <link rel="stylesheet" href="./css/dark.css">
 
     <script type="text/javascript" src="../../include/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="../../include/json2.js"></script>
@@ -84,7 +85,7 @@
                         <span class="printer-status" :style="getPrinterStatusStyle(printer.printerStatus, printer.connectStatus)">{{ getPrinterStatus(printer.printerStatus,
                             printer.connectStatus)
                             }}</span>
-                        <span class="remaining-time">{{ getPrinterRemainingTime(printer) }}</span>
+                        <span v-show="printer.printerStatus===1" class="remaining-time">{{ getPrinterRemainingTime(printer) }}</span>
                     </div>
                 </div>
             </div>
@@ -115,7 +116,7 @@
     <script type="text/javascript" src="printer.js"></script>
     <script>
         const { createApp } = Vue;
-        const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOption, ElForm, ElFormItem, ElLoading } = ElementPlus;
+        const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOption, ElForm, ElFormItem, ElLoading,ElMessageBox,ElPopconfirm } = ElementPlus;
 
         // Create Vue app
         const app = createApp(PrinterManager);

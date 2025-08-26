@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./css/light.css">
+    <link rel="stylesheet" href="./css/dark.css">
 
     <script src="../../include/jquery-3.6.0.min.js"></script>
     <script src="../thirdparty/vue/vue.global.prod.min.js"></script>
@@ -20,7 +21,7 @@
 
 <body>
     <div id="app">
-        <div class="print-task-dialog">
+        <div class="print-task-dialog" v-show="!isIniting">
             <main v-if="printerList && printerList.length > 0" class="print-task-content">
                 <section class="model-section">
                     <img v-if="modelImageSrc" :src="modelImageSrc" class="model-preview" alt="3D Model">
@@ -51,7 +52,7 @@
                         </div>
 
                         <div class="device-selection">
-                            <div class="section-header">
+                            <div class="section-header" style="margin: 12px 0px;">
                                 <label class="section-title">{{ $t('printSend.printer') }}</label>
                                 <div class="section-separator"></div>
                             </div>
@@ -109,41 +110,81 @@
                         </div>
                     </div>
                 </section>
+                <section class="options-section">
+                    <div class="options-separator"></div>
 
-                <section class="filament-section" v-show="showFilamentSection">
-                    <div class="filament-header">
-                        <div class="filament-controls">
-                            <div class="toggle-item">
-                                <div class="toggle-label trans" tid="auto_refill">{{ $t('printSend.autoRefill') }}</div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" v-model="printInfo.autoRefill">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <div class="toggle-label trans" tid="switch_to_device_tab">{{
+                                $t('printSend.switchToDeviceTab') }}</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" v-model="printInfo.switchToDeviceTab">
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
-                        <div class="filament-pagination">
-                            <button class="pagination-btn" @click="prevPage" :disabled="currentPage <= 1">
-                                <img src="img/prev.svg" alt="">
-                            </button>
-                            <span>{{ currentPage }}/{{ totalPages }}</span>
-                            <button class="pagination-btn" @click="nextPage" :disabled="currentPage >= totalPages">
-                                <img src="img/next.svg" alt="">
-                            </button>
+
+                        <div class="toggle-item">
+                            <div class="toggle-label trans" tid="upload_and_print">{{ $t('printSend.uploadAndPrint') }}
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" v-model="printInfo.uploadAndPrint">
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
                     </div>
-                    <div class="filament-list">
-                        <div v-for="filament in currentPageFilaments" :key="filament.index" class="mapping-container">
-                            <div class="filament-rect" :style="getFilamentStyle(filament)"
-                                :title="filament.filamentName">
-                                <div class="filament-type">{{ filament.filamentType }}</div>
-                                <div class="filament-weight">{{ formatWeight(filament.filamentWeight) }}</div>
-                            </div>
-                            <div class="tray-rect" :title="filament.mappedMmsFilament || 'No mapping'">
-                                <span v-html="getFilamentSvg(filament.mappedMmsFilament)">
-                                </span>
-                                <div class="tray-filament-type">{{ filament.mappedMmsFilament?.filamentType || '?' }}
+                </section>
+                <section class="filament-section" v-if="showFilamentSection">
+                    <div class="section-header">
+                        <h3 class="section-title">{{ $t('printSend.filamentMapping') }}</h3>
+                        <div class="section-separator"></div>
+                    </div>
+                    <div class="filament-container">
+                        <div class="filament-header">
+                            <div class="filament-controls">
+                                <div class="toggle-item">
+                                    <div class="toggle-label trans" tid="auto_refill">{{ $t('printSend.autoRefill') }}
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" v-model="printInfo.autoRefill">
+                                        <span class="toggle-slider"></span>
+                                    </label>
                                 </div>
-                                <el-popover ref="mmsPopover" placement="top" title="" :width="352" trigger="click"
+                            </div>
+                            <div class="filament-pagination">
+                                <button class="pagination-btn" @click="prevPage" :disabled="currentPage <= 1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                        fill="currentColor" version="1.1" width="6" height="10" viewBox="0 0 6 10">
+                                        <g transform="matrix(-1,0,0,-1,12,20)">
+                                            <path
+                                                d="M12,15.18525L7.8947400000000005,10L6,10L10.105260000000001,15.18525L6,20L7.8947400000000005,20L12,15.18525Z"
+                                                fill-opacity="1" style="mix-blend-mode:passthrough" />
+                                        </g>
+                                    </svg>
+                                </button>
+                                <span>{{ currentPage }}/{{ totalPages }}</span>
+                                <button class="pagination-btn" @click="nextPage" :disabled="currentPage >= totalPages">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                        fill="currentColor" version="1.1" width="6" height="10" viewBox="0 0 6 10">
+                                        <g>
+                                            <path
+                                                d="M6,5.18525L1.89474,0L0,0L4.10526,5.18525L0,10L1.89474,10L6,5.18525Z"
+                                                fill-opacity="1" style="mix-blend-mode:passthrough" />
+                                        </g>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="filament-list">
+                            <div v-for="filament in currentPageFilaments" :key="filament.index"
+                                class="mapping-container">
+                                <div class="filament-rect" :style="getFilamentStyle(filament)"
+                                    :title="filament.filamentName">
+                                    <div class="filament-type">{{ filament.filamentType }}</div>
+                                    <div class="filament-weight">{{ formatWeight(filament.filamentWeight) }}</div>
+                                </div>
+
+
+                                <el-popover ref="mmsPopover" placement="top" title="" :width="420" trigger="click"
                                     :show-arrow="false">
                                     <template #default>
                                         <div>
@@ -171,36 +212,21 @@
                                         </div>
                                     </template>
                                     <template #reference>
-                                        <span><img src="./img/down-arrow.svg" alt=""></span>
+                                        <div class="tray-rect">
+                                            <span v-html="getFilamentSvg(filament.mappedMmsFilament)">
+                                            </span>
+                                            <div class="tray-filament-type">{{ filament.mappedMmsFilament?.filamentType
+                                                ||
+                                                '?' }}
+                                            </div>
+                                            <span><img src="./img/down-arrow.svg" alt=""></span>
+                                        </div>
                                     </template>
                                 </el-popover>
 
                                 <!-- <div class="tray-filament-type">{{ filament.amsFilamentType || 'N/A' }}</div> -->
+
                             </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="options-section">
-                    <div class="options-separator"></div>
-
-                    <div class="toggle-group">
-                        <div class="toggle-item">
-                            <div class="toggle-label trans" tid="switch_to_device_tab">{{
-                                $t('printSend.switchToDeviceTab') }}</div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" v-model="printInfo.switchToDeviceTab">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="toggle-item">
-                            <div class="toggle-label trans" tid="upload_and_print">{{ $t('printSend.uploadAndPrint') }}
-                            </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" v-model="printInfo.uploadAndPrint">
-                                <span class="toggle-slider"></span>
-                            </label>
                         </div>
                     </div>
                 </section>
@@ -233,16 +259,18 @@
                         </div>
                     </div>
                 </section>
+
             </main>
             <div v-else class="print-task-content no-printer">
                 <img src="../img/printer-empty.png" width="224" />
-                <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
+                <div>{{ $t("noPrinterConnected") }}</div>
 
             </div>
-            <footer class="action-buttons">
+            <footer class="action-buttons" >
                 <button class="btn btn-secondary trans" @click="cancel" tid="cancel">{{ $t('printSend.cancel')
                     }}</button>
-                <button class="btn btn-primary trans" :disabled="!curPrinter" @click="upload" tid="upload">{{ $t('printSend.upload') }}</button>
+                <button class="btn btn-primary trans" :disabled="!curPrinter" @click="upload" tid="upload">{{
+                    $t('printSend.upload') }}</button>
             </footer>
         </div>
     </div>
