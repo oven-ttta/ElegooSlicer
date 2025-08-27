@@ -6,7 +6,7 @@
   "from": "system",
   "setting_id": "PEN3Plus10050",
   "instantiation": "true",
-  "filename_format": "EN3Plus_{nozzle_diameter[0]}_{input_filename_base}_{filament_type[0]}{layer_height}_{print_time}.gcode",
+  "filename_format": "EN3Plus_{nozzle_diameter[0]}_{input_filename_base}_{filament_name}{layer_height}_{print_time}.gcode",
   "default_acceleration": "1000",
   "gap_infill_speed": "30",
   "initial_layer_infill_speed": "50",
