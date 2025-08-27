@@ -27,7 +27,7 @@
     "ironing_speed": "30",
     "ironing_type": "no ironing",
     "layer_height": "0.2",
-    "filename_format": "{input_filename_base}_{filament_name}{layer_height}_{print_time}.gcode",
+    "filename_format": "{input_filename_base}_{filament_name}_{layer_height}_{print_time}.gcode",
     "detect_overhang_wall": "1",
     "overhang_1_4_speed": "0",
     "overhang_2_4_speed": "50",
