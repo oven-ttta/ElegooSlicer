@@ -465,7 +465,7 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
     PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
     PrinterMmsGroup    mmsGroup;
 
-    if (!printerNetworkInfo.printerId.empty() && printerNetworkInfo.printerAttributes.capabilities.supportsMms) {
+    if (!printerNetworkInfo.printerId.empty() && printerNetworkInfo.systemCapabilities.supportsMultiFilament) {
         PrinterNetworkResult<PrinterMmsGroup> res = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
         if (res.isSuccess() && res.hasData()) {
             mmsGroup = res.data.value();

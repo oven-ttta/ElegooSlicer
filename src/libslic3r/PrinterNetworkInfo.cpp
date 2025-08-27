@@ -105,18 +105,29 @@ PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json)
                 printerNetworkInfo.printTask.progress = json["printTask"]["progress"].get<int>();
             }
         }
-        if (json.contains("printerAttributes")) {
-            if (json["printerAttributes"].contains("supportsAutoBedLeveling")) {
-                printerNetworkInfo.printerAttributes.capabilities.supportsAutoBedLeveling = json["printerAttributes"]["supportsAutoBedLeveling"].get<bool>();
+        if (json.contains("printCapabilities")) {
+            if (json["printCapabilities"].contains("supportsAutoBedLeveling")) {
+                printerNetworkInfo.printCapabilities.supportsAutoBedLeveling = json["printCapabilities"]["supportsAutoBedLeveling"].get<bool>();
             }
-            if (json["printerAttributes"].contains("supportsTimeLapse")) {
-                printerNetworkInfo.printerAttributes.capabilities.supportsTimeLapse = json["printerAttributes"]["supportsTimeLapse"].get<bool>();
+            if (json["printCapabilities"].contains("supportsTimeLapse")) {
+                printerNetworkInfo.printCapabilities.supportsTimeLapse = json["printCapabilities"]["supportsTimeLapse"].get<bool>();
             }
-            if (json["printerAttributes"].contains("supportsHeatedBedSwitching")) {
-                printerNetworkInfo.printerAttributes.capabilities.supportsHeatedBedSwitching = json["printerAttributes"]["supportsHeatedBedSwitching"].get<bool>();
+            if (json["printCapabilities"].contains("supportsHeatedBedSwitching")) {
+                printerNetworkInfo.printCapabilities.supportsHeatedBedSwitching = json["printCapabilities"]["supportsHeatedBedSwitching"].get<bool>();
             }
-            if (json["printerAttributes"].contains("supportsMms")) {
-                printerNetworkInfo.printerAttributes.capabilities.supportsMms = json["printerAttributes"]["supportsMms"].get<bool>();
+            if (json["printCapabilities"].contains("supportsFilamentMapping")) {
+                printerNetworkInfo.printCapabilities.supportsFilamentMapping = json["printCapabilities"]["supportsFilamentMapping"].get<bool>();
+            }
+        }
+        if (json.contains("systemCapabilities")) {
+            if (json["systemCapabilities"].contains("supportsMultiFilament")) {
+                printerNetworkInfo.systemCapabilities.supportsMultiFilament = json["systemCapabilities"]["supportsMultiFilament"].get<bool>();
+            }
+            if (json["systemCapabilities"].contains("canGetDiskInfo")) {
+                printerNetworkInfo.systemCapabilities.canGetDiskInfo = json["systemCapabilities"]["canGetDiskInfo"].get<bool>();
+            }
+            if (json["systemCapabilities"].contains("canSetPrinterName")) {
+                printerNetworkInfo.systemCapabilities.canSetPrinterName = json["systemCapabilities"]["canSetPrinterName"].get<bool>();
             }
         }
     } catch (const std::exception& e) {
@@ -163,12 +174,17 @@ nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printer
     printTaskJson["estimatedTime"] = printerNetworkInfo.printTask.estimatedTime;
     printTaskJson["progress"]      = printerNetworkInfo.printTask.progress;
     json["printTask"]              = printTaskJson;
-    nlohmann::json printerAttributesJson;
-    printerAttributesJson["supportsAutoBedLeveling"] = printerNetworkInfo.printerAttributes.capabilities.supportsAutoBedLeveling;
-    printerAttributesJson["supportsTimeLapse"] = printerNetworkInfo.printerAttributes.capabilities.supportsTimeLapse;
-    printerAttributesJson["supportsHeatedBedSwitching"] = printerNetworkInfo.printerAttributes.capabilities.supportsHeatedBedSwitching;
-    printerAttributesJson["supportsMms"] = printerNetworkInfo.printerAttributes.capabilities.supportsMms;
-    json["printerAttributes"] = printerAttributesJson;
+    nlohmann::json printCapabilitiesJson;
+    printCapabilitiesJson["supportsAutoBedLeveling"] = printerNetworkInfo.printCapabilities.supportsAutoBedLeveling;
+    printCapabilitiesJson["supportsTimeLapse"] = printerNetworkInfo.printCapabilities.supportsTimeLapse;
+    printCapabilitiesJson["supportsHeatedBedSwitching"] = printerNetworkInfo.printCapabilities.supportsHeatedBedSwitching;
+    printCapabilitiesJson["supportsFilamentMapping"] = printerNetworkInfo.printCapabilities.supportsFilamentMapping;
+    json["printCapabilities"] = printCapabilitiesJson;
+    nlohmann::json systemCapabilitiesJson;
+    systemCapabilitiesJson["supportsMultiFilament"] = printerNetworkInfo.systemCapabilities.supportsMultiFilament;
+    systemCapabilitiesJson["canGetDiskInfo"] = printerNetworkInfo.systemCapabilities.canGetDiskInfo;
+    systemCapabilitiesJson["canSetPrinterName"] = printerNetworkInfo.systemCapabilities.canSetPrinterName;
+    json["systemCapabilities"] = systemCapabilitiesJson;
     return json;
 }
 

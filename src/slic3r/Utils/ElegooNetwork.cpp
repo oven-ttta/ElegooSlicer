@@ -45,7 +45,7 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo()
     return ElegooLink::getInstance()->getPrinterMmsInfo(mPrinterNetworkInfo.printerId);
 }
 
-PrinterNetworkResult<PrinterAttributes> ElegooNetwork::getPrinterAttributes()
+PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::getPrinterAttributes()
 {
     return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId);
 }

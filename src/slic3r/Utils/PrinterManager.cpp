@@ -246,7 +246,10 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     if (connectResult.isSuccess() && connectResult.data.has_value()) {    
         auto attributes = network->getPrinterAttributes();
         if(attributes.isSuccess() && attributes.hasData()) {
-            printerNetworkInfo.printerAttributes = attributes.data.value();
+            auto printerAttributes = attributes.data.value();   
+            printerNetworkInfo.printCapabilities = printerAttributes.printCapabilities;
+            printerNetworkInfo.systemCapabilities = printerAttributes.systemCapabilities;
+            printerNetworkInfo.firmwareVersion = printerAttributes.firmwareVersion;
         } else {
             wxLogWarning("Failed to get printer attributes for added printer %s %s %s: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                          printerNetworkInfo.printerModel, attributes.message.c_str());
@@ -486,9 +489,21 @@ void PrinterManager::monitorPrinterConnections()
                 }
                 auto connectResult = network->connectToPrinter();
                 if (connectResult.isSuccess()) {
-                    addPrinterNetwork(network);
-                    PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_CONNECTED);
-                } 
+                    auto attributes = network->getPrinterAttributes();
+                    if(attributes.isSuccess() && attributes.hasData()) {
+                        // update printer attributes
+                        auto printerAttributes = attributes.data.value();
+                        PrinterCache::getInstance()->updatePrinterAttributes(printer.printerId, printerAttributes);
+                        addPrinterNetwork(network);
+                        PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_CONNECTED);
+                        wxLogMessage("Connected to printer: %s %s %s, firmware version: %s", printer.host, printer.printerName, printer.printerModel, printerAttributes.firmwareVersion.c_str());
+                    } else {
+                        wxLogError("Failed to get printer attributes for printer: %s %s %s", printer.host, printer.printerName, printer.printerModel);
+                    }
+                } else {
+                    wxLogError("Failed to connect to printer: %s %s %s", printer.host, printer.printerName, printer.printerModel);
+                    PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
+                }
             });
             connectionFutures.push_back(std::move(future));
         }

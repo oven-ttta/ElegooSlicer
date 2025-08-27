@@ -188,9 +188,9 @@ void PrinterCache::updatePrinterAttributes(const std::string& printerId, const P
     if (it != mPrinters.end()) {
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         it->second.lastActiveTime = now;
-        if(printerInfo.firmwareVersion.empty()) {
-            it->second.firmwareVersion = printerInfo.firmwareVersion;
-        }
+        it->second.firmwareVersion = printerInfo.firmwareVersion;
+        it->second.printCapabilities = printerInfo.printCapabilities;
+        it->second.systemCapabilities = printerInfo.systemCapabilities;
     }
 }
 

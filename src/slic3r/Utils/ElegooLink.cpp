@@ -144,6 +144,13 @@ void ElegooLink::init()
         PrinterNetworkInfo info;
         info.printerId       = event->attributes.printerId;
         info.firmwareVersion = event->attributes.firmwareVersion;
+        info.printCapabilities.supportsAutoBedLeveling = event->attributes.capabilities.printCapabilities.supportsAutoBedLeveling;
+        info.printCapabilities.supportsTimeLapse = event->attributes.capabilities.printCapabilities.supportsTimeLapse;
+        info.printCapabilities.supportsHeatedBedSwitching = event->attributes.capabilities.printCapabilities.supportsHeatedBedSwitching;
+        info.printCapabilities.supportsFilamentMapping = event->attributes.capabilities.printCapabilities.supportsFilamentMapping;
+        info.systemCapabilities.supportsMultiFilament = event->attributes.capabilities.systemCapabilities.supportsMultiFilament;
+        info.systemCapabilities.canGetDiskInfo = event->attributes.capabilities.systemCapabilities.canGetDiskInfo;
+        info.systemCapabilities.canSetPrinterName = event->attributes.capabilities.systemCapabilities.canSetPrinterName;
         PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.printerId, info));
     });
 
@@ -457,26 +464,30 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
     return PrinterNetworkResult<PrinterMmsGroup>(resultCode, mmsGroup);
 }
 
-PrinterNetworkResult<PrinterAttributes> ElegooLink::getPrinterAttributes(const std::string& printerId)
+PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const std::string& printerId)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
-    PrinterAttributes printerAttributes;
+    PrinterNetworkInfo printerNetworkInfo;
     try {
         elink::PrinterAttributesResult elinkResult = elink::ElegooLink::getInstance().getPrinterAttributes({printerId});
         resultCode = parseElegooResult(elinkResult.code);
         if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if(elinkResult.hasData()) {
                 const elink::PrinterAttributes& attributes = elinkResult.value();
-                printerAttributes.capabilities.supportsAutoBedLeveling = attributes.capabilities.printCapabilities.supportsAutoBedLeveling;
-                printerAttributes.capabilities.supportsTimeLapse = attributes.capabilities.printCapabilities.supportsTimeLapse;
-                printerAttributes.capabilities.supportsHeatedBedSwitching = attributes.capabilities.printCapabilities.supportsHeatedBedSwitching;
-                printerAttributes.capabilities.supportsMms = attributes.capabilities.printCapabilities.supportsFilamentMapping;
+                printerNetworkInfo.printCapabilities.supportsAutoBedLeveling = attributes.capabilities.printCapabilities.supportsAutoBedLeveling;
+                printerNetworkInfo.printCapabilities.supportsTimeLapse = attributes.capabilities.printCapabilities.supportsTimeLapse;
+                printerNetworkInfo.printCapabilities.supportsHeatedBedSwitching = attributes.capabilities.printCapabilities.supportsHeatedBedSwitching;
+                printerNetworkInfo.printCapabilities.supportsFilamentMapping = attributes.capabilities.printCapabilities.supportsFilamentMapping;
+                printerNetworkInfo.systemCapabilities.supportsMultiFilament = attributes.capabilities.systemCapabilities.supportsMultiFilament;
+                printerNetworkInfo.systemCapabilities.canGetDiskInfo = attributes.capabilities.systemCapabilities.canGetDiskInfo;
+                printerNetworkInfo.systemCapabilities.canSetPrinterName = attributes.capabilities.systemCapabilities.canSetPrinterName;
+                printerNetworkInfo.firmwareVersion = attributes.firmwareVersion;
             }
         }
     } catch (const std::exception& e) {
         wxLogError("Exception in ElegooLink::getPrinterAttributes: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
-    return PrinterNetworkResult<PrinterAttributes>(resultCode, printerAttributes);
+    return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo);
 }
 } // namespace Slic3r

@@ -172,7 +172,7 @@ webviewIpc::IPCResult PrinterMmsSyncView::getPrinterList()
     auto printerList = PrinterManager::getInstance()->getPrinterList();
     nlohmann::json printerArray = json::array();
     for (auto& printer : printerList) {
-        if(!printer.printerAttributes.capabilities.supportsMms) {
+        if(!printer.systemCapabilities.supportsMultiFilament) {
             continue;
         }
         nlohmann::json printerObj = nlohmann::json::object();
