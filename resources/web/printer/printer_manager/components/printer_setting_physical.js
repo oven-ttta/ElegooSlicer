@@ -73,15 +73,36 @@ const PrinterSettingPhysicalComponent = {
         handleUpdatePhysicalPrinter(newPrinter) {
             if (!this.printer) return;
 
+            let name=null;
+            // check if name has changed
+            if (newPrinter.printerName !== this.printer.printerName) {
+               name=newPrinter.printerName;
+            }
+
+            let host=null;
+            // check if host has changed
+            if (newPrinter.host !== this.printer.host) {
+               host=newPrinter.host;
+            }
+
+            this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, name, host);
+            this.closeModal();
+        },
+
+        handleUpdateNetworkPrinter(newPrinter) {
+            if (!this.printer) return;
+
             // check if name has changed
             if (newPrinter.printerName !== this.printer.printerName) {
                 this.printerStore.requestUpdatePrinterName(this.printer.printerId, newPrinter.printerName);
             }
-
             // check if host has changed
             if (newPrinter.host !== this.printer.host) {
                 this.printerStore.requestUpdatePrinterHost(this.printer.printerId, newPrinter.host);
             }
+
+            this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, newPrinter.printerName, newPrinter.host);
+            this.closeModal();
         }
     }
 };

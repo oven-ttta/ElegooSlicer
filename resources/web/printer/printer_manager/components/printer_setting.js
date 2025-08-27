@@ -33,7 +33,7 @@ const PrinterSettingTemplate = /*html*/
                                     <el-input
                                         v-model="formData.printerName"
                                         ref="nameInput"
-                                        @blur="saveNameChanges"
+                                        @change="saveNameChanges"
                                         @keydown="onNameKeydown"
                                         :placeholder="$t('printerSetting.enterPrinterName')"
                                         maxlength="50"
@@ -58,7 +58,7 @@ const PrinterSettingTemplate = /*html*/
                                     <el-input
                                         v-model="formData.host"
                                         ref="hostInput"
-                                        @blur="saveHostChanges"
+                                        @change="saveHostChanges"
                                         @keydown="onHostKeydown"
                                         :placeholder="$t('printerSetting.enterHostIpUrl')"
                                         maxlength="30"
@@ -179,7 +179,7 @@ const PrinterSettingComponent = {
         onNameKeydown(e) {
             if (e.keyCode === 13) { // Enter
                 e.preventDefault();
-                this.saveNameChanges();
+                // this.saveNameChanges();
                 this.$refs.nameInput.blur(); // 失去焦点
             } else if (e.keyCode === 27) { // Escape
                 e.preventDefault();
@@ -190,7 +190,7 @@ const PrinterSettingComponent = {
         onHostKeydown(e) {
             if (e.keyCode === 13) { // Enter
                 e.preventDefault();
-                this.saveHostChanges();
+                // this.saveHostChanges();
                 this.$refs.hostInput.blur(); // 失去焦点
             } else if (e.keyCode === 27) { // Escape
                 e.preventDefault();

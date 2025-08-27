@@ -139,7 +139,7 @@ body {
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px;
+  padding: 16px 18px 18px 18px;
 }
 
 .printer-category {

@@ -61,7 +61,9 @@ const PrintSendApp = {
             // UI state
             isEditingName: false,
             showFilamentSection: false,
-            isIniting: false
+            isIniting: false,
+            // Currently selected heated bed type in the app
+            currentBedType: ""
         };
     },
 
@@ -100,6 +102,15 @@ const PrintSendApp = {
 
         mmsFilamentList() {
             return this.printInfo.mmsInfo?.mmsList || [];
+        },
+
+        // Check if selected printer model does not match the current project printer model
+        printerModelNotMatch() {
+            return this.curPrinter && this.printInfo.currentProjectPrinterModel && this.curPrinter.printerModel !== this.printInfo.currentProjectPrinterModel;
+        },
+
+        bedTypeNotMatch() {
+            return this.printInfo.uploadAndPrint && this.currentBedType !== this.selectedBedTypeValue;
         }
     },
 
@@ -108,6 +119,7 @@ const PrintSendApp = {
         async init() {
             this.isIniting = true;
             await this.requestPrinterList();
+            await this.getCurrentBedType();
             this.isIniting = false;
         },
 
@@ -171,7 +183,20 @@ const PrintSendApp = {
                 nativeIpc.sendEvent('expand_window', { expand });
             } catch (error) {
                 console.error('Failed to request printer list:', error);
-            } 
+            }
+        },
+
+        async getCurrentBedType() {
+            try {
+                const response = await this.ipcRequest('get_current_bed_type', { printerId: this.curPrinter.printerId });
+                if (response && response.bedType) {
+                    console.log("Current bed type:", response.bedType);
+                    this.currentBedType = response.bedType;
+                    console.log("Selected bed type:", this.selectedBedTypeValue);
+                }
+            } catch (error) {
+                console.error('Failed to get current bed type:', error);
+            }
         },
 
         async refreshPrinterList() {
@@ -192,12 +217,6 @@ const PrintSendApp = {
                 this.hasMmsInfo = false;
             }
 
-            if (printInfo.currentProjectPrinterModel) {
-                if(this.curPrinter && this.curPrinter.printerModel !== printInfo.currentProjectPrinterModel) {
-                    this.showStatusTip(this.$t('printSend.printerModelNotMatch'));
-                }
-            }
-            
             this.$nextTick(() => {
                 this.adjustModelNameWidth();
             });
@@ -348,7 +367,7 @@ const PrintSendApp = {
             for (let i = 0; i < this.printInfo.filamentList.length; i++) {
                 if (this.printInfo.filamentList[i].index === filamentIndex) {
                     const filament = this.printInfo.filamentList[i];
-                    if(filament.filamentType !== tray.filamentType && tray.filamentType !== '') {
+                    if (filament.filamentType !== tray.filamentType && tray.filamentType !== '') {
                         this.showStatusTip(this.$t('printSend.filamentTypeNotMatch'));
                         return;
                     }
@@ -448,7 +467,7 @@ const PrintSendApp = {
         refreshShowFilamentSection() {
             setTimeout(() => {
                 this.showFilamentSection = this.printInfo.uploadAndPrint && this.hasMmsInfo;
-            }, this.printInfo.uploadAndPrint&&this.hasMmsInfo ? 100 : 0);
+            }, this.printInfo.uploadAndPrint && this.hasMmsInfo ? 100 : 0);
         }
     },
 

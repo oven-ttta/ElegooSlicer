@@ -508,7 +508,7 @@ void WebviewIPCManager::sendMessage(const json& message) {
         }
         
         // Use compact dump for transmission efficiency, with error handling
-        std::string jsonStr = message.dump(-1, ' ', false, json::error_handler_t::replace);
+        std::string jsonStr = message.dump(-1, ' ', true);
         if (jsonStr.empty()) {
             wxLogError("IPC: Failed to serialize message to JSON");
             return;

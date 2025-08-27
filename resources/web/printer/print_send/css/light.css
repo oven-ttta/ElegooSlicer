@@ -728,3 +728,10 @@
   color: var(--text-primary);
   font-size: 16px;
 }
+
+
+.error-tips{
+  color: var(--color-error);
+  font-size: 16px;
+  margin-top: 8px;
+}

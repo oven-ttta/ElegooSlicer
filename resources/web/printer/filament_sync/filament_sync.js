@@ -25,7 +25,6 @@ const FilamentSyncApp = {
                 const response = await nativeIpc.request(method, params, timeout);
                 return response;
             } catch (error) {
-                console.error(`IPC request failed for ${method}:`, error);
                 let message = '';
                 if (method === "syncMmsFilament") {
                     message = i18n.global.t("filamentSync.failedToSyncFilament");
@@ -64,7 +63,7 @@ const FilamentSyncApp = {
 
         // Request printer filament info when printer is selected
         async requestPrinterFilamentInfo(printerId) {
-           const loading = ElLoading.service({
+            const loading = ElLoading.service({
                 lock: true,
             });
             try {
@@ -74,29 +73,31 @@ const FilamentSyncApp = {
                 this.printFilamentList = response.printFilamentList;
             } catch (error) {
                 console.error('Failed to request printer filament info:', error);
-            }finally {
+                this.mmsInfo = null;
+                this.printFilamentList = [];
+            } finally {
                 loading.close();
             }
         },
 
         async updatePrinterSelection() {
             if (this.printerList.length === 0) return;
-            let selectedPrinter;       
+            let selectedPrinter;
             if (this.curPrinter && this.curPrinter.printerId) {
                 // find the printer by printerId
                 let cur = this.printerList.find(p => p.printerId === this.curPrinter.printerId);
                 if (cur) {
                     selectedPrinter = cur;
                 }
-            }        
+            }
             // if not found, find the selected printer
             if (!selectedPrinter) {
                 selectedPrinter = this.printerList.find(p => p.selected);
                 if (!selectedPrinter) {
                     selectedPrinter = this.printerList[0];
                 }
-            }          
-            this.curPrinter = selectedPrinter;       
+            }
+            this.curPrinter = selectedPrinter;
             // Request filament info for the selected printer
             if (this.curPrinter && this.curPrinter.printerId) {
                 await this.requestPrinterFilamentInfo(this.curPrinter.printerId);
@@ -145,24 +146,24 @@ const FilamentSyncApp = {
             if (!this.curPrinter || !this.mmsInfo) {
                 return false;
             }
-            
+
             // Check if MMS list exists and has items
             const mmsList = this.mmsInfo.mmsList;
             if (!mmsList || mmsList.length === 0) {
                 return false;
             }
-            
+
             // Check if first MMS has tray list with items
             const firstMms = mmsList[0];
             if (!firstMms || !firstMms.trayList || firstMms.trayList.length === 0) {
                 return false;
             }
-            
+
             // Check if there are filaments with active status (1: loaded, 3: ready)
-            const activeFilaments = firstMms.trayList.filter(tray => 
+            const activeFilaments = firstMms.trayList.filter(tray =>
                 tray.status === 1 || tray.status === 3
             );
-            
+
             return activeFilaments.length > 0;
         }
     },
@@ -178,7 +179,7 @@ const FilamentSyncApp = {
             if (!this.printerList || this.printerList.length === 0) {
                 return false;
             }
-            
+
             // Use shared logic to check for active filaments
             return this.hasActiveFilaments();
         },

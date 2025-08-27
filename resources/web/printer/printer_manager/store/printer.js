@@ -78,14 +78,19 @@ const usePrinterStore = defineStore('printer', {
     },
 
 
-    init() {
-        this.requestPrinterModelList();
-        this.requestPrinterList();
-        this.startStatusUpdates();
+    async init() {
+      const loading = ElLoading.service({
+        lock: true,
+      });
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // Load printer models and printer list
+      await this.requestPrinterModelList();
+      await this.requestPrinterList();
+      await this.startStatusUpdates();
+      loading.close();
     },
+
     uninit() {
-
-
       // Clear status update interval
       if (this.statusUpdateInterval) {
         clearInterval(this.statusUpdateInterval);
@@ -101,17 +106,17 @@ const usePrinterStore = defineStore('printer', {
         return response;
       } catch (error) {
         let message = ''
-        if (method === "request_add_printer" || method === "request_add_physical_printer") {
+        // if (method === "request_add_printer" || method === "request_add_physical_printer") {
 
-          if (params.printer.authMode === 'token' && (error.code === 200 || error.code === 202 || error.code === 203)) {
-            message = i18n.global.t("printerAuth.failedToAddPrinterInvalidAccessCode");
-          } else {
-            message = i18n.global.t("printerAuth.failedToAddPrinter");
-          }
+        //   if (params.printer.authMode === 'token' && (error.code === 200 || error.code === 202 || error.code === 203)) {
+        //     message = i18n.global.t("printerAuth.failedToAddPrinterInvalidAccessCode");
+        //   } else {
+        //     message = i18n.global.t("printerAuth.failedToAddPrinter");
+        //   }
 
-        } else {
-          message = `${error.message || 'Unknown error occurred'}`
-        }
+        // } else {
+        message = `${error.message || 'Unknown error occurred'}`
+        // }
         // Show error notification using Element Plus message component
         if (window.ElementPlus && window.ElementPlus.ElMessage) {
           window.ElementPlus.ElMessage.error({
@@ -232,19 +237,37 @@ const usePrinterStore = defineStore('printer', {
       }
     },
 
-    async requestUpdatePrinterName(printerId, printerName) {
+
+    async requestUpdatePrinterNameAndHost(printerId, printerName, host) {
       // const loading = ElLoading.service({
       //   lock: true,
       // });
       try {
-        await this.ipcRequest('request_update_printer_name', {
-          printerId,
-          printerName
-        });
+
+        if (isEmptyString(printerName) && isEmptyString(host)) {
+          // Nothing to update
+          return;
+        }
+
+        if (printerName) {
+          await this.ipcRequest('request_update_printer_name', {
+            printerId,
+            printerName
+          });
+        }
+
+        if (host) {
+          await this.ipcRequest('request_update_printer_host', {
+            printerId,
+            host
+          });
+        }
+
         ElementPlus.ElMessage.success({
           message: i18n.global.t("printerManager.modifySuccess"),
           duration: 3000,
         });
+
       } catch (error) {
         console.error('Failed to update printer name:', error);
       } finally {
@@ -253,25 +276,13 @@ const usePrinterStore = defineStore('printer', {
 
     },
 
-    async requestUpdatePrinterHost(printerId, host) {
-      // const loading = ElLoading.service({
-      //   lock: true,
-      // });
-      try {
-        await this.ipcRequest('request_update_printer_host', {
-          printerId,
-          host
-        });
-        ElementPlus.ElMessage.success({
-          message: i18n.global.t("printerManager.modifySuccess"),
-          duration: 3000,
-        });
-      } catch (error) {
-        console.error('Failed to update printer host:', error);
-      } finally {
-        // loading.close();
-      }
+    async requestUpdatePrinterName(printerId, printerName) {
+      await this.requestUpdatePrinterNameAndHost(printerId, printerName, null);
 
+    },
+
+    async requestUpdatePrinterHost(printerId, host) {
+      await this.requestUpdatePrinterNameAndHost(printerId, null, host);
     },
     // Handle printer information updates
     updatePrinterInfo(data) {

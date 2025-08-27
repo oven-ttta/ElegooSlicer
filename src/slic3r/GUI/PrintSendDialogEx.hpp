@@ -47,6 +47,7 @@ public:
 protected:
     void OnCloseWindow(wxCloseEvent& event);
 
+    BedType getCurrentBedType() const;
 private:
     void setupIPCHandlers();
     webviewIpc::IPCResult getPrinterList();

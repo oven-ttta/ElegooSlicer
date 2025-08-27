@@ -30,9 +30,8 @@
 #include "PrinterMmsManager.hpp"
 #include <slic3r/Utils/WebviewIPCManager.h>
 
-
-#define HAS_MMS_HEIGHT 796
-#define NO_MMS_HEIGHT 600
+#define HAS_MMS_HEIGHT 800
+#define NO_MMS_HEIGHT 650
 
 using namespace nlohmann;
 
@@ -60,12 +59,13 @@ PrintSendDialogEx::PrintSendDialogEx(Plater*                    plater,
     Bind(wxEVT_CLOSE_WINDOW, &PrintSendDialogEx::OnCloseWindow, this);
 }
 
-PrintSendDialogEx::~PrintSendDialogEx() {
+PrintSendDialogEx::~PrintSendDialogEx()
+{
     m_isDestroying = true;
-    
+
     // Reset the life tracker to signal all async operations that this object is being destroyed
     m_lifeTracker.reset();
-    
+
     if (mIpc) {
         delete mIpc;
         mIpc = nullptr;
@@ -98,7 +98,7 @@ void PrintSendDialogEx::init()
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
     topsizer->Add(mBrowser, wxSizerFlags().Expand().Proportion(1));
-    wxSize pSize = FromDIP(wxSize(860, NO_MMS_HEIGHT));
+    wxSize pSize = FromDIP(wxSize(860, HAS_MMS_HEIGHT));
     SetSize(pSize);
     CenterOnParent();
 
@@ -144,7 +144,7 @@ void PrintSendDialogEx::init()
     m_cachedModelName = recent_path.ToUTF8().data();
     if (m_cachedModelName.size() >= 6 && m_cachedModelName.compare(m_cachedModelName.size() - 6, 6, ".gcode") == 0)
         m_cachedModelName = m_cachedModelName.substr(0, m_cachedModelName.size() - 6);
-    
+
     // if (size_t extension_start = recent_path.find_last_of('.'); extension_start != std::string::npos)
     //     m_valid_suffix = recent_path.substr(extension_start);
     // mProjectName = getCurrentProjectName();
@@ -188,31 +188,32 @@ std::string PrintSendDialogEx::getCurrentProjectName()
 
 void PrintSendDialogEx::setupIPCHandlers()
 {
-    if (!mIpc) return;
+    if (!mIpc)
+        return;
 
     // Handle request_print_task (async due to time-consuming preparePrintTask operation)
-    mIpc->onRequestAsync("request_print_task", [this](const webviewIpc::IPCRequest& request,
-                                                       std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+    mIpc->onRequestAsync("request_print_task", [this](const webviewIpc::IPCRequest&                     request,
+                                                      std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         std::string printerId = request.params.value("printerId", "");
-        
+
         // Create a weak reference to track object lifetime
         std::weak_ptr<bool> life_tracker = m_lifeTracker;
-        
+
         // Mark async operation as in progress to prevent window closing
         m_asyncOperationInProgress = true;
-        
+
         // Run the print task preparation in a separate thread to avoid blocking the UI
         std::thread([life_tracker, printerId, sendResponse, this]() {
             try {
                 // Check if the object still exists
                 if (auto tracker = life_tracker.lock()) {
                     webviewIpc::IPCResult response = this->preparePrintTask(printerId);
-                    
+
                     // Final check before sending response
                     if (life_tracker.lock()) {
                         // Mark async operation as completed
                         m_asyncOperationInProgress = false;
-                        
+
                         sendResponse(response);
                     }
                 } else {
@@ -223,7 +224,7 @@ void PrintSendDialogEx::setupIPCHandlers()
                 if (life_tracker.lock()) {
                     // Mark async operation as completed even on error
                     m_asyncOperationInProgress = false;
-                    
+
                     wxLogError("Error in request_print_task: %s", e.what());
                     sendResponse(webviewIpc::IPCResult::error(std::string("Print task preparation failed: ") + e.what()));
                 }
@@ -231,7 +232,7 @@ void PrintSendDialogEx::setupIPCHandlers()
                 if (life_tracker.lock()) {
                     // Mark async operation as completed even on unknown error
                     m_asyncOperationInProgress = false;
-                    
+
                     wxLogError("Unknown error in request_print_task");
                     sendResponse(webviewIpc::IPCResult::error("Print task preparation failed: Unknown error"));
                 }
@@ -261,11 +262,10 @@ void PrintSendDialogEx::setupIPCHandlers()
     // Handle start_upload
     mIpc->onEvent("start_upload", [this](const webviewIpc::IPCEvent& event) {
         try {
-           auto result = onPrint(event.data);
-           if(result.code == 0)
-           {
-             EndModal(wxID_OK);
-           }
+            auto result = onPrint(event.data);
+            if (result.code == 0) {
+                EndModal(wxID_OK);
+            }
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in start_upload: " << e.what();
         }
@@ -287,6 +287,27 @@ void PrintSendDialogEx::setupIPCHandlers()
             }
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in expand_window: " << e.what();
+        }
+    });
+
+    mIpc->onRequest("get_current_bed_type", [this](const webviewIpc::IPCRequest& request) {
+        try {
+            int         bedType    = getCurrentBedType();
+            std::string bedTypeStr = "";
+            if (bedType == BedType::btPC)
+                bedTypeStr = "btPC"; // B
+            else if (bedType == BedType::btPTE)
+                bedTypeStr = "btPTE"; // A
+            else {
+                bedTypeStr = "unknown";
+            }
+
+            nlohmann::json response = nlohmann::json::object();
+            response["bedType"]     = bedTypeStr;
+            return webviewIpc::IPCResult::success(response);
+        } catch (const std::exception& e) {
+            wxLogError("Error in request_printer_list: %s", e.what());
+            return webviewIpc::IPCResult::error("Failed to get printer list");
         }
     });
 }
@@ -356,11 +377,11 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
         auto it = nameToPreset.find(filamentName);
         if (it != nameToPreset.end()) {
             PrintFilamentMmsMapping filament;
-            Preset*                 preset = it->second;
+            Preset*                 preset        = it->second;
             std::string             filamentAlias = preset->alias;
             std::string             displayedFilamentType;
             std::string             filamentType = preset->config.get_filament_type(displayedFilamentType);
-            
+
             // get filament density to calculate filament weight
             float                     density            = 0.0;
             const ConfigOptionFloats* filament_densities = preset->config.option<ConfigOptionFloats>("filament_density");
@@ -368,10 +389,10 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
                 density = filament_densities->values[0];
             }
 
-            filament.filamentType    = filamentType;
-            filament.filamentId      = preset->filament_id;
-            filament.settingId       = preset->setting_id;
-            filament.filamentName    = filamentName;
+            filament.filamentType = filamentType;
+            filament.filamentId   = preset->filament_id;
+            filament.settingId    = preset->setting_id;
+            filament.filamentName = filamentName;
             // alias and filamentType is used to match filament in mms
             filament.filamentAlias   = filamentAlias;
             filament.filamentWeight  = 0;
@@ -385,9 +406,9 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
         int extruderIdx = extruders[i] - 1;
         if (extruderIdx < 0 || extruderIdx >= (int) projectFilamentList.size())
             continue;
-        auto info = projectFilamentList[extruderIdx];
+        auto info          = projectFilamentList[extruderIdx];
         info.index         = extruderIdx;
-        auto  colour       = wxGetApp().preset_bundle->project_config.opt_string("filament_colour", (unsigned int) extruderIdx);
+        auto colour        = wxGetApp().preset_bundle->project_config.opt_string("filament_colour", (unsigned int) extruderIdx);
         info.filamentColor = colour;
         float total_weight = 0.0;
 
@@ -442,21 +463,21 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
     printInfo["currentProjectPrinterModel"] = printerModel;
 
     PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
-    PrinterMmsGroup mmsGroup;
+    PrinterMmsGroup    mmsGroup;
 
-    if(!printerNetworkInfo.printerId.empty() && printerNetworkInfo.printerAttributes.capabilities.supportsMms) {
+    if (!printerNetworkInfo.printerId.empty() && printerNetworkInfo.printerAttributes.capabilities.supportsMms) {
         PrinterNetworkResult<PrinterMmsGroup> res = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
-        if(res.isSuccess() && res.hasData()) {
+        if (res.isSuccess() && res.hasData()) {
             mmsGroup = res.data.value();
         }
-        nlohmann::json mmsInfo  = convertPrinterMmsGroupToJson(mmsGroup);
-        printInfo["mmsInfo"]    = mmsInfo;
+        nlohmann::json mmsInfo = convertPrinterMmsGroupToJson(mmsGroup);
+        printInfo["mmsInfo"]   = mmsInfo;
         PrinterMmsManager::getInstance()->getFilamentMmsMapping(printerNetworkInfo, mPrintFilamentList, mmsGroup);
     } else {
         printInfo["mmsInfo"] = json::object();
     }
-    
-    if(mmsGroup.mmsList.size() == 0) {
+
+    if (mmsGroup.mmsList.size() == 0) {
         mHasMms = false;
     } else {
         mHasMms = true;
@@ -465,18 +486,18 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
     nlohmann::json filamentList = json::array();
     for (auto& filament : mPrintFilamentList) {
         filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
-    }  
+    }
     printInfo["filamentList"] = filamentList;
-    
+
     webviewIpc::IPCResult result;
-    result.data = printInfo;
-    result.code = 0;
+    result.data    = printInfo;
+    result.code    = 0;
     result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
     return result;
 }
 webviewIpc::IPCResult PrintSendDialogEx::getPrinterList()
 {
-    webviewIpc::IPCResult result;
+    webviewIpc::IPCResult           result;
     nlohmann::json                  printers    = json::array();
     std::vector<PrinterNetworkInfo> printerList = PrinterManager::getInstance()->getPrinterList();
     for (auto& printer : printerList) {
@@ -488,22 +509,22 @@ webviewIpc::IPCResult PrintSendDialogEx::getPrinterList()
         printers.push_back(printerJson);
     }
     std::string selectedPrinterId = wxGetApp().app_config->get("recent", CONFIG_KEY_SELECTED_PRINTER_ID);
-    auto cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
-    std::string printerModel = "";
-    auto printerModelValue = cfg.option<ConfigOptionString>("printer_model");
+    auto        cfg               = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    std::string printerModel      = "";
+    auto        printerModelValue = cfg.option<ConfigOptionString>("printer_model");
     if (printerModelValue) {
         printerModel = printerModelValue->value;
     }
     PrinterNetworkInfo selectedPrinter = PrinterManager::getInstance()->getSelectedPrinter(printerModel, selectedPrinterId);
-    for(auto& printer : printers) {
-        if(printer["printerId"].get<std::string>() == selectedPrinter.printerId) {
+    for (auto& printer : printers) {
+        if (printer["printerId"].get<std::string>() == selectedPrinter.printerId) {
             printer["selected"] = true;
         } else {
             printer["selected"] = false;
         }
     }
-    result.data = printers;
-    result.code = 0;
+    result.data    = printers;
+    result.code    = 0;
     result.message = "success";
     return result;
 }
@@ -511,7 +532,7 @@ webviewIpc::IPCResult PrintSendDialogEx::getPrinterList()
 webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo)
 {
     webviewIpc::IPCResult result;
-    result.data = nlohmann::json::object();
+    result.data                       = nlohmann::json::object();
     PrinterNetworkErrorCode errorCode = PrinterNetworkErrorCode::SUCCESS;
     try {
         mSelectedPrinterId     = "";
@@ -532,7 +553,7 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         if (!mSelectedPrinterId.empty()) {
             wxGetApp().app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, mSelectedPrinterId);
         } else {
-            errorCode = PrinterNetworkErrorCode::PRINTER_NOT_SELECTED;
+            errorCode      = PrinterNetworkErrorCode::PRINTER_NOT_SELECTED;
             result.message = getErrorMessage(errorCode);
             return result;
         }
@@ -545,40 +566,40 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         }
         // txt_filename->SetValue(modelName);
 
-        if(uploadAndPrint && mHasMms) {
-             for(auto& printFilament : mPrintFilamentList) {
+        if (uploadAndPrint && mHasMms) {
+            for (auto& printFilament : mPrintFilamentList) {
                 // init mappedMmsFilament
                 printFilament.mappedMmsFilament = PrinterMmsTray();
-                for( int i = 0; i < printInfo["filamentList"].size(); i++) {
+                for (int i = 0; i < printInfo["filamentList"].size(); i++) {
                     nlohmann::json mappedFilament = printInfo["filamentList"][i]["mappedMmsFilament"];
-                    //update printFilament with mappedFilament
+                    // update printFilament with mappedFilament
                     if (printInfo["filamentList"][i]["index"] == printFilament.index) {
-                        printFilament.mappedMmsFilament.trayName = mappedFilament["trayName"];
-                        printFilament.mappedMmsFilament.mmsId = mappedFilament["mmsId"];
-                        printFilament.mappedMmsFilament.trayId = mappedFilament["trayId"];
+                        printFilament.mappedMmsFilament.trayName      = mappedFilament["trayName"];
+                        printFilament.mappedMmsFilament.mmsId         = mappedFilament["mmsId"];
+                        printFilament.mappedMmsFilament.trayId        = mappedFilament["trayId"];
                         printFilament.mappedMmsFilament.filamentColor = mappedFilament["filamentColor"];
-                        printFilament.mappedMmsFilament.filamentName = mappedFilament["filamentName"];
-                        printFilament.mappedMmsFilament.filamentType = mappedFilament["filamentType"];
+                        printFilament.mappedMmsFilament.filamentName  = mappedFilament["filamentName"];
+                        printFilament.mappedMmsFilament.filamentType  = mappedFilament["filamentType"];
                         break;
                     }
                 }
-             }
-             for (auto& printFilament : mPrintFilamentList) {
-                 if (printFilament.mappedMmsFilament.trayName.empty() || printFilament.mappedMmsFilament.mmsId.empty() ||
-                     printFilament.mappedMmsFilament.trayId.empty() || printFilament.mappedMmsFilament.filamentColor.empty() ||
-                     printFilament.mappedMmsFilament.filamentName.empty() || printFilament.mappedMmsFilament.filamentType.empty()) {
-                        errorCode = PrinterNetworkErrorCode::PRINTER_MMS_FILAMENT_NOT_MAPPED;
-                        result.message = getErrorMessage(errorCode);
-                        return result;
-                 }
-             }
-             PrinterMmsManager::getInstance()->saveFilamentMmsMapping(mPrintFilamentList);
+            }
+            for (auto& printFilament : mPrintFilamentList) {
+                if (printFilament.mappedMmsFilament.trayName.empty() || printFilament.mappedMmsFilament.mmsId.empty() ||
+                    printFilament.mappedMmsFilament.trayId.empty() || printFilament.mappedMmsFilament.filamentColor.empty() ||
+                    printFilament.mappedMmsFilament.filamentName.empty() || printFilament.mappedMmsFilament.filamentType.empty()) {
+                    errorCode      = PrinterNetworkErrorCode::PRINTER_MMS_FILAMENT_NOT_MAPPED;
+                    result.message = getErrorMessage(errorCode);
+                    return result;
+                }
+            }
+            PrinterMmsManager::getInstance()->saveFilamentMmsMapping(mPrintFilamentList);
         }
     } catch (std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "Print Error: " << e.what();
         errorCode = PrinterNetworkErrorCode::INTERNAL_ERROR;
     }
-    result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
+    result.code    = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
     result.message = getErrorMessage(errorCode);
     return result;
 }
@@ -602,7 +623,7 @@ void PrintSendDialogEx::EndModal(int ret)
 std::map<std::string, std::string> PrintSendDialogEx::extendedInfo() const
 {
     nlohmann::json filamentList = json::array();
-    if(mHasMms) {
+    if (mHasMms) {
         for (auto& filament : mPrintFilamentList) {
             filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
         }
@@ -621,14 +642,20 @@ void PrintSendDialogEx::OnCloseWindow(wxCloseEvent& event)
     // If async operation is in progress, prevent closing
     if (m_asyncOperationInProgress && !m_isDestroying) {
         // Show a message to user that operation is in progress
-        // wxMessageBox(_L("Print task preparation is in progress. Please wait..."), 
+        // wxMessageBox(_L("Print task preparation is in progress. Please wait..."),
         //              _L("Operation in Progress"), wxOK | wxICON_INFORMATION);
         event.Veto(); // Prevent the window from closing
         return;
     }
-    
+
     // Allow normal close behavior
     event.Skip();
 }
 
+BedType PrintSendDialogEx::getCurrentBedType() const
+{
+    std::string str_bed_type = wxGetApp().app_config->get("curr_bed_type");
+    int         bedType      = atoi(str_bed_type.c_str());
+    return static_cast<BedType>(bedType);
+}
 }} // namespace Slic3r::GUI
