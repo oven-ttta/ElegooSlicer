@@ -18,10 +18,7 @@ const PrinterManager = {
     },
 
     mounted() {
-        TranslatePage();
-        setTimeout(() => {
-            this.init();
-        }, 1000);
+        this.init();
     },
 
     watch: {

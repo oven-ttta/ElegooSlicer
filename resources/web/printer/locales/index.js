@@ -122,7 +122,8 @@ const langMessages = {
       "noFilamentInfo": "The printer has no filament information to sync. Please check and refresh or retry.",
       "cancel": "Cancel",
       "sync": "Sync",
-      "failedToSyncFilament": "Failed to sync filament."
+      "failedToSyncFilament": "Failed to sync filament.",
+      "warningTips":"The current workspace already has filament information. Confirming the sync will directly overwrite the filament information"
     },
     "printSend": {
       "printer": "Printer",
@@ -143,7 +144,9 @@ const langMessages = {
       "someFilamentsNotMapped": "Some filaments are not mapped to MMS trays",
       "filamentMapping": "Filament Mapping",
       "filamentTypeNotMatch": "Filament type not match",
-      "printerModelNotMatch": "The selected printer does not match the gcode file. It may cause printing failure or even printer damage! It is recommended to re-slice or select the correct printer to start printing."
+      "printerModelNotMatch": "The selected printer does not match the gcode file. It may cause printing failure or even printer damage! It is recommended to re-slice or select the correct printer to start printing.",
+      "bedTypeNotMatch":"The selected bed type does not match the file. Please confirm before starting the print."
+    
     }
   },
   zh_CN: {
@@ -170,12 +173,12 @@ const langMessages = {
       "canceled": "已取消",
       "selfChecking": "自检中",
       "autoLeveling": "自动调平",
-      "pidCalibrating": "PID校准中",
-      "resonanceTesting": "共振测试",
+      "pidCalibrating": "PID校准中", 
+      "resonanceTesting": "振纹优化中",
       "updating": "更新中",
       "fileCopying": "文件复制中",
       "fileTransferring": "文件传输中",
-      "homing": "归零中",
+      "homing": "回零中",
       "preheating": "预热中",
       "filamentOperating": "耗材操作中",
       "extruderOperating": "挤出机操作中",
@@ -270,7 +273,8 @@ const langMessages = {
       "noFilamentInfo": "打印机没有要同步的耗材信息。请检查并刷新或重试。",
       "cancel": "取消",
       "sync": "同步",
-      "failedToSyncFilament": "同步耗材失败。"
+      "failedToSyncFilament": "同步耗材失败。",
+      "warningTips":"当前渲染区已经存在耗材信息，确认同步后耗材信息将会被直接覆盖"
     },
     "printSend": {
       "printer": "打印机",
@@ -291,7 +295,8 @@ const langMessages = {
       "someFilamentsNotMapped": "某些耗材未映射到MMS托盘",
       "filamentMapping": "耗材映射",
       "filamentTypeNotMatch": "耗材类型不匹配",
-      "printerModelNotMatch": "当前选中的打印机与gcode文件不匹配，可能会导致打印失败甚至打印机损坏！建议重新切片或者选择正确的打印机启动打印。"
+      "printerModelNotMatch": "当前选中的打印机与gcode文件不匹配，可能会导致打印失败甚至打印机损坏！建议重新切片或者选择正确的打印机启动打印。",
+      "bedTypeNotMatch":"当前选中的热床类型与文件不匹配，请确认后在启动打印。"
     }
   }
 };

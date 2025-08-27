@@ -85,6 +85,9 @@
                 </div>
             </div>
             <div class="footer">
+                <div class="warning-text" v-if="printFilamentList&&printFilamentList.length>0">
+                    {{$t("filamentSync.warningTips")}}
+                </div>
                 <button class=" btn-secondary trans" @click="cancel" tid="cancel">{{ $t('filamentSync.cancel')
                     }}</button>
                 <button class=" btn-primary trans" :disabled="!canSync" @click="sync" tid="upload">{{ $t('filamentSync.sync') }}</button>
