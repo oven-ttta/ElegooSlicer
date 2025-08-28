@@ -50,6 +50,18 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Authentication failed");
         case PrinterNetworkErrorCode::TOKEN_EXPIRED:
             return _u8L("Login session expired");        
+        case PrinterNetworkErrorCode::NOT_AUTHENTICATED:
+            return _u8L("Not authenticated");
+        case PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD:
+            return _u8L("Invalid username or password");
+        case PrinterNetworkErrorCode::INVALID_TOKEN:
+            return _u8L("Invalid token");
+        case PrinterNetworkErrorCode::INVALID_ACCESS_CODE:
+            return _u8L("Invalid access code");
+        case PrinterNetworkErrorCode::INVALID_PIN_CODE:
+            return _u8L("Invalid PIN code");
+        case PrinterNetworkErrorCode::PRINTER_CONNECTION_LIMIT_EXCEEDED:
+            return _u8L("Connection limit exceeded");
         case PrinterNetworkErrorCode::FILE_TRANSFER_FAILED:
             return _u8L("File upload failed");
         case PrinterNetworkErrorCode::FILE_NOT_FOUND:

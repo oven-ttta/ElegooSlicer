@@ -115,9 +115,9 @@ const PrinterAuthComponent = {
             const authMode = this.printer && this.printer.authMode;
 
             switch (authMode) {
-                case "token":
+                case 2:
                     return this.$t("printerAuth.connectToPrinter");
-                case "pin":
+                case 3:
                     return this.$t("printerAuth.bindPrinter");
                 default:
                     return this.$t("printerAuth.connectToPrinter");
@@ -139,9 +139,7 @@ const PrinterAuthComponent = {
 
             const updatedPrinter = {
                 ...this.printer,
-                extraInfo: {
-                    token: accessCode,
-                },
+                accessCode: accessCode,
             };
 
             this.$emit("add-printer", updatedPrinter);

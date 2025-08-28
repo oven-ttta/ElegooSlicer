@@ -30,9 +30,15 @@ PrinterNetworkErrorCode parseElegooResult(elink::ElegooError code)
     case elink::ElegooError::VERSION_NOT_SUPPORTED: return PrinterNetworkErrorCode::VERSION_NOT_SUPPORTED;
     case elink::ElegooError::VERSION_TOO_OLD: return PrinterNetworkErrorCode::VERSION_TOO_OLD;
     case elink::ElegooError::VERSION_TOO_NEW: return PrinterNetworkErrorCode::VERSION_TOO_NEW;
-    case elink::ElegooError::NOT_AUTHORIZED: return PrinterNetworkErrorCode::NOT_AUTHORIZED;
     case elink::ElegooError::INVALID_CREDENTIAL: return PrinterNetworkErrorCode::INVALID_CREDENTIAL;
     case elink::ElegooError::TOKEN_EXPIRED: return PrinterNetworkErrorCode::TOKEN_EXPIRED;
+    case elink::ElegooError::NOT_AUTHORIZED: return PrinterNetworkErrorCode::NOT_AUTHORIZED;
+    case elink::ElegooError::NOT_AUTHENTICATED: return PrinterNetworkErrorCode::NOT_AUTHENTICATED;
+    case elink::ElegooError::INVALID_USERNAME_OR_PASSWORD: return PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD;
+    case elink::ElegooError::INVALID_TOKEN: return PrinterNetworkErrorCode::INVALID_TOKEN;
+    case elink::ElegooError::INVALID_ACCESS_CODE: return PrinterNetworkErrorCode::INVALID_ACCESS_CODE;
+    case elink::ElegooError::INVALID_PIN_CODE: return PrinterNetworkErrorCode::INVALID_PIN_CODE;
+    case elink::ElegooError::CONNECTION_LIMIT_EXCEEDED: return PrinterNetworkErrorCode::PRINTER_CONNECTION_LIMIT_EXCEEDED;
     case elink::ElegooError::FILE_TRANSFER_FAILED: return PrinterNetworkErrorCode::FILE_TRANSFER_FAILED;
     case elink::ElegooError::FILE_NOT_FOUND: return PrinterNetworkErrorCode::FILE_NOT_FOUND;
     case elink::ElegooError::PRINTER_BUSY: return PrinterNetworkErrorCode::PRINTER_BUSY;
@@ -173,7 +179,15 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
             connectionParams.printerType = (elink::PrinterType) printerNetworkInfo.printerType;
         } 
         connectionParams.name            = printerNetworkInfo.printerName;
-        connectionParams.authMode        = printerNetworkInfo.authMode;
+        if(printerNetworkInfo.authMode == PRINTER_AUTH_MODE_PASSWORD) {
+            connectionParams.authMode        = "basic";
+        } else if(printerNetworkInfo.authMode == PRINTER_AUTH_MODE_ACCESS_CODE) {
+            connectionParams.authMode        = "accessCode";
+        } else if(printerNetworkInfo.authMode == PRINTER_AUTH_MODE_PIN_CODE) {
+            connectionParams.authMode        = "pinCode";
+        } else {
+            connectionParams.authMode        = "";
+        }
         connectionParams.username        = printerNetworkInfo.username;
         connectionParams.password        = printerNetworkInfo.password;
         connectionParams.host            = printerNetworkInfo.host;
@@ -183,17 +197,10 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
         connectionParams.autoReconnect   = true;
         connectionParams.checkConnection = true; 
         connectionParams.connectionTimeout = 3 * 1000;
-        if (printerNetworkInfo.authMode == "basic") {
-            connectionParams.username = "";
-            connectionParams.password = "";
-        } else if (printerNetworkInfo.authMode == "token") {
-            nlohmann::json extraInfo = nlohmann::json::parse(printerNetworkInfo.extraInfo);
-            if (extraInfo.contains(PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN)) {
-                connectionParams.token = extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN].get<std::string>();
-            } else {
-                wxLogError("Error connecting to printer: %s", "Token is not set");
-            }
-        }
+        connectionParams.token             = printerNetworkInfo.token;
+        connectionParams.accessCode        = printerNetworkInfo.accessCode;
+        connectionParams.pinCode           = printerNetworkInfo.pinCode;
+
         auto elinkResult = elink::ElegooLink::getInstance().connectPrinter(connectionParams);
         resultCode    = parseElegooResult(elinkResult.code);
         if (elinkResult.code == elink::ElegooError::SUCCESS) {
@@ -206,7 +213,14 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
                 info.mainboardId     = addPrinter.mainboardId;
                 info.serialNumber    = addPrinter.serialNumber;
                 info.firmwareVersion = addPrinter.firmwareVersion;
-                info.authMode = addPrinter.authMode;
+                info.authMode = PRINTER_AUTH_MODE_NONE;
+                if(addPrinter.authMode == "basic") {
+                    info.authMode = PRINTER_AUTH_MODE_PASSWORD;
+                } else if(addPrinter.authMode == "accessCode") {
+                    info.authMode = PRINTER_AUTH_MODE_ACCESS_CODE;
+                } else if(addPrinter.authMode == "pinCode") {
+                    info.authMode = PRINTER_AUTH_MODE_PIN_CODE;
+                }
                 info.printerId = addPrinter.printerId;
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
@@ -261,7 +275,14 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
                 info.vendor          = printer.brand;
                 info.printerType      = static_cast<int>(printer.printerType);
                 info.webUrl          = printer.webUrl;
-                info.authMode        = printer.authMode;
+                info.authMode        = PRINTER_AUTH_MODE_NONE;
+                if(printer.authMode == "basic") {
+                    info.authMode = PRINTER_AUTH_MODE_PASSWORD;
+                } else if(printer.authMode == "accessCode") {
+                    info.authMode = PRINTER_AUTH_MODE_ACCESS_CODE;
+                } else if(printer.authMode == "pinCode") {
+                    info.authMode = PRINTER_AUTH_MODE_PIN_CODE;
+                }
                 info.mainboardId     = printer.mainboardId;
                 discoverPrinters.push_back(info);
             }

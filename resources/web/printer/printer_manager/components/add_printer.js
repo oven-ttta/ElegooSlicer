@@ -147,10 +147,7 @@ const AddPrinterComponent = {
                         return;
                     }
                     const printer = this.printers[this.selectedPrinterIdx];
-                    if (printer.authMode === 'token' &&
-                        (printer.extraInfo === '' ||
-                            !(printer.extraInfo && printer.extraInfo.token) ||
-                            printer.extraInfo.token === '')) {
+                    if (printer.authMode === 2 && (printer.accessCode === '' || printer.accessCode === null)) {
                         this.pendingAuthPrinter = printer;
                         this.showPrinterAuth = true;
                         this.$nextTick(() => {

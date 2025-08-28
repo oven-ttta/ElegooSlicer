@@ -58,13 +58,10 @@ struct PrinterPrintTask
     int         estimatedTime{0};
     int         progress{0};
 };
-#define PRINTER_NETWORK_EXTRA_INFO_KEY_TOKEN "token"
+
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_HOST "deviceUi"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_PORT "httpsCaFile"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_VENDOR "apiKey"
-#define PRINTER_NETWORK_EXTRA_INFO_KEY_PIN "pin"
-#define PRINTER_NETWORK_EXTRA_INFO_KEY_ACCESS_CODE "accessCode"
-
 
 struct PrinterMmsTray
 {
@@ -140,6 +137,12 @@ struct SystemCapabilities
     bool supportsMultiFilament = false; // Supports multi-filament printing
 };
 
+enum PrinterAuthMode {
+    PRINTER_AUTH_MODE_NONE = 0,
+    PRINTER_AUTH_MODE_PASSWORD = 1,
+    PRINTER_AUTH_MODE_ACCESS_CODE = 2,
+    PRINTER_AUTH_MODE_PIN_CODE = 3,
+};
 struct PrinterNetworkInfo
 {
     std::string printerName;
@@ -156,7 +159,10 @@ struct PrinterNetworkInfo
     std::string serialNumber;
     std::string username;
     std::string password;
-    std::string authMode;
+    PrinterAuthMode authMode{PRINTER_AUTH_MODE_NONE};
+    std::string token;
+    std::string accessCode;
+    std::string pinCode;
     std::string webUrl;
     std::string connectionUrl;
     bool        isPhysicalPrinter{false};
@@ -165,7 +171,7 @@ struct PrinterNetworkInfo
     uint64_t    lastActiveTime{0};
     PrintCapabilities  printCapabilities;
     SystemCapabilities   systemCapabilities;
-    std::string extraInfo; // json string
+    std::string extraInfo{"{}"}; // json string
     // not save to file
     PrinterPrintTask     printTask;
     PrinterConnectStatus connectStatus{PRINTER_CONNECT_STATUS_DISCONNECTED};

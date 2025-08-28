@@ -56,6 +56,15 @@ PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json)
         if (json.contains("authMode")) {
             printerNetworkInfo.authMode = json["authMode"];
         }
+        if (json.contains("token")) {
+            printerNetworkInfo.token = json["token"];
+        }
+        if (json.contains("accessCode")) {
+            printerNetworkInfo.accessCode = json["accessCode"];
+        }
+        if (json.contains("pinCode")) {
+            printerNetworkInfo.pinCode = json["pinCode"];
+        }
         if (json.contains("webUrl")) {
             printerNetworkInfo.webUrl = json["webUrl"];
         }
@@ -65,7 +74,7 @@ PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json)
         if (json.contains("extraInfo")) {
             printerNetworkInfo.extraInfo = json["extraInfo"].dump();
         } else {
-            printerNetworkInfo.extraInfo = "";
+            printerNetworkInfo.extraInfo = "{}";
         }
         if (json.contains("isPhysicalPrinter")) {
             printerNetworkInfo.isPhysicalPrinter = json["isPhysicalPrinter"].get<bool>();
@@ -153,6 +162,9 @@ nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printer
     json["username"]        = printerNetworkInfo.username;
     json["password"]        = printerNetworkInfo.password;
     json["authMode"]        = printerNetworkInfo.authMode;
+    json["token"]           = printerNetworkInfo.token;
+    json["accessCode"]      = printerNetworkInfo.accessCode;
+    json["pinCode"]         = printerNetworkInfo.pinCode;
     json["webUrl"]          = printerNetworkInfo.webUrl;
     json["connectionUrl"]   = printerNetworkInfo.connectionUrl;
     if (!printerNetworkInfo.extraInfo.empty()) {

@@ -41,9 +41,13 @@ enum class PrinterNetworkErrorCode
 
     // Authentication-related errors (200-299)
     INVALID_CREDENTIAL=200, // Invalid username or password
-    TOKEN_EXPIRED = 201,      // Login expired
-    NOT_AUTHENTICATED = 202,  // Not authenticated (not logged in / missing credentials)
-    NOT_AUTHORIZED = 203,      // Authenticated but not authorized
+    TOKEN_EXPIRED=201,      // Login expired
+    NOT_AUTHENTICATED=202,  // Not authenticated (not logged in / missing credentials)
+    NOT_AUTHORIZED=203,      // Authenticated but not authorized
+    INVALID_USERNAME_OR_PASSWORD=204, // Username or password invalid
+    INVALID_TOKEN=205,       // Token invalid
+    INVALID_ACCESS_CODE=206, // Access code invalid
+    INVALID_PIN_CODE=207,    // PIN code invalid
 
     // File transfer-related errors (300-399)
     FILE_TRANSFER_FAILED = 300, // File transfer failed (including upload, download)
@@ -61,6 +65,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_DATA_FORMAT_ERROR = 1007,    // send data format error
     PRINTER_RESPONSE_FORMAT_ERROR = 1008, // Printer response format error
     PRINTER_RESPONSE_INVALID = 1009,      // Printer response invalid data
+    PRINTER_CONNECTION_LIMIT_EXCEEDED = 1010,     // Connection limit exceeded
 
     HOST_TYPE_NOT_SUPPORTED = 9998,          // Host type not supported
     PRINTER_NETWORK_EXCEPTION = 9999,          // External error
