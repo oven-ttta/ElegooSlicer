@@ -1835,30 +1835,32 @@ void Sidebar::sync_ams_list()
     std::vector<std::string> list2;
     if (!ams_filament_ids.empty())
         boost::algorithm::split(list2, ams_filament_ids, boost::algorithm::is_any_of(","));
-    struct SyncAmsDialog : MessageDialog {
-        SyncAmsDialog(wxWindow * parent, bool first): MessageDialog(parent,
-            first
-                ? _L("Sync filaments with AMS will drop all current selected filament presets and colors. Do you want to continue?")
-                : _L("Already did a synchronization, do you want to sync only changes or resync all?"),
-            _L("Sync filaments with AMS"), 0)
-        {
-            if (first) {
-                add_button(wxID_YES, true, _L("Yes"));
-            } else {
-                add_button(wxID_OK, true, _L("Sync"));
-                add_button(wxID_YES, false, _L("Resync"));
-            }
-            add_button(wxID_CANCEL, false, _L("Cancel"));
-        }
-    } dlg(this, ams_filament_ids.empty());
-    auto res = dlg.ShowModal();
-    if (res == wxID_CANCEL) return;
+    // struct SyncAmsDialog : MessageDialog {
+    //     SyncAmsDialog(wxWindow * parent, bool first): MessageDialog(parent,
+    //         first
+    //             ? _L("Sync filaments with AMS will drop all current selected filament presets and colors. Do you want to continue?")
+    //             : _L("Already did a synchronization, do you want to sync only changes or resync all?"),
+    //         _L("Sync filaments with AMS"), 0)
+    //     {
+    //         if (first) {
+    //             add_button(wxID_YES, true, _L("Yes"));
+    //         } else {
+    //             add_button(wxID_OK, true, _L("Sync"));
+    //             add_button(wxID_YES, false, _L("Resync"));
+    //         }
+    //         add_button(wxID_CANCEL, false, _L("Cancel"));
+    //     }
+    // } dlg(this, ams_filament_ids.empty());
+    // auto res = dlg.ShowModal();
+    // if (res == wxID_CANCEL) return;
     list2.resize(list.size());
     auto iter = list.begin();
     for (int i = 0; i < list.size(); ++i, ++iter) {
         auto & ams = iter->second;
         auto filament_id = ams.opt_string("filament_id", 0u);
-        ams.set_key_value("filament_changed", new ConfigOptionBool{res == wxID_YES || list2[i] != filament_id});
+        //ams.set_key_value("filament_changed", new ConfigOptionBool{res == wxID_YES || list2[i] != filament_id});
+        // always resync all filaments
+        ams.set_key_value("filament_changed", new ConfigOptionBool{true});
         list2[i] = filament_id;
     }
 
