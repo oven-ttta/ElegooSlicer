@@ -20,7 +20,6 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() override;
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() override;
     virtual PrinterNetworkResult<PrinterNetworkInfo> getPrinterAttributes() override;  
-    virtual int getPrinterType() override;
 
     static void init();
     static void uninit();

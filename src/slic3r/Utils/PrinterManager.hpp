@@ -65,7 +65,6 @@ private:
 
 private:
     PrinterManager();
-    int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);
 
     std::mutex mConnectionsMutex;
     std::map<std::string, std::shared_ptr<IPrinterNetwork>> mNetworkConnections;

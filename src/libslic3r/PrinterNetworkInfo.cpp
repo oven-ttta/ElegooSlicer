@@ -41,9 +41,6 @@ PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json)
         if (json.contains("mainboardId")) {
             printerNetworkInfo.mainboardId = json["mainboardId"];
         }
-        if (json.contains("printerType")) {
-            printerNetworkInfo.printerType = json["printerType"];
-        }
         if (json.contains("serialNumber")) {
             printerNetworkInfo.serialNumber = json["serialNumber"];
         }
@@ -157,7 +154,6 @@ nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printer
     json["firmwareVersion"] = printerNetworkInfo.firmwareVersion;
     json["hostType"]        = printerNetworkInfo.hostType;
     json["mainboardId"]     = printerNetworkInfo.mainboardId;
-    json["printerType"]     = printerNetworkInfo.printerType;
     json["serialNumber"]    = printerNetworkInfo.serialNumber;
     json["username"]        = printerNetworkInfo.username;
     json["password"]        = printerNetworkInfo.password;

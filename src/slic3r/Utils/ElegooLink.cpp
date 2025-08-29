@@ -85,6 +85,70 @@ PrinterStatus parseElegooStatus(elink::PrinterState mainStatus, elink::PrinterSu
     return printerStatus;
 }
 
+PrinterNetworkInfo convertFromElegooPrinterInfo(const elink::PrinterInfo& printerInfo)
+{
+    PrinterNetworkInfo info;
+    info.printerId = printerInfo.printerId;
+    info.firmwareVersion = printerInfo.firmwareVersion;
+    info.mainboardId = printerInfo.mainboardId;
+    info.serialNumber = printerInfo.serialNumber;
+    info.webUrl = printerInfo.webUrl;
+    info.printerName = printerInfo.name;
+    info.host = printerInfo.host;
+    info.printerModel = printerInfo.model;
+    info.vendor = printerInfo.brand;
+    // std map 转json
+    nlohmann::json json;
+    for(const auto& [key, value] : printerInfo.extraInfo) {
+        json[key] = value;
+    }
+    info.extraInfo = json.dump();
+
+    info.authMode = PRINTER_AUTH_MODE_NONE;
+    if(printerInfo.authMode == "basic") {
+        info.authMode = PRINTER_AUTH_MODE_PASSWORD;
+    } else if(printerInfo.authMode == "accessCode") {
+        info.authMode = PRINTER_AUTH_MODE_ACCESS_CODE;
+    } else if(printerInfo.authMode == "pinCode") {
+        info.authMode = PRINTER_AUTH_MODE_PIN_CODE;
+    }
+    
+    return info;
+}
+PrinterNetworkInfo convertFromElegooPrinterAttributes(const elink::PrinterAttributes& attributes)
+{
+    PrinterNetworkInfo info = convertFromElegooPrinterInfo(attributes);
+
+    info.printCapabilities.supportsAutoBedLeveling = attributes.capabilities.printCapabilities.supportsAutoBedLeveling;
+    info.printCapabilities.supportsTimeLapse = attributes.capabilities.printCapabilities.supportsTimeLapse;
+    info.printCapabilities.supportsHeatedBedSwitching = attributes.capabilities.printCapabilities.supportsHeatedBedSwitching;
+    info.printCapabilities.supportsFilamentMapping = attributes.capabilities.printCapabilities.supportsFilamentMapping;
+    info.systemCapabilities.supportsMultiFilament = attributes.capabilities.systemCapabilities.supportsMultiFilament;
+    info.systemCapabilities.canGetDiskInfo = attributes.capabilities.systemCapabilities.canGetDiskInfo;
+    info.systemCapabilities.canSetPrinterName = attributes.capabilities.systemCapabilities.canSetPrinterName;
+    
+    return info;
+}
+elink::PrinterType getPrinterType(const PrinterNetworkInfo& printerNetworkInfo)
+{
+    std::string model  = printerNetworkInfo.printerModel;
+    std::string vendor = printerNetworkInfo.vendor;
+    std::transform(model.begin(), model.end(), model.begin(), ::tolower);
+    std::transform(vendor.begin(), vendor.end(), vendor.begin(), ::tolower);
+    if (model.find(vendor) == std::string::npos) {
+        model = vendor + " " + model;
+    }
+    if (model == "elegoo centauri carbon 2" || model == "elegoo centauri 2") {
+        return elink::PrinterType::ELEGOO_FDM_CC2;
+    } else if (model == "elegoo centauri carbon" || model == "elegoo centauri") {
+        return elink::PrinterType::ELEGOO_FDM_CC;
+    } else if (vendor == "elegoo") {
+        return elink::PrinterType::ELEGOO_FDM_KLIPPER;
+    }
+
+    return elink::PrinterType::GENERIC_FDM_KLIPPER;
+}
+
 } // namespace
 
 ElegooLink::ElegooLink()
@@ -147,16 +211,7 @@ void ElegooLink::init()
     });
 
     elink::ElegooLink::getInstance().subscribeEvent<elink::PrinterAttributesEvent>([&](const std::shared_ptr<elink::PrinterAttributesEvent>& event) {
-        PrinterNetworkInfo info;
-        info.printerId       = event->attributes.printerId;
-        info.firmwareVersion = event->attributes.firmwareVersion;
-        info.printCapabilities.supportsAutoBedLeveling = event->attributes.capabilities.printCapabilities.supportsAutoBedLeveling;
-        info.printCapabilities.supportsTimeLapse = event->attributes.capabilities.printCapabilities.supportsTimeLapse;
-        info.printCapabilities.supportsHeatedBedSwitching = event->attributes.capabilities.printCapabilities.supportsHeatedBedSwitching;
-        info.printCapabilities.supportsFilamentMapping = event->attributes.capabilities.printCapabilities.supportsFilamentMapping;
-        info.systemCapabilities.supportsMultiFilament = event->attributes.capabilities.systemCapabilities.supportsMultiFilament;
-        info.systemCapabilities.canGetDiskInfo = event->attributes.capabilities.systemCapabilities.canGetDiskInfo;
-        info.systemCapabilities.canSetPrinterName = event->attributes.capabilities.systemCapabilities.canSetPrinterName;
+        PrinterNetworkInfo info = convertFromElegooPrinterAttributes(event->attributes);
         PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.printerId, info));
     });
 
@@ -173,11 +228,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
     try {
         elink::ConnectPrinterParams connectionParams;
         connectionParams.printerId        = printerNetworkInfo.printerId;
-        if(printerNetworkInfo.isPhysicalPrinter && printerNetworkInfo.printerType == -1) {
-            connectionParams.printerType = (elink::PrinterType) getPrinterType(printerNetworkInfo);
-        } else {
-            connectionParams.printerType = (elink::PrinterType) printerNetworkInfo.printerType;
-        } 
+        connectionParams.printerType = getPrinterType(printerNetworkInfo);
         connectionParams.name            = printerNetworkInfo.printerName;
         if(printerNetworkInfo.authMode == PRINTER_AUTH_MODE_PASSWORD) {
             connectionParams.authMode        = "basic";
@@ -206,22 +257,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
         if (elinkResult.code == elink::ElegooError::SUCCESS) {
             if (elinkResult.data.has_value() && elinkResult.data.value().isConnected && elinkResult.data.value().printerInfo.printerId == printerNetworkInfo.printerId) {      
                 auto addPrinter = elinkResult.data.value().printerInfo;
-                PrinterNetworkInfo info = printerNetworkInfo;
-                //update printer network info
-                info.firmwareVersion = addPrinter.firmwareVersion;
-                info.webUrl          = addPrinter.webUrl;
-                info.mainboardId     = addPrinter.mainboardId;
-                info.serialNumber    = addPrinter.serialNumber;
-                info.firmwareVersion = addPrinter.firmwareVersion;
-                info.authMode = PRINTER_AUTH_MODE_NONE;
-                if(addPrinter.authMode == "basic") {
-                    info.authMode = PRINTER_AUTH_MODE_PASSWORD;
-                } else if(addPrinter.authMode == "accessCode") {
-                    info.authMode = PRINTER_AUTH_MODE_ACCESS_CODE;
-                } else if(addPrinter.authMode == "pinCode") {
-                    info.authMode = PRINTER_AUTH_MODE_PIN_CODE;
-                }
-                info.printerId = addPrinter.printerId;
+                PrinterNetworkInfo info = convertFromElegooPrinterInfo(addPrinter);
                 return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
@@ -266,24 +302,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
         resultCode  = parseElegooResult(elinkResult.code);
         if (elinkResult.code == elink::ElegooError::SUCCESS && elinkResult.data.has_value()) {
             for (const auto& printer : elinkResult.value().printers) {
-                PrinterNetworkInfo info;
-                info.printerName     = printer.name;
-                info.host            = printer.host;
-                info.printerModel    = printer.model;
-                info.firmwareVersion = printer.firmwareVersion;
-                info.serialNumber    = printer.serialNumber;
-                info.vendor          = printer.brand;
-                info.printerType      = static_cast<int>(printer.printerType);
-                info.webUrl          = printer.webUrl;
-                info.authMode        = PRINTER_AUTH_MODE_NONE;
-                if(printer.authMode == "basic") {
-                    info.authMode = PRINTER_AUTH_MODE_PASSWORD;
-                } else if(printer.authMode == "accessCode") {
-                    info.authMode = PRINTER_AUTH_MODE_ACCESS_CODE;
-                } else if(printer.authMode == "pinCode") {
-                    info.authMode = PRINTER_AUTH_MODE_PIN_CODE;
-                }
-                info.mainboardId     = printer.mainboardId;
+                PrinterNetworkInfo info = convertFromElegooPrinterInfo(printer);
                 discoverPrinters.push_back(info);
             }
         } 
@@ -391,28 +410,6 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
     return networkResult;
 }
 
-int ElegooLink::getPrinterType(const PrinterNetworkInfo& printerNetworkInfo)
-{
-    if(printerNetworkInfo.isPhysicalPrinter) {
-        std::string model = printerNetworkInfo.printerModel;
-        std::string vendor = printerNetworkInfo.vendor;
-        std::transform(model.begin(), model.end(), model.begin(), ::tolower);
-        std::transform(vendor.begin(), vendor.end(), vendor.begin(), ::tolower);
-        if(model.find(vendor) == std::string::npos) {
-            model = vendor + " " + model;
-        }
-        if(model == "elegoo centauri carbon 2" || model == "elegoo centauri 2") {
-            return static_cast<int>(elink::PrinterType::ELEGOO_FDM_CC2);
-        } else if(model == "elegoo centauri carbon" || model == "elegoo centauri") {
-            return static_cast<int>(elink::PrinterType::ELEGOO_FDM_CC);  
-        } else if (vendor == "elegoo") {
-            return static_cast<int>(elink::PrinterType::ELEGOO_FDM_KLIPPER);
-        } else {
-            return static_cast<int>(elink::PrinterType::GENERIC_FDM_KLIPPER);
-        }
-    } 
-    return printerNetworkInfo.printerType; 
-}
 
 PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::string& printerId)
 {
@@ -495,24 +492,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
         if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if(elinkResult.hasData()) {
                 const elink::PrinterAttributes& attributes = elinkResult.value();
-                printerNetworkInfo.printCapabilities.supportsAutoBedLeveling = attributes.capabilities.printCapabilities.supportsAutoBedLeveling;
-                printerNetworkInfo.printCapabilities.supportsTimeLapse = attributes.capabilities.printCapabilities.supportsTimeLapse;
-                printerNetworkInfo.printCapabilities.supportsHeatedBedSwitching = attributes.capabilities.printCapabilities.supportsHeatedBedSwitching;
-                printerNetworkInfo.printCapabilities.supportsFilamentMapping = attributes.capabilities.printCapabilities.supportsFilamentMapping;
-                printerNetworkInfo.systemCapabilities.supportsMultiFilament = attributes.capabilities.systemCapabilities.supportsMultiFilament;
-                printerNetworkInfo.systemCapabilities.canGetDiskInfo = attributes.capabilities.systemCapabilities.canGetDiskInfo;
-                printerNetworkInfo.systemCapabilities.canSetPrinterName = attributes.capabilities.systemCapabilities.canSetPrinterName;
-                printerNetworkInfo.firmwareVersion = attributes.firmwareVersion;
-                printerNetworkInfo.mainboardId = attributes.mainboardId;
-                printerNetworkInfo.serialNumber = attributes.serialNumber;
-                printerNetworkInfo.webUrl = attributes.webUrl;
-                if(attributes.authMode == "basic") {
-                    printerNetworkInfo.authMode = PRINTER_AUTH_MODE_PASSWORD;
-                } else if(attributes.authMode == "accessCode") {
-                    printerNetworkInfo.authMode = PRINTER_AUTH_MODE_ACCESS_CODE;
-                } else if(attributes.authMode == "pinCode") {
-                    printerNetworkInfo.authMode = PRINTER_AUTH_MODE_PIN_CODE;
-                }
+                printerNetworkInfo = convertFromElegooPrinterAttributes(attributes);
             }
         }
     } catch (const std::exception& e) {

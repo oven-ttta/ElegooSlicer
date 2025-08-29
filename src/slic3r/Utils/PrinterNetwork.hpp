@@ -26,7 +26,6 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() = 0;   
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() = 0;
     virtual PrinterNetworkResult<PrinterNetworkInfo> getPrinterAttributes() = 0;
-    virtual int getPrinterType() = 0;
 
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
 

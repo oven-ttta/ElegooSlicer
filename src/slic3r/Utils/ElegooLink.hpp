@@ -24,7 +24,6 @@ public:
     PrinterNetworkResult<bool>                            sendPrintFile(const PrinterNetworkParams& params);
     PrinterNetworkResult<PrinterMmsGroup>                 getPrinterMmsInfo(const std::string& printerId);
     PrinterNetworkResult<PrinterNetworkInfo>              getPrinterAttributes(const std::string& printerId);
-    int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);
 
 private:
     bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10);

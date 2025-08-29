@@ -35,10 +35,7 @@ PrinterNetworkResult<bool> ElegooNetwork::sendPrintFile(const PrinterNetworkPara
     return ElegooLink::getInstance()->sendPrintFile(params);
 
 }
-int ElegooNetwork::getPrinterType()
-{
-    return ElegooLink::getInstance()->getPrinterType(mPrinterNetworkInfo);
-}
+
 
 PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo()
 {

@@ -284,17 +284,6 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     printerNetworkInfo.addTime        = now;
     printerNetworkInfo.modifyTime     = now;
     printerNetworkInfo.lastActiveTime = now;
-    printerNetworkInfo.printerId      = "";
-
-    if(printerNetworkInfo.isPhysicalPrinter) {
-        printerNetworkInfo.printerType = getPrinterType(printerNetworkInfo);
-        if(printerNetworkInfo.printerType == -1) {
-            wxLogWarning("Failed to get device type for printer %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
-                         printerNetworkInfo.printerModel);
-            return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_TYPE_NOT_SUPPORTED, false);
-        }
-    }
-
     printerNetworkInfo.printerId = boost::uuids::to_string(boost::uuids::random_generator{}());
 
     std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
@@ -392,9 +381,6 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPr
             printerNetworkInfo.printerName = printerModel.name;
         }
         printerNetworkInfo.printerModel = printerModel.name;
-        if (printerNetworkInfo.printerType == 2) {
-            printerNetworkInfo.printerModel = "Elegoo Centauri Carbon 2";
-        }
         printerNetworkInfo.isPhysicalPrinter = false;
         if (vendorPrinterModelConfigMap.find(printerNetworkInfo.vendor) != vendorPrinterModelConfigMap.end()) {
             auto modelConfigMap = vendorPrinterModelConfigMap[printerNetworkInfo.vendor];
@@ -684,16 +670,6 @@ std::shared_ptr<IPrinterNetwork> PrinterManager::getPrinterNetwork(const std::st
     }
     return nullptr;
 }
-
-int PrinterManager::getPrinterType(const PrinterNetworkInfo& printerNetworkInfo)
-{
-    auto network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
-    if (network) {
-        return network->getPrinterType();
-    }
-    return -1;
-}
-
 
 
 } // namespace Slic3r
