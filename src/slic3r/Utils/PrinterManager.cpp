@@ -520,6 +520,15 @@ void PrinterManager::monitorPrinterConnections()
                 }
 
                 std::shared_ptr<IPrinterNetwork> activeNetwork = getPrinterNetwork(printerId);
+                
+                if(printer.value().printerStatus == PRINTER_STATUS_ID_NOT_MATCH) {
+                    if(activeNetwork) {
+                        wxLogError("Printer status is not match, host: %s, name: %s, model: %s, printerId: %s", printer.value().host.c_str(), printer.value().printerName.c_str(), printer.value().printerModel.c_str(), printerId.c_str());
+                        deletePrinterNetwork(printerId);
+                    }
+                    return;
+                }
+
                 if (activeNetwork && printer.value().connectStatus == PRINTER_CONNECT_STATUS_CONNECTED && activeNetwork->getPrinterNetworkInfo().host == printer.value().host) {
                     // already connected and the host is the same, no need to connect again
                     return;

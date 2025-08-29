@@ -76,7 +76,8 @@ const PrinterManager = {
                 [16]: this.$t("printerManager.printCompleted"),
                 [17]: this.$t("printerManager.rfidRecognizing"),
                 [999]: this.$t("printerManager.error"),
-                [1000]: this.$t("printerManager.unknown")
+                [1000]: this.$t("printerManager.idNotMatch"),
+                [10000]: this.$t("printerManager.unknown")
             };
 
             return statusMap[printerStatus] || "";
