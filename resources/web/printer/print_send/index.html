@@ -86,7 +86,7 @@
                                 </div>
 
                                 <div class="dropdown bed-dropdown"
-                                    v-if="curPrinter && curPrinter.supportsHeatedBedSwitching"
+                                    v-if="curPrinter && curPrinter.printCapabilities.supportsHeatedBedSwitching"
                                     v-click-outside="closeBedDropdown" :class="{ hidden: !showBedDropdown }">
                                     <div class="dropdown-header" :class="{ active: bedDropdownOpen }"
                                         @click="toggleBedDropdown">
@@ -235,7 +235,7 @@
                     </div>
                 </section>
                 <section class="print-options-section" :class="{ hidden: !showPrintOptions }"
-                    v-if="curPrinter && (curPrinter.supportsAutoBedLeveling || curPrinter.supportsTimeLapse)">
+                    v-if="curPrinter && (curPrinter.printCapabilities.supportsAutoBedLeveling || curPrinter.printCapabilities.supportsTimeLapse)">
                     <div class="section-header">
                         <h3 class="section-title">{{ $t('printSend.printOptions') }}</h3>
                         <div class="section-separator"></div>
@@ -244,7 +244,7 @@
                     <div class="print-options-grid">
                         <div class="toggle-item">
                             <div class="toggle-label trans"
-                                v-if="curPrinter && curPrinter.supportsAutoBedLeveling"
+                                v-if="curPrinter && curPrinter.printCapabilities.supportsAutoBedLeveling"
                                 tid="heated_bed_leveling">{{ $t('printSend.autoBedLeveling') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.heatedBedLeveling" />
@@ -254,7 +254,7 @@
 
                         <div class="toggle-item">
                             <div class="toggle-label trans"
-                                v-if="curPrinter && curPrinter.supportsTimeLapse" tid="time_lapse">{{
+                                v-if="curPrinter && curPrinter.printCapabilities.supportsTimeLapse" tid="time_lapse">{{
                                 $t('printSend.timelapse') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.timeLapse" />
