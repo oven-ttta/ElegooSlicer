@@ -38,7 +38,7 @@ public:
 
     virtual void                               init() override;
     virtual boost::filesystem::path filename() const override{
-        return m_cachedModelName;
+        return into_path(m_cachedModelName);
     }
     virtual std::string group() const override {return "";}
     virtual std::string storage() const override {return "";}
@@ -76,7 +76,7 @@ private:
     bool m_isDestroying{false};
     std::shared_ptr<bool> m_lifeTracker;
     bool m_asyncOperationInProgress{false};
-    std::string m_cachedModelName;
+    wxString m_cachedModelName;
    
 };
 }} // namespace Slic3r::GUI 

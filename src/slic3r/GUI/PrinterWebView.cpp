@@ -319,7 +319,7 @@ void PrinterWebView::setupIPCHandlers()
             wxFileDialog openFileDialog(this, _L("Open File"), "", "", filter, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
             if (openFileDialog.ShowModal() != wxID_CANCEL) {
                 nlohmann::json data;
-                data["files"] = {openFileDialog.GetPath().ToStdString()};
+                data["files"] = {openFileDialog.GetPath().ToUTF8().data()};
                 return webviewIpc::IPCResult::success(data);
             } else {
                 nlohmann::json data;

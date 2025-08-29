@@ -141,7 +141,7 @@ void PrintSendDialogEx::init()
     }
 
     // Cache the model name for use in preparePrintTask
-    m_cachedModelName = recent_path.ToUTF8().data();
+    m_cachedModelName = recent_path;
     if (m_cachedModelName.size() >= 6 && m_cachedModelName.compare(m_cachedModelName.size() - 6, 6, ".gcode") == 0)
         m_cachedModelName = m_cachedModelName.substr(0, m_cachedModelName.size() - 6);
 
@@ -329,7 +329,7 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
     printInfo["layerCount"] = layerCount;
 
     // Use cached model name instead of getting it from UI control
-    std::string modelName = m_cachedModelName;
+    std::string modelName = m_cachedModelName.ToUTF8().data();
 
     printInfo["modelName"]         = modelName;
     printInfo["timeLapse"]         = mTimeLapse == 1;
@@ -564,6 +564,7 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         if (!modelName.EndsWith(".gcode")) {
             modelName += ".gcode";
         }
+        m_cachedModelName = modelName;
         // txt_filename->SetValue(modelName);
 
         if (uploadAndPrint && mHasMms) {
