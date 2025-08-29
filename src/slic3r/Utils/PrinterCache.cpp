@@ -195,4 +195,13 @@ void PrinterCache::updatePrinterAttributes(const std::string& printerId, const P
     }
 }
 
+void PrinterCache::updatePrinterAttributesByNotify(const std::string& printerId, const PrinterNetworkInfo& printerInfo) {
+    std::lock_guard<std::mutex> lock(mCacheMutex);
+    auto it = mPrinters.find(printerId);
+    if (it != mPrinters.end()) {
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        it->second.lastActiveTime = now;
+        it->second.firmwareVersion = printerInfo.firmwareVersion;
+    }
+}   
 } // namespace Slic3r

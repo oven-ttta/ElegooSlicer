@@ -160,7 +160,7 @@ void PrinterManager::init() {
 
     // printer attributes changed event
     PrinterNetworkEvent::getInstance()->attributesChanged.connect([this](const PrinterAttributesEvent& event) {
-        PrinterCache::getInstance()->updatePrinterAttributes(event.printerId, event.printerInfo);
+        PrinterCache::getInstance()->updatePrinterAttributesByNotify(event.printerId, event.printerInfo);
     });
 
     mIsRunning        = true;

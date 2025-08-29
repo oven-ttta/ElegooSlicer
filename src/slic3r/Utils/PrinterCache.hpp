@@ -67,9 +67,18 @@ public:
     bool updatePrinterHost(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
 
     /**
-     * @brief Update printer attributes
+     * @brief Update printer attributes only when the printer is connected
+     * @param printerId: printer id
+     * @param printerInfo: printer info
      */
     void updatePrinterAttributes(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
+
+    /**
+     * @brief Update printer attributes by notify
+     * @param printerId: printer id
+     * @param printerInfo: printer info
+     */
+    void updatePrinterAttributesByNotify(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
 
     /**
      * @brief Update printer status
