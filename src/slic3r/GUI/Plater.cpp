@@ -4072,6 +4072,12 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                             // validate the system profiles
                             std::set<std::string> modified_gcodes;
                             int validated = preset_bundle->validate_presets(filename.string(), config, modified_gcodes);
+                            if(validated != VALIDATE_PRESETS_MODIFIED_GCODES) {
+                                if(VALIDATE_PRESETS_SUCCESS == q->auto_load_missing_vendor_presets(preset_bundle, config, modified_gcodes, filename.string())) {
+                                    // if load success, validate again
+                                    validated = preset_bundle->validate_presets(filename.string(), config, modified_gcodes);
+                                }
+                            }
                             if (validated == VALIDATE_PRESETS_MODIFIED_GCODES) {
                                 std::string warning_message;
                                 warning_message += "\n";
@@ -4085,11 +4091,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                                 auto  res = dlg.ShowModal();
                                 if (dlg.get_checkbox_state())
                                     wxGetApp().app_config->set("no_warn_when_modified_gcodes", "true");
-                            }
-                            else if ((validated == VALIDATE_PRESETS_PRINTER_NOT_FOUND) || (validated == VALIDATE_PRESETS_FILAMENTS_NOT_FOUND)) {
-
-                                q->auto_load_missing_vendor_presets(preset_bundle, config, modified_gcodes, filename.string());
-
+                            } else if ((validated == VALIDATE_PRESETS_PRINTER_NOT_FOUND) || (validated == VALIDATE_PRESETS_FILAMENTS_NOT_FOUND)) {
                                 std::string warning_message;
                                 warning_message += "\n";
                                 for (std::set<std::string>::iterator it=modified_gcodes.begin(); it!=modified_gcodes.end(); ++it)
@@ -14803,47 +14805,64 @@ SuppressBackgroundProcessingUpdate::~SuppressBackgroundProcessingUpdate()
 }
 
 // Auto-load missing vendor presets when loading 3MF files
-int Plater::auto_load_missing_vendor_presets(PresetBundle* preset_bundle, DynamicPrintConfig& config, 
-                                            std::set<std::string>& modified_gcodes, const std::string& filename)
+int Plater::auto_load_missing_vendor_presets(PresetBundle*          preset_bundle,
+                                             DynamicPrintConfig&    config,
+                                             std::set<std::string>& modified_gcodes,
+                                             const std::string&     filename)
 {
     std::string printer_preset = config.option<ConfigOptionString>("printer_settings_id", true)->value;
+    BOOST_LOG_TRIVIAL(info) << "Auto-load missing vendor presets: " << filename << " " << printer_preset;
     if (printer_preset.empty()) {
         return VALIDATE_PRESETS_PRINTER_NOT_FOUND;
     }
+    std::string printer_model   = config.option<ConfigOptionString>("printer_model", true)->value;
+    std::string printer_variant = config.option<ConfigOptionString>("printer_variant", true)->value;
 
-    std::string vendor_name;    
+    if(printer_model.empty() || printer_variant.empty()) {
+        BOOST_LOG_TRIVIAL(info) << "Auto-load missing vendor presets: " << filename << " " << printer_preset << " printer_model or printer_variant is empty";
+        return VALIDATE_PRESETS_PRINTER_NOT_FOUND;
+    }
+
+    std::string vendor_name;
+
     PresetBundle temp_bundle;
     auto [substitutions, errors] = temp_bundle.load_system_models_from_json(ForwardCompatibilitySubstitutionRule::EnableSilent);
     for (const auto& vendor_pair : temp_bundle.vendors) {
         const auto& vendor_profile = vendor_pair.second;
         for (const auto& model : vendor_profile.models) {
-            if (printer_preset.find(model.name) != std::string::npos) {
+            if (!printer_model.empty() && model.id == printer_model) {
                 vendor_name = vendor_pair.first;
                 break;
             }
         }
-        if (!vendor_name.empty()) break;
-    }  
-    
+        if (!vendor_name.empty())
+            break;
+    }
+
     if (vendor_name.empty()) {
+        BOOST_LOG_TRIVIAL(info) << "Auto-load missing vendor presets: " << filename << " " << printer_preset << " vendor_name is empty";
         return VALIDATE_PRESETS_PRINTER_NOT_FOUND;
     }
 
-    const auto vendor_dir = (boost::filesystem::path(Slic3r::data_dir()) / PRESET_SYSTEM_DIR).make_preferred();
-    auto vendor_file = vendor_dir / (vendor_name + ".json");
-    
+    const auto vendor_dir  = (boost::filesystem::path(Slic3r::data_dir()) / PRESET_SYSTEM_DIR).make_preferred();
+    auto       vendor_file = vendor_dir / (vendor_name + ".json");
+
     if (!fs::exists(vendor_file)) {
         std::unique_ptr<PresetUpdater> updater = std::make_unique<PresetUpdater>();
-        std::vector<std::string> install_bundles;
+        std::vector<std::string>       install_bundles;
         install_bundles.emplace_back(vendor_name);
         if (!updater->install_bundles_rsrc(std::move(install_bundles), false)) {
+            BOOST_LOG_TRIVIAL(error) << "Failed to auto-install vendor bundle: " << vendor_name << " for " << filename << " " << printer_preset;
             return VALIDATE_PRESETS_PRINTER_NOT_FOUND;
         }
+        BOOST_LOG_TRIVIAL(info) << "Auto-installing vendor bundle: " << vendor_name << " for " << filename << " " << printer_preset;
+        // auto select the vendor and model
+        AppConfig* app_config = wxGetApp().app_config;
+        app_config->set_variant(vendor_name, printer_model, printer_variant, "true");
     }
+
     preset_bundle->load_presets(*wxGetApp().app_config, ForwardCompatibilitySubstitutionRule::Enable);
     return VALIDATE_PRESETS_SUCCESS;
 }
-
-
 
 }}    // namespace Slic3r::GUI
