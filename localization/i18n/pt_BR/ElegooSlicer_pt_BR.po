@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2024-06-01 21:51-0300\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese, Brazilian\n"
@@ -5655,6 +5655,9 @@ msgstr "Erro %s"
 msgid "%s has encountered an error"
 msgstr "%s encontrou um erro"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "Aviso %s"
@@ -6046,26 +6049,6 @@ msgstr ""
 
 msgid "Sync filaments with AMS"
 msgstr "Sincronizar filamentos com AMS"
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-"Sincronizar filamentos com AMS eliminará todas os presets de filamento e "
-"cores selecionadas atualmente. Deseja continuar?"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr ""
-"Já foi feita uma sincronização, deseja sincronizar apenas as alterações ou "
-"ressincronizar tudo?"
-
-msgid "Sync"
-msgstr "Sincronizar"
-
-msgid "Resync"
-msgstr "Ressincronizar"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr "Não há filamentos compatíveis, e a sincronização não é realizada."
@@ -17830,6 +17813,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -17879,6 +17880,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -18198,6 +18212,26 @@ msgstr ""
 "Você sabia que ao imprimir materiais propensos ao empenamento, como ABS, "
 "aumentar adequadamente a temperatura da mesa aquecida pode reduzir a "
 "probabilidade de empenamento?"
+
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr ""
+#~ "Sincronizar filamentos com AMS eliminará todas os presets de filamento e "
+#~ "cores selecionadas atualmente. Deseja continuar?"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr ""
+#~ "Já foi feita uma sincronização, deseja sincronizar apenas as alterações "
+#~ "ou ressincronizar tudo?"
+
+#~ msgid "Sync"
+#~ msgstr "Sincronizar"
+
+#~ msgid "Resync"
+#~ msgstr "Ressincronizar"
 
 #~ msgid "ShiftLeft mouse button"
 #~ msgstr "Botão do mouse ShiftLeft"

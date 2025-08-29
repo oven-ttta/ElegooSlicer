@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -5274,6 +5274,9 @@ msgstr ""
 msgid "%s has encountered an error"
 msgstr ""
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, possible-c-format, possible-boost-format
 msgid "%s warning"
 msgstr ""
@@ -5646,22 +5649,6 @@ msgid ""
 msgstr ""
 
 msgid "Sync filaments with AMS"
-msgstr ""
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr ""
-
-msgid "Sync"
-msgstr ""
-
-msgid "Resync"
 msgstr ""
 
 msgid "There are no compatible filaments, and sync is not performed."
@@ -15613,6 +15600,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -15662,6 +15667,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

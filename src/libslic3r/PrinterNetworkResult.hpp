@@ -77,6 +77,8 @@ enum class PrinterNetworkErrorCode
     CREATE_NETWORK_FOR_HOST_TYPE_FAILED = 10005, // Failed to create network for host type
     PRINTER_NOT_SELECTED = 10006,                // Printer not selected
     PRINTER_MMS_FILAMENT_NOT_MAPPED = 10007,     // Printer MMS filament not mapped
+    PRINTER_HOST_NOT_MATCH = 10008,      // host not match with the local printer
+    PRINTER_HOST_NOT_CONNECTED = 10009,       // host not connected
 };
 
 

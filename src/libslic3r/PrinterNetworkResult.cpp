@@ -100,6 +100,10 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Printer not selected");
         case PrinterNetworkErrorCode::PRINTER_MMS_FILAMENT_NOT_MAPPED:
             return _u8L("Some filaments are not mapped");
+        case PrinterNetworkErrorCode::PRINTER_HOST_NOT_MATCH:
+            return _u8L("Printer host does not match the local printer, please delete and add again");
+        case PrinterNetworkErrorCode::PRINTER_HOST_NOT_CONNECTED:
+            return _u8L("Printer host is not connected");
         default:
             return _u8L("An unknown error occurred");
     }

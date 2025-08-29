@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2023-11-06 14:37+0800\n"
 "Last-Translator: ablegods <ablegods@gmail.com>\n"
 "Language-Team: \n"
@@ -5595,6 +5595,9 @@ msgstr "%s 錯誤"
 msgid "%s has encountered an error"
 msgstr "%s 遇到一個錯誤"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "%s 警告"
@@ -5985,24 +5988,6 @@ msgstr "沒有發現 AMS 線材。請在“設備”頁面選擇列印設備，�
 
 msgid "Sync filaments with AMS"
 msgstr "同步到 AMS 的線材清單"
-
-#, fuzzy
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-"同步到 AMS 的線材清單將刪除所有目前設定的線材預設檔、顏色。確定要繼續嗎？"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr "已經同步過，你希望僅同步改變的線材還是重新同步所有線材？"
-
-msgid "Sync"
-msgstr "僅同步改變的"
-
-msgid "Resync"
-msgstr "重新同步所有"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr "沒有任何相容的線材，同步操作未執行。"
@@ -16935,6 +16920,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -16984,6 +16987,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -17283,6 +17299,24 @@ msgid ""
 "ABS, appropriately increasing the heatbed temperature can reduce the "
 "probability of warping."
 msgstr ""
+
+#, fuzzy
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr ""
+#~ "同步到 AMS 的線材清單將刪除所有目前設定的線材預設檔、顏色。確定要繼續嗎？"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr "已經同步過，你希望僅同步改變的線材還是重新同步所有線材？"
+
+#~ msgid "Sync"
+#~ msgstr "僅同步改變的"
+
+#~ msgid "Resync"
+#~ msgstr "重新同步所有"
 
 #~ msgctxt "Verb"
 #~ msgid "Scale"

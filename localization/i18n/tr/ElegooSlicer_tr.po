@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2024-07-11 00:22+0300\n"
 "Last-Translator: Olcay ÖREN\n"
 "Language-Team: \n"
@@ -5584,6 +5584,9 @@ msgstr "%s hata"
 msgid "%s has encountered an error"
 msgstr "%s bir hatayla karşılaştı"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "%s uyarı"
@@ -5972,26 +5975,6 @@ msgstr ""
 
 msgid "Sync filaments with AMS"
 msgstr "Filamentleri AMS ile senkronize et"
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-"Filamentleri AMS ile senkronize etmek, seçili tüm mevcut filament ön "
-"ayarlarını ve renklerini kaldıracaktır. Devam etmek istiyor musun?"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr ""
-"Zaten bir senkronizasyon yaptınız. Yalnızca değişiklikleri senkronize etmek "
-"mi yoksa tümünü yeniden senkronize etmek mi istiyorsunuz?"
-
-msgid "Sync"
-msgstr "Senkronizasyon"
-
-msgid "Resync"
-msgstr "Yeniden eşitleme"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr "Uyumlu filament yok ve senkronizasyon gerçekleştirilmiyor."
@@ -17384,6 +17367,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -17433,6 +17434,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -17753,6 +17767,26 @@ msgstr ""
 "ABS gibi bükülmeye yatkın malzemelere baskı yaparken, ısıtma yatağı "
 "sıcaklığının uygun şekilde arttırılmasının bükülme olasılığını "
 "azaltabileceğini biliyor muydunuz?"
+
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr ""
+#~ "Filamentleri AMS ile senkronize etmek, seçili tüm mevcut filament ön "
+#~ "ayarlarını ve renklerini kaldıracaktır. Devam etmek istiyor musun?"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr ""
+#~ "Zaten bir senkronizasyon yaptınız. Yalnızca değişiklikleri senkronize "
+#~ "etmek mi yoksa tümünü yeniden senkronize etmek mi istiyorsunuz?"
+
+#~ msgid "Sync"
+#~ msgstr "Senkronizasyon"
+
+#~ msgid "Resync"
+#~ msgstr "Yeniden eşitleme"
 
 #~ msgid "ShiftLeft mouse button"
 #~ msgstr "Shift + Sol fare düğmesi"

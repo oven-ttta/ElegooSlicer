@@ -503,6 +503,16 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
                 printerNetworkInfo.systemCapabilities.canGetDiskInfo = attributes.capabilities.systemCapabilities.canGetDiskInfo;
                 printerNetworkInfo.systemCapabilities.canSetPrinterName = attributes.capabilities.systemCapabilities.canSetPrinterName;
                 printerNetworkInfo.firmwareVersion = attributes.firmwareVersion;
+                printerNetworkInfo.mainboardId = attributes.mainboardId;
+                printerNetworkInfo.serialNumber = attributes.serialNumber;
+                printerNetworkInfo.webUrl = attributes.webUrl;
+                if(attributes.authMode == "basic") {
+                    printerNetworkInfo.authMode = PRINTER_AUTH_MODE_PASSWORD;
+                } else if(attributes.authMode == "accessCode") {
+                    printerNetworkInfo.authMode = PRINTER_AUTH_MODE_ACCESS_CODE;
+                } else if(attributes.authMode == "pinCode") {
+                    printerNetworkInfo.authMode = PRINTER_AUTH_MODE_PIN_CODE;
+                }
             }
         }
     } catch (const std::exception& e) {

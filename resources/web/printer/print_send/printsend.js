@@ -406,6 +406,11 @@ const PrintSendApp = {
         },
 
         async upload() {
+            if(this.curPrinter.connectStatus !== 1) {
+                this.showStatusTip(this.$t('printSend.printerNotConnected'));
+                return;
+            }
+
             // Update task with current UI state
             this.printInfo.selectedPrinterId = this.curPrinter.printerId;
             this.printInfo.bedType = this.selectedBedTypeValue;

@@ -152,7 +152,7 @@ void PrinterCache::updatePrinterStatus(const std::string& printerId, const Print
         it->second.printerStatus = status;
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         it->second.lastActiveTime = now;
-        if(status == PrinterStatus::PRINTER_STATUS_IDLE) {
+        if(status != PrinterStatus::PRINTER_STATUS_PRINTING && status != PrinterStatus::PRINTER_STATUS_PAUSED && status != PrinterStatus::PRINTER_STATUS_PAUSING) {
             it->second.printTask.taskId = "";
             it->second.printTask.fileName = "";
             it->second.printTask.totalTime = 0;
@@ -191,6 +191,7 @@ void PrinterCache::updatePrinterAttributes(const std::string& printerId, const P
         it->second.firmwareVersion = printerInfo.firmwareVersion;
         it->second.printCapabilities = printerInfo.printCapabilities;
         it->second.systemCapabilities = printerInfo.systemCapabilities;
+        it->second.webUrl = printerInfo.webUrl;
     }
 }
 

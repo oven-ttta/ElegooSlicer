@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2023-09-30 15:15+0200\n"
 "Last-Translator: René Mošner <Renemosner@seznam.cz>\n"
 "Language-Team: \n"
@@ -5541,6 +5541,9 @@ msgstr "%s chyba"
 msgid "%s has encountered an error"
 msgstr "%s Došlo k chybě v programu"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "%s varování"
@@ -5924,26 +5927,6 @@ msgstr ""
 
 msgid "Sync filaments with AMS"
 msgstr "Synchronizovat filamenty s AMS"
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-"Synchronizace filamentů s AMS zruší všechny aktuálně vybrané předvolby "
-"filamentů a barvy. Chcete pokračovat?"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr ""
-"Synchronizace již proběhla, chcete synchronizovat pouze změny nebo znovu "
-"synchronizovat Všechno?"
-
-msgid "Sync"
-msgstr "Synchronizovat"
-
-msgid "Resync"
-msgstr "Znovu synchronizovat"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr ""
@@ -16873,6 +16856,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -16922,6 +16923,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -17215,6 +17229,26 @@ msgid ""
 "ABS, appropriately increasing the heatbed temperature can reduce the "
 "probability of warping."
 msgstr ""
+
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr ""
+#~ "Synchronizace filamentů s AMS zruší všechny aktuálně vybrané předvolby "
+#~ "filamentů a barvy. Chcete pokračovat?"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr ""
+#~ "Synchronizace již proběhla, chcete synchronizovat pouze změny nebo znovu "
+#~ "synchronizovat Všechno?"
+
+#~ msgid "Sync"
+#~ msgstr "Synchronizovat"
+
+#~ msgid "Resync"
+#~ msgstr "Znovu synchronizovat"
 
 #~ msgid "Unselect"
 #~ msgstr "Zrušení výběru"

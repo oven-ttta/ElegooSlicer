@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2024-07-07 18:43+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -5666,6 +5666,9 @@ msgstr "%s error"
 msgid "%s has encountered an error"
 msgstr "%s hi ha hagut un error"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "%s advertència"
@@ -6059,26 +6062,6 @@ msgstr ""
 
 msgid "Sync filaments with AMS"
 msgstr "Sincronitzar filaments amb AMS"
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-"Sincronitzar filaments amb AMS eliminarà tots els perfils de filament i "
-"colors. Voleu continuar?"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr ""
-"Ja heu fet una sincronització, voleu sincronitzar només els canvis o tornar "
-"a sincronitzar-los tots?"
-
-msgid "Sync"
-msgstr "Sincronitzar"
-
-msgid "Resync"
-msgstr "Resincronitzar"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr "No hi ha filaments compatibles i la sincronització no s'ha realitzat."
@@ -17951,6 +17934,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -18000,6 +18001,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -18320,6 +18334,26 @@ msgstr ""
 "Sabíeu que quan imprimiu materials propensos a deformar-se, com ara l'ABS, "
 "augmentar adequadament la temperatura del llit pot reduir la probabilitat de "
 "deformació."
+
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr ""
+#~ "Sincronitzar filaments amb AMS eliminarà tots els perfils de filament i "
+#~ "colors. Voleu continuar?"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr ""
+#~ "Ja heu fet una sincronització, voleu sincronitzar només els canvis o "
+#~ "tornar a sincronitzar-los tots?"
+
+#~ msgid "Sync"
+#~ msgstr "Sincronitzar"
+
+#~ msgid "Resync"
+#~ msgstr "Resincronitzar"
 
 #~ msgid "ShiftLeft mouse button"
 #~ msgstr "Màj+Botó esquerre del ratolí"

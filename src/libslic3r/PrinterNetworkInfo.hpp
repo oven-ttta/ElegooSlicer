@@ -37,7 +37,8 @@ enum PrinterStatus {
     PRINTER_STATUS_RFID_RECOGNIZING   = 17, // RFID recognizing
 
     PRINTER_STATUS_ERROR   = 999,  // Device exception status
-    PRINTER_STATUS_UNKNOWN = 1000, // Unknown status
+    PRINTER_STATUS_ID_NOT_MATCH = 1000, // local mainboard or serial number not match with the remote printer
+    PRINTER_STATUS_UNKNOWN = 10000, // Unknown status
 };
 
 enum TrayStatus {

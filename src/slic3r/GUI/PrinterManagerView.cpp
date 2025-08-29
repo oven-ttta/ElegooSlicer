@@ -471,11 +471,38 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     // Handle request_update_printer_host
-    m_ipc->onRequest("request_update_printer_host", [this](const webviewIpc::IPCRequest& request){
+    m_ipc->onRequestAsync("request_update_printer_host", [this](const webviewIpc::IPCRequest& request,
+                                                                 std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string host = params.value("host", "");
-        return updatePrinterHost(printerId, host);
+ 
+        // Create a weak reference to track object lifetime
+        std::weak_ptr<bool> life_tracker = m_lifeTracker;
+        // Run the add printer operation in a separate thread
+        std::thread([life_tracker, printerId, host, sendResponse, this]() {
+            try {
+                // Check if the object still exists
+                if (auto tracker = life_tracker.lock()) {
+                    auto result = updatePrinterHost(printerId, host);
+                    // Final check before sending response
+                    if (life_tracker.lock()) {
+                        sendResponse(result);
+                    }
+                } else {
+                    // Object was destroyed, don't send response
+                    return;
+                }
+            } catch (const std::exception& e) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error(std::string("Update printer host failed: ") + e.what()));
+                }
+            } catch (...) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error("Update printer host failed: Unknown error"));
+                }
+            }
+        }).detach();
     });
 
     // Handle request_delete_printer
@@ -542,12 +569,29 @@ webviewIpc::IPCResult PrinterManagerView::updatePrinterName(const std::string& p
     result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
     return result;
 }
-webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& id, const std::string& host)
+webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& printerId, const std::string& host)
 {
     webviewIpc::IPCResult result;
-    auto networkResult = PrinterManager::getInstance()->updatePrinterHost(id, host);
+    auto networkResult = PrinterManager::getInstance()->updatePrinterHost(printerId, host);
     result.message = networkResult.message;
     result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
+    PrinterNetworkInfo printerInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
+    
+    if(result.code == 0 && !printerInfo.host.empty() && printerInfo.host != host) {     
+        wxString url = printerInfo.webUrl;
+        if(PrintHost::get_print_host_type(printerInfo.hostType) == htElegooLink && printerInfo.printerType == 2) 
+        {
+            std::string accessCode = printerInfo.accessCode;
+            url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber) + "&access_code=" + accessCode;
+        }
+        auto it = mPrinterViews.find(printerId);
+        if (it != mPrinterViews.end()) {
+            int page = mTabBar->GetPageIndex(it->second);
+            if (page != wxNOT_FOUND) {
+                it->second->load_url(url);
+            }
+        }
+    }
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::addPrinter(const nlohmann::json& printer)

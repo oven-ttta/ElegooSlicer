@@ -50,6 +50,20 @@ public:
     void close();
 
 private:
+
+    class PrinterLock
+    {
+    public:
+        PrinterLock(const std::string& printerId);
+        ~PrinterLock();
+        
+    private:
+        std::mutex* mPrinterMutex;
+        static std::map<std::string, std::mutex> sPrinterMutexes;
+        static std::mutex sMutex;       
+    };
+
+private:
     PrinterManager();
     int getPrinterType(const PrinterNetworkInfo& printerNetworkInfo);
 
@@ -63,6 +77,7 @@ private:
     std::atomic<bool> mIsRunning;
     std::thread mConnectionThread;
     void monitorPrinterConnections();
+
 
 };
 } // namespace Slic3r::GUI 

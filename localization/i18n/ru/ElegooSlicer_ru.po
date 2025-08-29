@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer V2.0.0 Official Release\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2024-06-19 16:50+0700\n"
 "Last-Translator: \n"
 "Language-Team: Andylg <andylg@yandex.ru>\n"
@@ -5719,6 +5719,9 @@ msgstr "Ошибка %s"
 msgid "%s has encountered an error"
 msgstr "%s обнаружил ошибку"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "Предупреждение %s"
@@ -6112,26 +6115,6 @@ msgstr ""
 
 msgid "Sync filaments with AMS"
 msgstr "Синхронизация прутка с АСПП"
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-"При синхронизации пластиковых нитей с АСПП все текущие выбранные профили "
-"прутков и цвета будут сброшены. Продолжить?"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr ""
-"Синхронизация уже выполнена. Хотите синхронизировать только изменения или "
-"заново синхронизировать всё?"
-
-msgid "Sync"
-msgstr "Только изменения"
-
-msgid "Resync"
-msgstr "Всё"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr ""
@@ -18319,6 +18302,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -18368,6 +18369,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -18689,6 +18703,26 @@ msgstr ""
 "Знаете ли вы, что при печати материалами, склонными к короблению, таких как "
 "ABS, повышение температуры подогреваемого стола может снизить эту "
 "вероятность?"
+
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr ""
+#~ "При синхронизации пластиковых нитей с АСПП все текущие выбранные профили "
+#~ "прутков и цвета будут сброшены. Продолжить?"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr ""
+#~ "Синхронизация уже выполнена. Хотите синхронизировать только изменения или "
+#~ "заново синхронизировать всё?"
+
+#~ msgid "Sync"
+#~ msgstr "Только изменения"
+
+#~ msgid "Resync"
+#~ msgstr "Всё"
 
 #~ msgid "ShiftLeft mouse button"
 #~ msgstr "Левая кнопка мыши"

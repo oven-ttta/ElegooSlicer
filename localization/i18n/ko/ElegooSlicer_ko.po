@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2024-05-31 23:33+0900\n"
 "Last-Translator: Hotsolidinfill <138652683+Hotsolidinfill@users.noreply."
 "github.com>, crwusiz <crwusiz@gmail.com>\n"
@@ -5511,6 +5511,9 @@ msgstr "%s 에러"
 msgid "%s has encountered an error"
 msgstr "%s 에 오류가 발생했습니다"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "%s 경고"
@@ -5894,26 +5897,6 @@ msgstr ""
 
 msgid "Sync filaments with AMS"
 msgstr "AMS와 필라멘트 동기화"
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-"AMS와 동기화된 필라멘트는 현재 선택된 모든 필라멘트 사전 설정 및 색상을 삭제"
-"합니다. 계속하시겠습니까?"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr ""
-"이미 동기화를 수행했습니다. 변경 사항만 동기화하시겠습니까? 아니면 다시 동기"
-"화하시겠습니까?"
-
-msgid "Sync"
-msgstr "동기화"
-
-msgid "Resync"
-msgstr "재 동기화"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr "호환되는 필라멘트가 없으며 동기화가 수행되지 않습니다."
@@ -17351,6 +17334,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -17400,6 +17401,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -17711,6 +17725,26 @@ msgstr ""
 "뒤틀림 방지\n"
 "ABS와 같이 뒤틀림이 발생하기 쉬운 소재를 출력할 때, 히트베드 온도를 적절하게 "
 "높이면 뒤틀림 가능성을 줄일 수 있다는 사실을 알고 계셨나요?"
+
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr ""
+#~ "AMS와 동기화된 필라멘트는 현재 선택된 모든 필라멘트 사전 설정 및 색상을 삭"
+#~ "제합니다. 계속하시겠습니까?"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr ""
+#~ "이미 동기화를 수행했습니다. 변경 사항만 동기화하시겠습니까? 아니면 다시 동"
+#~ "기화하시겠습니까?"
+
+#~ msgid "Sync"
+#~ msgstr "동기화"
+
+#~ msgid "Resync"
+#~ msgstr "재 동기화"
 
 #~ msgid "ShiftLeft mouse button"
 #~ msgstr "Shift + 왼쪽 마우스 버튼"

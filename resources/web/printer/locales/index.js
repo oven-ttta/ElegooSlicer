@@ -145,7 +145,8 @@ const langMessages = {
       "filamentMapping": "Filament Mapping",
       "filamentTypeNotMatch": "Filament type not match",
       "printerModelNotMatch": "The selected printer does not match the gcode file. It may cause printing failure or even printer damage! It is recommended to re-slice or select the correct printer to start printing.",
-      "bedTypeNotMatch":"The selected bed type does not match the file. Please confirm before starting the print."
+      "bedTypeNotMatch":"The selected bed type does not match the file. Please confirm before starting the print.",
+      "printerNotConnected":"Printer is not connected"
     
     }
   },
@@ -296,7 +297,8 @@ const langMessages = {
       "filamentMapping": "耗材映射",
       "filamentTypeNotMatch": "耗材类型不匹配",
       "printerModelNotMatch": "当前选中的打印机与gcode文件不匹配，可能会导致打印失败甚至打印机损坏！建议重新切片或者选择正确的打印机启动打印。",
-      "bedTypeNotMatch":"当前选中的热床类型与文件不匹配，请确认后在启动打印。"
+      "bedTypeNotMatch":"当前选中的热床类型与文件不匹配，请确认后在启动打印。",
+      "printerNotConnected":"打印机未连接"
     }
   }
 };

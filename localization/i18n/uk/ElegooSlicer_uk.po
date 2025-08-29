@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2024-06-30 23:05+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -5648,6 +5648,9 @@ msgstr "%s помилка"
 msgid "%s has encountered an error"
 msgstr "%s виявив помилку"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "%s попередження"
@@ -6042,26 +6045,6 @@ msgstr ""
 
 msgid "Sync filaments with AMS"
 msgstr "Синхронізація ниток з AMS"
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr ""
-"Синхронізація ниток з AMS видаляє всі поточні вибрані пресети ниток і\n"
-"Кольори. Ви хочете продовжувати?"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr ""
-"Синхронізацію вже робив, синхронізувати лише зміни абопересинхронізувати\n"
-"Усе?"
-
-msgid "Sync"
-msgstr "Синхронізувати"
-
-msgid "Resync"
-msgstr "Повторна синхронізація"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr "Немає сумісних філаментів, а синхронізація не виконується."
@@ -17762,6 +17745,24 @@ msgstr ""
 msgid "Login session expired"
 msgstr ""
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr ""
 
@@ -17811,6 +17812,19 @@ msgid "Host type not supported"
 msgstr ""
 
 msgid "Failed to create network connection"
+msgstr ""
+
+msgid "Printer not selected"
+msgstr ""
+
+msgid "Some filaments are not mapped"
+msgstr ""
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr ""
+
+msgid "Printer host is not connected"
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -18129,6 +18143,26 @@ msgstr ""
 "Чи знаєте ви, що при друку матеріалами, схильними до деформації, такими як "
 "ABS, відповідне підвищення температури гарячого ліжка може зменшити "
 "ймовірність деформації."
+
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr ""
+#~ "Синхронізація ниток з AMS видаляє всі поточні вибрані пресети ниток і\n"
+#~ "Кольори. Ви хочете продовжувати?"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr ""
+#~ "Синхронізацію вже робив, синхронізувати лише зміни абопересинхронізувати\n"
+#~ "Усе?"
+
+#~ msgid "Sync"
+#~ msgstr "Синхронізувати"
+
+#~ msgid "Resync"
+#~ msgstr "Повторна синхронізація"
 
 #~ msgid "ShiftLeft mouse button"
 #~ msgstr "ShiftЛіва кнопка миші"

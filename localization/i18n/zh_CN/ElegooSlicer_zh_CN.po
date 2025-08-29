@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 11:23+0800\n"
+"POT-Creation-Date: 2025-08-29 14:12+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -5411,6 +5411,9 @@ msgstr "%s 错误"
 msgid "%s has encountered an error"
 msgstr "%s 遇到一个错误"
 
+msgid "An unknown error has occurred."
+msgstr ""
+
 #, c-format, boost-format
 msgid "%s warning"
 msgstr "%s 警告"
@@ -5781,22 +5784,6 @@ msgstr "没有发现AMS材料。请在“设备”页面选择打印机，将加
 
 msgid "Sync filaments with AMS"
 msgstr "同步到 AMS 的材料列表"
-
-msgid ""
-"Sync filaments with AMS will drop all current selected filament presets and "
-"colors. Do you want to continue?"
-msgstr "同步到 AMS 的材料列表将丢弃所有当前配置的材料预设、颜色。是否继续？"
-
-msgid ""
-"Already did a synchronization, do you want to sync only changes or resync "
-"all?"
-msgstr "已经同步过，你希望仅同步改变的材料还是重新同步所有材料？"
-
-msgid "Sync"
-msgstr "同步"
-
-msgid "Resync"
-msgstr "重新同步"
 
 msgid "There are no compatible filaments, and sync is not performed."
 msgstr "没有如任何兼容的材料，同步操作未执行。"
@@ -16487,6 +16474,24 @@ msgstr "身份验证失败"
 msgid "Login session expired"
 msgstr "登录会话已过期"
 
+msgid "Not authenticated"
+msgstr ""
+
+msgid "Invalid username or password"
+msgstr ""
+
+msgid "Invalid token"
+msgstr ""
+
+msgid "Invalid access code"
+msgstr ""
+
+msgid "Invalid PIN code"
+msgstr ""
+
+msgid "Connection limit exceeded"
+msgstr ""
+
 msgid "File upload failed"
 msgstr "文件上传失败"
 
@@ -16537,6 +16542,19 @@ msgstr "不支持的主机类型"
 
 msgid "Failed to create network connection"
 msgstr "创建网络连接失败"
+
+msgid "Printer not selected"
+msgstr "未选择打印机"
+
+msgid "Some filaments are not mapped"
+msgstr "部分耗材未映射"
+
+msgid ""
+"Printer host does not match the local printer, please delete and add again"
+msgstr "打印机与本地信息不匹配，请删除重新添加"
+
+msgid "Printer host is not connected"
+msgstr "打印机连接失败"
 
 #: resources/data/hints.ini: [hint:G-code window]
 msgid ""
@@ -16838,6 +16856,25 @@ msgid ""
 msgstr ""
 "避免翘曲\n"
 "您知道吗？打印ABS这类易翘曲材料时，适当提高热床温度可以降低翘曲的概率。"
+
+#~ msgid "Printer host does not match the local printer"
+#~ msgstr "打印机与本地信息不匹配，请删除重新添加"
+
+#~ msgid ""
+#~ "Sync filaments with AMS will drop all current selected filament presets "
+#~ "and colors. Do you want to continue?"
+#~ msgstr "同步到 AMS 的材料列表将丢弃所有当前配置的材料预设、颜色。是否继续？"
+
+#~ msgid ""
+#~ "Already did a synchronization, do you want to sync only changes or resync "
+#~ "all?"
+#~ msgstr "已经同步过，你希望仅同步改变的材料还是重新同步所有材料？"
+
+#~ msgid "Sync"
+#~ msgstr "同步"
+
+#~ msgid "Resync"
+#~ msgstr "重新同步"
 
 #~ msgid "Connection to ElegooLink is working correctly."
 #~ msgstr "已成功连接到ElegooLink"
