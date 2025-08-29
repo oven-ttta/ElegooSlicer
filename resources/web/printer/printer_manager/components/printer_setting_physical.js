@@ -65,10 +65,10 @@ const PrinterSettingPhysicalComponent = {
         },
 
         async deletePrinter() {
-            try{
-            await this.printerStore.requestDeletePrinter(this.printer.printerId);
-            this.closeModal();
-            }catch (error) {
+            try {
+                await this.printerStore.requestDeletePrinter(this.printer.printerId);
+                this.closeModal();
+            } catch (error) {
                 // console.error('Failed to delete printer:', error);
             }
         },
@@ -82,39 +82,25 @@ const PrinterSettingPhysicalComponent = {
             }
         },
 
-        handleUpdatePhysicalPrinter(newPrinter) {
+        async handleUpdatePhysicalPrinter(newPrinter) {
             if (!this.printer) return;
 
             let name = null;
+            let host = null;
             // check if name has changed
             if (newPrinter.printerName !== this.printer.printerName) {
                 name = newPrinter.printerName;
             }
-
-            let host = null;
+            
             // check if host has changed
             if (newPrinter.host !== this.printer.host) {
                 host = newPrinter.host;
             }
 
-            this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, name, host);
+            await this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, name, host);
+            this.printer.printerName = newPrinter.printerName;
+            this.printer.host = newPrinter.host;
             // this.closeModal();
         },
-
-        handleUpdateNetworkPrinter(newPrinter) {
-            if (!this.printer) return;
-
-            // check if name has changed
-            if (newPrinter.printerName !== this.printer.printerName) {
-                this.printerStore.requestUpdatePrinterName(this.printer.printerId, newPrinter.printerName);
-            }
-            // check if host has changed
-            if (newPrinter.host !== this.printer.host) {
-                this.printerStore.requestUpdatePrinterHost(this.printer.printerId, newPrinter.host);
-            }
-
-            this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, newPrinter.printerName, newPrinter.host);
-            // this.closeModal();
-        }
     }
 };

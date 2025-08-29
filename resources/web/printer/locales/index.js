@@ -179,7 +179,7 @@ const langMessages = {
       "updating": "更新中",
       "fileCopying": "文件复制中",
       "fileTransferring": "文件传输中",
-      "homing": "回零中",
+      "homing": "归零中",
       "preheating": "预热中",
       "filamentOperating": "耗材操作中",
       "extruderOperating": "挤出机操作中",

@@ -258,10 +258,17 @@ const usePrinterStore = defineStore('printer', {
         }
 
         if (host) {
-          await this.ipcRequest('request_update_printer_host', {
-            printerId,
-            host
+          const loading = ElLoading.service({
+            lock: true,
           });
+          try {
+            await this.ipcRequest('request_update_printer_host', {
+              printerId,
+              host
+            });
+          } finally {
+            loading.close();
+          }
         }
 
         ElementPlus.ElMessage.success({
@@ -271,6 +278,7 @@ const usePrinterStore = defineStore('printer', {
 
       } catch (error) {
         console.error('Failed to update printer name:', error);
+        throw error;
       } finally {
         // loading.close();
       }

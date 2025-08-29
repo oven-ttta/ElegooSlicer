@@ -547,7 +547,7 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         if (bedType == "btPC") {
             mBedType = BedType::btPC;
         } else {
-            mBedType = BedType::btPEI;
+            mBedType = BedType::btPTE;
         }
 
         if (!mSelectedPrinterId.empty()) {

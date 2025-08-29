@@ -136,6 +136,9 @@ const AddPrinterComponent = {
         },
 
         closeModal() {
+            if (this.$refs.manualFormComponent) {
+                this.$refs.manualFormComponent.resetForm();
+            }
             this.$emit('close-modal');
         },
 

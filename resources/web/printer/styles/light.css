@@ -73,7 +73,7 @@
   --el-bg-color: var(--bg-primary);
   --el-dialog-bg-color: var(--el-bg-color);
   --el-drawer-bg-color: var(--el-dialog-bg-color, var(--el-bg-color));
-  --el-mask-color: rgba(255, 255, 255, 0.7);
+  --el-mask-color: rgba(255, 255, 255, 0.5);
 }
 
 /* ===== BASE STYLES ===== */
