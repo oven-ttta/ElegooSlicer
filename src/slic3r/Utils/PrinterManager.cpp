@@ -229,8 +229,6 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterHost(const std::string& 
     PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
     deletePrinterNetwork(printerId);
 
-    std::this_thread::sleep_for(std::chrono::seconds(60));
-
     printer.value().host = host;
     std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printer.value());
     if (!network) {
