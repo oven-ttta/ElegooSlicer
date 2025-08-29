@@ -27,7 +27,7 @@ body {
 /* ===================== Printer Auth Dialog ===================== */
 
 .printer-auth-content {
-  padding: 15px 40px;
+  padding: 16px 0px;
   text-align: center;
   flex: 1;
   display: flex;
@@ -36,14 +36,14 @@ body {
 }
 
 .printer-image-container {
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .printer-auth-content img {
-  width: 180px;
-  height: 180px;
+  /* width: 180px; */
+  height: 192px;
   object-fit: contain;
-  margin-bottom: 15px;
+  border-radius: 8px;
 }
 
 .printer-auth-content h3 {
@@ -55,7 +55,7 @@ body {
 }
 
 .instruction-text {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-secondary);
   margin: 0 0 20px 0;
   line-height: 1.4;

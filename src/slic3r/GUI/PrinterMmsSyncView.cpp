@@ -63,6 +63,10 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
     wxSize pSize = FromDIP(wxSize(800, 700));
     SetSize(pSize);
     CenterOnParent();
+
+    if (logo) {
+        logo->Hide();
+    }
 }
 
 PrinterMmsSyncView::~PrinterMmsSyncView() {

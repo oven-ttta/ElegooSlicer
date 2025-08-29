@@ -143,7 +143,11 @@ const AddPrinterComponent = {
             try {
                 if (this.activeTab === 'discover') {
                     if (this.selectedPrinterIdx === null) {
-                        alert(this.$t('addPrinterDialog.pleaseSelectPrinter'));
+                        // alert(this.$t('addPrinterDialog.pleaseSelectPrinter'));
+                        ElementPlus.ElMessage({
+                            message: this.$t('addPrinterDialog.pleaseSelectPrinter'),
+                            type: 'error',
+                        });
                         return;
                     }
                     const printer = this.printers[this.selectedPrinterIdx];
@@ -167,6 +171,7 @@ const AddPrinterComponent = {
                         const printer = await this.$refs.manualFormComponent.getFormData();
                         if (printer) {
                             await this.printerStore.requestAddPhysicalPrinter(printer);
+                            this.$refs.manualFormComponent.resetForm();
                             this.closeModal();
                         }
                     }

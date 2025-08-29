@@ -57,7 +57,7 @@ const langMessages = {
       "cannotFindPrinter": "Cannot find printer?",
       "connect": "Connect",
       "help": "Help",
-      "helpMessage": "请确保打印机已经联网，并且与当前软件处于同一个网络，如果刷新后依旧无法发现，可尝试进行手动添加。",
+      "helpMessage": "{'Please make sure the printer is connected to the network and is on the same network as the current software. If you still cannot find it after refreshing, you can try manual addition.'}",
       "ok": "OK",
       "pleaseSelectPrinter": "Please select a printer"
     },
@@ -85,12 +85,12 @@ const langMessages = {
       "modelCannotBeModified": "Model cannot be modified for existing printers"
     },
     "printerAuth": {
-      "enterAccessCode": "Please enter the 6-character access code on the printer",
+      "enterAccessCode": "Please check the access code displayed on the screen and enter it below to complete the addition.",
       "cannotAccessCode": "Cannot access code?",
       "close": "Close",
       "connect": "Connect",
       "help": "Help",
-      "helpMessage": "Please check the printer screen or manual for the 6-character access code.",
+      "helpMessage": "{'Please make sure the printer firmware is updated to the latest version and \"LAN Only\" mode is enabled. If you have any questions, please contact 3dp@elegoo.com via email for support.'}",
       "ok": "OK",
       "pleaseEnterCompleteAccessCode": "Please enter the complete 6-character access code",
       "connectToPrinter": "Connect to Printer",
@@ -235,12 +235,12 @@ const langMessages = {
       "modelCannotBeModified": "现有打印机无法修改型号"
     },
     "printerAuth": {
-      "enterAccessCode": "请在打印机上输入6位访问代码",
+      "enterAccessCode": "请查看屏幕上显示的访问码，并在下方输入以完成添加。",
       "cannotAccessCode": "无法获取访问代码？",
       "close": "关闭",
       "connect": "连接",
       "help": "帮助",
-      "helpMessage": "请检查打印机屏幕或手册获取6位访问代码。",
+      "helpMessage": "{'请确定打印机固件已经更新到最新版本，并且开启了“仅局域网”模式，如有问题，可邮件联系3dp@elegoo.com以寻求支持。'}",
       "ok": "确定",
       "pleaseEnterCompleteAccessCode": "请输入完整的6位访问代码",
       "connectToPrinter": "连接到打印机",

@@ -127,18 +127,18 @@ void PrintSendDialogEx::init()
     // txt_filename->SetValue(recent_path);
     // //Hide to prevent flickering
     // txt_filename->Hide();
-    // if (logo) {
-    //     logo->Hide();
-    // }
-    // //hide content_sizer child
-    // if(content_sizer){
-    //     auto child = content_sizer->GetChildren();
-    //     for (auto& item : child) {
-    //         if(item->IsWindow() && item->GetWindow()!=nullptr) {
-    //             item->GetWindow()->Hide();
-    //         }
-    //     }
-    // }
+    if (logo) {
+        logo->Hide();
+    }
+    //hide content_sizer child
+    if(content_sizer){
+        auto child = content_sizer->GetChildren();
+        for (auto& item : child) {
+            if(item->IsWindow() && item->GetWindow()!=nullptr) {
+                item->GetWindow()->Hide();
+            }
+        }
+    }
 
     // Cache the model name for use in preparePrintTask
     m_cachedModelName = recent_path.ToUTF8().data();
