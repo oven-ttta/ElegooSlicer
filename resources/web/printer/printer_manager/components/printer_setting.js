@@ -204,10 +204,14 @@ const PrinterSettingComponent = {
 
             if (newName && newName !== currentName) {
                 // Use Element Plus form validation
-                this.$refs.printerForm.validateField('printerName', (valid) => {
+                this.$refs.printerForm.validateField('printerName', async (valid) => {
                     if (valid) {
-                        this.printer.printerName = newName;
-                        this.printerStore.requestUpdatePrinterName(this.printer.printerId, newName);
+                        try {
+                            await this.printerStore.requestUpdatePrinterName(this.printer.printerId, newName);
+                            this.printer.printerName = newName;
+                        } catch (error) {
+                            this.formData.printerName = currentName;
+                        }
                     } else {
                         // Validation failed, keep editing mode and show error
                         console.log('Name validation failed');
@@ -222,10 +226,14 @@ const PrinterSettingComponent = {
 
             if (newHost && newHost !== currentHost) {
                 // Use Element Plus form validation
-                this.$refs.printerForm.validateField('host', (valid) => {
+                this.$refs.printerForm.validateField('host', async (valid) => {
                     if (valid) {
-                        this.printer.host = newHost;
-                        this.printerStore.requestUpdatePrinterHost(this.printer.printerId, newHost);
+                        try {
+                            await this.printerStore.requestUpdatePrinterHost(this.printer.printerId, newHost);
+                            this.printer.host = newHost;
+                        } catch (error) {
+                            this.formData.host = currentHost;
+                        }
                     } else {
                         // Validation failed, keep editing mode and show error
                         console.log('Host validation failed');

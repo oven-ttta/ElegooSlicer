@@ -18,7 +18,7 @@ const PrintSendApp = {
                 uploadAndPrint: false,
                 switchToDeviceTab: false,
                 autoRefill: false,
-                bedType: 'btPEI',
+                bedType: 'btPTE',
                 currentProjectPrinterModel: '',
                 filamentList: [],
                 mmsInfo: {
@@ -47,10 +47,10 @@ const PrintSendApp = {
 
             // Bed type management
             bedTypes: [
-                { value: 'btPEI', name: this.$t ? this.$t('printSend.texturedA') : 'Textured A', icon: 'img/bt_pei.png' },
+                { value: 'btPTE', name: this.$t ? this.$t('printSend.texturedA') : 'Textured A', icon: 'img/bt_pte.png' },
                 { value: 'btPC', name: this.$t ? this.$t('printSend.smoothB') : 'Smooth B', icon: 'img/bt_pc.png' }
             ],
-            selectedBedTypeValue: 'btPEI',
+            selectedBedTypeValue: 'btPTE',
             bedDropdownOpen: false,
 
             // Filament management
@@ -274,6 +274,7 @@ const PrintSendApp = {
         },
 
         selectBedType(bedType) {
+            console.log("Selected bed type:", bedType);
             this.selectedBedTypeValue = bedType.value;
             this.bedDropdownOpen = false;
             this.onBedTypeChanged(bedType.value);
@@ -458,7 +459,7 @@ const PrintSendApp = {
         async onPrinterChanged() {
             // Update bed types with current translations
             this.bedTypes = [
-                { value: 'btPEI', name: this.$t('printSend.texturedA'), icon: 'img/bt_pei.png' },
+                { value: 'btPTE', name: this.$t('printSend.texturedA'), icon: 'img/bt_pte.png' },
                 { value: 'btPC', name: this.$t('printSend.smoothB'), icon: 'img/bt_pc.png' }
             ];
             // Handle printer change logic if needed
@@ -479,7 +480,7 @@ const PrintSendApp = {
     mounted() {
         // Initialize bed types with translations
         this.bedTypes = [
-            { value: 'btPEI', name: this.$t('printSend.texturedA'), icon: 'img/bt_pei.png' },
+            { value: 'btPTE', name: this.$t('printSend.texturedA'), icon: 'img/bt_pte.png' },
             { value: 'btPC', name: this.$t('printSend.smoothB'), icon: 'img/bt_pc.png' }
         ];
 
