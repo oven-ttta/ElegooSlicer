@@ -4,9 +4,8 @@ const PrinterAuthTemplate =
         <div class="printer-auth-dialog">
             <div class="printer-auth-content">
                 <div class="printer-image-container">
-                    <img :src="(printer && printer.printerImg) || ''" />
+                    <img :src="connectGuideImg" />
                 </div>
-                <h3>{{ (printer && printer.printerName) || '' }}</h3>
                 <p class="instruction-text">{{ $t('printerAuth.enterAccessCode') }}</p>
                 
                 <div class="access-code-inputs">
@@ -80,6 +79,12 @@ const PrinterAuthComponent = {
   
     },
 
+    computed: {
+        connectGuideImg() {
+            return "./img/connect-guide-"+ defaultLanguage() +".png";
+        },
+    },
+
     watch: {
         printer: {
             handler(newVal) {
@@ -133,7 +138,11 @@ const PrinterAuthComponent = {
             const accessCode = this.accessCodes.join("");
 
             if (accessCode.length !== 6) {
-                alert(this.$t("printerAuth.pleaseEnterCompleteAccessCode"));
+                // alert(this.$t("printerAuth.pleaseEnterCompleteAccessCode"));
+                ElementPlus.ElMessage({
+                    message: this.$t("printerAuth.pleaseEnterCompleteAccessCode"),
+                    type: "error",
+                });
                 return;
             }
 

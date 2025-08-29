@@ -194,6 +194,7 @@ const usePrinterStore = defineStore('printer', {
         // Response handling is done in event listeners
       } catch (error) {
         console.error('Failed to delete printer:', error);
+        throw error;
       }
       finally {
         loading.close();

@@ -8,8 +8,17 @@ const PrinterSettingPhysicalTemplate = /*html*/
                 ></manual-form-component>
             </div>
             <div class="add-printer-footer">
-                <el-button type="danger" @click="deletePrinter">{{ $t('delete') }}</el-button>
-                <el-button type="primary" @click="confirmPrinter">{{ $t('confirm') }}</el-button>
+                <el-popconfirm :title="$t('printerSetting.confirmDeletePrinter')" :confirm-button-text="$t('confirm')" 
+                    :cancel-button-text="$t('cancel')" 
+                    @confirm="deletePrinter" 
+                    width="200"
+                    cancel-button-type="info"
+                    placement="top-start">
+                    <template #reference>
+                        <button class="btn-danger">{{ $t('delete') }}</button>
+                    </template>
+                </el-popconfirm>
+                <button class="btn-primary" @click="confirmPrinter">{{ $t('confirm') }}</button>
             </div>
         </div>
     `;
@@ -51,13 +60,16 @@ const PrinterSettingPhysicalComponent = {
     methods: {
 
         closeModal() {
+            this.$refs.manualFormComponent.resetForm();
             this.$emit('close-modal');
         },
 
         async deletePrinter() {
-            if (confirm(this.$t('printerSettingPhysical.confirmDeletePrinter'))) {
-               await this.printerStore.requestDeletePrinter(this.printer.printerId);
-               this.closeModal();
+            try{
+            await this.printerStore.requestDeletePrinter(this.printer.printerId);
+            this.closeModal();
+            }catch (error) {
+                // console.error('Failed to delete printer:', error);
             }
         },
 
@@ -73,20 +85,20 @@ const PrinterSettingPhysicalComponent = {
         handleUpdatePhysicalPrinter(newPrinter) {
             if (!this.printer) return;
 
-            let name=null;
+            let name = null;
             // check if name has changed
             if (newPrinter.printerName !== this.printer.printerName) {
-               name=newPrinter.printerName;
+                name = newPrinter.printerName;
             }
 
-            let host=null;
+            let host = null;
             // check if host has changed
             if (newPrinter.host !== this.printer.host) {
-               host=newPrinter.host;
+                host = newPrinter.host;
             }
 
             this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, name, host);
-            this.closeModal();
+            // this.closeModal();
         },
 
         handleUpdateNetworkPrinter(newPrinter) {
@@ -102,7 +114,7 @@ const PrinterSettingPhysicalComponent = {
             }
 
             this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, newPrinter.printerName, newPrinter.host);
-            this.closeModal();
+            // this.closeModal();
         }
     }
 };

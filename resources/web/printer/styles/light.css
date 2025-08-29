@@ -36,6 +36,7 @@
   --color-danger: #dc3545;
   --color-info: #17a2b8;
   --color-error:#DF4536;
+  --color-danger-hover: #c82333;
 
   /* Printer Status Colors */
   --printer-status-offline-color: #333333;
@@ -104,7 +105,7 @@ body {
 }
 
 .btn-secondary {
-  padding: 8px 20px;
+  padding: 8px 16px;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 500;
@@ -114,7 +115,8 @@ body {
   min-width: 80px;
   background: var(--bg-primary);
   color: var(--text-secondary);
-  border: 1px solid var(--border-primary);
+  outline: 1px solid var(--border-primary);
+
 }
 
 .btn-secondary:hover {
@@ -140,6 +142,28 @@ body {
 }
 
 .btn-primary:disabled {
+  background: var(--toggle-bg-off);
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.15s ease;
+  min-width: 80px;
+  background: var(--color-danger);
+  color: var(--button-text-color-primary);
+}
+
+.btn-danger:hover {
+  background: var(--color-danger-hover);
+}
+
+.btn-danger:disabled {
   background: var(--toggle-bg-off);
   cursor: not-allowed;
 }
