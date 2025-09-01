@@ -16397,7 +16397,7 @@ msgid "Face and face assembly"
 msgstr "面与面的组装"
 
 msgid "Connected Printer"
-msgstr "已连接打印机"
+msgstr "已连接的打印机"
 
 msgid "Printer MMS Sync"
 msgstr "打印机MMS同步"

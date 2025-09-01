@@ -18165,7 +18165,7 @@ msgid "Brim Ears"
 msgstr "Mausohren"
 
 msgid "Please select single object."
-msgstr ""
+msgstr "Bitte wählen Sie ein einzelnes Objekt aus."
 
 msgid "Please confirm explosion ratio = 1 and select at least two volumes."
 msgstr ""
