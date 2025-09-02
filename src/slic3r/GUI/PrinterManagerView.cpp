@@ -621,7 +621,7 @@ webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::jso
         errorCode = networkResult.code;
     } catch (const std::exception& e) {
         wxLogMessage("Add physical printer error: %s", e.what());
-        errorCode = PrinterNetworkErrorCode::INVALID_FORMAT;
+        errorCode = PrinterNetworkErrorCode::INVALID_PARAMETER;
         result.message = getErrorMessage(errorCode);
     }
     result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);

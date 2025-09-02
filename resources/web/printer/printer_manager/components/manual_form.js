@@ -28,7 +28,6 @@ const ManualFormTemplate = /*html*/
                                     v-model="formData.vendor" 
                                     @change="onVendorChange"
                                     :disabled="isVendorDisabled"
-                                    :title="isVendorDisabled ? $t('manualForm.vendorCannotBeModified') : ''"
                                     :placeholder="$t('manualForm.selectVendor')"
                                 >
                                     <el-option 
@@ -47,7 +46,6 @@ const ManualFormTemplate = /*html*/
                                     v-model="formData.printerModel" 
                                     @change="onModelChange"
                                     :disabled="isModelDisabled"
-                                    :title="isModelDisabled ? $t('manualForm.modelCannotBeModified') : ''"
                                     :placeholder="$t('manualForm.selectModel')"
                                 >
                                     <el-option 

@@ -14,44 +14,16 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("An internal error occurred");
         case PrinterNetworkErrorCode::INVALID_PARAMETER:
             return _u8L("Invalid parameter provided");
-        case PrinterNetworkErrorCode::INVALID_FORMAT:
-            return _u8L("Invalid data format");
-        case PrinterNetworkErrorCode::TIMEOUT:
+        case PrinterNetworkErrorCode::OPERATION_TIMEOUT:
             return _u8L("Operation timed out");
-        case PrinterNetworkErrorCode::CANCELLED:
+        case PrinterNetworkErrorCode::OPERATION_CANCELLED:
             return _u8L("Operation was cancelled");
-        case PrinterNetworkErrorCode::ACCESS_DENIED:
+        case PrinterNetworkErrorCode::PRINTER_ACCESS_DENIED:
             return _u8L("Access denied");
-        case PrinterNetworkErrorCode::NOT_FOUND:
-            return _u8L("Resource not found");
-        case PrinterNetworkErrorCode::ALREADY_EXISTS:
-            return _u8L("Resource already exists");
-        case PrinterNetworkErrorCode::INSUFFICIENT_SPACE:
-            return _u8L("Insufficient storage space");
-        case PrinterNetworkErrorCode::BAD_REQUEST:
-            return _u8L("Bad request");
-        case PrinterNetworkErrorCode::CONNECTION_ERROR:
+        case PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR:
             return _u8L("Connection failed");
         case PrinterNetworkErrorCode::NETWORK_ERROR:
             return _u8L("Network error occurred");
-        case PrinterNetworkErrorCode::SERVICE_UNAVAILABLE:
-            return _u8L("Service temporarily unavailable");
-        case PrinterNetworkErrorCode::NOT_IMPLEMENTED:
-            return _u8L("Feature not available");      
-        case PrinterNetworkErrorCode::VERSION_NOT_SUPPORTED:
-            return _u8L("Version not supported");
-        case PrinterNetworkErrorCode::VERSION_TOO_OLD:
-            return _u8L("Version is too old");
-        case PrinterNetworkErrorCode::VERSION_TOO_NEW:
-            return _u8L("Version is too new");        
-        case PrinterNetworkErrorCode::NOT_AUTHORIZED:
-            return _u8L("Access unauthorized");
-        case PrinterNetworkErrorCode::INVALID_CREDENTIAL:
-            return _u8L("Authentication failed");
-        case PrinterNetworkErrorCode::TOKEN_EXPIRED:
-            return _u8L("Login session expired");        
-        case PrinterNetworkErrorCode::NOT_AUTHENTICATED:
-            return _u8L("Not authenticated");
         case PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD:
             return _u8L("Invalid username or password");
         case PrinterNetworkErrorCode::INVALID_TOKEN:
@@ -68,18 +40,12 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("File not found");        
         case PrinterNetworkErrorCode::PRINTER_BUSY:
             return _u8L("Printer is busy");
-        case PrinterNetworkErrorCode::PRINTER_OFFLINE:
-            return _u8L("Printer is offline");
-        case PrinterNetworkErrorCode::PRINTER_INITIALIZATION_ERROR:
-            return _u8L("Printer initialization failed");
         case PrinterNetworkErrorCode::PRINTER_COMMAND_FAILED:
             return _u8L("Printer command failed");
         case PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED:
             return _u8L("Printer is already connected");
         case PrinterNetworkErrorCode::PRINTER_INTERNAL_ERROR:
             return _u8L("Printer internal error");
-        case PrinterNetworkErrorCode::PRINTER_TASK_NOT_FOUND:
-            return _u8L("Print task not found");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION:
             return _u8L("Printer network error");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA:

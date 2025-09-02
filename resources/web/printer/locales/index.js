@@ -7,9 +7,6 @@ const langMessages = {
     "confirm": "Confirm",
     "cancel": "Cancel",
     "noPrinterConnected": "No printer connected. Please go to \"Devices\" to discover or add a new printer.",
-    "multiColor": {
-      "CanvasPro": "CANVAS PRO",
-    },
     "printerManager": {
       "connectedPrinters": "Connected Printers",
       "addPrinter": "Add Printer",
@@ -81,9 +78,7 @@ const langMessages = {
       "pleaseEnterPrinterName": "Please enter printer name",
       "lengthShouldBe1To50": "Length should be 1 to 50 characters",
       "pleaseSelectHostType": "Please select host type",
-      "pleaseEnterHostNameIpUrl": "Please enter host name, IP or URL",
-      "vendorCannotBeModified": "Vendor cannot be modified for existing printers",
-      "modelCannotBeModified": "Model cannot be modified for existing printers"
+      "pleaseEnterHostNameIpUrl": "Please enter host name, IP or URL"
     },
     "printerAuth": {
       "enterAccessCode": "Please check the access code displayed on the screen and enter it below to complete the addition.",
@@ -158,9 +153,6 @@ const langMessages = {
     "confirm": "确认",
     "cancel": "取消",
     "noPrinterConnected": "无打印机连接。请前往\"设备\"发现或添加新打印机。",
-    "multiColor": {
-      "CanvasPro": "画布专业版",
-    },
     "printerManager": {
       "localPrinters": "本地打印机",
       "connectedPrinters": "已连接的打印机",
@@ -233,8 +225,7 @@ const langMessages = {
       "lengthShouldBe1To50": "长度应为1到50个字符",
       "pleaseSelectHostType": "请选择主机类型",
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
-      "vendorCannotBeModified": "现有打印机无法修改厂商",
-      "modelCannotBeModified": "现有打印机无法修改型号"
+      "vendorCannotBeModified": "现有打印机无法修改厂商"
     },
     "printerAuth": {
       "enterAccessCode": "请查看屏幕上显示的访问码，并在下方输入以完成添加。",
