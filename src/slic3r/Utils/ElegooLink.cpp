@@ -9,45 +9,37 @@ namespace Slic3r {
 
 namespace {
 
-PrinterNetworkErrorCode parseElegooResult(elink::ElegooError code)
+PrinterNetworkErrorCode parseElegooResult(elink::ELINK_ERROR_CODE code)
 {
     switch (code) {
-    case elink::ElegooError::SUCCESS: return PrinterNetworkErrorCode::SUCCESS;
-    case elink::ElegooError::BAD_REQUEST: return PrinterNetworkErrorCode::BAD_REQUEST;
-    case elink::ElegooError::INTERNAL_ERROR: return PrinterNetworkErrorCode::INTERNAL_ERROR;
-    case elink::ElegooError::INVALID_PARAMETER: return PrinterNetworkErrorCode::INVALID_PARAMETER;
-    case elink::ElegooError::INVALID_FORMAT: return PrinterNetworkErrorCode::INVALID_FORMAT;
-    case elink::ElegooError::TIMEOUT: return PrinterNetworkErrorCode::TIMEOUT;
-    case elink::ElegooError::CANCELLED: return PrinterNetworkErrorCode::CANCELLED;
-    case elink::ElegooError::ACCESS_DENIED: return PrinterNetworkErrorCode::ACCESS_DENIED;
-    case elink::ElegooError::NOT_FOUND: return PrinterNetworkErrorCode::NOT_FOUND;
-    case elink::ElegooError::ALREADY_EXISTS: return PrinterNetworkErrorCode::ALREADY_EXISTS;
-    case elink::ElegooError::INSUFFICIENT_SPACE: return PrinterNetworkErrorCode::INSUFFICIENT_SPACE;
-    case elink::ElegooError::CONNECTION_ERROR: return PrinterNetworkErrorCode::CONNECTION_ERROR;
-    case elink::ElegooError::NETWORK_ERROR: return PrinterNetworkErrorCode::NETWORK_ERROR;
-    case elink::ElegooError::SERVICE_UNAVAILABLE: return PrinterNetworkErrorCode::SERVICE_UNAVAILABLE;
-    case elink::ElegooError::NOT_IMPLEMENTED: return PrinterNetworkErrorCode::NOT_IMPLEMENTED;
-    case elink::ElegooError::VERSION_NOT_SUPPORTED: return PrinterNetworkErrorCode::VERSION_NOT_SUPPORTED;
-    case elink::ElegooError::VERSION_TOO_OLD: return PrinterNetworkErrorCode::VERSION_TOO_OLD;
-    case elink::ElegooError::VERSION_TOO_NEW: return PrinterNetworkErrorCode::VERSION_TOO_NEW;
-    case elink::ElegooError::INVALID_CREDENTIAL: return PrinterNetworkErrorCode::INVALID_CREDENTIAL;
-    case elink::ElegooError::TOKEN_EXPIRED: return PrinterNetworkErrorCode::TOKEN_EXPIRED;
-    case elink::ElegooError::NOT_AUTHORIZED: return PrinterNetworkErrorCode::NOT_AUTHORIZED;
-    case elink::ElegooError::NOT_AUTHENTICATED: return PrinterNetworkErrorCode::NOT_AUTHENTICATED;
-    case elink::ElegooError::INVALID_USERNAME_OR_PASSWORD: return PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD;
-    case elink::ElegooError::INVALID_TOKEN: return PrinterNetworkErrorCode::INVALID_TOKEN;
-    case elink::ElegooError::INVALID_ACCESS_CODE: return PrinterNetworkErrorCode::INVALID_ACCESS_CODE;
-    case elink::ElegooError::INVALID_PIN_CODE: return PrinterNetworkErrorCode::INVALID_PIN_CODE;
-    case elink::ElegooError::CONNECTION_LIMIT_EXCEEDED: return PrinterNetworkErrorCode::PRINTER_CONNECTION_LIMIT_EXCEEDED;
-    case elink::ElegooError::FILE_TRANSFER_FAILED: return PrinterNetworkErrorCode::FILE_TRANSFER_FAILED;
-    case elink::ElegooError::FILE_NOT_FOUND: return PrinterNetworkErrorCode::FILE_NOT_FOUND;
-    case elink::ElegooError::PRINTER_BUSY: return PrinterNetworkErrorCode::PRINTER_BUSY;
-    case elink::ElegooError::PRINTER_OFFLINE: return PrinterNetworkErrorCode::PRINTER_OFFLINE;
-    case elink::ElegooError::PRINTER_INITIALIZATION_ERROR: return PrinterNetworkErrorCode::PRINTER_INITIALIZATION_ERROR;
-    case elink::ElegooError::PRINTER_COMMAND_FAILED: return PrinterNetworkErrorCode::PRINTER_COMMAND_FAILED;
-    case elink::ElegooError::PRINTER_ALREADY_CONNECTED: return PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED;
-    case elink::ElegooError::PRINTER_INTERNAL_ERROR: return PrinterNetworkErrorCode::PRINTER_INTERNAL_ERROR;
-    case elink::ElegooError::PRINTER_TASK_NOT_FOUND: return PrinterNetworkErrorCode::PRINTER_TASK_NOT_FOUND;
+    case elink::ELINK_ERROR_CODE::SUCCESS: return PrinterNetworkErrorCode::SUCCESS;
+    case elink::ELINK_ERROR_CODE::UNKNOWN_ERROR: return PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    case elink::ELINK_ERROR_CODE::INTERNAL_ERROR: return PrinterNetworkErrorCode::INTERNAL_ERROR;
+    case elink::ELINK_ERROR_CODE::INVALID_PARAMETER: return PrinterNetworkErrorCode::INVALID_PARAMETER;
+    case elink::ELINK_ERROR_CODE::OPERATION_TIMEOUT: return PrinterNetworkErrorCode::OPERATION_TIMEOUT;
+    case elink::ELINK_ERROR_CODE::OPERATION_CANCELLED: return PrinterNetworkErrorCode::OPERATION_CANCELLED;
+    case elink::ELINK_ERROR_CODE::OPERATION_IN_PROGRESS: return PrinterNetworkErrorCode::OPERATION_IN_PROGRESS;
+    case elink::ELINK_ERROR_CODE::OPERATION_NOT_IMPLEMENTED: return PrinterNetworkErrorCode::OPERATION_NOT_IMPLEMENTED;
+    case elink::ELINK_ERROR_CODE::NETWORK_ERROR: return PrinterNetworkErrorCode::NETWORK_ERROR;
+    case elink::ELINK_ERROR_CODE::INVALID_USERNAME_OR_PASSWORD: return PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD;
+    case elink::ELINK_ERROR_CODE::INVALID_TOKEN: return PrinterNetworkErrorCode::INVALID_TOKEN;
+    case elink::ELINK_ERROR_CODE::INVALID_ACCESS_CODE: return PrinterNetworkErrorCode::INVALID_ACCESS_CODE;
+    case elink::ELINK_ERROR_CODE::INVALID_PIN_CODE: return PrinterNetworkErrorCode::INVALID_PIN_CODE;
+    case elink::ELINK_ERROR_CODE::FILE_TRANSFER_FAILED: return PrinterNetworkErrorCode::FILE_TRANSFER_FAILED;
+    case elink::ELINK_ERROR_CODE::FILE_NOT_FOUND: return PrinterNetworkErrorCode::FILE_NOT_FOUND;
+    case elink::ELINK_ERROR_CODE::FILE_ALREADY_EXISTS: return PrinterNetworkErrorCode::FILE_ALREADY_EXISTS;
+    case elink::ELINK_ERROR_CODE::FILE_ACCESS_DENIED: return PrinterNetworkErrorCode::FILE_ACCESS_DENIED;
+    case elink::ELINK_ERROR_CODE::PRINTER_NOT_FOUND: return PrinterNetworkErrorCode::PRINTER_NOT_FOUND;
+    case elink::ELINK_ERROR_CODE::PRINTER_CONNECTION_ERROR: return PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR;
+    case elink::ELINK_ERROR_CODE::PRINTER_CONNECTION_LIMIT_EXCEEDED: return PrinterNetworkErrorCode::PRINTER_CONNECTION_LIMIT_EXCEEDED;
+    case elink::ELINK_ERROR_CODE::PRINTER_ALREADY_CONNECTED: return PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED;
+    case elink::ELINK_ERROR_CODE::PRINTER_BUSY: return PrinterNetworkErrorCode::PRINTER_BUSY;
+    case elink::ELINK_ERROR_CODE::PRINTER_COMMAND_FAILED: return PrinterNetworkErrorCode::PRINTER_COMMAND_FAILED;
+    case elink::ELINK_ERROR_CODE::PRINTER_INTERNAL_ERROR: return PrinterNetworkErrorCode::PRINTER_INTERNAL_ERROR;
+    case elink::ELINK_ERROR_CODE::PRINTER_INVALID_PARAMETER: return PrinterNetworkErrorCode::PRINTER_INVALID_PARAMETER;
+    case elink::ELINK_ERROR_CODE::PRINTER_INVALID_RESPONSE: return PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE;
+    case elink::ELINK_ERROR_CODE::PRINTER_ACCESS_DENIED: return PrinterNetworkErrorCode::PRINTER_ACCESS_DENIED;
+
     default: return PrinterNetworkErrorCode::UNKNOWN_ERROR;
     }
 }
@@ -254,7 +246,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
 
         auto elinkResult = elink::ElegooLink::getInstance().connectPrinter(connectionParams);
         resultCode    = parseElegooResult(elinkResult.code);
-        if (elinkResult.code == elink::ElegooError::SUCCESS) {
+        if (elinkResult.code == elink::ELINK_ERROR_CODE::SUCCESS) {
             if (elinkResult.data.has_value() && elinkResult.data.value().isConnected && elinkResult.data.value().printerInfo.printerId == printerNetworkInfo.printerId) {      
                 auto addPrinter = elinkResult.data.value().printerInfo;
                 PrinterNetworkInfo info = convertFromElegooPrinterInfo(addPrinter);
@@ -300,7 +292,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
         discoveryParams.enableAutoRetry   = true;
         auto elinkResult = elink::ElegooLink::getInstance().startPrinterDiscovery(discoveryParams);
         resultCode  = parseElegooResult(elinkResult.code);
-        if (elinkResult.code == elink::ElegooError::SUCCESS && elinkResult.data.has_value()) {
+        if (elinkResult.code == elink::ELINK_ERROR_CODE::SUCCESS && elinkResult.data.has_value()) {
             for (const auto& printer : elinkResult.value().printers) {
                 PrinterNetworkInfo info = convertFromElegooPrinterInfo(printer);
                 discoverPrinters.push_back(info);
@@ -324,7 +316,7 @@ bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status, int
     for(int i = 0; i < tryCount; i++) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         auto elinkResult = elink::ElegooLink::getInstance().getPrinterStatus({printerId});
-        if (elinkResult.code == elink::ElegooError::SUCCESS) {
+        if (elinkResult.code == elink::ELINK_ERROR_CODE::SUCCESS) {
             const auto& statusData = elinkResult.value();
             if(statusData.printerStatus.state == elink::PrinterState::IDLE) {
                 isBusy = false;

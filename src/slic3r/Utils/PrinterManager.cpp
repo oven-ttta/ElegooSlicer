@@ -258,7 +258,7 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterHost(const std::string& 
             wxLogWarning("Failed to get printer attributes for added printer %s %s %s: %s", printer.value().host, printer.value().printerName,
                          printer.value().printerModel, attributes.message.c_str());
             network->disconnectFromPrinter();
-            return PrinterNetworkResult<bool>(attributes.isSuccess() ? PrinterNetworkErrorCode::PRINTER_RESPONSE_INVALID : attributes.code, false);
+            return PrinterNetworkResult<bool>(attributes.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : attributes.code,false);
         }
     }
     wxLogWarning("Failed to connect to printer, host: %s, printerName: %s, printerModel: %s, hostType: %s", printer.value().host, printer.value().printerName,
@@ -310,7 +310,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
             wxLogWarning("Failed to get printer attributes for added printer %s %s %s: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                          printerNetworkInfo.printerModel, attributes.message.c_str());
             network->disconnectFromPrinter();
-            return PrinterNetworkResult<bool>(attributes.isSuccess() ? PrinterNetworkErrorCode::PRINTER_RESPONSE_INVALID : attributes.code, false);
+            return PrinterNetworkResult<bool>(attributes.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : attributes.code,false);
         }
         printerNetworkInfo.connectStatus = PRINTER_CONNECT_STATUS_CONNECTED;
         addPrinterNetwork(network);
@@ -321,7 +321,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     } 
     wxLogWarning("Failed to add printer %s %s %s: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
         printerNetworkInfo.printerModel, connectResult.message.c_str());
-    return PrinterNetworkResult<bool>(connectResult.isSuccess() ? PrinterNetworkErrorCode::PRINTER_RESPONSE_INVALID : connectResult.code, false);          
+    return PrinterNetworkResult<bool>(connectResult.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : connectResult.code,false);
 }
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPrinter()
@@ -430,13 +430,13 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
         }
         if (printer.value().connectStatus != PRINTER_CONNECT_STATUS_CONNECTED) {
             wxLogError("Printer not connected, File name: %s", params.fileName.c_str());
-            result.code = PrinterNetworkErrorCode::PRINTER_OFFLINE;
+            result.code = PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR;
             break;
         }
         std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(params.printerId);
         if(!network) {
             wxLogError("No network connection for printer: %s", params.printerId.c_str());
-            result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NOT_FOUND, false);
+            result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
             break;
         }
         result = network->sendPrintFile(params);
@@ -482,13 +482,13 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
     }
     if (printer.value().connectStatus != PRINTER_CONNECT_STATUS_CONNECTED) {
         wxLogError("Printer not connected, printerId: %s", printerId.c_str());
-        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::PRINTER_OFFLINE, PrinterMmsGroup());
+        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR, PrinterMmsGroup());
     }
 
     std::shared_ptr<IPrinterNetwork>  network = getPrinterNetwork(printerId);
     if (!network) {
         wxLogError("No network connection for printer: %s", printerId.c_str());
-        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::NOT_FOUND, PrinterMmsGroup());
+        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterMmsGroup());
     }
     PrinterNetworkResult<PrinterMmsGroup>   result = network->getPrinterMmsInfo();
 
@@ -497,7 +497,8 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
     }
     wxLogWarning("Failed to get printer mms info: %s %s %s, error: %s", printer.value().host, printer.value().printerName,
                  printer.value().printerModel, result.message.c_str());
-    return PrinterNetworkResult<PrinterMmsGroup>(result.isSuccess() ? result.code : PrinterNetworkErrorCode::PRINTER_RESPONSE_INVALID, PrinterMmsGroup());
+    return PrinterNetworkResult<PrinterMmsGroup>(result.isSuccess() ? result.code : PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE,
+                                                 PrinterMmsGroup());
 }
 
 
