@@ -75,6 +75,58 @@ class TranslationSyncer:
             
         return translations
     
+    def parse_elegoo_po_file_all(self, file_path):
+        """Parse ElegooSlicer PO file - get ALL msgid->msgstr (only non-empty msgstr)."""
+        translations = {}
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            
+            # Pre-filter: remove empty lines and comment lines
+            lines = [line.strip() for line in lines if line.strip() and not line.strip().startswith('#~')]
+            
+            i = 0
+            while i < len(lines):
+                line = lines[i]
+                
+                if line.startswith('msgid '):
+                    # Read msgid content
+                    msgid_content = line[line.find('"'):].strip()
+                    i += 1
+                    
+                    # Read multi-line msgid
+                    while i < len(lines) and lines[i].startswith('"'):
+                        msgid_content += "\n" + lines[i]
+                        i += 1
+                    
+                    # Skip empty msgid
+                    if msgid_content == '""':
+                        continue
+                    
+                    # Read msgstr content
+                    if i < len(lines) and lines[i].startswith('msgstr '):
+                        msgstr_content = lines[i][lines[i].find('"'):].strip()
+                        i += 1
+                        
+                        # Read multi-line msgstr
+                        while i < len(lines) and lines[i].startswith('"'):
+                            msgstr_content += "\n" + lines[i]
+                            i += 1
+                        
+                        # Save only if msgstr is non-empty
+                        if msgstr_content and msgstr_content != '""':
+                            translations[msgid_content] = msgstr_content
+                    else:
+                        # No msgstr found - skip this entry
+                        continue
+                else:
+                    i += 1
+        except Exception as e:
+            print(f"Error parsing {file_path}: {e}")
+        
+        return translations
+    
     def parse_orca_po_file(self, file_path):
         """Parse OrcaSlicer PO file - get all translations for lookup"""
         translations = {}
@@ -232,6 +284,7 @@ class TranslationSyncer:
         total_updated = 0
         all_changes = {}  # 记录所有文件的修改信息
         all_need_translation = {}  # 记录所有需要翻译的条目
+        all_translated = {}  # 记录已翻译条目（从 ElegooSlicer）
         
         for i, po_file in enumerate(po_files, 1):
             language_code = po_file.parent.name
@@ -239,12 +292,13 @@ class TranslationSyncer:
             
             # Parse ElegooSlicer PO file - only get msgid that need translation
             elegoo_translations = self.parse_elegoo_po_file(po_file)
+            # Parse ALL ElegooSlicer entries that are already translated
+            elegoo_translated = self.parse_elegoo_po_file_all(po_file)
 
-            print(f"  ElegooSlicer: {len(elegoo_translations)} translations need updating")
+            print(f"  ElegooSlicer: {len(elegoo_translations)} translations need updating, {len(elegoo_translated)} already translated")
             
-            if not elegoo_translations:
-                print(f"  No translations need updating, skipping")
-                continue
+            # Store entries for reporting regardless of whether updates are needed
+            all_translated[language_code] = elegoo_translated
             
             # Store all entries that need translation
             all_need_translation[language_code] = elegoo_translations
@@ -306,11 +360,11 @@ class TranslationSyncer:
         print(f"\nSync completed! Total translations updated: {total_updated}")
         
         # Generate Excel report
-        if all_need_translation:
-            self.generate_excel_report(all_need_translation, all_changes)
+        if all_need_translation or all_translated:
+            self.generate_excel_report(all_need_translation, all_changes, all_translated)
             print(f"Excel report generated: translation_changes.xlsx")
     
-    def generate_excel_report(self, all_need_translation, all_changes):
+    def generate_excel_report(self, all_need_translation, all_changes, all_translated):
         """Generate Excel report with translation changes"""
         wb = Workbook()
         
@@ -321,7 +375,10 @@ class TranslationSyncer:
         header_font = Font(bold=True)
         header_fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
         
-        for language_code, translations_to_update in all_need_translation.items():
+        # Ensure we iterate over all languages present in either dict
+        language_codes = set(all_need_translation.keys()) | set(all_translated.keys())
+        for language_code in sorted(language_codes):
+            translations_to_update = all_need_translation.get(language_code, {})
             # Create worksheet for each language
             ws = wb.create_sheet(title=language_code)
             
@@ -373,6 +430,22 @@ class TranslationSyncer:
             # Auto-adjust column widths
             ws.column_dimensions['A'].width = 80
             ws.column_dimensions['B'].width = 80
+
+            # Also export already translated entries into a second sheet
+            translated_entries = all_translated.get(language_code, {})
+            ws_t = wb.create_sheet(title=f"{language_code}_translated")
+            ws_t['A1'] = 'msgid'
+            ws_t['B1'] = 'Elegoo Translation'
+            ws_t['A1'].font = header_font
+            ws_t['A1'].fill = header_fill
+            ws_t['B1'].font = header_font
+            ws_t['B1'].fill = header_fill
+
+            for i, (msgid, translation) in enumerate(sorted(translated_entries.items()), 2):
+                ws_t[f'A{i}'] = msgid
+                ws_t[f'B{i}'] = translation
+            ws_t.column_dimensions['A'].width = 80
+            ws_t.column_dimensions['B'].width = 80
         
         # Save the workbook
         wb.save('translation_changes.xlsx')

@@ -30,7 +30,10 @@ public:
 private:
     void setupIPCHandlers();
     void onClosePrinterTab(wxAuiNotebookEvent& event);
- 
+    void onTabBeginDrag(wxAuiNotebookEvent& event);
+    void onTabDragMotion(wxAuiNotebookEvent& event);
+    void onTabEndDrag(wxAuiNotebookEvent& event);
+    bool mFirstTabClicked{false};
 
     webviewIpc::IPCResult getPrinterList();
     webviewIpc::IPCResult getPrinterListStatus();

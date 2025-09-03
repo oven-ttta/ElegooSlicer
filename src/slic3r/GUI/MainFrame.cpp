@@ -254,7 +254,7 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
     default:
     case GUI_App::EAppMode::Editor:
         m_taskbar_icon = std::make_unique<ElegooSlicerTaskBarIcon>(wxTBI_DOCK);
-        m_taskbar_icon->SetIcon(wxIcon(Slic3r::var("elegoo-logo.png"), wxBITMAP_TYPE_PNG), "ElegooSlicer");
+        m_taskbar_icon->SetIcon(wxIcon(Slic3r::var("elegoo_logo.png"), wxBITMAP_TYPE_PNG), "ElegooSlicer");
         break;
     case GUI_App::EAppMode::GCodeViewer:
         break;

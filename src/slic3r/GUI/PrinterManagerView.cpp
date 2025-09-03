@@ -8,6 +8,11 @@
 #include <wx/string.h>
 #include <wx/toolbar.h>
 #include <wx/textdlg.h>
+#include <wx/dc.h>
+#include <wx/bitmap.h>
+#include <wx/aui/auibook.h>
+#include <wx/aui/aui.h>
+#include <wx/aui/auibar.h>
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <wx/webview.h>
 #include "slic3r/Utils/PrinterManager.hpp"
@@ -22,6 +27,15 @@
 #include "slic3r/Utils/WebviewIPCManager.h"
 
 #define FIRST_TAB_NAME _L("Connected Printer")
+#define TAB_MAX_WIDTH 200
+#define TAB_MIN_WIDTH 20
+#define TAB_PADDING 8
+#define TAB_ICON_TEXT_SPACING 8
+#define TAB_CLOSE_BUTTON_SIZE 20
+#define TAB_CLOSE_BUTTON_MARGIN 6
+#define TAB_SEPARATOR_WIDTH 1
+#define TAB_HEIGHT 28
+#define TAB_BORDER_WIDTH 2
 
 namespace Slic3r {
 namespace GUI {
@@ -33,33 +47,153 @@ private:
         return GUI_App::dark_mode();
     }
 
-    void getColorScheme(wxColour& activeTab, wxColour& inactiveTab, wxColour& activeText, 
-                       wxColour& inactiveText, wxColour& background, wxColour& border, wxColour &tabHeaderBackground) const {
+    wxAuiNotebook* getNotebookFrom(wxWindow* wnd) const {
+        wxWindow* current = wnd;
+        while (current) {
+            if (auto nb = dynamic_cast<wxAuiNotebook*>(current)) {
+                return nb;
+            }
+            current = current->GetParent();
+        }
+        return nullptr;
+    }
+
+    int calculateTabWidth(wxWindow* wnd, bool isFirstTab) const {
+        if (isFirstTab) {
+            return TAB_MAX_WIDTH;
+        }
+        
+        wxAuiNotebook* notebook = getNotebookFrom(wnd);
+        if (!notebook) {
+            return TAB_MAX_WIDTH;
+        }
+        
+        const int totalPages = notebook->GetPageCount();
+        const int otherPages = totalPages - 1; // Exclude first tab
+        
+        if (otherPages <= 0) {
+            return TAB_MAX_WIDTH;
+        }
+        
+        const int totalWidth = notebook->GetClientSize().x;
+        const int availableWidth = totalWidth - TAB_MAX_WIDTH;
+        
+        if (availableWidth <= 0) {
+            return TAB_MIN_WIDTH;
+        }
+        
+        const int avgWidth = availableWidth / otherPages;
+        return std::max(TAB_MIN_WIDTH, std::min(TAB_MAX_WIDTH, avgWidth));
+    }
+
+    void drawTabContent(wxDC& dc, const wxRect& tab_rect, const wxBitmap& icon, 
+                       const wxString& text, const wxColour& text_colour, bool isFirstTab) const {
+        dc.SetTextForeground(text_colour);
+        
+        const wxSize icon_size = icon.IsOk() ? icon.GetSize() : wxSize(0, 0);
+        const wxSize text_size = dc.GetTextExtent(text);
+        
+        // Calculate positions
+        const int icon_x = tab_rect.x + TAB_PADDING;
+        const int text_x = icon_x + icon_size.x + (icon.IsOk() ? TAB_ICON_TEXT_SPACING : 0);
+        const int icon_y = tab_rect.y + (tab_rect.height - icon_size.y) / 2;
+        const int text_y = tab_rect.y + (tab_rect.height - text_size.y) / 2;
+        
+        // Draw icon
+        if (icon.IsOk()) {
+            dc.DrawBitmap(icon, icon_x, icon_y);
+        }
+        
+        // Draw text with clipping (no ellipsis)
+        const int close_button_space = isFirstTab ? 0 : (TAB_CLOSE_BUTTON_SIZE + TAB_CLOSE_BUTTON_MARGIN);
+        const int text_max_width = tab_rect.x + tab_rect.width - text_x - close_button_space;
+        
+        if (text_max_width > 0) {
+            wxRect text_clip(text_x, tab_rect.y, text_max_width, tab_rect.height);
+            dc.SetClippingRegion(text_clip);
+            dc.DrawText(text, text_x, text_y);
+            dc.DestroyClippingRegion();
+        }
+    }
+
+    void drawCloseButton(wxDC& dc, const wxRect& tab_rect, int tabWidth, 
+                        int close_button_state, wxRect* out_button_rect) const {
+        wxRect close_rect(
+            tab_rect.x + tabWidth - TAB_CLOSE_BUTTON_SIZE - TAB_CLOSE_BUTTON_MARGIN,
+            tab_rect.y + (tab_rect.height - TAB_CLOSE_BUTTON_SIZE) / 2,
+            TAB_CLOSE_BUTTON_SIZE,
+            TAB_CLOSE_BUTTON_SIZE
+        );
+        
+        if (out_button_rect) *out_button_rect = close_rect;
+        
+        // Simple SVG with color modification
+        wxBitmap close_icon = create_scaled_bitmap("topbar_close", nullptr, TAB_CLOSE_BUTTON_SIZE);
+        if (close_icon.IsOk()) {
+            // Change color based on state
+            if (close_button_state == wxAUI_BUTTON_STATE_HOVER || close_button_state == wxAUI_BUTTON_STATE_PRESSED) {
+                wxImage img = close_icon.ConvertToImage();
+                wxColour new_color = isDarkMode() ? wxColour(255, 120, 120) : wxColour(200, 0, 0);
+                
+                // Simple color replacement: replace dark pixels with new color
+                for (int y = 0; y < img.GetHeight(); y++) {
+                    for (int x = 0; x < img.GetWidth(); x++) {
+                        if (img.GetAlpha(x, y) > 0) { // Only process non-transparent pixels
+                            img.SetRGB(x, y, new_color.Red(), new_color.Green(), new_color.Blue());
+                        }
+                    }
+                }
+                close_icon = wxBitmap(img);
+            }
+            
+            const int icon_x = close_rect.x + (close_rect.width - close_icon.GetWidth()) / 2;
+            const int icon_y = close_rect.y + (close_rect.height - close_icon.GetHeight()) / 2;
+            dc.DrawBitmap(close_icon, icon_x, icon_y);
+        }
+    }
+
+    void getColorScheme(wxColour& activeTab, wxColour& inactiveTab, wxColour& hoverTab, wxColour& activeText, 
+                       wxColour& inactiveText, wxColour& background, wxColour& border, wxColour &tabHeaderBackground,
+                       wxColour& separator) const {
         if (isDarkMode()) {
             // dark mode color scheme
-            activeTab = wxColour(0, 120, 189);      // active tab: dark blue
+            activeTab = wxColour(107, 107, 107);     
             inactiveTab = wxColour(45, 45, 48);   // inactive tab: light gray
+            hoverTab = wxColour(70, 70, 70);      // hover tab: medium gray
             activeText = wxColour(255, 255, 255);    // active tab text: white
             inactiveText = wxColour(200, 200, 200);  // inactive tab text: light gray
             background = wxColour(45, 45, 45);       // tab bar background: dark gray
-            border =  wxColour(45, 45, 45);           // border: dark gray
+            border =  wxColour(0, 0, 0);           // border: black
             tabHeaderBackground = wxColour(45, 45, 45);   // tab header background: dark gray
+            separator = wxColour(80, 80, 80);        
         } else {
             // light mode color scheme
-            activeTab = wxColour(0, 120, 189);      // active tab: steel blue
+            activeTab = wxColour(107, 107, 107);     
             inactiveTab = wxColour(56, 68, 70);      // inactive tab: dark gray
+            hoverTab = wxColour(80, 90, 95);        // hover tab: lighter gray
             activeText = wxColour(255, 255, 255);    // active tab text: white
             inactiveText = wxColour(200, 200, 200);     // inactive tab text: dark gray
             background = wxColour(250, 250, 250);    // tab bar background: almost white
-            border = wxColour(250, 250, 250);  // border: light gray
+            border = wxColour(0, 0, 0);  // border: black
             tabHeaderBackground = wxColour(56, 68, 70);
+            separator = wxColour(120, 120, 120); 
         }
+    }
+
+    // Get icon for tab based on caption
+    wxBitmap getTabIcon(const wxString& caption) const {
+        if (caption == FIRST_TAB_NAME) {
+            return create_scaled_bitmap("printer_manager", nullptr, 16);  
+        } else {
+            return create_scaled_bitmap("elegoo_tab", nullptr, 12);  
+        }
+        return wxBitmap();
     }
 
 public:
     TabArt() {
-        wxColour activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground;
-        getColorScheme(activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground);
+        wxColour activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator;
+        getColorScheme(activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator);
 
         SetColour(inactiveTab);        // inactive tab background color
         SetActiveColour(activeTab);    // active tab background color
@@ -76,147 +210,113 @@ public:
                  wxRect* out_button_rect,
                  int* x_extent) override
     {
-        bool isFirstTab = (page.caption == FIRST_TAB_NAME);
+        const bool isFirstTab = (page.caption == FIRST_TAB_NAME);
+        const bool isActive = page.active;
 
-        // If it is the first tab, hide the close button
-        if (isFirstTab) {
-            close_button_state = wxAUI_BUTTON_STATE_HIDDEN;
-        }
-
-        // Completely custom drawing, do not call the parent class method to avoid white edge issues
-        bool isActive = page.active;
+        // Get color scheme
+        wxColour activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator;
+        getColorScheme(activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator);
+        
+        // Calculate tab width
+        int tabWidth = calculateTabWidth(wnd, isFirstTab);
+  
         wxRect tab_rect = in_rect;
+        tab_rect.width = tabWidth - TAB_SEPARATOR_WIDTH;   
+        tab_rect.height = TAB_HEIGHT;
 
-        wxColour tab_colour, text_colour, border_colour, background_colour, inactive_tab_colour, inactive_text_colour, tab_header_background_colour;
-        getColorScheme(tab_colour, inactive_tab_colour, text_colour, inactive_text_colour, background_colour, border_colour, tab_header_background_colour);
-
-        //  Select color based on tab state
-        if (isActive) {
-        } else {
-            tab_colour = inactive_tab_colour;
-            text_colour = inactive_text_colour;
-        }
-
-        // Calculate the actual size of the tab, text area
+        // Get icon and text
+        wxBitmap icon = getTabIcon(page.caption);
         wxString text = page.caption;
         wxSize text_size = dc.GetTextExtent(text);
+        wxSize icon_size = icon.IsOk() ? icon.GetSize() : wxSize(0, 0);
+        
 
-        // Calculate tab width: text width + left/right margin + close button space
-        int tab_width = text_size.x + 16; // Basic left/right margin
-        if (!isFirstTab && close_button_state != wxAUI_BUTTON_STATE_HIDDEN) {
-            tab_width += 20; // Close button space
+        // Check if mouse is over this tab
+        wxPoint mousePos = wnd->ScreenToClient(wxGetMousePosition());
+        bool mouseOverTab = tab_rect.Contains(mousePos);
+        
+        // Select colors based on active state and hover state
+        wxColour tab_colour;
+        if (isActive) {
+            tab_colour = activeTab;
+        } else if (mouseOverTab) {
+            tab_colour = hoverTab;
+        } else {
+            tab_colour = inactiveTab;
         }
-
-        // Adjust tab_rect width
-        tab_rect.width = tab_width;
-
-        // Completely fill the background to avoid white edges
+        
+        const wxColour text_colour = isActive ? activeText : inactiveText;
+        
+        // Draw tab background for active tab or hovered tab except first tab is active
         dc.SetBrush(wxBrush(tab_colour));
-        dc.SetPen(wxPen(tab_colour, 0));
-        dc.DrawRectangle(tab_rect);
-
-        // Draw text
-        dc.SetTextForeground(text_colour);
-
-        // Calculate text position
-        wxPoint text_pos;
-        text_pos.x = tab_rect.x + 8; // Left margin
-        text_pos.y = tab_rect.y + (tab_rect.height - text_size.y) / 2;
-        dc.DrawText(text, text_pos);
-
-        // Set close button position
-        wxRect close_rect;
-        if (!isFirstTab && close_button_state != wxAUI_BUTTON_STATE_HIDDEN) {
-            close_rect.x = tab_rect.x + tab_rect.width - 18;
-            close_rect.y = tab_rect.y + (tab_rect.height - 14) / 2;
-            close_rect.width = 14;
-            close_rect.height = 14;
-            
-            if (out_button_rect) *out_button_rect = close_rect;
-
-            // Dark mode and light mode close button colors
-            wxColour close_hover_bg, close_normal_colour, close_hover_colour;
-            if (isDarkMode()) {
-                close_hover_bg = wxColour(80, 40, 40);     // Dark red background
-                close_normal_colour = wxColour(200, 200, 200); // Gray X
-                close_hover_colour = wxColour(255, 120, 120);  // Light red X
-            } else {
-                close_hover_bg = wxColour(255, 200, 200);  // Light red background
-                close_normal_colour = wxColour(200, 200, 200); // Gray X
-                close_hover_colour = wxColour(200, 0, 0);      // Red X
-            }
-
-            // Draw close button background
-            if (close_button_state == wxAUI_BUTTON_STATE_HOVER) {
-                dc.SetBrush(wxBrush(close_hover_bg));
-                dc.SetPen(wxPen(tab_colour, 0));
-                dc.DrawRoundedRectangle(close_rect, 3);
-            }
-
-            // Draw close button X - centered in 14x14 area
-            wxColour close_colour = (close_button_state == wxAUI_BUTTON_STATE_HOVER) ? 
-                close_hover_colour : close_normal_colour;
-            dc.SetPen(wxPen(close_colour, 2));
-            
-            // Calculate center point of the 14x14 button
-            int center_x = close_rect.x + close_rect.width / 2;   // 7 pixels from left
-            int center_y = close_rect.y + close_rect.height / 2;  // 7 pixels from top
-            int half_size = 3; // X extends 2 pixels in each direction from center
-
-            // Draw X lines centered in the button
-            dc.DrawLine(center_x - half_size, center_y - half_size, 
-                       center_x + half_size, center_y + half_size);
-            dc.DrawLine(center_x + half_size, center_y - half_size, 
-                       center_x - half_size, center_y + half_size);
+        dc.SetPen(wxPen(tab_colour, 0)); 
+        if ((!isFirstTab && isActive) || (mouseOverTab && !isActive)) {
+            dc.DrawRectangle(tab_rect);
         }
+        
+        // Draw icon and text
+        drawTabContent(dc, tab_rect, icon, text, text_colour, isFirstTab);
 
+        // Draw close button for non-first tabs when mouse is over the tab or tab is active
+        if (!isFirstTab && (isActive || mouseOverTab)) {
+            drawCloseButton(dc, tab_rect, tabWidth, close_button_state, out_button_rect);
+        }
+        
+        // Draw separator
+        DrawTabSeparator(dc, tab_rect.x + tab_rect.width, tab_rect.y, tab_rect.height);
+             
         // Set output parameters
         if (out_tab_rect) *out_tab_rect = tab_rect;
-        if (x_extent) *x_extent = tab_rect.width;
+        if (x_extent) *x_extent = tabWidth;
     }
     
     void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect) override
     {
-        wxColour activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground;
-        getColorScheme(activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground);
-
+        wxColour activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator;
+        getColorScheme(activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator);
 
         dc.SetPen(wxPen(tabHeaderBackground, 1));
         dc.SetBrush(wxBrush(tabHeaderBackground));
         dc.DrawRectangle(rect);
+
+        // Draw borders using the border color from color scheme
+        dc.SetPen(wxPen(border, TAB_BORDER_WIDTH));
+        // Bottom border
+        dc.DrawLine(rect.x, rect.y + TAB_HEIGHT + 1, rect.x + rect.width, rect.y + TAB_HEIGHT + 1);
     }
 
-    int GetBorderWidth(
-        wxWindow* wnd) override{
-            return 0; // No border width needed
+    int GetBorderWidth(wxWindow* wnd) override {
+        return 0; // Reserve space for top and bottom borders
     }
 
+    wxSize GetTabSize(wxDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmap& bitmap, bool active, int close_button_state, int* x_extent) override {
+        // Get the default tab size
+        wxSize default_size = wxAuiDefaultTabArt::GetTabSize(dc, wnd, caption, bitmap, active, close_button_state, x_extent);  
+        // Return custom size with modified height
+        return wxSize(default_size.x, TAB_HEIGHT);
+    }
     void DrawBorder(wxDC& dc, wxWindow* wnd, const wxRect& rect) override
     {
-        wxColour activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground;
-        getColorScheme(activeTab, inactiveTab, activeText, inactiveText, background, border, tabHeaderBackground);
+        wxColour activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator;
+        getColorScheme(activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator);
 
         // Draw the main background area
         dc.SetBrush(wxBrush(background));
         dc.SetPen(wxPen(background, 1));
         dc.DrawRectangle(rect);
 
-        // Draw only the top 26px area with tabHeaderBackground
-        const int topAreaHeight = 25;
-        if (rect.height >= topAreaHeight) {
-            wxRect topRect = rect;
-            topRect.height = topAreaHeight;
-            dc.SetBrush(wxBrush(tabHeaderBackground));
-            dc.SetPen(wxPen(tabHeaderBackground, 1));
-            dc.DrawRectangle(topRect);
-        }
-        if(isDarkMode()){
-            dc.SetPen(wxPen(wxColour(0x22, 0x22, 0x22), 1));
-            dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y);
-        }else{
-            dc.SetPen(wxPen(wxColour(0x60, 0x60, 0x60), 1));
-            dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y);
-        }
+        // Draw borders using the border color from color scheme
+        dc.SetPen(wxPen(border, TAB_BORDER_WIDTH));
+        // Top border
+        dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y);
+    }
+
+    // Draw separator between tabs
+    void DrawTabSeparator(wxDC& dc, int x, int y, int height) const
+    {
+        wxColour separator_color = isDarkMode() ? wxColour(80, 80, 80) : wxColour(120, 120, 120);
+        dc.SetPen(wxPen(separator_color, TAB_SEPARATOR_WIDTH));
+        dc.DrawLine(x, y, x, y + height);
     }
 };
 
@@ -254,6 +354,10 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     mTabBar->SetSelection(0);
     Bind(wxEVT_CLOSE_WINDOW, &PrinterManagerView::onClose, this);
     mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &PrinterManagerView::onClosePrinterTab, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_BEGIN_DRAG, &PrinterManagerView::onTabBeginDrag, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_DRAG_MOTION, &PrinterManagerView::onTabDragMotion, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_END_DRAG, &PrinterManagerView::onTabEndDrag, this);
+
 }
 
 PrinterManagerView::~PrinterManagerView() {
@@ -301,6 +405,7 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId)
     }
 
     view->load_url(url);
+
     mTabBar->AddPage(view, from_u8(printerInfo.printerName));
     mTabBar->SetSelection(mTabBar->GetPageCount() - 1);
     mPrinterViews[printerId] = view;
@@ -328,6 +433,48 @@ void PrinterManagerView::onClosePrinterTab(wxAuiNotebookEvent& event)
     }
     event.Skip();
 }
+
+void PrinterManagerView::onTabBeginDrag(wxAuiNotebookEvent& event)
+{
+    // Prevent dragging the first tab (index 0)
+    if ( event.GetSelection() == 0  ) {
+        event.Veto();
+        mFirstTabClicked = true;
+        return;
+    }
+    mFirstTabClicked = false;
+    event.Skip();
+}
+
+void PrinterManagerView::onTabDragMotion(wxAuiNotebookEvent& event)
+{
+    if (mFirstTabClicked) {
+        event.Veto();
+        return;
+    }
+    // Prevent dropping at position 0
+    wxPoint screenPt = wxGetMousePosition();
+    wxPoint nbPt = mTabBar->ScreenToClient(screenPt);
+    long flags = 0;
+    int targetIndex = mTabBar->HitTest(nbPt, &flags);   
+    if (targetIndex == 0) {
+        event.Veto();
+        return;
+    }
+    event.Skip();
+}
+
+void PrinterManagerView::onTabEndDrag(wxAuiNotebookEvent& event)
+{
+    if (mFirstTabClicked) {
+        event.Veto();
+        return;
+    }
+    event.Skip();
+}
+
+
+
 void PrinterManagerView::setupIPCHandlers()
 {
     if (!m_ipc) return;
