@@ -25,7 +25,7 @@ public:
     PrinterManagerView(wxWindow *parent);
     virtual ~PrinterManagerView();
     void onClose(wxCloseEvent& evt);
-    void openPrinterTab(const std::string& printerId);
+    void openPrinterTab(const std::string& printerId, bool saveState = true);
 
 private:
     void setupIPCHandlers();
@@ -33,6 +33,7 @@ private:
     void onTabBeginDrag(wxAuiNotebookEvent& event);
     void onTabDragMotion(wxAuiNotebookEvent& event);
     void onTabEndDrag(wxAuiNotebookEvent& event);
+    void onTabChanged(wxAuiNotebookEvent& event);
     bool mFirstTabClicked{false};
 
     webviewIpc::IPCResult getPrinterList();
@@ -46,6 +47,10 @@ private:
     webviewIpc::IPCResult deletePrinter(const std::string& printerId);
     webviewIpc::IPCResult browseCAFile();
 
+    // Tab persistence methods
+    void saveTabState();
+    void loadTabState();
+    
     wxAuiNotebook* mTabBar;
     wxWebView* mBrowser;
     webviewIpc::WebviewIPCManager* m_ipc;

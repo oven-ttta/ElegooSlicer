@@ -25,6 +25,8 @@
 #include <thread>
 #include <boost/filesystem.hpp>
 #include "slic3r/Utils/WebviewIPCManager.h"
+#include <fstream>
+#include <mutex>
 
 #define FIRST_TAB_NAME _L("Connected Printer")
 #define TAB_MAX_WIDTH 200
@@ -39,6 +41,9 @@
 
 namespace Slic3r {
 namespace GUI {
+
+// Static mutex for tab state file operations
+static std::mutex s_tabStateMutex;
 
 class TabArt : public wxAuiDefaultTabArt
 {
@@ -351,17 +356,24 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/printer_manager/printer.html").make_preferred().string());
     TargetUrl = "file://" + TargetUrl;
     mBrowser->LoadURL(TargetUrl);
-    mTabBar->SetSelection(0);
+    // Load saved tab state
+    loadTabState();
+
     Bind(wxEVT_CLOSE_WINDOW, &PrinterManagerView::onClose, this);
     mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &PrinterManagerView::onClosePrinterTab, this);
     mTabBar->Bind(wxEVT_AUINOTEBOOK_BEGIN_DRAG, &PrinterManagerView::onTabBeginDrag, this);
     mTabBar->Bind(wxEVT_AUINOTEBOOK_DRAG_MOTION, &PrinterManagerView::onTabDragMotion, this);
     mTabBar->Bind(wxEVT_AUINOTEBOOK_END_DRAG, &PrinterManagerView::onTabEndDrag, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &PrinterManagerView::onTabChanged, this);
+
 
 }
 
 PrinterManagerView::~PrinterManagerView() {
     m_isDestroying = true;
+    
+    // Save tab state before destruction
+    saveTabState();
     
     // Reset the life tracker to signal all async operations that this object is being destroyed
     m_lifeTracker.reset();
@@ -372,7 +384,7 @@ PrinterManagerView::~PrinterManagerView() {
     }
 }
 
-void PrinterManagerView::openPrinterTab(const std::string& printerId)
+void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveState)
 {
     auto it = mPrinterViews.find(printerId);
     if (it != mPrinterViews.end()) {
@@ -410,6 +422,10 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId)
     mTabBar->SetSelection(mTabBar->GetPageCount() - 1);
     mPrinterViews[printerId] = view;
     Layout();
+    
+    // Update tab state after adding new tab
+    if(saveState)
+        saveTabState();
 }
 
 void PrinterManagerView::onClose(wxCloseEvent& evt)
@@ -431,6 +447,10 @@ void PrinterManagerView::onClosePrinterTab(wxAuiNotebookEvent& event)
             break;
         }
     }
+    
+    // Update tab state after closing tab
+    saveTabState();
+    
     event.Skip();
 }
 
@@ -469,7 +489,15 @@ void PrinterManagerView::onTabEndDrag(wxAuiNotebookEvent& event)
     if (mFirstTabClicked) {
         event.Veto();
         return;
-    }
+    }   
+    saveTabState();
+    event.Skip();
+}
+
+void PrinterManagerView::onTabChanged(wxAuiNotebookEvent& event)
+{
+    // Save tab state when active tab changes
+    saveTabState();
     event.Skip();
 }
 
@@ -877,6 +905,104 @@ webviewIpc::IPCResult PrinterManagerView::getPrinterModelList()
     result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
     return result;
 }
+
+void PrinterManagerView::saveTabState()
+{
+    std::lock_guard<std::mutex> lock(s_tabStateMutex);
+    try {
+        nlohmann::json tabState = nlohmann::json::object();
+        nlohmann::json tabs = nlohmann::json::array();
+        
+        // Save all printer tabs (skip the first tab which is always "Connected Printer")
+        for (size_t i = 1; i < mTabBar->GetPageCount(); ++i) {
+            wxWindow* page = mTabBar->GetPage(i);
+            if (page) {
+                // Find the printer ID for this page
+                for (const auto& pair : mPrinterViews) {
+                    if (pair.second == page) {
+                        nlohmann::json tabInfo;
+                        tabInfo["printerId"] = pair.first;
+                        tabInfo["tabName"] = mTabBar->GetPageText(i).ToStdString();
+                        tabs.push_back(tabInfo);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Save current active tab index
+        int activeTabIndex = mTabBar->GetSelection();
+        tabState["tabs"] = tabs;
+        tabState["activeTabIndex"] = activeTabIndex;
+        
+        // Save to file
+        std::string filePath = (boost::filesystem::path(Slic3r::data_dir()) / "user" / "printer_tab_state.json").string();
+        
+        // Ensure directory exists
+        boost::filesystem::path dir = boost::filesystem::path(filePath).parent_path();
+        if (!boost::filesystem::exists(dir)) {
+            boost::filesystem::create_directories(dir);
+        }
+        
+        std::ofstream file(filePath);
+        if (file.is_open()) {
+            file << tabState.dump(4);
+            file.close();
+        }
+    } catch (const std::exception& e) {
+        wxLogError("Failed to save tab state: %s", e.what());
+    }
+}
+
+void PrinterManagerView::loadTabState()
+{
+    std::lock_guard<std::mutex> lock(s_tabStateMutex);
+    try {
+        std::string filePath = (boost::filesystem::path(Slic3r::data_dir()) / "user" / "printer_tab_state.json").string();
+        
+        if (!boost::filesystem::exists(filePath)) {
+            return; // No saved state
+        }
+        
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            return;
+        }
+        
+        nlohmann::json tabState;
+        file >> tabState;
+        file.close();
+        
+        if (!tabState.is_object() || !tabState.contains("tabs")) {
+            return;
+        }
+        
+        nlohmann::json tabs = tabState["tabs"];
+        if (!tabs.is_array()) {
+            return;
+        }
+        
+        // Load tabs in order
+        for (const auto& tabInfo : tabs) {
+            if (tabInfo.contains("printerId")) {
+                std::string printerId = tabInfo["printerId"];
+                openPrinterTab(printerId, false);
+            }
+        }
+        int activeTabIndex = 0;
+        // Restore active tab after all tabs are loaded
+        if (tabState.contains("activeTabIndex")) {
+            activeTabIndex = tabState["activeTabIndex"];
+      
+        }
+        if (activeTabIndex >= 0 && activeTabIndex < mTabBar->GetPageCount()) {
+            mTabBar->SetSelection(activeTabIndex);
+        }
+    } catch (const std::exception& e) {
+        wxLogError("Failed to load tab state: %s", e.what());
+    }
+}
+
 } // GUI
 } // Slic3r
 
