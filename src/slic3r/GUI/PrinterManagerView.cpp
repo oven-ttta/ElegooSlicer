@@ -37,7 +37,7 @@
 #define TAB_CLOSE_BUTTON_MARGIN 6
 #define TAB_SEPARATOR_WIDTH 1
 #define TAB_HEIGHT 28
-#define TAB_BORDER_WIDTH 2
+#define TAB_BORDER_WIDTH 1
 
 namespace Slic3r {
 namespace GUI {
@@ -227,8 +227,7 @@ public:
   
         wxRect tab_rect = in_rect;
         tab_rect.width = tabWidth - TAB_SEPARATOR_WIDTH;   
-        tab_rect.height = TAB_HEIGHT;
-
+        tab_rect.height = tab_rect.height - TAB_BORDER_WIDTH;
         // Get icon and text
         wxBitmap icon = getTabIcon(page.caption);
         wxString text = page.caption;
@@ -280,14 +279,15 @@ public:
         wxColour activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator;
         getColorScheme(activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator);
 
-        dc.SetPen(wxPen(tabHeaderBackground, 1));
+        // Draw header background
+        auto headerRect = rect;
+        dc.SetPen(wxPen(tabHeaderBackground, 0));
         dc.SetBrush(wxBrush(tabHeaderBackground));
         dc.DrawRectangle(rect);
 
-        // Draw borders using the border color from color scheme
+        // Draw header bottom border
         dc.SetPen(wxPen(border, TAB_BORDER_WIDTH));
-        // Bottom border
-        dc.DrawLine(rect.x, rect.y + TAB_HEIGHT + 1, rect.x + rect.width, rect.y + TAB_HEIGHT + 1);
+        dc.DrawLine(rect.x, rect.y + rect.height - TAB_BORDER_WIDTH, rect.x + rect.width, rect.y + rect.height - TAB_BORDER_WIDTH);
     }
 
     int GetBorderWidth(wxWindow* wnd) override {
@@ -305,15 +305,21 @@ public:
         wxColour activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator;
         getColorScheme(activeTab, inactiveTab, hoverTab, activeText, inactiveText, background, border, tabHeaderBackground, separator);
 
-        // Draw the main background area
+        // Draw the main background
         dc.SetBrush(wxBrush(background));
-        dc.SetPen(wxPen(background, 1));
+        dc.SetPen(wxPen(background, 0));
         dc.DrawRectangle(rect);
 
-        // Draw borders using the border color from color scheme
+        auto headerRect = rect;
+        headerRect.height = TAB_HEIGHT + TAB_BORDER_WIDTH + 2;
+        if(headerRect.height <= rect.height) {
+            dc.SetPen(wxPen(tabHeaderBackground, 0));
+            dc.SetBrush(wxBrush(tabHeaderBackground));
+            dc.DrawRectangle(headerRect);
+        }
+        // Draw header top border
         dc.SetPen(wxPen(border, TAB_BORDER_WIDTH));
-        // Top border
-        dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y);
+        dc.DrawLine(headerRect.x, headerRect.y, headerRect.x + headerRect.width, headerRect.y);
     }
 
     // Draw separator between tabs
