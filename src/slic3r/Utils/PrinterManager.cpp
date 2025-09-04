@@ -522,11 +522,7 @@ void PrinterManager::monitorPrinterConnections()
 
                 std::shared_ptr<IPrinterNetwork> activeNetwork = getPrinterNetwork(printerId);
                 
-                if(printer.value().printerStatus == PRINTER_STATUS_ID_NOT_MATCH) {
-                    if(activeNetwork) {
-                        wxLogError("Printer status is not match, host: %s, name: %s, model: %s, printerId: %s", printer.value().host.c_str(), printer.value().printerName.c_str(), printer.value().printerModel.c_str(), printerId.c_str());
-                        deletePrinterNetwork(printerId);
-                    }
+                if(printer.value().printerStatus == PRINTER_STATUS_ID_NOT_MATCH || printer.value().printerStatus == PRINTER_STATUS_AUTH_ERROR) {                   
                     return;
                 }
 
@@ -582,7 +578,14 @@ void PrinterManager::monitorPrinterConnections()
                         wxLogError("Failed to get printer attributes for printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
                     }
                 } else {
-                    wxLogError("Failed to connect to printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
+
+                    if(connectResult.code == PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD || 
+                        connectResult.code == PrinterNetworkErrorCode::INVALID_TOKEN || 
+                        connectResult.code == PrinterNetworkErrorCode::INVALID_ACCESS_CODE || 
+                        connectResult.code == PrinterNetworkErrorCode::INVALID_PIN_CODE) {
+                        PrinterCache::getInstance()->updatePrinterStatus(printerId, PRINTER_STATUS_AUTH_ERROR);                              
+                    }
+                    wxLogError("Failed to connect to printer: %s %s %s, error: %s", printer.value().host, printer.value().printerName, printer.value().printerModel, connectResult.message.c_str());
                     PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
                 }
             });

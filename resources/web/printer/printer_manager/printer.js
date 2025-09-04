@@ -77,6 +77,7 @@ const PrinterManager = {
                 [17]: this.$t("printerManager.rfidRecognizing"),
                 [999]: this.$t("printerManager.error"),
                 [1000]: this.$t("printerManager.idNotMatch"),
+                [1001]: this.$t("printerManager.authError"),
                 [10000]: this.$t("printerManager.unknown")
             };
 
@@ -111,6 +112,19 @@ const PrinterManager = {
                     backgroundColor: 'var(--printer-status-primary-bg)'
                 };
             }
+        },
+
+        shouldShowWarningIcon(printerStatus, connectStatus) {
+            return connectStatus === 0 && (printerStatus === 1000 || printerStatus === 1001);
+        },
+
+        getWarningTooltip(printerStatus) {
+            if (printerStatus === 1000) {
+                return this.$t("printerManager.idNotMatch");
+            } else if (printerStatus === 1001) {
+                return this.$t("printerManager.authError");
+            }
+            return "";
         },
 
         getPrinterProgress(printer) {

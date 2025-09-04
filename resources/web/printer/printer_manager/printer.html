@@ -86,6 +86,11 @@
                             printer.connectStatus)
                             }}</span>
                         <span v-show="printer.printerStatus===1" class="remaining-time">{{ getPrinterRemainingTime(printer) }}</span>
+                        <div v-if="shouldShowWarningIcon(printer.printerStatus, printer.connectStatus)" 
+                             class="warning-icon" 
+                             :title="getWarningTooltip(printer.printerStatus)">
+                            <img src="./img/warning.svg" alt="Warning" width="16" height="16" />
+                        </div>
                     </div>
                 </div>
             </div>
