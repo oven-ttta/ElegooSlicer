@@ -57,6 +57,15 @@ PrintSendDialogEx::PrintSendDialogEx(Plater*                    plater,
 {
     // Bind close event to handle async operations
     Bind(wxEVT_CLOSE_WINDOW, &PrintSendDialogEx::OnCloseWindow, this);
+
+        // Bind ESC key hook to disable ESC key closing the dialog
+    Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& e) {
+        if (e.GetKeyCode() == WXK_ESCAPE) {
+            // Do nothing - disable ESC key closing the dialog
+            return;
+        }
+        e.Skip();
+    });
 }
 
 PrintSendDialogEx::~PrintSendDialogEx()
