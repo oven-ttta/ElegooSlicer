@@ -497,7 +497,7 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
     }
     wxLogWarning("Failed to get printer mms info: %s %s %s, error: %s", printer.value().host, printer.value().printerName,
                  printer.value().printerModel, result.message.c_str());
-    return PrinterNetworkResult<PrinterMmsGroup>(result.isSuccess() ? result.code : PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE,
+    return PrinterNetworkResult<PrinterMmsGroup>(result.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : result.code,
                                                  PrinterMmsGroup());
 }
 
