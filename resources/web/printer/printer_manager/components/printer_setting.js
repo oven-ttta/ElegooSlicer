@@ -76,7 +76,7 @@ const PrinterSettingTemplate = /*html*/
                             <span class="printer-setting-info-value">
                                 <span class="printer-setting-info-text">
                                     <span class="printer-setting-firmware-version">{{ (printer && printer.firmwareVersion) || '' }}</span>
-                                    <span class="printer-setting-update-tag" :class="{ available: printer && printer.firmwareUpdate === 1 }">
+                                    <span class="printer-setting-update-tag" :class="{ available: printer && printer.firmwareUpdate === 1 }" v-if="false">
                                         {{ getFirmwareUpdateText() }}
                                     </span>
                                 </span>
