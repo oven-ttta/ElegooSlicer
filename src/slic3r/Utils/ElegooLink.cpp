@@ -63,6 +63,7 @@ PrinterStatus parseElegooStatus(elink::PrinterState mainStatus, elink::PrinterSu
     case elink::PrinterState::FILAMENT_OPERATING: printerStatus = PRINTER_STATUS_FILAMENT_OPERATING; break;
     case elink::PrinterState::EXTRUDER_OPERATING: printerStatus = PRINTER_STATUS_EXTRUDER_OPERATING; break;
     case elink::PrinterState::UNKNOWN: printerStatus = PRINTER_STATUS_UNKNOWN; break;
+    case elink::PrinterState::BUSY: printerStatus = PRINTER_STATUS_BUSY; break;
     case elink::PrinterState::EXCEPTION: printerStatus = PRINTER_STATUS_ERROR; break;
     default: printerStatus = PRINTER_STATUS_UNKNOWN; break;
     }

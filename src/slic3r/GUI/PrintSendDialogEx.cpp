@@ -102,6 +102,9 @@ void PrintSendDialogEx::init()
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/print_send/index.html").make_preferred().string());
     TargetUrl = "file://" + TargetUrl;
+    wxString strlang = wxGetApp().current_language_code_safe();
+    if (strlang != "")
+        TargetUrl = wxString::Format("%s?lang=%s", TargetUrl, strlang);
     mBrowser->LoadURL(TargetUrl);
 
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
