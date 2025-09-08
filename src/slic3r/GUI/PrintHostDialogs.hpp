@@ -36,7 +36,6 @@ public:
 
     virtual void EndModal(int ret) override;
     virtual void init();
-    virtual std::map<std::string, std::string> extendedInfo() const { return {}; }
 
 protected:
     wxTextCtrl *txt_filename;

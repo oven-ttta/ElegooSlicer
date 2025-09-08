@@ -1,13 +1,24 @@
 #pragma once
 
+
+#include <boost/filesystem/path.hpp>
+
 #include <wx/dialog.h>
 #include <wx/webview.h>
 #include <wx/colour.h>
+#include <wx/string.h>
+#include <wx/event.h>
+#include <wx/dialog.h>
+
 #include <nlohmann/json.hpp>
 #include "Plater.hpp"
-#include "PrintHostDialogs.hpp"
+#include "GUI_Utils.hpp"
+#include "MsgDialog.hpp"
+#include "../Utils/PrintHost.hpp"
+#include "libslic3r/PrintConfig.hpp"
 #include "libslic3r/PrinterNetworkInfo.hpp"
 #include <slic3r/Utils/WebviewIPCManager.h>
+
 #if wxUSE_WEBVIEW_IE
 #include "wx/msw/webview_ie.h"
 #endif
@@ -20,29 +31,23 @@ namespace webviewIpc {
 }
 
 namespace Slic3r { namespace GUI {
-class PrintSendDialogEx : public PrintHostSendDialog
+class PrintSendDialogEx : public GUI::MsgDialog
 {
 public:
-    PrintSendDialogEx(Plater*                        plater,
-                    int                            printPlateIdx,
-                    const boost::filesystem::path& path,
-                    PrintHostPostUploadActions     postActions,
-                    const wxArrayString&           groups,
-                    const wxArrayString&           storagePaths,
-                    const wxArrayString&           storageNames,
-                    bool                           switchToDeviceTab);
+    PrintSendDialogEx(Plater* plater, int printPlateIdx, const boost::filesystem::path& path);
 
     ~PrintSendDialogEx();
 
+    void init() ;
+    boost::filesystem::path filename() const {
+        return into_path(mModelName);
+    }
+
     virtual void EndModal(int ret) override;
 
-    virtual void                               init() override;
-    virtual boost::filesystem::path filename() const override{
-        return into_path(m_cachedModelName);
-    }
-    virtual std::string group() const override {return "";}
-    virtual std::string storage() const override {return "";}
-    virtual std::map<std::string, std::string> extendedInfo() const override;
+    std::map<std::string, std::string> getExtendedInfo() const ;
+    PrintHostPostUploadAction getPostAction() const;
+    bool getSwitchToDeviceTab() const;
 
 protected:
     void OnCloseWindow(wxCloseEvent& event);
@@ -67,16 +72,20 @@ private:
     bool    mHeatedBedLeveling;
     BedType mBedType;
     bool    mAutoRefill;
+    PrintHostPostUploadAction mPostUploadAction;
+    bool mSwitchToDeviceTab;
+    wxString mModelName;
+    boost::filesystem::path mPath;
     std::string mSelectedPrinterId;
     std::string mProjectName;
     std::vector<PrintFilamentMmsMapping> mPrintFilamentList;
     bool mHasMms;
 
     // async operation tracking
-    bool m_isDestroying{false};
-    std::shared_ptr<bool> m_lifeTracker;
-    bool m_asyncOperationInProgress{false};
-    wxString m_cachedModelName;
+    bool mIsDestroying{false};
+    std::shared_ptr<bool> mLifeTracker;
+    bool mAsyncOperationInProgress{false};
+
    
 };
 }} // namespace Slic3r::GUI 

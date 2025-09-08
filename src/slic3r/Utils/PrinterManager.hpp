@@ -19,6 +19,7 @@ namespace Slic3r {
 #define CONFIG_KEY_BEDTYPE             "printsend_bed_type"
 #define CONFIG_KEY_AUTO_REFILL         "printsend_auto_refill"
 #define CONFIG_KEY_SELECTED_PRINTER_ID "printsend_selected_printer_id"
+#define CONFIG_KEY_SWITCH_TO_DEVICE_TAB "printsend_switch_to_device_tab"
 
 #define CONFIG_KEY_MMS_FILAMENT_MAPPING "mms_filament_mapping"
 

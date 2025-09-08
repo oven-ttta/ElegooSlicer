@@ -37,23 +37,19 @@ using namespace nlohmann;
 
 namespace Slic3r { namespace GUI {
 
-PrintSendDialogEx::PrintSendDialogEx(Plater*                    plater,
-                                     int                        printPlateIdx,
-                                     const fs::path&            path,
-                                     PrintHostPostUploadActions postActions,
-                                     const wxArrayString&       groups,
-                                     const wxArrayString&       storagePaths,
-                                     const wxArrayString&       storageNames,
-                                     bool                       switchToDeviceTab)
-    : PrintHostSendDialog(path, postActions, groups, storagePaths, storageNames, switchToDeviceTab)
+PrintSendDialogEx::PrintSendDialogEx(Plater* plater, int printPlateIdx, const boost::filesystem::path& path)
+    :  MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Send G-code to printer host"), _L("Upload to Printer Host with the following filename:"), 0)
     , mPlater(plater)
     , mPrintPlateIdx(printPlateIdx)
     , mTimeLapse(0)
     , mHeatedBedLeveling(0)
     , mBedType(BedType::btPTE)
-    , m_isDestroying(false)
-    , m_lifeTracker(std::make_shared<bool>(true))
-    , m_asyncOperationInProgress(false)
+    , mIsDestroying(false)
+    , mLifeTracker(std::make_shared<bool>(true))
+    , mAsyncOperationInProgress(false)
+    , mPostUploadAction(PrintHostPostUploadAction::None)
+    , mSwitchToDeviceTab(false)
+    , mPath(path)
 {
     // Bind close event to handle async operations
     Bind(wxEVT_CLOSE_WINDOW, &PrintSendDialogEx::OnCloseWindow, this);
@@ -70,10 +66,10 @@ PrintSendDialogEx::PrintSendDialogEx(Plater*                    plater,
 
 PrintSendDialogEx::~PrintSendDialogEx()
 {
-    m_isDestroying = true;
+    mIsDestroying = true;
 
     // Reset the life tracker to signal all async operations that this object is being destroyed
-    m_lifeTracker.reset();
+    mLifeTracker.reset();
 
     if (mIpc) {
         delete mIpc;
@@ -116,7 +112,7 @@ void PrintSendDialogEx::init()
 
     std::string uploadAndPrint = app_config->get("recent", CONFIG_KEY_UPLOADANDPRINT);
     if (!uploadAndPrint.empty())
-        post_upload_action = static_cast<PrintHostPostUploadAction>(std::stoi(uploadAndPrint));
+        mPostUploadAction = static_cast<PrintHostPostUploadAction>(std::stoi(uploadAndPrint));
     std::string timeLapse = app_config->get("recent", CONFIG_KEY_TIMELAPSE);
     if (!timeLapse.empty())
         mTimeLapse = std::stoi(timeLapse);
@@ -131,31 +127,33 @@ void PrintSendDialogEx::init()
     if (!autoRefill.empty())
         mAutoRefill = std::stoi(autoRefill);
 
+    std::string switchToDeviceTab = app_config->get("recent", CONFIG_KEY_SWITCH_TO_DEVICE_TAB);
+    if (!switchToDeviceTab.empty())
+        mSwitchToDeviceTab = std::stoi(switchToDeviceTab);
+
     wxString recent_path = from_u8(app_config->get("recent", CONFIG_KEY_PATH));
     if (recent_path.Length() > 0 && recent_path[recent_path.Length() - 1] != '/') {
         recent_path += '/';
     }
-    recent_path += m_path.filename().wstring();
-    // txt_filename->SetValue(recent_path);
-    // //Hide to prevent flickering
-    // txt_filename->Hide();
-    if (logo) {
-        logo->Hide();
-    }
-    //hide content_sizer child
-    if(content_sizer){
-        auto child = content_sizer->GetChildren();
-        for (auto& item : child) {
-            if(item->IsWindow() && item->GetWindow()!=nullptr) {
-                item->GetWindow()->Hide();
-            }
-        }
-    }
+    recent_path += mPath.filename().wstring();
+
+    // if (logo) {
+    //     logo->Hide();
+    // }
+    // //hide content_sizer child
+    // if(content_sizer){
+    //     auto child = content_sizer->GetChildren();
+    //     for (auto& item : child) {
+    //         if(item->IsWindow() && item->GetWindow()!=nullptr) {
+    //             item->GetWindow()->Hide();
+    //         }
+    //     }
+    // }
 
     // Cache the model name for use in preparePrintTask
-    m_cachedModelName = recent_path;
-    if (m_cachedModelName.size() >= 6 && m_cachedModelName.compare(m_cachedModelName.size() - 6, 6, ".gcode") == 0)
-        m_cachedModelName = m_cachedModelName.substr(0, m_cachedModelName.size() - 6);
+    mModelName = recent_path;
+    if (mModelName.size() >= 6 && mModelName.compare(mModelName.size() - 6, 6, ".gcode") == 0)
+        mModelName = mModelName.substr(0, mModelName.size() - 6);
 
     // if (size_t extension_start = recent_path.find_last_of('.'); extension_start != std::string::npos)
     //     m_valid_suffix = recent_path.substr(extension_start);
@@ -209,10 +207,10 @@ void PrintSendDialogEx::setupIPCHandlers()
         std::string printerId = request.params.value("printerId", "");
 
         // Create a weak reference to track object lifetime
-        std::weak_ptr<bool> life_tracker = m_lifeTracker;
+        std::weak_ptr<bool> life_tracker = mLifeTracker;
 
         // Mark async operation as in progress to prevent window closing
-        m_asyncOperationInProgress = true;
+        mAsyncOperationInProgress = true;
 
         // Run the print task preparation in a separate thread to avoid blocking the UI
         std::thread([life_tracker, printerId, sendResponse, this]() {
@@ -224,7 +222,7 @@ void PrintSendDialogEx::setupIPCHandlers()
                     // Final check before sending response
                     if (life_tracker.lock()) {
                         // Mark async operation as completed
-                        m_asyncOperationInProgress = false;
+                        mAsyncOperationInProgress = false;
 
                         sendResponse(response);
                     }
@@ -235,7 +233,7 @@ void PrintSendDialogEx::setupIPCHandlers()
             } catch (const std::exception& e) {
                 if (life_tracker.lock()) {
                     // Mark async operation as completed even on error
-                    m_asyncOperationInProgress = false;
+                    mAsyncOperationInProgress = false;
 
                     wxLogError("Error in request_print_task: %s", e.what());
                     sendResponse(webviewIpc::IPCResult::error(std::string("Print task preparation failed: ") + e.what()));
@@ -243,7 +241,7 @@ void PrintSendDialogEx::setupIPCHandlers()
             } catch (...) {
                 if (life_tracker.lock()) {
                     // Mark async operation as completed even on unknown error
-                    m_asyncOperationInProgress = false;
+                    mAsyncOperationInProgress = false;
 
                     wxLogError("Unknown error in request_print_task");
                     sendResponse(webviewIpc::IPCResult::error("Print task preparation failed: Unknown error"));
@@ -341,13 +339,13 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
     printInfo["layerCount"] = layerCount;
 
     // Use cached model name instead of getting it from UI control
-    std::string modelName = m_cachedModelName.ToUTF8().data();
+    std::string modelName = mModelName.ToUTF8().data();
 
     printInfo["modelName"]         = modelName;
     printInfo["timeLapse"]         = mTimeLapse == 1;
     printInfo["heatedBedLeveling"] = mHeatedBedLeveling == 1;
-    printInfo["switchToDeviceTab"] = m_switch_to_device_tab;
-    printInfo["uploadAndPrint"]    = post_upload_action == PrintHostPostUploadAction::StartPrint;
+    printInfo["switchToDeviceTab"] = mSwitchToDeviceTab;
+    printInfo["uploadAndPrint"]    = mPostUploadAction == PrintHostPostUploadAction::StartPrint;
     printInfo["autoRefill"]        = mAutoRefill == 1;
     if (mBedType == BedType::btPC)
         printInfo["bedType"] = "btPC"; // B
@@ -552,7 +550,7 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         mHeatedBedLeveling     = printInfo["heatedBedLeveling"].get<bool>();
         mAutoRefill            = printInfo["autoRefill"].get<bool>();
         bool uploadAndPrint    = printInfo["uploadAndPrint"].get<bool>();
-        m_switch_to_device_tab = printInfo["switchToDeviceTab"].get<bool>();
+        mSwitchToDeviceTab = printInfo["switchToDeviceTab"].get<bool>();
         mSelectedPrinterId     = printInfo["selectedPrinterId"].get<std::string>();
         std::string bedType    = printInfo["bedType"].get<std::string>();
 
@@ -562,21 +560,19 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
             mBedType = BedType::btPTE;
         }
 
-        if (!mSelectedPrinterId.empty()) {
-            wxGetApp().app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, mSelectedPrinterId);
-        } else {
+        if (mSelectedPrinterId.empty()) {
             errorCode      = PrinterNetworkErrorCode::PRINTER_NOT_SELECTED;
             result.message = getErrorMessage(errorCode);
             return result;
         }
 
-        post_upload_action = uploadAndPrint ? PrintHostPostUploadAction::StartPrint : PrintHostPostUploadAction::None;
+        mPostUploadAction = uploadAndPrint ? PrintHostPostUploadAction::StartPrint : PrintHostPostUploadAction::None;
 
         wxString modelName = wxString::FromUTF8(printInfo["modelName"].get<std::string>());
         if (!modelName.EndsWith(".gcode")) {
             modelName += ".gcode";
         }
-        m_cachedModelName = modelName;
+        mModelName = modelName;
         // txt_filename->SetValue(modelName);
 
         if (uploadAndPrint && mHasMms) {
@@ -623,17 +619,20 @@ void PrintSendDialogEx::EndModal(int ret)
 {
     if (ret == wxID_OK) {
         AppConfig* app_config = wxGetApp().app_config;
-        app_config->set("recent", CONFIG_KEY_UPLOADANDPRINT, std::to_string(static_cast<int>(post_upload_action)));
+        app_config->set("recent", CONFIG_KEY_UPLOADANDPRINT, std::to_string(static_cast<int>(mPostUploadAction)));
         app_config->set("recent", CONFIG_KEY_TIMELAPSE, std::to_string(mTimeLapse));
         app_config->set("recent", CONFIG_KEY_HEATEDBEDLEVELING, std::to_string(mHeatedBedLeveling));
         app_config->set("recent", CONFIG_KEY_BEDTYPE, std::to_string(static_cast<int>(mBedType)));
         app_config->set("recent", CONFIG_KEY_AUTO_REFILL, std::to_string(mAutoRefill));
+        app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, mSelectedPrinterId);
+        app_config->set("recent", CONFIG_KEY_SWITCH_TO_DEVICE_TAB, std::to_string(mSwitchToDeviceTab));
+
     }
 
-    PrintHostSendDialog::EndModal(ret);
+    MsgDialog::EndModal(ret);
 }
 
-std::map<std::string, std::string> PrintSendDialogEx::extendedInfo() const
+std::map<std::string, std::string> PrintSendDialogEx::getExtendedInfo() const
 {
     nlohmann::json filamentList = json::array();
     if (mHasMms) {
@@ -650,10 +649,20 @@ std::map<std::string, std::string> PrintSendDialogEx::extendedInfo() const
             {"filamentAmsMapping", filamentList.dump()}};
 }
 
+PrintHostPostUploadAction PrintSendDialogEx::getPostAction() const
+{
+    return mPostUploadAction;
+}
+
+bool PrintSendDialogEx::getSwitchToDeviceTab() const
+{
+    return mSwitchToDeviceTab;
+}
+
 void PrintSendDialogEx::OnCloseWindow(wxCloseEvent& event)
 {
     // If async operation is in progress, prevent closing
-    if (m_asyncOperationInProgress && !m_isDestroying) {
+    if (mAsyncOperationInProgress && !mIsDestroying) {
         // Show a message to user that operation is in progress
         // wxMessageBox(_L("Print task preparation is in progress. Please wait..."),
         //              _L("Operation in Progress"), wxOK | wxICON_INFORMATION);
