@@ -36,6 +36,7 @@ enum PrinterStatus {
     PRINTER_STATUS_PRINT_COMPLETED    = 16, // Print completed
     PRINTER_STATUS_RFID_RECOGNIZING   = 17, // RFID recognizing
 
+    PRINTER_STATUS_BUSY   = 998,  // Device busy
     PRINTER_STATUS_ERROR   = 999,  // Device exception status
     PRINTER_STATUS_ID_NOT_MATCH = 1000, // local mainboard or serial number not match with the remote printer
     PRINTER_STATUS_AUTH_ERROR = 1001, // local auth mode not match with the remote printer

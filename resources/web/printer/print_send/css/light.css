@@ -61,9 +61,11 @@
   align-items: center;
   justify-content: left;
   gap: 8px;
+  max-width: 550px;
 }
 .model-name-input {
   width: fit-content;
+  max-width: 530px;
 }
 .model-name-input .el-input__wrapper {
   box-shadow: none;

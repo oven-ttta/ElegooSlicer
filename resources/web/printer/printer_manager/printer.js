@@ -75,6 +75,7 @@ const PrinterManager = {
                 [15]: this.$t("printerManager.extruderOperating"),
                 [16]: this.$t("printerManager.printCompleted"),
                 [17]: this.$t("printerManager.rfidRecognizing"),
+                [998]: this.$t("printerManager.busy"),
                 [999]: this.$t("printerManager.error"),
                 [1000]: this.$t("printerManager.idNotMatch"),
                 [1001]: this.$t("printerManager.authError"),
@@ -96,7 +97,7 @@ const PrinterManager = {
                     color: 'var(--printer-status-success-color)',
                     backgroundColor: 'var(--printer-status-success-bg)'
                 };
-            } else if (printerStatus === 999) {
+            } else if (printerStatus === 999 || printerStatus === 998) {
                 return {
                     color: 'var(--printer-status-error-color)',
                     backgroundColor: 'var(--printer-status-error-bg)'

@@ -361,6 +361,9 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     std::replace(_dir.begin(), _dir.end(), '\\', '/');
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/printer_manager/printer.html").make_preferred().string());
     TargetUrl = "file://" + TargetUrl;
+    wxString strlang = wxGetApp().current_language_code_safe();
+    if (strlang != "")
+        TargetUrl = wxString::Format("%s?lang=%s", TargetUrl, strlang);
     mBrowser->LoadURL(TargetUrl);
     // Load saved tab state
     loadTabState();
