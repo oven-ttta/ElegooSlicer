@@ -1,5 +1,8 @@
 #include "PrinterManager.hpp"
-#include "libslic3r/PresetBundle.hpp"
+#include "slic3r/GUI/GUI_App.hpp"
+#include "slic3r/GUI/MainFrame.hpp"
+#include <wx/app.h>
+#include <wx/wx.h>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -167,6 +170,8 @@ void PrinterManager::init() {
     mConnectionThread = std::thread([this]() { monitorPrinterConnections(); });
 
     PrinterCache::getInstance()->loadPrinterList();
+
+    syncOldPresetPrinters();
 }
 
 void PrinterManager::close() { 
@@ -551,7 +556,7 @@ void PrinterManager::monitorPrinterConnections()
                     if(attributes.isSuccess() && attributes.hasData()) {
                         // update printer attributes
                         auto printerAttributes = attributes.data.value();
-                        if(!printerAttributes.mainboardId.empty() && printer.value().mainboardId != printerAttributes.mainboardId) {
+                        if(!printer.value().mainboardId.empty() && !printerAttributes.mainboardId.empty() && printer.value().mainboardId != printerAttributes.mainboardId) {
                             // the mainboardId of the local printer is not the same as the remote printer, which means the remote printer has been replaced with a new mainboard
                             // need to delete the printer and add the printer or discover the printer again
                             wxLogError("Printer mainboardId not match, local: %s, remote: %s", printer.value().mainboardId.c_str(), printerAttributes.mainboardId.c_str());
@@ -560,7 +565,7 @@ void PrinterManager::monitorPrinterConnections()
                             deletePrinterNetwork(printerId);
                             return;
                         }
-                        if(!printerAttributes.serialNumber.empty() && printer.value().serialNumber != printerAttributes.serialNumber) {    
+                        if(!printer.value().serialNumber.empty() && !printerAttributes.serialNumber.empty() && printer.value().serialNumber != printerAttributes.serialNumber) {    
                             // the serialNumber of the local printer is not the same as the remote printer, which means the remote printer has been replaced with a new serial number
                             //need to delete the printer and  add the printer or discover the printer again
                             wxLogError("Printer serialNumber not match, local: %s, remote: %s", printer.value().serialNumber.c_str(), printerAttributes.serialNumber.c_str());
@@ -569,7 +574,6 @@ void PrinterManager::monitorPrinterConnections()
                             deletePrinterNetwork(printerId);
                             return;
                         }
-
                         PrinterCache::getInstance()->updatePrinterAttributes(printerId, printerAttributes);
                         addPrinterNetwork(network);
                         PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_CONNECTED);
@@ -682,6 +686,141 @@ std::shared_ptr<IPrinterNetwork> PrinterManager::getPrinterNetwork(const std::st
         return it->second;
     }
     return nullptr;
+}
+
+void PrinterManager::syncOldPresetPrinters()
+{
+    // Check if migration has already been completed
+    if (wxGetApp().app_config->get("machine_migration_completed") == "1") {
+        return;
+    }
+    
+    try {
+        if (!wxGetApp().preset_bundle) {
+            wxLogMessage("Preset bundle not available, skipping sync");
+            return;
+        }
+        const auto& printerPresets = wxGetApp().preset_bundle->printers;
+
+        for (const auto& preset : printerPresets) {
+            if (preset.is_system) {
+                continue;
+            }
+            const auto& config = preset.config;
+            if (preset.name.empty() || !config.has("host_type") || !config.has("print_host") || !config.has("printer_model")) {
+                continue;
+            }
+
+            PrinterNetworkInfo printerInfo;
+            printerInfo.isPhysicalPrinter = true;
+            printerInfo.printerName       = preset.name;
+
+            auto printerModel = config.option<ConfigOptionString>("printer_model")->value;
+            
+            // Find vendor by printer model
+            std::string vendorName;
+            for (const auto& vendorProfile : wxGetApp().preset_bundle->vendors) {
+                for (const auto& vendorModel : vendorProfile.second.models) {
+                    if (vendorModel.name == printerModel) {
+                        vendorName = vendorProfile.first;
+                        break;
+                    }
+                }
+                if (!vendorName.empty()) break;
+            }
+            if(vendorName.empty()) {
+                continue;
+            }
+            printerInfo.vendor = vendorName;
+            printerInfo.printerModel = printerModel;
+            auto host         = config.option<ConfigOptionString>("print_host");
+            if(host && !host->value.empty()) {
+                printerInfo.host = host->value;
+            } else {
+                continue;
+            }
+            auto hostType     = config.option<ConfigOptionEnum<PrintHostType>>("host_type");
+            if(!PrintHost::support_device_list_management(config)) {
+                continue;
+            }
+            if(hostType) {
+                std::string hostTypeStr = PrintHost::get_print_host_type_str(hostType->value);
+                if (!hostTypeStr.empty()) {
+                    printerInfo.hostType = hostTypeStr;
+                } else {
+                    continue;
+                }
+            } else {
+                continue;
+            }
+            if (config.has("printhost_port")) {
+                auto port = config.option<ConfigOptionString>("printhost_port");
+                if(port && !port->value.empty()) {
+                    printerInfo.port = std::stoi(port->value);
+                }
+            }
+            if (config.has("print_host_webui")) {
+                auto print_host_webui = config.option<ConfigOptionString>("print_host_webui");
+                if(print_host_webui && !print_host_webui->value.empty()) {
+                    printerInfo.webUrl = print_host_webui->value;
+                }
+            }
+
+            nlohmann::json extraInfo = nlohmann::json();
+            if (config.has("printhost_apikey")) {
+                auto printhost_apikey = config.option<ConfigOptionString>("printhost_apikey");
+                if(printhost_apikey && !printhost_apikey->value.empty()) {
+                    extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_VENDOR] = printhost_apikey->value;
+                }
+            }
+            if (config.has("printhost_cafile")) {
+                auto cafile = config.option<ConfigOptionString>("printhost_cafile");
+                if(cafile && !cafile->value.empty()) {
+                    extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_PORT] = cafile->value;
+                }
+            }
+            if (config.has("printhost_ssl_ignore_revoke")) {
+                auto sslIgnoreRevoke = config.option<ConfigOptionString>("printhost_ssl_ignore_revoke");
+                if(sslIgnoreRevoke && !sslIgnoreRevoke->value.empty()) {
+                    extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_HOST] = sslIgnoreRevoke->value;
+                }
+            }
+            printerInfo.extraInfo = extraInfo.dump();
+
+            bool alreadyExists = false;
+            auto printers = PrinterCache::getInstance()->getPrinters();
+            for(const auto& printer : printers) {
+                if(printer.host == printerInfo.host) {
+                    alreadyExists = true;
+                    break;
+                }
+            }
+            if(alreadyExists) {
+                continue;
+            }
+            // Generate unique printerId
+            boost::uuids::uuid uuid = boost::uuids::random_generator()();
+            printerInfo.printerId = boost::uuids::to_string(uuid);
+            
+            // Set timestamps
+            auto now = std::chrono::system_clock::now();
+            auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+            printerInfo.addTime = timestamp;
+            printerInfo.modifyTime = timestamp;
+            printerInfo.lastActiveTime = timestamp;
+
+            PrinterCache::getInstance()->addPrinter(printerInfo);
+        }
+
+        wxLogMessage("Preset printers synced successfully");
+        
+        // Mark migration as completed
+        wxGetApp().app_config->set("machine_migration_completed", "1");
+        wxGetApp().app_config->save();
+        
+    } catch (const std::exception& e) {
+        wxLogMessage("Error syncing preset printers: %s", e.what());
+    }
 }
 
 

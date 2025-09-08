@@ -48,6 +48,9 @@ public:
 
     void init();
     void close();
+    
+    // sync old preset printers to network
+    void syncOldPresetPrinters();
 
 private:
 

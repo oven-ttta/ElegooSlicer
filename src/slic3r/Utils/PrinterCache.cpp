@@ -192,6 +192,12 @@ void PrinterCache::updatePrinterAttributes(const std::string& printerId, const P
         it->second.printCapabilities = printerInfo.printCapabilities;
         it->second.systemCapabilities = printerInfo.systemCapabilities;
         it->second.webUrl = printerInfo.webUrl;
+        if(it->second.mainboardId.empty() && !printerInfo.mainboardId.empty()) {
+            it->second.mainboardId = printerInfo.mainboardId;
+        }
+        if(it->second.serialNumber.empty() && !printerInfo.serialNumber.empty()) {
+            it->second.serialNumber = printerInfo.serialNumber;
+        }
     }
 }
 
