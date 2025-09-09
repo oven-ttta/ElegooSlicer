@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-29 14:12+0800\n"
+"POT-Creation-Date: 2025-09-09 19:46+0800\n"
 "PO-Revision-Date: 2024-06-01 21:51-0300\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese, Brazilian\n"
@@ -14667,7 +14667,8 @@ msgstr ""
 "fixas.\n"
 "2. Cone: Um cone com um filete na parte inferior para ajudar a estabilizar a "
 "torre de limpeza.\n"
-"3. Nervura: Adiciona quatro nervuras à parede da torre para maior estabilidade."
+"3. Nervura: Adiciona quatro nervuras à parede da torre para maior "
+"estabilidade."
 
 msgid "Extra rib length"
 msgstr "Comprimento extra de nervura"
@@ -14678,8 +14679,8 @@ msgid ""
 "than that determined by the cleaning volume."
 msgstr ""
 "Valores positivos podem aumentar o tamanho da parede da nervura, enquanto "
-"valores negativos podem reduzi-lo. No entanto, o tamanho da parede da nervura "
-"não pode ser menor que o determinado pelo volume de limpeza."
+"valores negativos podem reduzi-lo. No entanto, o tamanho da parede da "
+"nervura não pode ser menor que o determinado pelo volume de limpeza."
 
 msgid "Rib width"
 msgstr "Largura da nervura"
@@ -17768,9 +17769,6 @@ msgstr ""
 msgid "Invalid parameter provided"
 msgstr ""
 
-msgid "Invalid data format"
-msgstr ""
-
 msgid "Operation timed out"
 msgstr ""
 
@@ -17780,49 +17778,10 @@ msgstr ""
 msgid "Access denied"
 msgstr ""
 
-msgid "Resource not found"
-msgstr ""
-
-msgid "Resource already exists"
-msgstr ""
-
-msgid "Insufficient storage space"
-msgstr ""
-
-msgid "Bad request"
-msgstr ""
-
 msgid "Connection failed"
 msgstr ""
 
 msgid "Network error occurred"
-msgstr ""
-
-msgid "Service temporarily unavailable"
-msgstr ""
-
-msgid "Feature not available"
-msgstr ""
-
-msgid "Version not supported"
-msgstr ""
-
-msgid "Version is too old"
-msgstr ""
-
-msgid "Version is too new"
-msgstr ""
-
-msgid "Access unauthorized"
-msgstr ""
-
-msgid "Authentication failed"
-msgstr ""
-
-msgid "Login session expired"
-msgstr ""
-
-msgid "Not authenticated"
 msgstr ""
 
 msgid "Invalid username or password"
@@ -17849,12 +17808,6 @@ msgstr ""
 msgid "Printer is busy"
 msgstr ""
 
-msgid "Printer is offline"
-msgstr ""
-
-msgid "Printer initialization failed"
-msgstr ""
-
 msgid "Printer command failed"
 msgstr ""
 
@@ -17862,9 +17815,6 @@ msgid "Printer is already connected"
 msgstr ""
 
 msgid "Printer internal error"
-msgstr ""
-
-msgid "Print task not found"
 msgstr ""
 
 msgid "Printer network error"

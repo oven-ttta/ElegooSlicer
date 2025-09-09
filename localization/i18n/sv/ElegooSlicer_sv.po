@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-29 14:12+0800\n"
+"POT-Creation-Date: 2025-09-09 19:46+0800\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -16631,9 +16631,6 @@ msgstr ""
 msgid "Invalid parameter provided"
 msgstr ""
 
-msgid "Invalid data format"
-msgstr ""
-
 msgid "Operation timed out"
 msgstr ""
 
@@ -16643,49 +16640,10 @@ msgstr ""
 msgid "Access denied"
 msgstr ""
 
-msgid "Resource not found"
-msgstr ""
-
-msgid "Resource already exists"
-msgstr ""
-
-msgid "Insufficient storage space"
-msgstr ""
-
-msgid "Bad request"
-msgstr ""
-
 msgid "Connection failed"
 msgstr ""
 
 msgid "Network error occurred"
-msgstr ""
-
-msgid "Service temporarily unavailable"
-msgstr ""
-
-msgid "Feature not available"
-msgstr ""
-
-msgid "Version not supported"
-msgstr ""
-
-msgid "Version is too old"
-msgstr ""
-
-msgid "Version is too new"
-msgstr ""
-
-msgid "Access unauthorized"
-msgstr ""
-
-msgid "Authentication failed"
-msgstr ""
-
-msgid "Login session expired"
-msgstr ""
-
-msgid "Not authenticated"
 msgstr ""
 
 msgid "Invalid username or password"
@@ -16712,12 +16670,6 @@ msgstr ""
 msgid "Printer is busy"
 msgstr ""
 
-msgid "Printer is offline"
-msgstr ""
-
-msgid "Printer initialization failed"
-msgstr ""
-
 msgid "Printer command failed"
 msgstr ""
 
@@ -16725,9 +16677,6 @@ msgid "Printer is already connected"
 msgstr ""
 
 msgid "Printer internal error"
-msgstr ""
-
-msgid "Print task not found"
 msgstr ""
 
 msgid "Printer network error"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-29 14:12+0800\n"
+"POT-Creation-Date: 2025-09-09 19:46+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -16412,16 +16412,13 @@ msgid "Success"
 msgstr "成功"
 
 msgid "An unknown error occurred"
-msgstr "发生未知错误"
+msgstr "发生未知错误，请稍后重试"
 
 msgid "An internal error occurred"
-msgstr "发生内部错误"
+msgstr "发生未知的网络错误，请稍后重试"
 
 msgid "Invalid parameter provided"
 msgstr "提供的参数无效"
-
-msgid "Invalid data format"
-msgstr "数据格式无效"
 
 msgid "Operation timed out"
 msgstr "操作超时"
@@ -16432,62 +16429,23 @@ msgstr "操作已取消"
 msgid "Access denied"
 msgstr "访问被拒绝"
 
-msgid "Resource not found"
-msgstr "未找到资源"
-
-msgid "Resource already exists"
-msgstr "资源已存在"
-
-msgid "Insufficient storage space"
-msgstr "存储空间不足"
-
-msgid "Bad request"
-msgstr "请求错误"
-
 msgid "Connection failed"
 msgstr "连接失败"
 
 msgid "Network error occurred"
 msgstr "发生网络错误"
 
-msgid "Service temporarily unavailable"
-msgstr "服务暂时不可用"
-
-msgid "Feature not available"
-msgstr "功能不可用"
-
-msgid "Version not supported"
-msgstr "版本不受支持"
-
-msgid "Version is too old"
-msgstr "版本太旧"
-
-msgid "Version is too new"
-msgstr "版本太新"
-
-msgid "Access unauthorized"
-msgstr "访问未授权"
-
-msgid "Authentication failed"
-msgstr "身份验证失败"
-
-msgid "Login session expired"
-msgstr "登录会话已过期"
-
-msgid "Not authenticated"
-msgstr ""
-
 msgid "Invalid username or password"
 msgstr ""
 
 msgid "Invalid token"
-msgstr ""
+msgstr "无效的令牌，请检查后重试"
 
 msgid "Invalid access code"
-msgstr ""
+msgstr "无效的访问码，请检查后重试"
 
 msgid "Invalid PIN code"
-msgstr ""
+msgstr "无效的 PIN 码，请检查后重试"
 
 msgid "Connection limit exceeded"
 msgstr ""
@@ -16501,12 +16459,6 @@ msgstr "未找到文件"
 msgid "Printer is busy"
 msgstr "打印机正忙"
 
-msgid "Printer is offline"
-msgstr "打印机离线"
-
-msgid "Printer initialization failed"
-msgstr "打印机初始化失败"
-
 msgid "Printer command failed"
 msgstr "打印机命令失败"
 
@@ -16515,9 +16467,6 @@ msgstr "打印机已连接"
 
 msgid "Printer internal error"
 msgstr "打印机内部错误"
-
-msgid "Print task not found"
-msgstr "未找到打印任务"
 
 msgid "Printer network error"
 msgstr "打印机网络错误"
@@ -16856,6 +16805,54 @@ msgid ""
 msgstr ""
 "避免翘曲\n"
 "您知道吗？打印ABS这类易翘曲材料时，适当提高热床温度可以降低翘曲的概率。"
+
+#~ msgid "Invalid data format"
+#~ msgstr "数据格式无效"
+
+#~ msgid "Resource not found"
+#~ msgstr "未找到资源"
+
+#~ msgid "Resource already exists"
+#~ msgstr "资源已存在"
+
+#~ msgid "Insufficient storage space"
+#~ msgstr "存储空间不足"
+
+#~ msgid "Bad request"
+#~ msgstr "请求错误"
+
+#~ msgid "Service temporarily unavailable"
+#~ msgstr "服务暂时不可用"
+
+#~ msgid "Feature not available"
+#~ msgstr "功能不可用"
+
+#~ msgid "Version not supported"
+#~ msgstr "版本不受支持"
+
+#~ msgid "Version is too old"
+#~ msgstr "版本太旧"
+
+#~ msgid "Version is too new"
+#~ msgstr "版本太新"
+
+#~ msgid "Access unauthorized"
+#~ msgstr "访问未授权"
+
+#~ msgid "Authentication failed"
+#~ msgstr "身份验证失败"
+
+#~ msgid "Login session expired"
+#~ msgstr "登录会话已过期"
+
+#~ msgid "Printer is offline"
+#~ msgstr "打印机离线"
+
+#~ msgid "Printer initialization failed"
+#~ msgstr "打印机初始化失败"
+
+#~ msgid "Print task not found"
+#~ msgstr "未找到打印任务"
 
 #~ msgid "Printer host does not match the local printer"
 #~ msgstr "打印机与本地信息不匹配，请删除重新添加"
