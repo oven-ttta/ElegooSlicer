@@ -623,7 +623,8 @@ void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerN
                     }
                     mappedTray = tray;
                     // try match filament by filament type if not match, try match filament by generic preset
-                    if(tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, false) || tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, true)) {
+                    //if(tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, false) || tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, true)) {
+                    if(boost::to_upper_copy(filamentInfo.filamentType) == boost::to_upper_copy(tray.filamentType)) {
                         isMapped = true;
                         break;
                     }
