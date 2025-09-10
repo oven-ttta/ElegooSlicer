@@ -18,7 +18,7 @@ enum class PrinterNetworkErrorCode
 
     // General errors (1-99)
     UNKNOWN_ERROR             = 1, // Unknown error
-    INTERNAL_ERROR            = 2, // Internal error
+    NOT_INITIALIZED            = 2, // Not initialized
     INVALID_PARAMETER         = 3, // Invalid parameter (value error, type error, etc.)
     OPERATION_TIMEOUT         = 4, // Operation timeout (including connection, file transfer, etc.)
     OPERATION_CANCELLED       = 5, // Operation canceled
@@ -45,10 +45,12 @@ enum class PrinterNetworkErrorCode
     PRINTER_ALREADY_CONNECTED         = 1003, // Printer already connected or connecting
     PRINTER_BUSY                      = 1004, // Printer busy
     PRINTER_COMMAND_FAILED            = 1005, // Printer command execution failed
-    PRINTER_INTERNAL_ERROR            = 1006, // Printer internal error
+    PRINTER_UNKNOWN_ERROR            = 1006, // Printer internal error
     PRINTER_INVALID_PARAMETER         = 1007, // send data format error
     PRINTER_INVALID_RESPONSE          = 1008, // Printer response invalid data
     PRINTER_ACCESS_DENIED             = 1009, // Printer access denied
+    PRINTER_MISSING_BED_LEVELING_DATA = 1010, // Printer missing bed leveling data
+    PRINTER_PRINT_FILE_NOT_FOUND = 1011,       // Printer print file not found
 
     HOST_TYPE_NOT_SUPPORTED = 9998,          // Host type not supported
     PRINTER_NETWORK_EXCEPTION = 9999,          // External error
@@ -77,9 +79,8 @@ struct PrinterNetworkResult
     PrinterNetworkResult() = default;
 
     // Perfect forwarding constructor, supports results with data
-    template <typename U>
-    PrinterNetworkResult(PrinterNetworkErrorCode resultCode, U &&dataVal, std::string_view msg = "") 
-        : code(resultCode), data(std::forward<U>(dataVal)), message(msg.empty() ? getErrorMessage(resultCode) : msg) {}
+    template<typename U> PrinterNetworkResult(PrinterNetworkErrorCode resultCode, U&& dataVal, std::string_view msg = "") :
+    code(resultCode), data(std::forward<U>(dataVal)), message(msg.empty() ? getErrorMessage(resultCode) : msg) {}
 
     // Check if successful
     bool isSuccess() const noexcept

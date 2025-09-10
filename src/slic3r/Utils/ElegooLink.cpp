@@ -14,7 +14,7 @@ PrinterNetworkErrorCode parseElegooResult(elink::ELINK_ERROR_CODE code)
     switch (code) {
     case elink::ELINK_ERROR_CODE::SUCCESS: return PrinterNetworkErrorCode::SUCCESS;
     case elink::ELINK_ERROR_CODE::UNKNOWN_ERROR: return PrinterNetworkErrorCode::UNKNOWN_ERROR;
-    case elink::ELINK_ERROR_CODE::INTERNAL_ERROR: return PrinterNetworkErrorCode::INTERNAL_ERROR;
+    case elink::ELINK_ERROR_CODE::NOT_INITIALIZED: return PrinterNetworkErrorCode::NOT_INITIALIZED;
     case elink::ELINK_ERROR_CODE::INVALID_PARAMETER: return PrinterNetworkErrorCode::INVALID_PARAMETER;
     case elink::ELINK_ERROR_CODE::OPERATION_TIMEOUT: return PrinterNetworkErrorCode::OPERATION_TIMEOUT;
     case elink::ELINK_ERROR_CODE::OPERATION_CANCELLED: return PrinterNetworkErrorCode::OPERATION_CANCELLED;
@@ -35,11 +35,12 @@ PrinterNetworkErrorCode parseElegooResult(elink::ELINK_ERROR_CODE code)
     case elink::ELINK_ERROR_CODE::PRINTER_ALREADY_CONNECTED: return PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED;
     case elink::ELINK_ERROR_CODE::PRINTER_BUSY: return PrinterNetworkErrorCode::PRINTER_BUSY;
     case elink::ELINK_ERROR_CODE::PRINTER_COMMAND_FAILED: return PrinterNetworkErrorCode::PRINTER_COMMAND_FAILED;
-    case elink::ELINK_ERROR_CODE::PRINTER_INTERNAL_ERROR: return PrinterNetworkErrorCode::PRINTER_INTERNAL_ERROR;
+    case elink::ELINK_ERROR_CODE::PRINTER_UNKNOWN_ERROR: return PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR;
     case elink::ELINK_ERROR_CODE::PRINTER_INVALID_PARAMETER: return PrinterNetworkErrorCode::PRINTER_INVALID_PARAMETER;
     case elink::ELINK_ERROR_CODE::PRINTER_INVALID_RESPONSE: return PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE;
     case elink::ELINK_ERROR_CODE::PRINTER_ACCESS_DENIED: return PrinterNetworkErrorCode::PRINTER_ACCESS_DENIED;
-
+    case elink::ELINK_ERROR_CODE::PRINTER_PRINT_FILE_NOT_FOUND: return PrinterNetworkErrorCode::PRINTER_PRINT_FILE_NOT_FOUND;   
+    case elink::ELINK_ERROR_CODE::PRINTER_MISSING_BED_LEVELING_DATA: return PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA;
     default: return PrinterNetworkErrorCode::UNKNOWN_ERROR;
     }
 }
@@ -131,7 +132,7 @@ elink::PrinterType getPrinterType(const PrinterNetworkInfo& printerNetworkInfo)
     if (model.find(vendor) == std::string::npos) {
         model = vendor + " " + model;
     }
-    if (model == "elegoo centauri carbon 2" || model == "elegoo centauri 2") {
+    if (model == "elegoo centauri carbon 2") {
         return elink::PrinterType::ELEGOO_FDM_CC2;
     } else if (model == "elegoo centauri carbon" || model == "elegoo centauri") {
         return elink::PrinterType::ELEGOO_FDM_CC;
@@ -215,9 +216,20 @@ void ElegooLink::uninit()
     elink::ElegooLink::getInstance().cleanup();    
 }
 
+std::string parseUnknownErrorMsg(PrinterNetworkErrorCode resultCode, const std::string& msg)
+{
+    if(resultCode == PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR) {
+        if(msg.find("[ErrorCode:") != std::string::npos) {
+            return getErrorMessage(resultCode) + "(" + msg.substr(msg.find("[ErrorCode:") + 11, msg.find("]") - msg.find("[ErrorCode:") - 11) + ")";
+        }
+    }
+    return "";
+}
+
 PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    elink::ConnectPrinterResult elinkResult;
     try {
         elink::ConnectPrinterParams connectionParams;
         connectionParams.printerId        = printerNetworkInfo.printerId;
@@ -245,13 +257,13 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
         connectionParams.accessCode        = printerNetworkInfo.accessCode;
         connectionParams.pinCode           = printerNetworkInfo.pinCode;
 
-        auto elinkResult = elink::ElegooLink::getInstance().connectPrinter(connectionParams);
+        elinkResult = elink::ElegooLink::getInstance().connectPrinter(connectionParams);
         resultCode    = parseElegooResult(elinkResult.code);
         if (elinkResult.code == elink::ELINK_ERROR_CODE::SUCCESS) {
             if (elinkResult.data.has_value() && elinkResult.data.value().isConnected && elinkResult.data.value().printerInfo.printerId == printerNetworkInfo.printerId) {      
                 auto addPrinter = elinkResult.data.value().printerInfo;
                 PrinterNetworkInfo info = convertFromElegooPrinterInfo(addPrinter);
-                return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info);
+                return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, info, parseUnknownErrorMsg(resultCode, elinkResult.message));
             } else {
                 resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
             }
@@ -262,15 +274,16 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
 
-    return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo);
+    return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
 
 PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& printerId)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    elink::VoidResult elinkResult;
     try {
-        auto elinkResult = elink::ElegooLink::getInstance().disconnectPrinter(printerId);
+        elinkResult = elink::ElegooLink::getInstance().disconnectPrinter(printerId);
         resultCode    = parseElegooResult(elinkResult.code);
 
     } catch (const std::exception& e) {
@@ -278,7 +291,7 @@ PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& 
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
 
-    return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS);
+    return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
 
@@ -286,12 +299,13 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     std::vector<PrinterNetworkInfo> discoverPrinters;
+    elink::PrinterDiscoveryResult elinkResult;
     try {
         elink::PrinterDiscoveryParams discoveryParams;
         discoveryParams.timeoutMs         = 5 * 1000;
         discoveryParams.broadcastInterval = 1000;
         discoveryParams.enableAutoRetry   = true;
-        auto elinkResult = elink::ElegooLink::getInstance().startPrinterDiscovery(discoveryParams);
+        elinkResult = elink::ElegooLink::getInstance().startPrinterDiscovery(discoveryParams);
         resultCode  = parseElegooResult(elinkResult.code);
         if (elinkResult.code == elink::ELINK_ERROR_CODE::SUCCESS && elinkResult.data.has_value()) {
             for (const auto& printer : elinkResult.value().printers) {
@@ -304,7 +318,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
 
-    return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, discoverPrinters);
+    return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, discoverPrinters, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
 bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status, int tryCount)
@@ -336,6 +350,7 @@ bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status, int
 PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams& params)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    elink::StartPrintResult elinkResult;
     try {
         PrinterStatus status;
         if(isBusy(params.printerId, status)) {
@@ -344,11 +359,12 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
         elink::StartPrintParams startPrintParams;
         startPrintParams.printerId        = params.printerId;
         startPrintParams.storageLocation = "local";
-        startPrintParams.fileName        = params.fileName;
+        startPrintParams.fileName         = params.fileName;
         startPrintParams.autoBedLeveling = params.heatedBedLeveling;
         startPrintParams.heatedBedType   = params.bedType;
         startPrintParams.enableTimeLapse = params.timeLapse;
         startPrintParams.slotMap.clear();
+        
         for(const auto& filamentMmsMapping : params.filamentMmsMappingList) {
             if (filamentMmsMapping.mappedMmsFilament.mmsId.empty() || filamentMmsMapping.mappedMmsFilament.trayId.empty()) {
                 continue;
@@ -360,19 +376,38 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
             startPrintParams.slotMap.push_back(slotMapItem);
         }
 
-        auto elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
+        elink::VoidResult autoRefillResult;
+        if(params.autoRefill) {
+            autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, true});
+        } else {
+            autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, false});
+        }
+        
+        resultCode = parseElegooResult(autoRefillResult.code);
+        if(resultCode != PrinterNetworkErrorCode::SUCCESS) {
+            return PrinterNetworkResult<bool>(resultCode, false, parseUnknownErrorMsg(resultCode, autoRefillResult.message));
+        }
+
+        elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
         resultCode  = parseElegooResult(elinkResult.code);
+        if(resultCode == PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA && startPrintParams.autoBedLeveling == false) {
+            //missing bed leveling data, send bed leveling data
+            startPrintParams.autoBedLeveling = true;
+            elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
+            resultCode = parseElegooResult(elinkResult.code);
+        }
     } catch (const std::exception& e) {
         wxLogError("Exception in ElegooLink::sendPrintTask: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
-    return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS);
+    return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
 
 PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams& params)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    elink::FileUploadCompletionResult elinkResult;
     try {
         PrinterStatus status;
         if(isBusy(params.printerId, status , 1)) {
@@ -381,10 +416,10 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
         elink::FileUploadParams uploadParams;
         uploadParams.printerId = params.printerId;
         uploadParams.storageLocation = "local";
-        uploadParams.localFilePath = params.filePath;
+        uploadParams.localFilePath   = params.filePath;
         uploadParams.fileName = params.fileName;
 
-        auto elinkResult = elink::ElegooLink::getInstance().uploadFile(uploadParams, [&](const elink::FileUploadProgressData& progress) -> bool {
+        elinkResult = elink::ElegooLink::getInstance().uploadFile(uploadParams, [&](const elink::FileUploadProgressData& progress) -> bool {
             if(params.uploadProgressFn) {
                 bool cancel = false;
                 params.uploadProgressFn(progress.uploadedBytes, progress.totalBytes, cancel);
@@ -399,7 +434,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
         wxLogError("Exception in ElegooLink::sendPrintFile: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
-    PrinterNetworkResult<bool> networkResult(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS); 
+    PrinterNetworkResult<bool> networkResult(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, elinkResult.message)); 
     return networkResult;
 }
 
@@ -407,10 +442,11 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
 PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::string& printerId)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    elink::GetCanvasStatusResult elinkResult;
     PrinterMmsGroup mmsGroup;
     mmsGroup.mmsSystemName = "CANVAS";
     try {
-        auto elinkResult = elink::ElegooLink::getInstance().getCanvasStatus({printerId});
+        elinkResult = elink::ElegooLink::getInstance().getCanvasStatus({printerId});
         resultCode = parseElegooResult(elinkResult.code);
         if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if(elinkResult.hasData()) {
@@ -473,15 +509,16 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
         wxLogError("Exception in ElegooLink::getPrinterMmsInfo: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
-    return PrinterNetworkResult<PrinterMmsGroup>(resultCode, mmsGroup);
+    return PrinterNetworkResult<PrinterMmsGroup>(resultCode, mmsGroup, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const std::string& printerId)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    elink::PrinterAttributesResult elinkResult;
     PrinterNetworkInfo printerNetworkInfo;
     try {
-        elink::PrinterAttributesResult elinkResult = elink::ElegooLink::getInstance().getPrinterAttributes({printerId});
+        elinkResult = elink::ElegooLink::getInstance().getPrinterAttributes({printerId});
         resultCode = parseElegooResult(elinkResult.code);
         if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if(elinkResult.hasData()) {
@@ -493,6 +530,6 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
         wxLogError("Exception in ElegooLink::getPrinterAttributes: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
-    return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo);
+    return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 } // namespace Slic3r

@@ -419,7 +419,7 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
     PrinterWebView* view = new PrinterWebView(mTabBar);
     wxString url = printerInfo.webUrl;
     
-    if(PrintHost::get_print_host_type(printerInfo.hostType) == htElegooLink && (printerInfo.printerModel == "Elegoo Centauri Carbon 2" || printerInfo.printerModel == "Elegoo Centauri 2")) 
+    if(PrintHost::get_print_host_type(printerInfo.hostType) == htElegooLink && (printerInfo.printerModel == "Elegoo Centauri Carbon 2")) 
     {
         std::string accessCode = printerInfo.accessCode;
         url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber) + "&access_code=" + accessCode;
@@ -763,7 +763,7 @@ webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& p
     
     if(result.code == 0 && !printerInfo.host.empty() && printerInfo.host != host) {     
         wxString url = printerInfo.webUrl;
-        if(PrintHost::get_print_host_type(printerInfo.hostType) == htElegooLink && (printerInfo.printerModel == "Elegoo Centauri Carbon 2" || printerInfo.printerModel == "Elegoo Centauri 2")) 
+        if(PrintHost::get_print_host_type(printerInfo.hostType) == htElegooLink && (printerInfo.printerModel == "Elegoo Centauri Carbon 2")) 
         {
             std::string accessCode = printerInfo.accessCode;
             url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber) + "&access_code=" + accessCode;
@@ -879,7 +879,7 @@ webviewIpc::IPCResult PrinterManagerView::browseCAFile()
         }
     } catch (const std::exception& e) {
         wxLogMessage("Browse CA file error: %s", e.what());
-        errorCode = PrinterNetworkErrorCode::INTERNAL_ERROR;
+        errorCode = PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR;
     }
     result.data = path;
     result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);

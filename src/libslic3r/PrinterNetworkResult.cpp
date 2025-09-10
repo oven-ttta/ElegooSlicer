@@ -10,8 +10,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Success");            
         case PrinterNetworkErrorCode::UNKNOWN_ERROR:
             return _u8L("An unknown error occurred. Please try again later.");
-        case PrinterNetworkErrorCode::INTERNAL_ERROR:
-            return _u8L("An unknown network error occurred. Please try again later.");
+        case PrinterNetworkErrorCode::NOT_INITIALIZED:
+            return _u8L("Not initialized. Please try again later.");
         case PrinterNetworkErrorCode::INVALID_PARAMETER:
             return _u8L("Invalid parameter. Please try again.");
         case PrinterNetworkErrorCode::OPERATION_TIMEOUT:
@@ -20,6 +20,10 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Operation cancelled");
         case PrinterNetworkErrorCode::PRINTER_ACCESS_DENIED:
             return _u8L("Access denied. Please try again later.");
+        case PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA:
+            return _u8L("Missing bed leveling data. Please check and try again.");
+        case PrinterNetworkErrorCode::PRINTER_PRINT_FILE_NOT_FOUND:
+            return _u8L("Print file not found. Please troubleshoot.");
         case PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR:
             return _u8L("Connection failed. Please check the network of your computer and the printer, then try again.");
         case PrinterNetworkErrorCode::NETWORK_ERROR:
@@ -44,8 +48,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Operation failed. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED:
             return _u8L("Printer already connected");
-        case PrinterNetworkErrorCode::PRINTER_INTERNAL_ERROR:
-            return _u8L("Printer error. Please try again later or restart the printer.");
+        case PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR:
+            return _u8L("An unknown error occurred. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION:
             return _u8L("Printer network error. Please contact support at 3dp@elegoo.com.");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA:

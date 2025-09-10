@@ -606,7 +606,7 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         }
     } catch (std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "Print Error: " << e.what();
-        errorCode = PrinterNetworkErrorCode::INTERNAL_ERROR;
+        errorCode = PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR;
     }
     result.code    = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
     result.message = getErrorMessage(errorCode);

@@ -472,7 +472,7 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
         }
         if (params.errorFn) {
             std::string errorMessage = isSendPrintTaskFailed ? _u8L("Send print task failed") : _u8L("Send print file failed");
-            params.errorFn(errorMessage + ", " + result.message + "(" + std::to_string(static_cast<int>(result.code)) + ")");
+            params.errorFn(errorMessage + ", " + result.message);
         }
     }
     return result;
@@ -508,7 +508,7 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
         }
         return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::SUCCESS, result.data.value());
     }
-    
+
     wxLogWarning("Failed to get printer mms info: %s %s %s, error: %s", printer.value().host, printer.value().printerName,
     printer.value().printerModel, result.message.c_str());
     return PrinterNetworkResult<PrinterMmsGroup>(result.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : result.code,

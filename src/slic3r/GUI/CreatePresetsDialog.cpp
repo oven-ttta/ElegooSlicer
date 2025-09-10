@@ -98,7 +98,7 @@ static const std::unordered_map<std::string, std::vector<std::string>> printer_m
                             "Creality K1C",                "Creality K1 Max",             "Creality K1 SE",              "Creality K2 Plus"}},
      {"Custom Printer",    {"Generic Klipper Printer",     "Generic Marlin Printer",      "Generic RRF Printer",         "Generic ToolChanger Printer"}},
      {"Dremel",            {"Dremel 3D20", "Dremel 3D40", "Dremel 3D45"}},
-     {"Elegoo",            {"Elegoo Centauri Carbon 2",  "Elegoo Centauri 2",         "Elegoo Centauri Carbon",  "Elegoo Centauri",         "Elegoo OrangeStorm Giga", "Elegoo Neptune 4 Max",    "Elegoo Neptune 4 Plus",
+     {"Elegoo",            {"Elegoo Centauri Carbon 2",    "Elegoo Centauri Carbon",  "Elegoo Centauri",         "Elegoo OrangeStorm Giga", "Elegoo Neptune 4 Max",    "Elegoo Neptune 4 Plus",
                             "Elegoo Neptune 4 Pro",    "Elegoo Neptune 4",        "Elegoo Neptune 3 Max",    "Elegoo Neptune 3 Plus",   "Elegoo Neptune 3 Pro",
                             "Elegoo Neptune 3",        "Elegoo Neptune X",        "Elegoo Neptune 2S",       "Elegoo Neptune 2D",       "Elegoo Neptune 2",
                             "Elegoo Neptune"}},
