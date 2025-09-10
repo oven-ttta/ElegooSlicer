@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-10 14:56+0800\n"
+"POT-Creation-Date: 2025-09-10 17:35+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -16415,8 +16415,8 @@ msgstr "成功"
 msgid "An unknown error occurred. Please try again later."
 msgstr "发生未知错误，请稍后重试"
 
-msgid "An unknown network error occurred. Please try again later."
-msgstr "发生未知的网络错误，请稍后重试"
+msgid "Not initialized. Please try again later."
+msgstr ""
 
 msgid "Invalid parameter. Please try again."
 msgstr "参数无效，请重试"
@@ -16429,6 +16429,12 @@ msgstr "操作已取消"
 
 msgid "Access denied. Please try again later."
 msgstr "拒绝访问，请稍后重试"
+
+msgid "Missing bed leveling data. Please check and try again."
+msgstr ""
+
+msgid "Print file not found. Please troubleshoot."
+msgstr "文件未找到，请检查"
 
 msgid ""
 "Connection failed. Please check the network of your computer and the "
@@ -16470,8 +16476,8 @@ msgstr "操作失败，请稍后重试"
 msgid "Printer already connected"
 msgstr "打印机已存在"
 
-msgid "Printer error. Please try again later or restart the printer."
-msgstr "打印机异常，请稍后重试或者重启打印机"
+msgid "Unknown error. Please try again later or restart the printer."
+msgstr ""
 
 msgid "Printer network error. Please contact support at 3dp@elegoo.com."
 msgstr "打印机网络异常，请联系3dp@elegoo.com寻求支持"
@@ -16806,6 +16812,12 @@ msgid ""
 msgstr ""
 "避免翘曲\n"
 "您知道吗？打印ABS这类易翘曲耗材时，适当提高热床温度可以降低翘曲的概率。"
+
+#~ msgid "An unknown network error occurred. Please try again later."
+#~ msgstr "发生未知的网络错误，请稍后重试"
+
+#~ msgid "Printer error. Please try again later or restart the printer."
+#~ msgstr "打印机异常，请稍后重试或者重启打印机"
 
 #~ msgid "Printer MMS Sync"
 #~ msgstr "同步耗材"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-10 14:56+0800\n"
+"POT-Creation-Date: 2025-09-10 17:35+0800\n"
 "PO-Revision-Date: 2023-11-06 14:37+0800\n"
 "Last-Translator: ablegods <ablegods@gmail.com>\n"
 "Language-Team: \n"
@@ -16861,7 +16861,7 @@ msgstr ""
 msgid "An unknown error occurred. Please try again later."
 msgstr ""
 
-msgid "An unknown network error occurred. Please try again later."
+msgid "Not initialized. Please try again later."
 msgstr ""
 
 msgid "Invalid parameter. Please try again."
@@ -16874,6 +16874,12 @@ msgid "Operation cancelled"
 msgstr ""
 
 msgid "Access denied. Please try again later."
+msgstr ""
+
+msgid "Missing bed leveling data. Please check and try again."
+msgstr ""
+
+msgid "Print file not found. Please troubleshoot."
 msgstr ""
 
 msgid ""
@@ -16916,7 +16922,7 @@ msgstr ""
 msgid "Printer already connected"
 msgstr ""
 
-msgid "Printer error. Please try again later or restart the printer."
+msgid "Unknown error. Please try again later or restart the printer."
 msgstr ""
 
 msgid "Printer network error. Please contact support at 3dp@elegoo.com."
