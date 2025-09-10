@@ -287,6 +287,7 @@ nlohmann::json convertPrinterMmsGroupToJson(const PrinterMmsGroup& mmsGroup)
     json["activeMmsId"]    = mmsGroup.activeMmsId;
     json["activeTrayId"]   = mmsGroup.activeTrayId;
     json["autoRefill"]     = mmsGroup.autoRefill;
+    json["mmsSystemName"]  = mmsGroup.mmsSystemName;
     json["vtTray"]         = convertPrinterMmsTrayToJson(mmsGroup.vtTray);
     nlohmann::json mmsList = nlohmann::json::array();
     for (auto& mms : mmsGroup.mmsList) {
@@ -306,6 +307,7 @@ PrinterMmsGroup convertJsonToPrinterMmsGroup(const nlohmann::json& json)
         mmsGroup.activeMmsId  = json["activeMmsId"];
         mmsGroup.activeTrayId = json["activeTrayId"];
         mmsGroup.autoRefill   = json["autoRefill"];
+        mmsGroup.mmsSystemName = json["mmsSystemName"];
         mmsGroup.vtTray       = convertJsonToPrinterMmsTray(json["vtTray"]);
         if (json.contains("mmsList")) {
             for (auto& mms : json["mmsList"]) {

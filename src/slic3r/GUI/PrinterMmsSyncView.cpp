@@ -19,7 +19,7 @@
 
 namespace Slic3r { namespace GUI {
 
-PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Printer MMS Sync"), _L(""), 0)
+PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Synchronize filament list"), _L(""), 0)
     , m_isDestroying(false)
     , m_lifeTracker(std::make_shared<bool>(true))
     , m_asyncOperationInProgress(false)
@@ -222,7 +222,7 @@ webviewIpc::IPCResult PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann:
     std::string printerId = params["printerId"];
     auto mmsGroupResult = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
     if(!mmsGroupResult.isSuccess() || !mmsGroupResult.hasData()) {
-        result.code = static_cast<int>(PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED);
+        result.code = static_cast<int>(mmsGroupResult.code);
         result.message = mmsGroupResult.message;
         return result;
     }

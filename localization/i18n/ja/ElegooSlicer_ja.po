@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-09 19:46+0800\n"
+"POT-Creation-Date: 2025-09-10 14:56+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -4272,7 +4272,7 @@ msgid "Auto rotate for arrangement"
 msgstr "自動回転"
 
 msgid "Allow multiple materials on same plate"
-msgstr "一つのプレートに複数の材料を使用可能"
+msgstr "一つのプレートに複数の耗材を使用可能"
 
 msgid "Avoid extrusion calibration region"
 msgstr "押出しキャリブレーション領域を避ける"
@@ -5831,8 +5831,8 @@ msgstr "フィラメントを追加"
 msgid "Remove last filament"
 msgstr "最後のフィラメントを削除"
 
-msgid "Synchronize filament list from AMS"
-msgstr "AMSと素材を同期"
+msgid "Synchronize filament list"
+msgstr ""
 
 msgid "Set filaments to use"
 msgstr "フィラメントを選択"
@@ -7552,7 +7552,7 @@ msgid "default filament profile"
 msgstr "デフォルトフィラメントプロファイル"
 
 msgid "default SLA material profile"
-msgstr "デフォルトのSLA材料プロファイル"
+msgstr "デフォルトのSLA耗材プロファイル"
 
 msgid "default SLA print profile"
 msgstr "デフォルトのSLAプリントプロファイル"
@@ -8292,7 +8292,7 @@ msgstr ""
 "ラミングとは、単一エクストルーダーMMプリンターでツールを交換する直前の急速吐"
 "出動作を指します。 その目的は、フィラメントを抜く時に新しいフィラメントの挿入"
 "を妨げないようにすることと、再挿入のときにエラーにならないよう、フィラメント"
-"の先端部を適切なシェイプにすることです。 この処理は重要であり、材料が変わる"
+"の先端部を適切なシェイプにすることです。 この処理は重要であり、耗材が変わる"
 "と、良好な先端形状が得られるラミング条件の変更が必要となったりします。 このた"
 "め、ラミング中の吐出速度は調整できるようになっています。\n"
 "\n"
@@ -9142,7 +9142,7 @@ msgid ""
 "While the object %1% itself fits the build volume, it exceeds the maximum "
 "build volume height because of material shrinkage compensation."
 msgstr ""
-"オブジェクト %1% 自体はビルドボリュームに適合していますが、材料の収縮補正のた"
+"オブジェクト %1% 自体はビルドボリュームに適合していますが、耗材の収縮補正のた"
 "め、ビルドボリュームの最大の高さを超えています。"
 
 #, boost-format
@@ -10874,7 +10874,7 @@ msgid ""
 "toolchanges with flexible materials that may need more time to shrink to "
 "original dimensions."
 msgstr ""
-"フィラメントがアンロードされた後に停止する時間。 軟らかい材料などで元の寸法に"
+"フィラメントがアンロードされた後に停止する時間。 軟らかい耗材などで元の寸法に"
 "縮小するのに時間を必要とすると考えられる場合で、信頼性の高いツール交換を行う"
 "のに役立ちます。"
 
@@ -10976,14 +10976,14 @@ msgid "The material type of filament"
 msgstr "フィラメント素材タイプ"
 
 msgid "Soluble material"
-msgstr "可溶性材料"
+msgstr "可溶性耗材"
 
 msgid ""
 "Soluble material is commonly used to print support and support interface"
-msgstr "可溶性材料は、サポート又はサポート接触面の造形によく使われます"
+msgstr "可溶性耗材は、サポート又はサポート接触面の造形によく使われます"
 
 msgid "Support material"
-msgstr "サポート材料"
+msgstr "サポート耗材"
 
 msgid ""
 "Support material is commonly used to print support and support interface"
@@ -11467,7 +11467,7 @@ msgid ""
 "The metallic material of nozzle. This determines the abrasive resistance of "
 "nozzle, and what kind of filament can be printed"
 msgstr ""
-"ノズル材料：これにより、ノズルの耐摩耗性と使用できるフィラメントが決まりま"
+"ノズル耗材：これにより、ノズルの耐摩耗性と使用できるフィラメントが決まりま"
 "す。"
 
 msgid "Undefine"
@@ -12290,7 +12290,7 @@ msgstr "ラフト接触面Z間隔"
 
 msgid "Z gap between object and raft. Ignored for soluble interface"
 msgstr ""
-"ラフトとオブジェクトのZ方向の間隔。可溶性材料を使用する場合この設定が無効で"
+"ラフトとオブジェクトのZ方向の間隔。可溶性耗材を使用する場合この設定が無効で"
 "す。"
 
 msgid "Raft expansion"
@@ -12320,7 +12320,7 @@ msgid ""
 "Object will be raised by this number of support layers. Use this function to "
 "avoid wrapping when print ABS"
 msgstr ""
-"指定したサポート層数で上げて造形します。ABSなど反りやすい材料に対して有効的で"
+"指定したサポート層数で上げて造形します。ABSなど反りやすい耗材に対して有効的で"
 "す。"
 
 msgid ""
@@ -14810,10 +14810,10 @@ msgid ""
 msgstr ""
 "フローダイナミクスキャリブレーションの詳細については、当社のWikiをご覧くださ"
 "い。\n"
-"通常、キャリブレーションは不要です。単一の色や材料で印刷を開始する際に、「フ"
+"通常、キャリブレーションは不要です。単一の色や耗材で印刷を開始する際に、「フ"
 "ローダイナミクスキャリブレーション」オプションが印刷開始メニューでチェックさ"
 "れていると、プリンターは従来の方法に従い、印刷前にフィラメントをキャリブレー"
-"ションします。複数の色や材料で印刷を開始する場合、プリンターはフィラメントが"
+"ションします。複数の色や耗材で印刷を開始する場合、プリンターはフィラメントが"
 "切り替わるたびにデフォルトの補正パラメーターを使用し、ほとんどの場合良好な結"
 "果が得られます。\n"
 "\n"
@@ -16554,88 +16554,91 @@ msgstr ""
 msgid "Connected Printer"
 msgstr ""
 
-msgid "Printer MMS Sync"
-msgstr ""
-
 msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
 msgstr ""
 
+#, boost-format
+msgid "%1% connection failed. Please check and try again."
+msgstr ""
+
 msgid "Success"
 msgstr ""
 
-msgid "An unknown error occurred"
+msgid "An unknown error occurred. Please try again later."
 msgstr ""
 
-msgid "An internal error occurred"
+msgid "An unknown network error occurred. Please try again later."
 msgstr ""
 
-msgid "Invalid parameter provided"
+msgid "Invalid parameter. Please try again."
 msgstr ""
 
-msgid "Operation timed out"
+msgid "Operation timed out. Please try again."
 msgstr ""
 
-msgid "Operation was cancelled"
+msgid "Operation cancelled"
 msgstr ""
 
-msgid "Access denied"
+msgid "Access denied. Please try again later."
 msgstr ""
 
-msgid "Connection failed"
+msgid ""
+"Connection failed. Please check the network of your computer and the "
+"printer, then try again."
 msgstr ""
 
-msgid "Network error occurred"
+msgid ""
+"Network error occurred. Please check the network of your computer and the "
+"printer, then try again."
 msgstr ""
 
-msgid "Invalid username or password"
+msgid "Invalid username or password. Please check and try again."
 msgstr ""
 
-msgid "Invalid token"
+msgid "Invalid token. Please check and try again."
 msgstr ""
 
-msgid "Invalid access code"
+msgid "Invalid access code. Please check and try again."
 msgstr ""
 
-msgid "Invalid PIN code"
+msgid "Invalid PIN code. Please check and try again."
 msgstr ""
 
-msgid "Connection limit exceeded"
+msgid "Connection limit reached. Please check and try again."
 msgstr ""
 
-msgid "File upload failed"
+msgid "File upload failed. Please try again later."
 msgstr ""
 
-msgid "File not found"
+msgid "File not found. Please troubleshoot."
 msgstr ""
 
-msgid "Printer is busy"
+msgid "Printer is busy. Please try again later."
 msgstr ""
 
-msgid "Printer command failed"
+msgid "Operation failed. Please try again later."
 msgstr ""
 
-msgid "Printer is already connected"
+msgid "Printer already connected"
 msgstr ""
 
-msgid "Printer internal error"
+msgid "Printer error. Please try again later or restart the printer."
 msgstr ""
 
-msgid "Printer network error"
+msgid "Printer network error. Please contact support at 3dp@elegoo.com."
 msgstr ""
 
-msgid "Invalid printer data received"
+msgid ""
+"Invalid printer data received. Please contact support at 3dp@elegoo.com."
 msgstr ""
 
 msgid "Printer MMS connection failed"
 msgstr ""
 
-msgid "Printer not found"
-msgstr ""
-
-msgid "Printer already exists"
+msgid "Printer not found. Please refresh and try again."
 msgstr ""
 
 msgid "Printer type not supported"
@@ -16644,20 +16647,18 @@ msgstr ""
 msgid "Host type not supported"
 msgstr ""
 
-msgid "Failed to create network connection"
+msgid "Failed to establish network connection"
 msgstr ""
 
-msgid "Printer not selected"
+msgid "Printer not selected. Please try again."
 msgstr ""
 
-msgid "Some filaments are not mapped"
+msgid "Unmapped filament detected, printing cannot be started."
 msgstr ""
 
 msgid ""
-"Printer host does not match the local printer, please delete and add again"
-msgstr ""
-
-msgid "Printer host is not connected"
+"The IP address does not match the printer's information. Please remove the "
+"printer and add it again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -16819,7 +16820,7 @@ msgid ""
 "printed model by doing some fine-tuning."
 msgstr ""
 "流量を微調整\n"
-"流量を材料、温度により微調整し、更に良い仕上がりが得られます。"
+"流量を耗材、温度により微調整し、更に良い仕上がりが得られます。"
 
 #: resources/data/hints.ini: [hint:Split your prints into plates]
 msgid ""

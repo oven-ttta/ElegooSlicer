@@ -270,12 +270,12 @@ arrangement::ArrangePolygon estimate_wipe_tower_info(int plate_index, std::set<i
 // 1. 以下几种情况不需要料塔：
 //    1）料塔被禁用，
 //    2）逐件打印，
-//    3）不允许不同材料落在相同盘，且没有多色对象
+//    3）不允许不同耗材落在相同盘，且没有多色对象
 // 2. 以下情况需要料塔：
 //    1）某对象是多色对象；
-//    2）打开了支撑，且支撑体与接触面使用的是不同材料
-//    3）允许不同材料落在相同盘，且所有选定对象中使用了多种热床温度相同的材料
-//     （所有对象都是单色的，但不同对象的材料不同，例如：对象A使用红色PLA，对象B使用白色PLA）
+//    2）打开了支撑，且支撑体与接触面使用的是不同耗材
+//    3）允许不同耗材落在相同盘，且所有选定对象中使用了多种热床温度相同的耗材
+//     （所有对象都是单色的，但不同对象的耗材不同，例如：对象A使用红色PLA，对象B使用白色PLA）
 void ArrangeJob::prepare_wipe_tower()
 {
     bool need_wipe_tower = false;
@@ -304,7 +304,7 @@ void ArrangeJob::prepare_wipe_tower()
     }
 
     // if multile extruders have same bed temp, we need wipe tower
-    // 允许不同材料落在相同盘，且所有选定对象中使用了多种热床温度相同的材料
+    // 允许不同耗材落在相同盘，且所有选定对象中使用了多种热床温度相同的耗材
     if (params.allow_multi_materials_on_same_plate) {
         std::map<int, std::set<int>> bedTemp2extruderIds;
         for (const auto& item : m_selected)

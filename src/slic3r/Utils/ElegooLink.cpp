@@ -408,6 +408,7 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     PrinterMmsGroup mmsGroup;
+    mmsGroup.mmsSystemName = "CANVAS";
     try {
         auto elinkResult = elink::ElegooLink::getInstance().getCanvasStatus({printerId});
         resultCode = parseElegooResult(elinkResult.code);

@@ -106,6 +106,7 @@ struct PrinterMmsGroup
     std::string             activeMmsId;
     std::string             activeTrayId;
     bool                    autoRefill;
+    std::string             mmsSystemName;
     std::vector<PrinterMms> mmsList;
     PrinterMmsTray          vtTray;
 };

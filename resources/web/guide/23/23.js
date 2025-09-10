@@ -602,7 +602,7 @@ function OnClickCustomFilamentAdd()
 	SendWXMessage( JSON.stringify(tSend) );		
 }
 
-//编辑某一个自定义材料
+//编辑某一个自定义耗材
 function CFEdit( fid )
 {
 	//alert(fid);

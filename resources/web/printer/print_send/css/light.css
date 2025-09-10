@@ -545,6 +545,12 @@
   opacity: 0.8;
 }
 
+.tray-popover-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* ===== OPTIONS SECTION ===== */
 .options-section {
   display: flex;

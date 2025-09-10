@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-09 19:46+0800\n"
+"POT-Creation-Date: 2025-09-10 14:56+0800\n"
 "PO-Revision-Date: 2024-07-11 00:22+0300\n"
 "Last-Translator: Olcay ÖREN\n"
 "Language-Team: \n"
@@ -5955,8 +5955,8 @@ msgstr "Bir filament ekle"
 msgid "Remove last filament"
 msgstr "Son filamenti kaldır"
 
-msgid "Synchronize filament list from AMS"
-msgstr "Filament listesini AMS'den senkronize edin"
+msgid "Synchronize filament list"
+msgstr "Filament listesini senkronize edin"
 
 msgid "Set filaments to use"
 msgstr "Kullanılacak filamentleri ayarla"
@@ -17292,88 +17292,91 @@ msgstr ""
 msgid "Connected Printer"
 msgstr ""
 
-msgid "Printer MMS Sync"
-msgstr ""
-
 msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
 msgstr ""
 
+#, boost-format
+msgid "%1% connection failed. Please check and try again."
+msgstr ""
+
 msgid "Success"
 msgstr ""
 
-msgid "An unknown error occurred"
+msgid "An unknown error occurred. Please try again later."
 msgstr ""
 
-msgid "An internal error occurred"
+msgid "An unknown network error occurred. Please try again later."
 msgstr ""
 
-msgid "Invalid parameter provided"
+msgid "Invalid parameter. Please try again."
 msgstr ""
 
-msgid "Operation timed out"
+msgid "Operation timed out. Please try again."
 msgstr ""
 
-msgid "Operation was cancelled"
+msgid "Operation cancelled"
 msgstr ""
 
-msgid "Access denied"
+msgid "Access denied. Please try again later."
 msgstr ""
 
-msgid "Connection failed"
+msgid ""
+"Connection failed. Please check the network of your computer and the "
+"printer, then try again."
 msgstr ""
 
-msgid "Network error occurred"
+msgid ""
+"Network error occurred. Please check the network of your computer and the "
+"printer, then try again."
 msgstr ""
 
-msgid "Invalid username or password"
+msgid "Invalid username or password. Please check and try again."
 msgstr ""
 
-msgid "Invalid token"
+msgid "Invalid token. Please check and try again."
 msgstr ""
 
-msgid "Invalid access code"
+msgid "Invalid access code. Please check and try again."
 msgstr ""
 
-msgid "Invalid PIN code"
+msgid "Invalid PIN code. Please check and try again."
 msgstr ""
 
-msgid "Connection limit exceeded"
+msgid "Connection limit reached. Please check and try again."
 msgstr ""
 
-msgid "File upload failed"
+msgid "File upload failed. Please try again later."
 msgstr ""
 
-msgid "File not found"
+msgid "File not found. Please troubleshoot."
 msgstr ""
 
-msgid "Printer is busy"
+msgid "Printer is busy. Please try again later."
 msgstr ""
 
-msgid "Printer command failed"
+msgid "Operation failed. Please try again later."
 msgstr ""
 
-msgid "Printer is already connected"
+msgid "Printer already connected"
 msgstr ""
 
-msgid "Printer internal error"
+msgid "Printer error. Please try again later or restart the printer."
 msgstr ""
 
-msgid "Printer network error"
+msgid "Printer network error. Please contact support at 3dp@elegoo.com."
 msgstr ""
 
-msgid "Invalid printer data received"
+msgid ""
+"Invalid printer data received. Please contact support at 3dp@elegoo.com."
 msgstr ""
 
 msgid "Printer MMS connection failed"
 msgstr ""
 
-msgid "Printer not found"
-msgstr ""
-
-msgid "Printer already exists"
+msgid "Printer not found. Please refresh and try again."
 msgstr ""
 
 msgid "Printer type not supported"
@@ -17382,20 +17385,18 @@ msgstr ""
 msgid "Host type not supported"
 msgstr ""
 
-msgid "Failed to create network connection"
+msgid "Failed to establish network connection"
 msgstr ""
 
-msgid "Printer not selected"
+msgid "Printer not selected. Please try again."
 msgstr ""
 
-msgid "Some filaments are not mapped"
+msgid "Unmapped filament detected, printing cannot be started."
 msgstr ""
 
 msgid ""
-"Printer host does not match the local printer, please delete and add again"
-msgstr ""
-
-msgid "Printer host is not connected"
+"The IP address does not match the printer's information. Please remove the "
+"printer and add it again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-09 19:46+0800\n"
+"POT-Creation-Date: 2025-09-10 14:56+0800\n"
 "PO-Revision-Date: 2023-11-06 14:37+0800\n"
 "Last-Translator: ablegods <ablegods@gmail.com>\n"
 "Language-Team: \n"
@@ -2927,7 +2927,7 @@ msgid ""
 "auto-filled by selecting a filament preset."
 msgstr ""
 "噴嘴溫度和最大體積速度會影響到校準結果，請填寫與實際列印相同的數值。可通過選"
-"擇已有的材料預設來自動填寫。"
+"擇已有的耗材預設來自動填寫。"
 
 msgid "Nozzle Diameter"
 msgstr "噴嘴直徑"
@@ -4017,7 +4017,7 @@ msgid "Filament settings"
 msgstr "線材設定"
 
 msgid "SLA Materials settings"
-msgstr "SLA 材料設定"
+msgstr "SLA 耗材設定"
 
 #, fuzzy
 msgid "Printer settings"
@@ -4365,7 +4365,7 @@ msgstr "自動旋轉以最佳化自動擺放效果"
 
 #, fuzzy
 msgid "Allow multiple materials on same plate"
-msgstr "允許同一列印板中包含多種材料"
+msgstr "允許同一列印板中包含多種耗材"
 
 msgid "Avoid extrusion calibration region"
 msgstr "避開擠出校準區域"
@@ -5885,7 +5885,7 @@ msgid "View all object's settings"
 msgstr "查看所有物件的設定"
 
 msgid "Material settings"
-msgstr "材料設定"
+msgstr "耗材設定"
 
 #, fuzzy
 msgid "Remove current plate (if not last one)"
@@ -5968,8 +5968,8 @@ msgstr "增加一個線材"
 msgid "Remove last filament"
 msgstr "刪除最後一個線材"
 
-msgid "Synchronize filament list from AMS"
-msgstr "從 AMS 同步線材清單"
+msgid "Synchronize filament list"
+msgstr "同步線材清單"
 
 #, fuzzy
 msgid "Set filaments to use"
@@ -6981,7 +6981,7 @@ msgid "Add/Remove filaments"
 msgstr "新增/刪除線材"
 
 msgid "Add/Remove materials"
-msgstr "新增/刪除材料"
+msgstr "新增/刪除耗材"
 
 msgid "Select/Remove printers(system presets)"
 msgstr ""
@@ -7266,7 +7266,7 @@ msgid ""
 "Filament does not match the filament in AMS slot. Please update the printer "
 "firmware to support AMS slot assignment."
 msgstr ""
-"材料編號和 AMS 槽位中的線材材質不相符，請更新列印設備韌體以支援 AMS 槽位映射"
+"耗材編號和 AMS 槽位中的線材材質不相符，請更新列印設備韌體以支援 AMS 槽位映射"
 "功能"
 
 #, fuzzy
@@ -7720,7 +7720,7 @@ msgid "default filament profile"
 msgstr "預設線材設定檔"
 
 msgid "default SLA material profile"
-msgstr "預設 SLA 材料設定檔"
+msgstr "預設 SLA 耗材設定檔"
 
 msgid "default SLA print profile"
 msgstr "預設 SLA 列印設定檔"
@@ -8102,7 +8102,7 @@ msgid ""
 "Do you want to change the diameter for all extruders to first extruder "
 "nozzle diameter value?"
 msgstr ""
-"已選擇單噴頭多材料模式，\n"
+"已選擇單噴頭多耗材模式，\n"
 "所有噴頭的直徑必須相同。\n"
 "您是否要將所有噴頭的直徑更改為第一噴頭的噴嘴直徑值？"
 
@@ -8119,7 +8119,7 @@ msgid ""
 "This is a single extruder multi-material printer, diameters of all extruders "
 "will be set to the new value. Do you want to proceed?"
 msgstr ""
-"這是一台單噴頭多材料列印機，所有噴頭的直徑將被設置為新的值。您要繼續嗎？"
+"這是一台單噴頭多耗材列印機，所有噴頭的直徑將被設置為新的值。您要繼續嗎？"
 
 msgid "Layer height limits"
 msgstr "層高限制"
@@ -8359,7 +8359,7 @@ msgstr "圖片"
 
 #, fuzzy
 msgid "Bill of Materials"
-msgstr "材料清單"
+msgstr "耗材清單"
 
 #, fuzzy
 msgid "Assembly Guide"
@@ -9368,7 +9368,7 @@ msgid ""
 "While the object %1% itself fits the build volume, it exceeds the maximum "
 "build volume height because of material shrinkage compensation."
 msgstr ""
-"物件 %1% 本身雖然符合構建體積，但由於材料收縮補償，導致其超出了最大構建高度限"
+"物件 %1% 本身雖然符合構建體積，但由於耗材收縮補償，導致其超出了最大構建高度限"
 "制。"
 
 #, boost-format
@@ -9481,12 +9481,12 @@ msgstr "擦拭塔要求支撐和物件採用同樣的層高。"
 msgid ""
 "Organic support tree tip diameter must not be smaller than support material "
 "extrusion width."
-msgstr "有機樹狀支撐尖端直徑不得小於支撐材料擠出寬度。"
+msgstr "有機樹狀支撐尖端直徑不得小於支撐耗材擠出寬度。"
 
 msgid ""
 "Organic support branch diameter must not be smaller than 2x support material "
 "extrusion width."
-msgstr "有機樹狀支撐分支直徑不得小於支撐材料擠出寬度的 2 倍。"
+msgstr "有機樹狀支撐分支直徑不得小於支撐耗材擠出寬度的 2 倍。"
 
 msgid ""
 "Organic support branch diameter must not be smaller than support tree tip "
@@ -11130,7 +11130,7 @@ msgid ""
 msgstr "線材直徑被用於計算 G-code 檔案中的擠出量。因此很重要，應盡可能精確。"
 
 msgid "Pellet flow coefficient"
-msgstr "顆粒材料流量係數"
+msgstr "顆粒耗材流量係數"
 
 msgid ""
 "Pellet flow coefficient is empirically derived and allows for volume "
@@ -11141,7 +11141,7 @@ msgid ""
 "\n"
 "filament_diameter = sqrt( (4 * pellet_flow_coefficient) / PI )"
 msgstr ""
-"顆粒流量係數是基於實驗資料得出的，用於計算顆粒列印機的材料體積。\n"
+"顆粒流量係數是基於實驗資料得出的，用於計算顆粒列印機的耗材體積。\n"
 "在內部系統中，該係數會被轉換為耗材直徑，而其它體積計算方式則維持不變。\n"
 "filament_diameter = sqrt( (4 * pellet_flow_coefficient) / PI )"
 
@@ -11282,7 +11282,7 @@ msgid ""
 "small amount of filament is rapidly extruded on the wipe tower just before "
 "the toolchange. This option is only used when the wipe tower is enabled."
 msgstr ""
-"多色列印設備執行尖端成型時（即，當列印設備設定中的單擠出機多材料未選取時）。"
+"多色列印設備執行尖端成型時（即，當列印設備設定中的單擠出機多耗材未選取時）。"
 "選取時，在換色之前，會迅速擠出少量線材絲到擦拭塔上。此選項僅在啟用擦拭塔時使"
 "用。"
 
@@ -11308,21 +11308,21 @@ msgid "g/cm³"
 msgstr "g/cm³"
 
 msgid "The material type of filament"
-msgstr "線材的材料類型"
+msgstr "線材的耗材類型"
 
 msgid "Soluble material"
-msgstr "可溶性材料"
+msgstr "可溶性耗材"
 
 msgid ""
 "Soluble material is commonly used to print support and support interface"
-msgstr "可溶性材料通常用於列印支撐和支撐面"
+msgstr "可溶性耗材通常用於列印支撐和支撐面"
 
 msgid "Support material"
-msgstr "支撐材料"
+msgstr "支撐耗材"
 
 msgid ""
 "Support material is commonly used to print support and support interface"
-msgstr "支撐材料通常用於列印支撐體和支撐接觸面"
+msgstr "支撐耗材通常用於列印支撐體和支撐接觸面"
 
 msgid "Softening temperature"
 msgstr "線材軟化溫度"
@@ -11827,7 +11827,7 @@ msgstr "噴嘴類型"
 msgid ""
 "The metallic material of nozzle. This determines the abrasive resistance of "
 "nozzle, and what kind of filament can be printed"
-msgstr "噴嘴的金屬材料。這將決定噴嘴的耐磨性，以及可列印線材的種類"
+msgstr "噴嘴的金屬耗材。這將決定噴嘴的耐磨性，以及可列印線材的種類"
 
 msgid "Undefine"
 msgstr "未定義"
@@ -12052,7 +12052,7 @@ msgid ""
 "material resulting in rough top surfaces."
 msgstr ""
 "為了增強填充與周邊的結合，填充區域會略微擴大，與周邊產生重疊。此百分比值是基"
-"於稀疏填充的線寬來計算的。建議將該值設置在 10-15% 左右，以減少過擠出或材料堆"
+"於稀疏填充的線寬來計算的。建議將該值設置在 10-15% 左右，以減少過擠出或耗材堆"
 "積的可能性從而避免列印出粗糙的頂部表面。"
 
 msgid "Top/Bottom solid infill/wall overlap"
@@ -12084,7 +12084,7 @@ msgid ""
 "Useful for multi-extruder prints with translucent materials or manual "
 "soluble support material"
 msgstr ""
-"強制在相鄰材料/體積之間產生實體殼。 適用於使用半透明材料或手動可溶支撐材料的"
+"強制在相鄰耗材/體積之間產生實體殼。 適用於使用半透明耗材或手動可溶支撐耗材的"
 "多擠出機列印"
 
 msgid "Maximum width of a segmented region"
@@ -12111,10 +12111,10 @@ msgid ""
 "filaments touch. This improves the adhesion between filaments, especially "
 "models printed in different materials."
 msgstr ""
-"在不同材料的耗材接觸點產生梁式互鎖結構，增強耗材之間的附著力，特別適用於不同"
-"材料列印的模型。\n"
+"在不同耗材的耗材接觸點產生梁式互鎖結構，增強耗材之間的附著力，特別適用於不同"
+"耗材列印的模型。\n"
 "譯者補充：此設定通常用於提升結構穩定性，透過梁式設計讓不同部分更緊密地連接在"
-"一起，常見於模組化或多材料列印中。"
+"一起，常見於模組化或多耗材列印中。"
 
 msgid "Interlocking beam width"
 msgstr "梁式互鎖寬度"
@@ -12192,7 +12192,7 @@ msgstr "熨燙流量"
 msgid ""
 "The amount of material to extrude during ironing. Relative to flow of normal "
 "layer height. Too high value results in overextrusion on the surface"
-msgstr "熨燙時相對正常層高流量的材料量。過高的數值將會導致表面材料過擠出。"
+msgstr "熨燙時相對正常層高流量的耗材量。過高的數值將會導致表面耗材過擠出。"
 
 msgid "Ironing line spacing"
 msgstr "熨燙間距"
@@ -12594,7 +12594,7 @@ msgstr ""
 msgid ""
 "This option will drop the temperature of the inactive extruders to prevent "
 "oozing."
-msgstr "這個選項會降低未使用噴頭的溫度，以防止材料滲出。"
+msgstr "這個選項會降低未使用噴頭的溫度，以防止耗材滲出。"
 
 msgid "Filename format"
 msgstr "檔案名稱格式"
@@ -12608,7 +12608,7 @@ msgstr "懸空可列印"
 
 #, fuzzy
 msgid "Modify the geometry to print overhangs without support material."
-msgstr "修改幾何形狀使得懸空部分無需支撐材料或者橋接列印。"
+msgstr "修改幾何形狀使得懸空部分無需支撐耗材或者橋接列印。"
 
 #, fuzzy
 msgid "Make overhangs printable - Maximum angle"
@@ -12620,7 +12620,7 @@ msgid ""
 "0 will replace all overhangs with conical material."
 msgstr ""
 "開啟使懸空可列印後，允許的懸空最大角度。90° 將完全不改變模型並允許任何懸空，"
-"而0° 將用圓錐形材料替換所有懸空部分。"
+"而0° 將用圓錐形耗材替換所有懸空部分。"
 
 msgid "Make overhangs printable - Hole area"
 msgstr "最大孔洞面積"
@@ -12629,7 +12629,7 @@ msgid ""
 "Maximum area of a hole in the base of the model before it's filled by "
 "conical material.A value of 0 will fill all the holes in the model base."
 msgstr ""
-"模型底部的孔洞在被圓錐形材料填充前所允許的最大面積。值為 0 將填充模型底部的所"
+"模型底部的孔洞在被圓錐形耗材填充前所允許的最大面積。值為 0 將填充模型底部的所"
 "有孔洞。"
 
 msgid "mm²"
@@ -12778,7 +12778,7 @@ msgid ""
 "Some amount of material in extruder is pulled back to avoid ooze during long "
 "travel. Set zero to disable retraction"
 msgstr ""
-"擠出機中的一些材料會被拉回特定長度，避免空駛較長時軟化的線材滲出。設定為 0 表"
+"擠出機中的一些耗材會被拉回特定長度，避免空駛較長時軟化的線材滲出。設定為 0 表"
 "示關閉回抽。"
 
 msgid "Long retraction when cut(beta)"
@@ -13351,7 +13351,7 @@ msgid ""
 "action."
 msgstr ""
 "啟用此選項後，自定義的換線 G-code 將僅在列印開始時被省略，整個列印過程中會跳"
-"過工具更換指令（例如：T0）。此功能適用於手動多材料列印，允許使用 M600/PAUSE "
+"過工具更換指令（例如：T0）。此功能適用於手動多耗材列印，允許使用 M600/PAUSE "
 "指令來觸發手動換線操作。"
 
 msgid "Auto-generate Tool Change Command"
@@ -13627,8 +13627,8 @@ msgid ""
 "overhangs."
 msgstr ""
 "支撐的樣式和形狀。 對於普通支撐，將支撐投影到網格中將創建更穩定的支撐（預"
-"設），而緊貼的支撐塔將節省材料並減少物體表面的痕跡。\n"
-"對於樹狀支撐，細長和有機風格將更積極地合併樹枝並節省大量材料（預設有機），而"
+"設），而緊貼的支撐塔將節省耗材並減少物體表面的痕跡。\n"
+"對於樹狀支撐，細長和有機風格將更積極地合併樹枝並節省大量耗材（預設有機），而"
 "混合風格將在大平面懸空下建立與正常支撐類似的結構。"
 
 msgid "Default (Grid/Organic)"
@@ -14726,10 +14726,10 @@ msgid ""
 msgstr "包含布林值的向量，用於指示每個擠出機是否在列印過程中被啟用。"
 
 msgid "Has single extruder MM priming"
-msgstr "單擠出機多材料預熱"
+msgstr "單擠出機多耗材預熱"
 
 msgid "Are the extra multi-material priming regions used in this print?"
-msgstr "這次列印是否使用了額外的多材料準備區域？"
+msgstr "這次列印是否使用了額外的多耗材準備區域？"
 
 msgid "Volume per extruder"
 msgstr "各擠出機線材體積"
@@ -15316,7 +15316,7 @@ msgid "Max Volumetric Speed calibration is recommended when you print with:"
 msgstr "使用以下選項列印時，建議進行最大體積速度校準："
 
 msgid "material with significant thermal shrinkage/expansion, such as..."
-msgstr "具有顯著熱收縮/膨脹的材料，例如..."
+msgstr "具有顯著熱收縮/膨脹的耗材，例如..."
 
 msgid "materials with inaccurate filament diameter"
 msgstr "耗材直徑不準確的線材"
@@ -15333,7 +15333,7 @@ msgstr "部分校準失敗！ 您可以清潔列印板並重試。 失敗的測�
 msgid ""
 "*We recommend you to add brand, materia, type, and even humidity level in "
 "the Name"
-msgstr "*我們建議您在名稱中加入品牌、材料、類型，甚至濕度水平。"
+msgstr "*我們建議您在名稱中加入品牌、耗材、類型，甚至濕度水平。"
 
 msgid "Failed"
 msgstr "失敗"
@@ -15361,7 +15361,7 @@ msgstr "輸入值"
 
 #, fuzzy
 msgid "Save to Filament Preset"
-msgstr "儲存到材料預設值"
+msgstr "儲存到耗材預設值"
 
 #, fuzzy
 msgid "Preset"
@@ -16327,7 +16327,7 @@ msgstr "預設的噴嘴直徑與記錄的噴嘴直徑不一致。您最近有更
 
 #, c-format, boost-format
 msgid "*Printing %s material with %s may cause nozzle damage"
-msgstr "*使用 %s 材料和 %s 列印可能會導致噴嘴損壞"
+msgstr "*使用 %s 耗材和 %s 列印可能會導致噴嘴損壞"
 
 #, fuzzy
 msgid "Need select printer"
@@ -16845,88 +16845,91 @@ msgstr ""
 msgid "Connected Printer"
 msgstr ""
 
-msgid "Printer MMS Sync"
-msgstr ""
-
 msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
 msgstr ""
 
+#, boost-format
+msgid "%1% connection failed. Please check and try again."
+msgstr ""
+
 msgid "Success"
 msgstr ""
 
-msgid "An unknown error occurred"
+msgid "An unknown error occurred. Please try again later."
 msgstr ""
 
-msgid "An internal error occurred"
+msgid "An unknown network error occurred. Please try again later."
 msgstr ""
 
-msgid "Invalid parameter provided"
+msgid "Invalid parameter. Please try again."
 msgstr ""
 
-msgid "Operation timed out"
+msgid "Operation timed out. Please try again."
 msgstr ""
 
-msgid "Operation was cancelled"
+msgid "Operation cancelled"
 msgstr ""
 
-msgid "Access denied"
+msgid "Access denied. Please try again later."
 msgstr ""
 
-msgid "Connection failed"
+msgid ""
+"Connection failed. Please check the network of your computer and the "
+"printer, then try again."
 msgstr ""
 
-msgid "Network error occurred"
+msgid ""
+"Network error occurred. Please check the network of your computer and the "
+"printer, then try again."
 msgstr ""
 
-msgid "Invalid username or password"
+msgid "Invalid username or password. Please check and try again."
 msgstr ""
 
-msgid "Invalid token"
+msgid "Invalid token. Please check and try again."
 msgstr ""
 
-msgid "Invalid access code"
+msgid "Invalid access code. Please check and try again."
 msgstr ""
 
-msgid "Invalid PIN code"
+msgid "Invalid PIN code. Please check and try again."
 msgstr ""
 
-msgid "Connection limit exceeded"
+msgid "Connection limit reached. Please check and try again."
 msgstr ""
 
-msgid "File upload failed"
+msgid "File upload failed. Please try again later."
 msgstr ""
 
-msgid "File not found"
+msgid "File not found. Please troubleshoot."
 msgstr ""
 
-msgid "Printer is busy"
+msgid "Printer is busy. Please try again later."
 msgstr ""
 
-msgid "Printer command failed"
+msgid "Operation failed. Please try again later."
 msgstr ""
 
-msgid "Printer is already connected"
+msgid "Printer already connected"
 msgstr ""
 
-msgid "Printer internal error"
+msgid "Printer error. Please try again later or restart the printer."
 msgstr ""
 
-msgid "Printer network error"
+msgid "Printer network error. Please contact support at 3dp@elegoo.com."
 msgstr ""
 
-msgid "Invalid printer data received"
+msgid ""
+"Invalid printer data received. Please contact support at 3dp@elegoo.com."
 msgstr ""
 
 msgid "Printer MMS connection failed"
 msgstr ""
 
-msgid "Printer not found"
-msgstr ""
-
-msgid "Printer already exists"
+msgid "Printer not found. Please refresh and try again."
 msgstr ""
 
 msgid "Printer type not supported"
@@ -16935,20 +16938,18 @@ msgstr ""
 msgid "Host type not supported"
 msgstr ""
 
-msgid "Failed to create network connection"
+msgid "Failed to establish network connection"
 msgstr ""
 
-msgid "Printer not selected"
+msgid "Printer not selected. Please try again."
 msgstr ""
 
-msgid "Some filaments are not mapped"
+msgid "Unmapped filament detected, printing cannot be started."
 msgstr ""
 
 msgid ""
-"Printer host does not match the local printer, please delete and add again"
-msgstr ""
-
-msgid "Printer host is not connected"
+"The IP address does not match the printer's information. Please remove the "
+"printer and add it again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
@@ -17159,7 +17160,7 @@ msgid ""
 "model that actually need it."
 msgstr ""
 "自訂支撐\n"
-"您知道嗎，您可以手動繪製增加/隱藏支撐的位置，此功能使僅將支撐材料放置在實際需"
+"您知道嗎，您可以手動繪製增加/隱藏支撐的位置，此功能使僅將支撐耗材放置在實際需"
 "要的模型截面上變得容易。"
 
 #: resources/data/hints.ini: [hint:Different types of supports]
@@ -18126,7 +18127,7 @@ msgstr ""
 #~ msgid ""
 #~ "Material becomes soft at this temperature. Thus the heatbed cannot be "
 #~ "hotter than this tempature"
-#~ msgstr "材料在這個溫度開始變軟。因此熱床溫度不能超過這個溫度。"
+#~ msgstr "耗材在這個溫度開始變軟。因此熱床溫度不能超過這個溫度。"
 
 #~ msgid "Enable this option if machine has auxiliary part cooling fan"
 #~ msgstr "如果機器有輔助部件冷卻風扇，勾選該選項"
@@ -18233,8 +18234,8 @@ msgstr ""
 #~ "structure to normal support under large flat overhangs."
 #~ msgstr ""
 #~ "支撐物的樣式和形狀。對於普通支撐，將支撐投射到一個規則的網格中，將創建更穩"
-#~ "定的支撐（默認），而緊貼的支撐塔將節省材料並減少物體的瑕疵。\n"
-#~ "對於樹形支撐，苗條板的風格將更積極地合併樹枝，並節省大量的材料（默認），而"
+#~ "定的支撐（默認），而緊貼的支撐塔將節省耗材並減少物體的瑕疵。\n"
+#~ "對於樹形支撐，苗條板的風格將更積極地合併樹枝，並節省大量的耗材（默認），而"
 #~ "混合風格將在大的平面懸垂下創建與正常支撐類似的結構。"
 
 #~ msgid "Target chamber temperature"

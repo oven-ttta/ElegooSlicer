@@ -50,6 +50,12 @@ html.dark .tray-rect {
   background: var(--bg-secondary);
 }
 
+html.dark .tray-popover-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Icon color adjustments for better visibility */
 html.dark .stat-icon,
 html.dark .dropdown-icon,
