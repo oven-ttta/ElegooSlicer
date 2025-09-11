@@ -18,12 +18,6 @@
     "426x426",
     "0x426"
   ],
-  "bed_texture_area": [
-    "200x-9.8",
-    "370x-9.8",
-    "370x-1.2",
-    "200x-1.2"
-  ],
   "printable_height": "480",
   "retract_lift_below": [
     "479"
