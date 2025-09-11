@@ -1225,6 +1225,7 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     //BBS: add bed_exclude_area
     ((ConfigOptionPoints,             bed_exclude_area))
     ((ConfigOptionPoints,             head_wrap_detect_zone))
+    ((ConfigOptionPoints,             bed_texture_area))
     // BBS
     ((ConfigOptionString,             bed_custom_texture))
     ((ConfigOptionString,             bed_custom_model))

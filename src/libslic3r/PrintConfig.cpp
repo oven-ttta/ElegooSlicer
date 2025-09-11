@@ -501,6 +501,12 @@ void PrintConfigDef::init_common_params()
     def->gui_type = ConfigOptionDef::GUIType::one_string;
     def->set_default_value(new ConfigOptionPoints{ Vec2d(0, 0) });
 
+    def = this->add("bed_texture_area", coPoints);
+    def->label = L("Bed texture area");
+    //BBS
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionPoints{});
+
     def = this->add("bed_custom_texture", coString);
     def->label = L("Bed custom texture");
     def->mode = comAdvanced;
