@@ -191,6 +191,7 @@ struct PrinterNetworkParams
     bool        heatedBedLeveling{false};
     bool        autoRefill{false};
     bool        uploadAndStartPrint{false};
+    bool        hasMms{false};
     std::vector<PrintFilamentMmsMapping> filamentMmsMappingList;
 
     std::function<void(const uint64_t uploadedBytes, const uint64_t totalBytes, bool& cancel)> uploadProgressFn;

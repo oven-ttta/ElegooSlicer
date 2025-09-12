@@ -169,7 +169,9 @@ void PrinterCache::updatePrinterPrintTask(const std::string& printerId, const Pr
     if (it != mPrinters.end()) {
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         it->second.lastActiveTime = now;
-        if(task.taskId.empty() || it->second.printerStatus == PrinterStatus::PRINTER_STATUS_IDLE) {
+        if(it->second.printerStatus == PrinterStatus::PRINTER_STATUS_IDLE || 
+            it->second.printerStatus == PrinterStatus::PRINTER_STATUS_OFFLINE ||
+            it->second.printerStatus == PrinterStatus::PRINTER_STATUS_CANCELED) {
             it->second.printTask.taskId = "";
             it->second.printTask.fileName = "";
             it->second.printTask.totalTime = 0;

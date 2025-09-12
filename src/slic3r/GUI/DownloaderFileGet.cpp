@@ -575,8 +575,15 @@ string FileGet::filename_from_url(const string& url)
     string content_disp_value;
 
     for (const auto& param : query_params) {
-        if (param.first == "filename") {
-            filename_from_query = url_decode(param.second, true);
+        if (param.first == "filename" || param.first == "file_name") {
+            string decoded_value = url_decode(param.second, true);
+            // Replace directory separators with underscores to match browser behavior
+            for (char& c : decoded_value) {
+                if (c == '/' || c == '\\') {
+                    c = '_';
+                }
+            }
+            filename_from_query = decoded_value;
 
         } else if (param.first == "response-content-disposition") {
             content_disp_value = url_decode(param.second, true);

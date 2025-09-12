@@ -71,7 +71,7 @@
                             <button class="printer-detail-btn"
                                 @click="printerStore.showPrinterDetail(printer.printerId)">{{ $t("printerManager.details") }}</button>
                         </div>
-                        <div class="card-menu icon-button" title="more" @click="showPrinterSettingsByIndex(index)">
+                        <div class="card-menu icon-button" :title="$t('printerManager.more')" @click="showPrinterSettingsByIndex(index)">
                             &#8942;
                         </div>
                     </div>

@@ -377,10 +377,12 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
         }
 
         elink::VoidResult autoRefillResult;
+        if(params.hasMms) {
         if(params.autoRefill) {
             autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, true});
-        } else {
-            autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, false});
+            } else {
+                autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, false});
+            }
         }
         
         resultCode = parseElegooResult(autoRefillResult.code);

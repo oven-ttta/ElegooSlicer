@@ -644,7 +644,8 @@ std::map<std::string, std::string> PrintSendDialogEx::getExtendedInfo() const
     return {{"bedType", std::to_string(mBedType)},
             {"timeLapse", mTimeLapse ? "true" : "false"},
             {"heatedBedLeveling", mHeatedBedLeveling ? "true" : "false"},
-            {"autoRefill", mAutoRefill ? "true" : "false"},
+            {"autoRefill", mAutoRefill ? "true" : "false"}, 
+            {"hasMms", mHasMms ? "true" : "false"}, 
             {"selectedPrinterId", mSelectedPrinterId},
             {"filamentAmsMapping", filamentList.dump()}};
 }
