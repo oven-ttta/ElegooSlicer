@@ -716,7 +716,7 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
             throw Slic3r::InvalidArgument("Error: WipeTowerIntegration::append_tcr was asked to do a toolchange it didn't expect.");
 
         std::string gcode;
-        gcode += ELEGOO_CC_TOOL_CHANGE_START_TAG(gcodegen.config(),new_extruder_id);
+       
         // Toolchangeresult.gcode assumes the wipe tower corner is at the origin (except for priming lines)
         // We want to rotate and shift all extrusions (gcode postprocessing) and starting and ending position
         float alpha = m_wipe_tower_rotation / 180.f * float(M_PI);
@@ -771,8 +771,9 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
         } else {
             // When this is multiextruder printer without any ramming, we can just change
             // the tool without travelling to the tower.
-            gcodegen.m_writer.add_object_end_labels(gcode);
+            gcode += gcodegen.retract();
         }
+        gcode += ELEGOO_CC_TOOL_CHANGE_START_TAG(gcodegen.config(), new_extruder_id);
 
         if (will_go_down) {
             gcode += gcodegen.writer().retract();
@@ -832,6 +833,7 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
             gcodegen.m_wipe.reset_path();
             for (const Vec2f &wipe_pt : tcr.wipe_path)
                 gcodegen.m_wipe.path.points.emplace_back(wipe_tower_point_to_object_point(gcodegen, transform_wt_pt(wipe_pt)));
+            gcode += gcodegen.retract(false, false);
         }
 
         // Let the planner know we are traveling between objects.
