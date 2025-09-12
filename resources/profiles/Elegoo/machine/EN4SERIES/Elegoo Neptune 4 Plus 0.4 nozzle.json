@@ -18,6 +18,12 @@
     "325x325",
     "0x325"
   ],
+  "bed_texture_area": [
+    "125x-10.5",
+    "295x-10.5",
+    "295x-1.6",
+    "125x-1.6"
+  ],
   "printable_height": "385",
   "retract_lift_below": [
     "384"
