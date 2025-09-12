@@ -110,7 +110,7 @@ const PrintSendApp = {
         },
 
         bedTypeNotMatch() {
-            return this.printInfo.uploadAndPrint && this.currentBedType !== this.selectedBedTypeValue;
+            return this.printInfo.uploadAndPrint && this.currentBedType !== this.selectedBedTypeValue && this.curPrinter.printCapabilities.supportsHeatedBedSwitching;
         }
     },
 
