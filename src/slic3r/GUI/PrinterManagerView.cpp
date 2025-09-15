@@ -94,8 +94,13 @@ private:
     void drawTabContent(wxDC& dc, const wxRect& tab_rect, const wxBitmap& icon, 
                        const wxString& text, const wxColour& text_colour, bool isFirstTab) const {
         dc.SetTextForeground(text_colour);
-        
-        const wxSize icon_size = icon.IsOk() ? icon.GetSize() : wxSize(0, 0);
+        wxSize icon_size = icon.IsOk() ? icon.GetSize() : wxSize(0, 0);
+        if (isFirstTab) {
+            icon_size = wxSize(16, 16);
+        } else {
+            icon_size = wxSize(22, 12);
+        }
+       
         const wxSize text_size = dc.GetTextExtent(text);
         
         // Calculate positions
@@ -135,9 +140,10 @@ private:
         // Simple SVG with color modification
         wxBitmap close_icon = create_scaled_bitmap("topbar_close", nullptr, TAB_CLOSE_BUTTON_SIZE);
         if (close_icon.IsOk()) {
+            auto close_icon_ = wxBitmap(close_icon.ConvertToImage().Rescale(TAB_CLOSE_BUTTON_SIZE, TAB_CLOSE_BUTTON_SIZE));
             // Change color based on state
             if (close_button_state == wxAUI_BUTTON_STATE_HOVER || close_button_state == wxAUI_BUTTON_STATE_PRESSED) {
-                wxImage img = close_icon.ConvertToImage();
+                wxImage img = close_icon_.ConvertToImage();
                 wxColour new_color = isDarkMode() ? wxColour(255, 120, 120) : wxColour(200, 0, 0);
                 
                 // Simple color replacement: replace dark pixels with new color
@@ -148,12 +154,12 @@ private:
                         }
                     }
                 }
-                close_icon = wxBitmap(img);
+                close_icon_ = wxBitmap(img);
             }
             
-            const int icon_x = close_rect.x + (close_rect.width - close_icon.GetWidth()) / 2;
-            const int icon_y = close_rect.y + (close_rect.height - close_icon.GetHeight()) / 2;
-            dc.DrawBitmap(close_icon, icon_x, icon_y);
+            const int icon_x = close_rect.x + (close_rect.width - close_icon_.GetWidth()) / 2;
+            const int icon_y = close_rect.y + (close_rect.height - close_icon_.GetHeight()) / 2;
+            dc.DrawBitmap(close_icon_, icon_x, icon_y);
         }
     }
 
