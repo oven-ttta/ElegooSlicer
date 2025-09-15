@@ -1,15 +1,12 @@
 {
 	"type": "filament",
-	"name": "Elegoo RAPID PETG @base",
+	"name": "Elegoo PETG @base",
 	"inherits": "fdm_filament_pet",
 	"from": "system",
-	"filament_id": "ERPETGB00",
+	"filament_id": "EPETGB00",
 	"instantiation": "false",
 	"cool_plate_temp": [
 		"0"
-	],
-	"filament_type": [
-		"PETG"
 	],
 	"cool_plate_temp_initial_layer": [
 		"0"
@@ -24,19 +21,19 @@
 		"30"
 	],
 	"fan_max_speed": [
-		"80"
+		"40"
 	],
 	"fan_min_speed": [
-		"30"
+		"10"
 	],
 	"filament_cost": [
 		"0"
 	],
 	"filament_density": [
-		"1.26"
+		"1.25"
 	],
 	"filament_max_volumetric_speed": [
-		"18"
+		"8"
 	],
 	"filament_vendor": [
 		"Elegoo"
@@ -54,10 +51,10 @@
 		"230"
 	],
 	"nozzle_temperature": [
-		"250"
+		"240"
 	],
 	"nozzle_temperature_initial_layer": [
-		"250"
+		"240"
 	],
 	"overhang_fan_speed": [
 		"90"
@@ -79,5 +76,8 @@
 	],
 	"filament_end_gcode": [
 		"; filament end gcode \n"
+	],
+	"filament_type": [
+		"PETG"
 	]
 }

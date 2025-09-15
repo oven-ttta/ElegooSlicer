@@ -1,11 +1,11 @@
 {
     "type": "filament",
     "name": "Elegoo RAPID PETG @EOS Giga",
-    "inherits": "Elegoo PETG PRO @base",
+    "inherits": "Elegoo PETG @base",
     "from": "system",
     "setting_id": "ERPETGEOSG00",
     "instantiation": "true",
-	"enable_pressure_advance": [
+    "enable_pressure_advance": [
         "1"
     ],
     "fan_max_speed": [
@@ -20,7 +20,7 @@
     "filament_max_volumetric_speed": [
         "34"
     ],
-	"nozzle_temperature": [
+    "nozzle_temperature": [
         "235"
     ],
     "nozzle_temperature_initial_layer": [
@@ -28,6 +28,9 @@
     ],
     "pressure_advance": [
         "0.035"
+    ],
+    "filament_density": [
+        "1.26"
     ],
     "compatible_printers": [
         "Elegoo OrangeStorm Giga 0.4 nozzle",

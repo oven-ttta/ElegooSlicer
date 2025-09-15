@@ -14,9 +14,6 @@
     "filament_flow_ratio": [
         "1.12"
     ],
-    "filament_max_volumetric_speed": [
-        "35"
-    ],
 	"nozzle_temperature": [
         "210"
     ],
@@ -26,6 +23,9 @@
     "overhang_fan_threshold": [
         "25%"
     ],
+	"filament_density": [
+		"1.25"
+	],
     "compatible_printers": [
         "Elegoo OrangeStorm Giga 0.4 nozzle",
         "Elegoo OrangeStorm Giga 0.6 nozzle",

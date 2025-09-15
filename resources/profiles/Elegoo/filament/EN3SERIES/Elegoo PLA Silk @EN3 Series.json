@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo PLA Silk @EN3 Series",
-    "inherits": "Elegoo PLA Silk @base",
+    "inherits": "Elegoo PLA @base",
     "from": "system",
     "setting_id": "EPLASEN3",
     "instantiation": "true",
@@ -43,6 +43,9 @@
     ],
     "slow_down_min_speed": [
         "10"
+    ],
+    "filament_density": [
+        "1.32"
     ],
     "compatible_printers": [
         "Elegoo Neptune 3 Pro 0.4 nozzle",

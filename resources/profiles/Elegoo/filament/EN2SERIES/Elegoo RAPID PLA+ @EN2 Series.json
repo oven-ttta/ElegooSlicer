@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo RAPID PLA+ @EN2 Series",
-    "inherits": "Elegoo RAPID PLA+ @base",
+    "inherits": "Elegoo PLA @base",
     "from": "system",
     "setting_id": "ERPLAPLUSEN2",
     "instantiation": "true",
@@ -44,6 +44,9 @@
     "slow_down_min_speed": [
         "10"
     ],
+	"filament_density": [
+		"1.25"
+	],
     "compatible_printers": [
         "Elegoo Neptune 0.4 nozzle",
         "Elegoo Neptune 0.6 nozzle",

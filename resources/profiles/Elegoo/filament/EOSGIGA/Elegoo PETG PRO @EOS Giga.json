@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo PETG PRO @EOS Giga",
-    "inherits": "Elegoo PETG PRO @base",
+    "inherits": "Elegoo PETG @base",
     "from": "system",
     "setting_id": "EPETGEOSG00",
     "instantiation": "true",

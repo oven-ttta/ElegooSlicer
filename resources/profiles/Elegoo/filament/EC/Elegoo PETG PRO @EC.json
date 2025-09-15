@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo PETG PRO @EC",
-    "inherits": "Elegoo PETG PRO @base",
+    "inherits": "Elegoo PETG @base",
     "from": "system",
     "setting_id": "EPETGPROEC",
     "instantiation": "true",

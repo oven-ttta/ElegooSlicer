@@ -1,13 +1,16 @@
 {
     "type": "filament",
     "name": "Elegoo RAPID PLA+ @0.2 nozzle",
-    "inherits": "Elegoo RAPID PLA+ @base",
+    "inherits": "Elegoo PLA @base",
     "from": "system",
     "setting_id": "ERPLAPLUS00020",
     "instantiation": "true",
     "filament_max_volumetric_speed": [
         "3.2"
     ],
+	"filament_density": [
+		"1.25"
+	],
     "compatible_printers": [
 	  "Elegoo Centauri 0.2 nozzle",
       "Elegoo Centauri Carbon 0.2 nozzle",

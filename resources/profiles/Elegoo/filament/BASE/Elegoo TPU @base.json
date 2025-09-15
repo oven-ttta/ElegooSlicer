@@ -1,9 +1,9 @@
 {
 	"type": "filament",
-	"name": "Elegoo TPU 95A @base",
+	"name": "Elegoo TPU @base",
 	"inherits": "fdm_filament_tpu",
 	"from": "system",
-	"filament_id": "ETPU95AB00",
+	"filament_id": "ETPUB00",
 	"instantiation": "false",
 	"filament_max_volumetric_speed": [
 		"3.6"

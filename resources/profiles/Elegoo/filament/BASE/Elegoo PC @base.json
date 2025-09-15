@@ -1,15 +1,18 @@
 {
     "type": "filament",
-    "name": "Elegoo PLA Matte @base",
-    "inherits": "fdm_filament_pla",
+    "name": "Elegoo PC @base",
+    "inherits": "fdm_filament_pc",
     "from": "system",
-    "filament_id": "EPLAMB00",
+    "filament_id": "EPCB00",
     "instantiation": "false",
     "filament_cost": [
         "0"
     ],
     "filament_density": [
         "1.25"
+    ],
+    "filament_max_volumetric_speed": [
+        "16"
     ],
     "filament_vendor": [
         "Elegoo"

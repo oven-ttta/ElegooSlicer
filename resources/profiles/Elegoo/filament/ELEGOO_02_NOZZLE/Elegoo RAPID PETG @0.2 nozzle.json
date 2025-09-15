@@ -1,12 +1,27 @@
 {
     "type": "filament",
     "name": "Elegoo RAPID PETG @0.2 nozzle",
-    "inherits": "Elegoo RAPID PETG @base",
+    "inherits": "Elegoo PETG @base",
     "from": "system",
     "setting_id": "ERPETG00020",
     "instantiation": "true",
     "filament_max_volumetric_speed": [
         "1"
+    ],
+    "fan_max_speed": [
+        "80"
+    ],
+    "fan_min_speed": [
+        "30"
+    ],
+    "filament_density": [
+        "1.26"
+    ],
+    "nozzle_temperature": [
+        "250"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "250"
     ],
     "compatible_printers": [
 	  "Elegoo Centauri 0.2 nozzle",
