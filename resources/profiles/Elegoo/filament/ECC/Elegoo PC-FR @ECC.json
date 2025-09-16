@@ -1,4 +1,3 @@
-
 {
     "type": "filament",
     "name": "Elegoo PC-FR @ECC",
@@ -8,9 +7,6 @@
     "instantiation": "true",
     "pressure_advance": [
         "0.024"
-    ],
-    "fan_max_speed": [
-        "40"
     ],
     "nozzle_temperature": [
         "280"
@@ -27,12 +23,15 @@
     "slow_down_layer_time": [
         "10"
     ],
+    "fan_max_speed": [
+        "40"
+    ],
     "filament_density": [
 		"1.1"
 	],
-	"filament_max_volumetric_speed": [
-		"12"
-	],
+    "filament_max_volumetric_speed": [
+        "18"
+    ],
     "compatible_printers": [
         "Elegoo Centauri Carbon 0.4 nozzle",
         "Elegoo Centauri Carbon 0.6 nozzle",

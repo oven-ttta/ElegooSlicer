@@ -3,7 +3,7 @@
 	"name": "Elegoo ABS @base",
 	"inherits": "fdm_filament_abs",
 	"from": "system",
-	"filament_id": "EABS00",
+	"filament_id": "EABSB00",
 	"instantiation": "false",
 	"filament_vendor": [
 		"Elegoo"
@@ -13,5 +13,11 @@
 	],
 	"filament_max_volumetric_speed": [
 		"12"
+	],
+	"nozzle_temperature": [
+		"270"
+	],
+	"fan_cooling_layer_time": [
+		"35"
 	]
 }

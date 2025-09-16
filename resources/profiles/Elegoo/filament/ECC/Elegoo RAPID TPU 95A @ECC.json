@@ -3,7 +3,7 @@
     "name": "Elegoo RAPID TPU 95A @ECC",
     "inherits": "Elegoo TPU @base",
     "from": "system",
-    "setting_id": "ETPU95ARECC",
+    "setting_id": "ERTPU95AECC",
     "instantiation": "true",
     "pressure_advance": [
         "0.024"
