@@ -57,6 +57,10 @@ const PrinterSettingPhysicalComponent = {
 
     },
 
+    computed: {
+
+    },
+
     methods: {
 
         closeModal() {
@@ -91,16 +95,23 @@ const PrinterSettingPhysicalComponent = {
             if (newPrinter.printerName !== this.printer.printerName) {
                 name = newPrinter.printerName;
             }
-            
+
             // check if host has changed
             if (newPrinter.host !== this.printer.host) {
                 host = newPrinter.host;
             }
 
-            await this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, name, host);
-            this.printer.printerName = newPrinter.printerName;
-            this.printer.host = newPrinter.host;
-            // this.closeModal();
+            if (name || host) {
+                await this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, name, host);
+                this.printer.printerName = newPrinter.printerName;
+                this.printer.host = newPrinter.host;
+            } else {
+                ElementPlus.ElMessage.success({
+                    message: i18n.global.t("printerManager.modifySuccess"),
+                    duration: 3000,
+                });
+            }
+            this.closeModal();
         },
     }
 };

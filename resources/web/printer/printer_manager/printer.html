@@ -60,7 +60,7 @@
             </div>
             <div class="printer-list" v-else>
                 <div v-for="(printer, index) in printerStore.printers" :key="printer.printerId" class="printer-card"
-                    :id="`printer-card-${printer.printerId}`">
+                    :id="`printer-card-${printer.printerId}`" @dblclick="printerStore.showPrinterDetail(printer.printerId)">
                     <div class="printer-card-header">
                         <div class="printer-img">
                             <img :src="printer.printerImg || ''" alt="Printer" />
@@ -76,7 +76,7 @@
                         </div>
                     </div>
                     <div class="progress-bar-container">
-                        <span class="progress-label" v-show="printer.printerStatus===1">{{ getPrinterProgress(printer) }}%</span>
+                        <span class="progress-label" v-show="canShowProgressText(printer.printerStatus, printer.connectStatus)">{{ getPrinterProgress(printer) }}%</span>
                         <div class="progress-bar-bg">
                             <div class="progress-bar" :style="`width:${getPrinterProgress(printer)}%`"></div>
                         </div>
@@ -85,7 +85,7 @@
                         <span class="printer-status" :style="getPrinterStatusStyle(printer.printerStatus, printer.connectStatus)">{{ getPrinterStatus(printer.printerStatus,
                             printer.connectStatus)
                             }}</span>
-                        <span v-show="printer.printerStatus===1" class="remaining-time">{{ getPrinterRemainingTime(printer) }}</span>
+                        <span v-show="canShowProgressText(printer.printerStatus, printer.connectStatus)" class="remaining-time">{{ getPrinterRemainingTime(printer) }}</span>
                         <div v-if="shouldShowWarningIcon(printer.printerStatus, printer.connectStatus)" 
                              class="warning-icon" 
                              :title="getWarningTooltip(printer.printerStatus)">

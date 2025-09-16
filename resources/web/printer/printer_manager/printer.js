@@ -49,6 +49,9 @@ const PrinterManager = {
         },
 
 
+        canShowProgressText(printerStatus, connectStatus) {
+            return printerStatus === 1 || printerStatus === 2 || printerStatus === 3;
+        },
         getPrinterStatus(printerStatus, connectStatus) {
             // If not connected, always show Offline
             if (connectStatus === 0) {
