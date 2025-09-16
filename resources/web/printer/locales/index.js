@@ -89,7 +89,7 @@ const langMessages = {
       "close": "Close",
       "connect": "Connect",
       "help": "Help",
-      "helpMessage": "{'Please make sure the printer firmware is updated to the latest version and \"LAN Only\" mode is enabled. If you have any questions, please contact 3dp@elegoo.com via email for support.'}",
+      "helpMessage": "{'Please make sure the printer firmware is updated to the latest version and \"LAN Only\" mode is enabled.'}",
       "ok": "OK",
       "pleaseEnterCompleteAccessCode": "Please enter the complete 6-character access code",
       "connectToPrinter": "Connect to Printer",
@@ -110,7 +110,8 @@ const langMessages = {
       "pleaseEnterPrinterName": "Please enter printer name",
       "lengthShouldBe1To50": "Length should be 1 to 50 characters",
       "pleaseEnterHostNameIpUrl": "Please enter hostname, IP or URL",
-      "confirmDeletePrinter": "Are you sure you want to delete this printer?"
+      "confirmDeletePrinter": "Are you sure you want to delete this printer?",
+      "pleaseEnterValidHostNameIpUrl": "Please enter a valid hostname, IP or URL."
     },
     "printerSettingPhysical": {
     },
@@ -239,7 +240,7 @@ const langMessages = {
       "close": "关闭",
       "connect": "连接",
       "help": "帮助",
-      "helpMessage": "{'请确定打印机固件已经更新到最新版本，并且开启了“仅局域网”模式，如有问题，可邮件联系3dp@elegoo.com以寻求支持'}",
+      "helpMessage": "{'请确定打印机固件已经更新到最新版本，并且开启了“仅局域网”模式。'}",
       "ok": "确定",
       "pleaseEnterCompleteAccessCode": "请输入完整的6位访问码",
       "connectToPrinter": "连接打印机",
@@ -260,7 +261,8 @@ const langMessages = {
       "pleaseEnterPrinterName": "请输入打印机名称",
       "lengthShouldBe1To50": "长度应为1到50个字符",
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
-      "confirmDeletePrinter": "您确定要删除此打印机吗？"
+      "confirmDeletePrinter": "您确定要删除此打印机吗？",
+      "pleaseEnterValidHostNameIpUrl": "请输入有效的主机名、IP地址或URL。"
     },
     "printerSettingPhysical": {
 

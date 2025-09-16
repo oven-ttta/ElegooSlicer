@@ -15605,11 +15605,11 @@ msgstr ""
 msgid "Unknown error. Please try again later or restart the printer."
 msgstr ""
 
-msgid "Printer network error. Please contact support at 3dp@elegoo.com."
+msgid "Printer network error. Please try again later or restart the printer."
 msgstr ""
 
 msgid ""
-"Invalid printer data received. Please contact support at 3dp@elegoo.com."
+"Invalid printer data received. Please try again later or restart the printer."
 msgstr ""
 
 msgid "Printer MMS connection failed"

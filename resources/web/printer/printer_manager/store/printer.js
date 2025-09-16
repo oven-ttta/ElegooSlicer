@@ -12,10 +12,10 @@ const usePrinterStore = defineStore('printer', {
   actions: {
     validateHost(rule, value, callback) {
       if (!value || value.trim().length === 0) {
-        callback(new Error('Please enter host name, IP or URL'));
+        callback(new Error(i18n.global.t('printerSetting.pleaseEnterHostNameIpUrl')));
         return;
       }
-
+      
       const trimmedValue = value.trim();
 
       // Helper function to validate IPv4 address
@@ -25,14 +25,14 @@ const usePrinterStore = defineStore('printer', {
         const match = ip.match(ipPattern);
 
         if (!match) {
-          return { valid: false, error: 'Please enter a valid hostname, IP address or URL' };
+          return { valid: false, error: i18n.global.t('printerSetting.pleaseEnterValidHostNameIpUrl') };
         }
 
         // Check each segment is between 0-255
         for (let i = 1; i <= 4; i++) {
           const segment = parseInt(match[i], 10);
           if (segment < 0 || segment > 255) {
-            return { valid: false, error: `Please enter a valid hostname, IP address or URL` };
+            return { valid: false, error: i18n.global.t('printerSetting.pleaseEnterValidHostNameIpUrl') };
           }
         }
 
@@ -74,7 +74,7 @@ const usePrinterStore = defineStore('printer', {
         return;
       }
 
-      callback(new Error('Please enter a valid hostname, IP address or URL'));
+      callback(new Error(i18n.global.t('printerSetting.pleaseEnterValidHostNameIpUrl')));
     },
 
 

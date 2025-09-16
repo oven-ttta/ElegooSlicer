@@ -51,9 +51,9 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR:
             return _u8L("An unknown error occurred. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION:
-            return _u8L("Printer network error. Please contact support at 3dp@elegoo.com.");
+            return _u8L("Printer network error. Please try again later or restart the printer.");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA:
-            return _u8L("Invalid printer data received. Please contact support at 3dp@elegoo.com.");
+            return _u8L("Invalid printer data received. Please try again later or restart the printer.");
         case PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED:
             return _u8L("Printer MMS connection failed");
         case PrinterNetworkErrorCode::PRINTER_NOT_FOUND:
