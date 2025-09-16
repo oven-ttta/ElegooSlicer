@@ -194,7 +194,7 @@ void Downloader::download_file(const std::string& full_url)
     }
     m_downloads.emplace_back(std::make_unique<Download>(id, url, this, m_dest_folder, DownType2));
 
-    auto dlg      = std::make_shared<DownloadProgressDialog>(m_downloads.back()->get_filename(),
+    auto dlg      = std::make_shared<DownloadProgressDialog>(wxString::FromUTF8(m_downloads.back()->get_filename()),
                                                              std::bind(&Downloader::user_action_callback2, this, std::placeholders::_1,
                                                                        std::placeholders::_2),
                                                              id);
