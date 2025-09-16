@@ -16479,12 +16479,12 @@ msgstr "打印机已存在"
 msgid "Unknown error. Please try again later or restart the printer."
 msgstr ""
 
-msgid "Printer network error. Please contact support at 3dp@elegoo.com."
-msgstr "打印机网络异常，请联系3dp@elegoo.com寻求支持"
+msgid "Printer network error. Please try again later or restart the printer."
+msgstr "打印机网络异常，请稍后重试或者重启打印机"
 
 msgid ""
-"Invalid printer data received. Please contact support at 3dp@elegoo.com."
-msgstr "收到无效的打印机数据，请联系3dp@elegoo.com寻求支持"
+"Invalid printer data received. Please try again later or restart the printer."
+msgstr "收到无效的打印机数据，请稍后重试或者重启打印机"
 
 msgid "Printer MMS connection failed"
 msgstr "打印机MMS连接失败"
