@@ -395,6 +395,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
         if(resultCode == PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA && startPrintParams.autoBedLeveling == false) {
             //missing bed leveling data, send bed leveling data
             startPrintParams.autoBedLeveling = true;
+            startPrintParams.bedLevelForce = true;
             elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
             resultCode = parseElegooResult(elinkResult.code);
         }
