@@ -19,6 +19,8 @@ const PrinterAuthTemplate =
                         v-model="accessCodes[index]"
                         @input="onCodeInput(index, $event)"
                         @keydown="onCodeKeydown(index, $event)"
+                        spellcheck="false"
+                        autocorrect="off"
                     />
                 </div>
                 
@@ -169,17 +171,37 @@ const PrinterAuthComponent = {
 
             // if a character is entered, automatically focus on the next input box
             if (stringValue.length === 1 && index < 5) {
-                this.$nextTick(() => {
+                // Use setTimeout for better compatibility with Safari
+                setTimeout(() => {
                     const nextInput = this.inputRefs[index + 1];
                     if (nextInput) {
-                        // Element Plus input focus setting
-                        if (nextInput.focus) {
-                            nextInput.focus();
-                        } else if (nextInput.$refs && nextInput.$refs.input) {
-                            nextInput.$refs.input.focus();
+                        // Try multiple methods to ensure focus works in Safari
+                        try {
+                            // Method 1: Direct focus on Element Plus component
+                            if (nextInput.focus) {
+                                nextInput.focus();
+                            }
+                            // Method 2: Focus on the inner input element
+                            else if (nextInput.$refs && nextInput.$refs.input) {
+                                nextInput.$refs.input.focus();
+                            }
+                            // Method 3: Find and focus the actual DOM input element (Safari fallback)
+                            else if (nextInput.$el) {
+                                const inputElement = nextInput.$el.querySelector('input');
+                                if (inputElement) {
+                                    inputElement.focus();
+                                }
+                            }
+                        } catch (error) {
+                            console.warn('Focus failed:', error);
+                            // Fallback: try to find input by DOM traversal
+                            const nextInputElement = document.querySelectorAll('.code-input input')[index + 1];
+                            if (nextInputElement) {
+                                nextInputElement.focus();
+                            }
                         }
                     }
-                });
+                }, 10); // Small delay for Safari compatibility
             }
         },
 
@@ -190,32 +212,72 @@ const PrinterAuthComponent = {
                 this.accessCodes[index] === "" &&
                 index > 0
             ) {
-                this.$nextTick(() => {
+                // Use setTimeout for better compatibility with Safari
+                setTimeout(() => {
                     const prevInput = this.inputRefs[index - 1];
                     if (prevInput) {
-                        // Element Plus input box focus setting
-                        if (prevInput.focus) {
-                            prevInput.focus();
-                        } else if (prevInput.$refs && prevInput.$refs.input) {
-                            prevInput.$refs.input.focus();
+                        // Try multiple methods to ensure focus works in Safari
+                        try {
+                            // Method 1: Direct focus on Element Plus component
+                            if (prevInput.focus) {
+                                prevInput.focus();
+                            }
+                            // Method 2: Focus on the inner input element
+                            else if (prevInput.$refs && prevInput.$refs.input) {
+                                prevInput.$refs.input.focus();
+                            }
+                            // Method 3: Find and focus the actual DOM input element (Safari fallback)
+                            else if (prevInput.$el) {
+                                const inputElement = prevInput.$el.querySelector('input');
+                                if (inputElement) {
+                                    inputElement.focus();
+                                }
+                            }
+                        } catch (error) {
+                            console.warn('Focus failed:', error);
+                            // Fallback: try to find input by DOM traversal
+                            const prevInputElement = document.querySelectorAll('.code-input input')[index - 1];
+                            if (prevInputElement) {
+                                prevInputElement.focus();
+                            }
                         }
                     }
-                });
+                }, 10); // Small delay for Safari compatibility
             }
         },
 
         focusFirstInput() {
-            this.$nextTick(() => {
+            // Use setTimeout for better compatibility with Safari
+            setTimeout(() => {
                 const firstInput = this.inputRefs[0];
                 if (firstInput) {
-                    // Element Plus input box focus setting
-                    if (firstInput.focus) {
-                        firstInput.focus();
-                    } else if (firstInput.$refs && firstInput.$refs.input) {
-                        firstInput.$refs.input.focus();
+                    // Try multiple methods to ensure focus works in Safari
+                    try {
+                        // Method 1: Direct focus on Element Plus component
+                        if (firstInput.focus) {
+                            firstInput.focus();
+                        }
+                        // Method 2: Focus on the inner input element
+                        else if (firstInput.$refs && firstInput.$refs.input) {
+                            firstInput.$refs.input.focus();
+                        }
+                        // Method 3: Find and focus the actual DOM input element (Safari fallback)
+                        else if (firstInput.$el) {
+                            const inputElement = firstInput.$el.querySelector('input');
+                            if (inputElement) {
+                                inputElement.focus();
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('Focus failed:', error);
+                        // Fallback: try to find first input by DOM traversal
+                        const firstInputElement = document.querySelector('.code-input input');
+                        if (firstInputElement) {
+                            firstInputElement.focus();
+                        }
                     }
                 }
-            });
+            }, 50); // Slightly longer delay for initial focus
         },
 
         showHelp() {
