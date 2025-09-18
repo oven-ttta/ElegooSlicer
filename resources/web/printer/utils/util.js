@@ -12,3 +12,14 @@ function isValidURL(url) {
         '(\\:\\d+)?(\\/[^\\s]*)?$', 'i'); // port and path
     return pattern.test(url);
 }
+
+function disableRightClickMenu() {
+    // 只在非开发模式下禁用右键菜单
+    const isDev = GetQueryString("dev") === "true";
+    
+    if (!isDev) {
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    }
+}

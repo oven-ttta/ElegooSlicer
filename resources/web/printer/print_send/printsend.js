@@ -489,6 +489,7 @@ const PrintSendApp = {
 
         // Initialize the application
         this.init();
+        disableRightClickMenu();
     },
 
     watch: {

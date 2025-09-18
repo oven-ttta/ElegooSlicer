@@ -19,6 +19,7 @@ const PrinterManager = {
 
     mounted() {
         this.init();
+        disableRightClickMenu();
     },
 
     watch: {

@@ -159,7 +159,7 @@ void ElegooLink::init()
 {
     elink::ElegooLink::Config cfg;
 
-    cfg.logLevel         = 1;
+    cfg.logLevel         = 2; // Log level 0 - TRACE, 1 - DEBUG, 2 - INFO, 3 - WARN, 4 - ERROR, 5 - CRITICAL, 6 - OFF
     cfg.logEnableConsole = true;
     cfg.logEnableFile    = true;
     cfg.logFileName      = data_dir() + "/log/elegoolink.log";

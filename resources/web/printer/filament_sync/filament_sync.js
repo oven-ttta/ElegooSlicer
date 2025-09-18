@@ -172,6 +172,7 @@ const FilamentSyncApp = {
     mounted() {
         // Initialize the application
         this.init();
+        disableRightClickMenu();
     },
     computed: {
         canSync() {
