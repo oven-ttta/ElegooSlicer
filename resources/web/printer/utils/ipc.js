@@ -276,7 +276,7 @@ class IPCManager {
                 return;
             }
             
-            if (attempt < 2) {
+            if (attempt < 5) {
                 setTimeout(() => trySend(attempt + 1), 1000);
             } else {
                 console.error('IPC: Unable to send message, no valid communication interface found');
