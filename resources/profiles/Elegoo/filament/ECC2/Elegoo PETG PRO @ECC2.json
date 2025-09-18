@@ -8,6 +8,9 @@
     "pressure_advance": [
         "0.024"
     ],
+    "overhang_fan_threshold": [
+		"50%"
+	],
     "compatible_printers": [
         "Elegoo Centauri Carbon 2 0.4 nozzle",
         "Elegoo Centauri Carbon 2 0.6 nozzle",
