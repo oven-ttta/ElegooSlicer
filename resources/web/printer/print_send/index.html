@@ -63,11 +63,11 @@
                                         <button class="printer-refresh-btn" @click.stop="refreshPrinterList">
                                             <img src="img/refresh.svg" alt="Refresh" />
                                         </button>
-                                        <img :src="curPrinter?.printerImg || ''" alt="" class="dropdown-icon" />
+                                        <img :src="(curPrinter && curPrinter.printerImg) || ''" alt="" class="dropdown-icon" />
                                         <div class="dropdown-content">
-                                            <div class="dropdown-title">{{ curPrinter?.printerName ||
+                                            <div class="dropdown-title">{{ (curPrinter && curPrinter.printerName) ||
                                                 $t('printSend.noPrinter') }}</div>
-                                            <div class="dropdown-subtitle">{{ curPrinter?.printerModel ||
+                                            <div class="dropdown-subtitle">{{ (curPrinter && curPrinter.printerModel) ||
                                                 $t('printSend.pleaseConnectPrinter') }}</div>
                                         </div>
                                     </div>
@@ -217,10 +217,10 @@
                                         </div>
                                     </template>
                                     <template #reference>
-                                        <div class="tray-rect" :title="filament.mappedMmsFilament?.filamentName">
+                                        <div class="tray-rect" :title="(filament.mappedMmsFilament && filament.mappedMmsFilament.filamentName) || ''">
                                             <span v-html="getFilamentSvg(filament.mappedMmsFilament)">
                                             </span>
-                                            <div class="tray-filament-type">{{ filament.mappedMmsFilament?.filamentType
+                                            <div class="tray-filament-type">{{ (filament.mappedMmsFilament && filament.mappedMmsFilament.filamentType)
                                                 ||
                                                 '?' }}
                                             </div>
