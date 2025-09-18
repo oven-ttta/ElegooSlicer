@@ -269,13 +269,22 @@ class IPCManager {
      */
     sendMessage(message) {
         console.log('IPC: Sending message', message);
-        if (window.wx && window.wx.postMessage) {
-            // Edge WebView2
-            window.wx.postMessage(JSON.stringify(message));
-        } else {
-            console.error('IPC: Unable to send message, no valid communication interface found');
-            throw new Error('IPC: No valid communication interface found');
-        }
+        
+        const trySend = (attempt = 0) => {
+            if (window.wx && window.wx.postMessage) {
+                window.wx.postMessage(JSON.stringify(message));
+                return;
+            }
+            
+            if (attempt < 2) {
+                setTimeout(() => trySend(attempt + 1), 1000);
+            } else {
+                console.error('IPC: Unable to send message, no valid communication interface found');
+                throw new Error('IPC: No valid communication interface found');
+            }
+        };
+        
+        trySend();
     }
 
     /**
