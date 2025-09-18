@@ -88,7 +88,7 @@ const PrintSendApp = {
         },
 
         totalPages() {
-            return Math.ceil((this.printInfo.filamentList?.length || 0) / this.pageSize);
+            return Math.ceil(((this.printInfo.filamentList && this.printInfo.filamentList.length) || 0) / this.pageSize);
         },
 
         currentPageFilaments() {
@@ -101,7 +101,7 @@ const PrintSendApp = {
         },
 
         mmsFilamentList() {
-            return this.printInfo.mmsInfo?.mmsList || [];
+            return (this.printInfo.mmsInfo && this.printInfo.mmsInfo.mmsList) || [];
         },
 
         // Check if selected printer model does not match the current project printer model
@@ -363,7 +363,10 @@ const PrintSendApp = {
 
         // MMS popover methods  
         updateFilamentMapping(filamentIndex, tray) {
-            document.getElementsByClassName('filament-section')?.[0].click();
+            const filamentSection = document.getElementsByClassName('filament-section');
+            if (filamentSection && filamentSection[0]) {
+                filamentSection[0].click();
+            }
             console.log('Selected MMS Tray:', tray);
             for (let i = 0; i < this.printInfo.filamentList.length; i++) {
                 if (this.printInfo.filamentList[i].index === filamentIndex) {

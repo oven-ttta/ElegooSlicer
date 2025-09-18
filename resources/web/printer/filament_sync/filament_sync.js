@@ -15,7 +15,7 @@ const FilamentSyncApp = {
 
     methods: {
         getFilamentSvg(filament) {
-            const color = filament?.filamentColor || '#888';
+            const color = (filament && filament.filamentColor) || '#888';
             return getFilamentSvg(color);
         },
 
