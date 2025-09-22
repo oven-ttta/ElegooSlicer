@@ -86,12 +86,12 @@ using namespace std::literals::string_view_literals;
  * the G-code between these two tags will be skipped.
  */
 #define ELEGOO_CC_TOOL_CHANGE_START_TAG(config, next_extruder) \
-    (config.printer_model.value.find("Elegoo Centauri Carbon") != std::string::npos ? \
-         "SET_CONDITION J=0 A=PRINT_TOOL B=" + std::to_string(next_extruder) + "\n" : \
+    (config.printer_model.value.find("Elegoo Centauri") != std::string::npos ? \
+         "SET_CONDITION A=WIPE_TOWER\n" : \
          "")
 #define ELEGOO_CC_TOOL_CHANGE_END_TAG(config, next_extruder) \
-    (config.printer_model.value.find("Elegoo Centauri Carbon") != std::string::npos ? \
-         "SET_CONDITION_END B=" + std::to_string(next_extruder) + "\n" : \
+    (config.printer_model.value.find("Elegoo Centauri") != std::string::npos ? \
+         "SET_CONDITION_END A=WIPE_TOWER\n" : \
          "")
 
 namespace Slic3r {
@@ -6562,16 +6562,8 @@ std::string GCode::set_extruder(unsigned int extruder_id, double print_z, bool b
     //Orca: Ignore change_filament_gcode if is the first call for a tool change and manual_filament_change is enabled
     if (!change_filament_gcode.empty() && !(m_config.manual_filament_change.value && m_toolchange_count == 1)) {
         dyn_config.set_key_value("toolchange_z", new ConfigOptionFloat(print_z));
-        
-        //Because the change filament code is in the middle of the wipe tower, when the wipe tower is enabled, there is no need to add the change filament tag again.
-        if (!m_config.enable_prime_tower.value) {
-            toolchange_gcode_parsed += ELEGOO_CC_TOOL_CHANGE_START_TAG(m_config, extruder_id);
-        }
         toolchange_gcode_parsed += placeholder_parser_process("change_filament_gcode", change_filament_gcode, extruder_id, &dyn_config);
         check_add_eol(toolchange_gcode_parsed);
-        if (!m_config.enable_prime_tower.value) {
-            toolchange_gcode_parsed += ELEGOO_CC_TOOL_CHANGE_END_TAG(m_config, extruder_id);
-        }
         gcode += toolchange_gcode_parsed;
 
         //BBS
