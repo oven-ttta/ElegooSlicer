@@ -446,10 +446,14 @@ bool PrinterMmsManager::isNamesMatch(
         }
     }
     
+    
+    // replace all dashes with spaces
+    std::replace(presetFilamentAlias.begin(), presetFilamentAlias.end(), '-', ' ');
+    std::replace(mmsFilamentName.begin(), mmsFilamentName.end(), '-', ' ');
+
     // remove space and compare
     boost::trim(presetFilamentAlias);
     boost::trim(mmsFilamentName);
-    
     return presetFilamentAlias == mmsFilamentName;
 }
 
@@ -465,6 +469,7 @@ bool PrinterMmsManager::tryMatchFilamentByFilamentType(
     auto it = presetMap.find(filamentType);
     if(it == presetMap.end()) return false;
 
+    // try match filament by mms filament type and preset filament name
     for(const auto& filamentInfo : presetMap.at(filamentType)) {
         PrinterMmsTray trayCopy = tray;
         trayCopy.filamentName = tray.filamentType;
@@ -475,6 +480,21 @@ bool PrinterMmsManager::tryMatchFilamentByFilamentType(
             return true;
         }
     }
+
+    // try match filament by mms filament type and preset filament type
+    for(const auto& filamentInfo : presetMap.at(filamentType)) {
+        PrinterMmsTray trayCopy = tray;
+        trayCopy.filamentName = tray.filamentType;
+        PresetFilamentInfo filamentCopy = filamentInfo;
+        filamentCopy.filamentAlias = filamentInfo.filamentType;
+        if(isNamesMatch(trayCopy, filamentCopy, printerNetworkInfo, isGeneric)) {
+            tray.filamentId = filamentCopy.filamentId;
+            tray.settingId = filamentCopy.settingId;
+            return true;
+        }
+    }
+
+
     return false;
 }
 
@@ -620,8 +640,7 @@ void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerN
                     }
                     mappedTray = tray;
                     // try match filament by filament type if not match, try match filament by generic preset
-                    //if(tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, false) || tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, true)) {
-                    if(boost::to_upper_copy(filamentInfo.filamentType) == boost::to_upper_copy(tray.filamentType)) {
+                    if(tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, false) || tryMatchFilamentByFilamentType(mappedTray, filamentPresetMap, printerNetworkInfo, true)) {
                         isMapped = true;
                         break;
                     }
