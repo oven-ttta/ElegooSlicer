@@ -9,6 +9,7 @@
 #include <string_view>
 #include "PrintConfig.hpp"
 
+#define REMOVE_COMP_TAG(str) { if ((str).find("COMP ") == 0) (str).erase(0, 5); }
 namespace Slic3r {
 
 class GCodeReader {
