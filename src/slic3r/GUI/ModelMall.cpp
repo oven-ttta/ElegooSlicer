@@ -126,7 +126,7 @@ namespace GUI {
             wxString strInput = evt.GetString();
             json     j = json::parse(strInput);
 
-            wxString strCmd = j["command"];
+            wxString strCmd = j["command"].get<std::string>();
             
             if(strCmd == "request_close_publish_window") {
                 this->Hide();

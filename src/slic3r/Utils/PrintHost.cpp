@@ -28,6 +28,7 @@
 #include "SimplyPrint.hpp"
 #include "PrinterManager.hpp"
 #include "PrinterMmsManager.hpp"
+#include "libslic3r/PrinterNetworkInfo.hpp"
 
 namespace fs = boost::filesystem;
 using boost::optional;

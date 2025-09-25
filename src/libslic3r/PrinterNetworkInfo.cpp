@@ -1,6 +1,6 @@
 #include <string>
 #include <functional>
-#include <nlohmann/json.hpp>
+
 #include <vector>
 #include <map>
 #include "PrinterNetworkInfo.hpp"

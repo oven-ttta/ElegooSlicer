@@ -271,11 +271,11 @@ void ZUserLogin::OnScriptMessage(wxWebViewEvent &evt)
     try {
         json j = json::parse(into_u8(str_input));
 
-        wxString strCmd = j["command"];
+        wxString strCmd = j["command"].get<std::string>();
 
         if (strCmd == "autotest_token")
         {
-            m_AutotestToken = j["data"]["token"];
+            m_AutotestToken = j["data"]["token"].get<std::string>();
         }
         if (strCmd == "user_login") {
             j["data"]["autotest_token"] = m_AutotestToken;

@@ -599,6 +599,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrinterMmsManager.hpp
     Utils/WebviewIPCManager.h
     Utils/WebviewIPCManager.cpp
+    Utils/ElegooLinkWAN.cpp
+    Utils/ElegooLinkWAN.hpp
 
 )
 
