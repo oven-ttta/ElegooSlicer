@@ -4,6 +4,7 @@
 #include "libslic3r/PrinterNetworkInfo.hpp"
 #include "elegoolink/ElegooLink.h"
 #include "libslic3r/Utils.hpp"
+#include "ElegooLinkWAN.hpp"
 namespace Slic3r {
 
 
@@ -209,6 +210,24 @@ void ElegooLink::init()
         PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.printerId, info));
     });
 
+    //elink::NetworkConfig config;
+    //config.logLevel         = 1;
+    //config.logEnableConsole = true;
+    //config.logEnableFile    = true;
+    //config.logFileName      = data_dir() + "/log/elegoonetwork.log";
+    //config.logMaxFileSize   = 10 * 1024 * 1024;
+    //auto loadResult         = elink::ElegooLinkWAN::getInstance().loadLibrary(
+    //    "C:\\ElegooProject\\elegoo-network\\build\\bin\\RelWithDebInfo\\ElegooNetwork.dll");
+    //if (loadResult != elink::LoaderResult::SUCCESS) {
+    //    wxLogError("Error loading ElegooNetwork library");
+    //} else {
+    //    wxLogMessage("ElegooNetwork library loaded successfully");
+    //    elink::ElegooLinkWAN::getInstance().initialize(config);
+    //    elink::ElegooLinkWAN::getInstance().setHttpCredential(
+    //        {55, "eeefbbf030897d9e10fc2e3c30d558de", "c0a8cb9b160ea34e6a2eaa424770e5a4", 1773642189797, 1882506189797});
+    //    auto p = elink::ElegooLinkWAN::getInstance().getPrinters();
+    //}
+  
 }
 
 void ElegooLink::uninit()
