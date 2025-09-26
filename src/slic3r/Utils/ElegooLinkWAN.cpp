@@ -29,6 +29,180 @@
 #define LIBRARY_EXTENSION ".so"
 #endif
 
+// form elegoolink
+namespace elink {
+
+inline void to_json(nlohmann::json& j, const elink::BaseParams&) { j = nlohmann::json::object(); }
+inline void from_json(const nlohmann::json& j, std::monostate& nlohmann_json_t) {}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterBaseParams, printerId)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterInfo,
+                                                printerId,
+                                                printerType,
+                                                brand,
+                                                manufacturer,
+                                                name,
+                                                model,
+                                                firmwareVersion,
+                                                serialNumber,
+                                                mainboardId,
+                                                host,
+                                                webUrl,
+                                                authMode,
+                                                extraInfo)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(StorageComponent, name, removable)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FanComponent, name, controllable, minSpeed, maxSpeed, supportsRpmReading)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    TemperatureComponent, name, controllable, supportsTemperatureReading, minTemperature, maxTemperature)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(LightComponent, name, type, minBrightness, maxBrightness)
+
+// Nested structs
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CameraCapabilities, supportsCamera, supportsTimeLapse)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SystemCapabilities, canSetPrinterName, canGetDiskInfo, supportsMultiFilament)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    PrintCapabilities, supportsAutoBedLeveling, supportsTimeLapse, supportsHeatedBedSwitching, supportsFilamentMapping)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterCapabilities,
+                                                storageComponents,
+                                                fanComponents,
+                                                temperatureComponents,
+                                                lightComponents,
+                                                cameraCapabilities,
+                                                systemCapabilities,
+                                                printCapabilities)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterAttributes,
+                                                printerId,
+                                                printerType,
+                                                brand,
+                                                manufacturer,
+                                                name,
+                                                model,
+                                                firmwareVersion,
+                                                serialNumber,
+                                                mainboardId,
+                                                host,
+                                                webUrl,
+                                                authMode,
+                                                extraInfo,
+                                                capabilities)
+// Status structs
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterStatus, state, subState, exceptionCodes, supportProgress, progress)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TemperatureStatus, current, target, highest, lowest)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FanStatus, speed, rpm)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrintAxesStatus, position)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    PrintStatus, taskId, fileName, totalTime, currentTime, estimatedTime, totalLayer, currentLayer, progress, printSpeedMode)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(LightStatus, connected, brightness, color)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(StorageStatus, connected)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SlotMapItem, t, trayId, canvasId)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    TrayInfo, trayId, brand, filamentType, filamentName, filamentCode, filamentColor, minNozzleTemp, maxNozzleTemp, status)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CanvasInfo, name, model, canvasId, connected, trays)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CanvasStatus, activeCanvasId, activeTrayId, autoRefill, canvases)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ExternalDeviceStatus, usbConnected, sdCardConnected, cameraConnected, canvasConnected)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterStatusData,
+                                                printerId,
+                                                printerStatus,
+                                                printStatus,
+                                                temperatureStatus,
+                                                fanStatus,
+                                                printAxesStatus,
+                                                lightStatus,
+                                                storageStatus,
+                                                canvasStatus,
+                                                externalDeviceStatus)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    StartPrintParams, printerId, storageLocation, fileName, autoBedLeveling, heatedBedType, enableTimeLapse, slotMap)
+// File transfer structs
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileUploadParams, printerId, storageLocation, localFilePath, fileName, overwriteExisting)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileUploadProgressData, taskId, fileName, totalBytes, uploadedBytes, percentage)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CancelFileUploadParams, printerId, taskId)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileUploadCompletionData, fileName)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConnectionStatusData, printerId, status)
+// SetAutoRefillParams
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SetAutoRefillParams, printerId, enable)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GetPrinterListData, printers)
+
+} // namespace
+
+namespace elink {
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    NetworkConfig, logLevel, logEnableConsole, logEnableFile, logFileName, logMaxFileSize, logMaxFiles, baseMqttUrl, baseApiUrl, userAgent)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SetRegionParams, region)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GetWebUrlData, loginUrl, modelLibraryUrl)
+// GetUserInfoParams
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UserInfo, id, email, name, avatar)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    HttpCredential, userId, accessToken, refreshToken, accessTokenExpireTime, refreshTokenExpireTime)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RtcTokenData, userId, rtcToken, rtcTokenExpireTime)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrintTaskDetail, taskId, thumbnail, taskName, beginTime, endTime, taskStatus)
+
+// Task-related structs
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrintTaskListParams, printerId, pageNumber, pageSize)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrintTaskListData, taskList, totalTasks)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DeletePrintTasksParams, printerId, taskIds)
+
+// File-related structs
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GetFileListParams, printerId, pageNumber, pageSize)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GetFileListData, fileList, totalFiles)
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileDetail,
+                                                fileName,
+                                                printTime,
+                                                layer,
+                                                layerHeight,
+                                                thumbnail,
+                                                size,
+                                                createTime,
+                                                totalFilamentUsed,
+                                                totalFilamentUsedLength,
+                                                totalPrintTimes,
+                                                lastPrintTime)
+// RtmMessageData
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RtmMessageData, printerId, message)
+
+// SendRtmMessageParams
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SendRtmMessageParams, printerId, message)
+
+// BindPrinterParams
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BindPrinterParams, name, authMode, model, serialNumber, pinCode)
+
+// BindPrinterData
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BindPrinterData, bindResult, printerInfo)
+
+// UnbindPrinterParams
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UnbindPrinterParams, printerId)
+
+} // namespace elink
+
 namespace elink {
 // Forward declarations for version info
 struct ElegooNetworkVersion
@@ -473,178 +647,6 @@ std::string ElegooNetworkLoader::resultToString(LoaderResult result)
     }
 }
 
-inline void to_json(nlohmann::json& j, const elink::BaseParams&) { j = nlohmann::json::object(); }
-
-inline void from_json(const nlohmann::json& j, std::monostate& nlohmann_json_t) {}
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    NetworkConfig, logLevel, logEnableConsole, logEnableFile, logFileName, logMaxFileSize, logMaxFiles, baseMqttUrl, baseApiUrl, userAgent)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SetRegionParams, region)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GetWebUrlData, loginUrl, modelLibraryUrl)
-// GetUserInfoParams
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UserInfo, id, email, name, avatar)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    HttpCredential, userId, accessToken, refreshToken, accessTokenExpireTime, refreshTokenExpireTime)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RtcTokenData, userId, rtcToken, rtcTokenExpireTime)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterBaseParams, printerId)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterInfo,
-                                                printerId,
-                                                printerType,
-                                                brand,
-                                                manufacturer,
-                                                name,
-                                                model,
-                                                firmwareVersion,
-                                                serialNumber,
-                                                mainboardId,
-                                                host,
-                                                webUrl,
-                                                authMode,
-                                                extraInfo)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(StorageComponent, name, removable)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FanComponent, name, controllable, minSpeed, maxSpeed, supportsRpmReading)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    TemperatureComponent, name, controllable, supportsTemperatureReading, minTemperature, maxTemperature)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(LightComponent, name, type, minBrightness, maxBrightness)
-
-// Nested structs
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CameraCapabilities, supportsCamera, supportsTimeLapse)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SystemCapabilities, canSetPrinterName, canGetDiskInfo, supportsMultiFilament)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    PrintCapabilities, supportsAutoBedLeveling, supportsTimeLapse, supportsHeatedBedSwitching, supportsFilamentMapping)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterCapabilities,
-                                                storageComponents,
-                                                fanComponents,
-                                                temperatureComponents,
-                                                lightComponents,
-                                                cameraCapabilities,
-                                                systemCapabilities,
-                                                printCapabilities)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterAttributes,
-                                                printerId,
-                                                printerType,
-                                                brand,
-                                                manufacturer,
-                                                name,
-                                                model,
-                                                firmwareVersion,
-                                                serialNumber,
-                                                mainboardId,
-                                                host,
-                                                webUrl,
-                                                authMode,
-                                                extraInfo,
-                                                capabilities)
-
-// Status structs
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterStatus, state, subState, exceptionCodes, supportProgress, progress)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TemperatureStatus, current, target, highest, lowest)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FanStatus, speed, rpm)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrintAxesStatus, position)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    PrintStatus, taskId, fileName, totalTime, currentTime, estimatedTime, totalLayer, currentLayer, progress, printSpeedMode)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(LightStatus, connected, brightness, color)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(StorageStatus, connected)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SlotMapItem, t, trayId, canvasId)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    TrayInfo, trayId, brand, filamentType, filamentName, filamentCode, filamentColor, minNozzleTemp, maxNozzleTemp, status)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CanvasInfo, name, model, canvasId, connected, trays)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CanvasStatus, activeCanvasId, activeTrayId, autoRefill, canvases)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ExternalDeviceStatus, usbConnected, sdCardConnected, cameraConnected, canvasConnected)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterStatusData,
-                                                printerId,
-                                                printerStatus,
-                                                printStatus,
-                                                temperatureStatus,
-                                                fanStatus,
-                                                printAxesStatus,
-                                                lightStatus,
-                                                storageStatus,
-                                                canvasStatus,
-                                                externalDeviceStatus)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    StartPrintParams, printerId, storageLocation, fileName, autoBedLeveling, heatedBedType, enableTimeLapse, slotMap)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrintTaskDetail, taskId, thumbnail, taskName, beginTime, endTime, taskStatus)
-
-// Task-related structs
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrintTaskListParams, printerId, pageNumber, pageSize)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrintTaskListData, taskList, totalTasks)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DeletePrintTasksParams, printerId, taskIds)
-
-// File-related structs
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GetFileListParams, printerId, pageNumber, pageSize)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GetFileListData, fileList, totalFiles)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileDetail,
-                                                fileName,
-                                                printTime,
-                                                layer,
-                                                layerHeight,
-                                                thumbnail,
-                                                size,
-                                                createTime,
-                                                totalFilamentUsed,
-                                                totalFilamentUsedLength,
-                                                totalPrintTimes,
-                                                lastPrintTime)
-
-// File transfer structs
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileUploadParams, printerId, storageLocation, localFilePath, fileName, overwriteExisting)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileUploadProgressData, taskId, fileName, totalBytes, uploadedBytes, percentage)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CancelFileUploadParams, printerId, taskId)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileUploadCompletionData, fileName)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConnectionStatusData, printerId, status)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SetPrinterNameParams, printerId, hostName)
-
-// RtmMessageData
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RtmMessageData, printerId, message)
-
-// SendRtmMessageParams
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SendRtmMessageParams, printerId, message)
-
-// BindPrinterParams
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BindPrinterParams, name, authMode, model, serialNumber, pinCode)
-
-// BindPrinterData
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BindPrinterData, bindResult, printerInfo)
-
-// UnbindPrinterParams
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UnbindPrinterParams, printerId)
-// SetAutoRefillParams
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SetAutoRefillParams, printerId, enable)
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GetPrinterListData, printers)
-
 class ElegooLinkWAN::ElegooLinkWANImpl
 {
 public:
@@ -876,6 +878,9 @@ VoidResult ElegooLinkWAN::initialize(const NetworkConfig& config)
                                 from_json(data, tokenData);
                                 auto event   = std::make_shared<RtcTokenEvent>();
                                 event->token = tokenData;
+                                self->eventBus_.publish(event);
+                            } else if (method == "on_logged_in_elsewhere") {
+                                auto event      = std::make_shared<LoggedInElsewhereEvent>();
                                 self->eventBus_.publish(event);
                             }
                         }

@@ -216,11 +216,21 @@ public:
     RtmMessageData message; // Connection status data
 };
 
+/*
+ * RTC Token Changed Event
+ */
 class RtcTokenEvent : public BaseEvent
 {
 public:
     RtcTokenData token; // RTC Token data
 };
+
+/**
+ * Logged in elsewhere event
+ */
+class LoggedInElsewhereEvent : public BaseEvent
+{}
+;
 
 class ElegooLinkWAN
 {
