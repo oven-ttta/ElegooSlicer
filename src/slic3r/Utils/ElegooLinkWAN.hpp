@@ -107,10 +107,16 @@ struct SendRtmMessageParams : public PrinterBaseParams
     std::string message; // 消息内容
 };
 
-struct RtmMessageData : public BaseEventData
+struct RtmMessageData
 {
     std::string printerId; // Printer ID
     std::string message;   // 响应内容
+};
+
+struct PrinterEventRawData
+{
+    std::string printerId; // Printer ID
+    std::string rawData;   // Raw data
 };
 
 struct PrintTaskDetail
@@ -229,8 +235,13 @@ public:
  * Logged in elsewhere event
  */
 class LoggedInElsewhereEvent : public BaseEvent
-{}
-;
+{};
+
+class PrinterEventRawEvent : public BaseEvent
+{
+public:
+    PrinterEventRawData rawData;
+};
 
 class ElegooLinkWAN
 {

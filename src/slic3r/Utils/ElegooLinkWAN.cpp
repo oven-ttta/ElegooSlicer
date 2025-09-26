@@ -18,7 +18,7 @@
 #elif defined(__APPLE__)
 #include <dlfcn.h>
 #define GET_PROC_ADDRESS dlsym
-#define LOAD_LIBRARY(path) dlopen(path, RTLD_LAZY)
+#define LOAD_LIBRARY(path)  (path, RTLD_LAZY)
 #define FREE_LIBRARY dlclose
 #define LIBRARY_EXTENSION ".dylib"
 #else // Linux and other Unix-like systems
@@ -189,6 +189,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileDetail,
 // RtmMessageData
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RtmMessageData, printerId, message)
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PrinterEventRawData, printerId, rawData)
 // SendRtmMessageParams
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SendRtmMessageParams, printerId, message)
 
@@ -881,6 +882,13 @@ VoidResult ElegooLinkWAN::initialize(const NetworkConfig& config)
                                 self->eventBus_.publish(event);
                             } else if (method == "on_logged_in_elsewhere") {
                                 auto event      = std::make_shared<LoggedInElsewhereEvent>();
+                                self->eventBus_.publish(event);
+                            } else if (method == "on_printer_event_raw"){
+                            
+                                PrinterEventRawData eventData;
+                                from_json(data, eventData);
+                                auto event     = std::make_shared<PrinterEventRawEvent>();
+                                event->rawData = eventData;
                                 self->eventBus_.publish(event);
                             }
                         }
