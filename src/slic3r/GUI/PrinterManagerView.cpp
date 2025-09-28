@@ -436,7 +436,7 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
 
     view->load_url(url);
 
-    mTabBar->AddPage(view, from_u8(printerInfo.printerName));
+    mTabBar->AddPage(view, from_u8(printerInfo.host));
     mTabBar->SetSelection(mTabBar->GetPageCount() - 1);
     mPrinterViews[printerId] = view;
     Layout();
