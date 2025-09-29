@@ -7,7 +7,6 @@
 #include <functional>
 #include <elegoolink/type.h>
 #include "nlohmann/json.hpp"
-
 namespace elink {
 #ifdef ERROR_INVALID_LIBRARY
 #undef ERROR_INVALID_LIBRARY
@@ -109,10 +108,16 @@ struct SendRtmMessageParams : public PrinterBaseParams
     std::string message; // 消息内容
 };
 
-struct RtmMessageData : public BaseEventData
+struct RtmMessageData
 {
     std::string printerId; // Printer ID
     std::string message;   // 响应内容
+};
+
+struct PrinterEventRawData
+{
+    std::string printerId; // Printer ID
+    std::string rawData;   // Raw data
 };
 
 struct PrintTaskDetail
@@ -218,10 +223,26 @@ public:
     RtmMessageData message; // Connection status data
 };
 
+/*
+ * RTC Token Changed Event
+ */
 class RtcTokenEvent : public BaseEvent
 {
 public:
     RtcTokenData token; // RTC Token data
+};
+
+
+/**
+ * Logged in elsewhere event
+ */
+class LoggedInElsewhereEvent : public BaseEvent
+{};
+
+class PrinterEventRawEvent : public BaseEvent
+{
+public:
+    PrinterEventRawData rawData;
 };
 
 class ElegooLinkWAN : public Slic3r::Singleton<ElegooLinkWAN>
@@ -232,12 +253,14 @@ public:
     using LogCallback                = std::function<void(int level, const std::string& message)>;
 
 private:
+
     ElegooLinkWAN();
     ElegooLinkWAN(const ElegooLinkWAN&) = delete;
     ElegooLinkWAN& operator=(const ElegooLinkWAN&) = delete;
     ~ElegooLinkWAN() = default;
 
 public:
+
     LoaderResult loadLibrary(const std::string& library_path);
     LoaderResult unloadLibrary();
     VoidResult   initialize(const NetworkConfig& config);
@@ -327,5 +350,5 @@ private:
     EventBus                           eventBus_;
 };
 
-} // namespace Slic3r
+
 #endif // ELEGOO_LINK_WAN_HPP
