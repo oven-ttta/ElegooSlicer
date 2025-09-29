@@ -784,10 +784,8 @@ public:
 };
 
 ElegooLinkWAN::ElegooLinkWANImpl::ElegooLinkWANImpl() : m_loader(std::make_unique<ElegooNetworkLoader>(1)) {}
-ElegooLinkWAN& ElegooLinkWAN::getInstance() {
-    static ElegooLinkWAN instance;
-    return instance;
-}
+
+ElegooLinkWAN::ElegooLinkWAN() {}
 // ElegooLinkWAN接口调用Pimpl
 LoaderResult ElegooLinkWAN::loadLibrary(const std::string& library_path)
 {
@@ -1093,4 +1091,5 @@ FileUploadCompletionResult ElegooLinkWAN::uploadFile(const FileUploadParams& par
 {
     return FileUploadCompletionResult::Error(ELINK_ERROR_CODE::OPERATION_NOT_IMPLEMENTED, "Not implemented");
 }
+
 } // namespace elink

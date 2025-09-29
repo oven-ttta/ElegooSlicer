@@ -22,6 +22,7 @@
 #include "PrinterCache.hpp"
 #include "PrinterNetworkEvent.hpp"
 #include "slic3r/GUI/I18N.hpp"
+#include "slic3r/Utils/PrinterPluginManager.hpp"
 namespace Slic3r {
 
 
@@ -166,12 +167,38 @@ void PrinterManager::init() {
         PrinterCache::getInstance()->updatePrinterAttributesByNotify(event.printerId, event.printerInfo);
     });
 
+    PrinterNetworkEvent::getInstance()->rtcTokenChanged.connect([this](const PrinterRtcTokenEvent& event) {
+        //PrinterCache::getInstance()->updatePrinterRtcToken(event.printerId, event.rtcToken);
+    });
+    PrinterNetworkEvent::getInstance()->rtmMessageChanged.connect([this](const PrinterRtmMessageEvent& event) {
+        //PrinterCache::getInstance()->updatePrinterRtmMessage(event.printerId, event.message);
+    });
+    PrinterNetworkEvent::getInstance()->connectionStatusChanged.connect([this](const PrinterConnectionStatusEvent& event) {
+        //PrinterCache::getInstance()->updatePrinterConnectionStatus(event.printerId, event.status);
+    });
+    PrinterNetworkEvent::getInstance()->eventRawChanged.connect([this](const PrinterEventRawEvent& event) {
+        //PrinterCache::getInstance()->updatePrinterEventRaw(event.printerId, event.event);
+    });
+
     mIsRunning        = true;
     mConnectionThread = std::thread([this]() { monitorPrinterConnections(); });
 
     PrinterCache::getInstance()->loadPrinterList();
 
     syncOldPresetPrinters();
+
+    PrinterPluginManager::getInstance()->init();
+
+    NetworkUserInfo userInfo;
+    userInfo.userId = 55;
+    userInfo.username = "";
+    userInfo.token = "f0658a8465277e9e4dc7dcd0b86611af";
+    userInfo.refreshToken = "669e3d8504d7ae4bbf6ff1b2ef134bc2";
+    userInfo.accessTokenExpireTime = 1774601839521;
+    userInfo.refreshTokenExpireTime = 1883465839521;
+    userInfo.hostType = "ElegooLink";
+
+    loginWAN(userInfo);
 }
 
 void PrinterManager::close() { 
@@ -832,5 +859,60 @@ void PrinterManager::syncOldPresetPrinters()
     }
 }
 
+PrinterNetworkResult<bool> PrinterManager::loginWAN(const NetworkUserInfo& userInfo)
+{
+    PrinterNetworkInfo printerInfo;
+    printerInfo.hostType = userInfo.hostType;
+
+    std::shared_ptr<IPrinterNetwork> work = PrinterNetworkFactory::createNetwork(printerInfo);
+    if(!work) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+    }
+    mNetworkWAN = work;
+    auto result = mNetworkWAN->loginWAN(userInfo);
+    if(result.isSuccess()) {
+        mNetworkUserInfo = userInfo;
+    }
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+}
+
+PrinterNetworkResult<std::vector<PrinterPrintFile>> PrinterManager::getFileList(const std::string& printerId)
+{
+    std::vector<PrinterPrintFile> printFiles;
+    if(!mNetworkWAN) {
+        return PrinterNetworkResult<std::vector<PrinterPrintFile>>(PrinterNetworkErrorCode::SUCCESS, printFiles);
+    }
+    return mNetworkWAN->getFileList(printerId);
+}
+PrinterNetworkResult<std::vector<PrinterPrintTask>> PrinterManager::getPrintTaskList(const std::string& printerId)
+{
+    std::vector<PrinterPrintTask> printTasks;
+    if(!mNetworkWAN) {
+        return PrinterNetworkResult<std::vector<PrinterPrintTask>>(PrinterNetworkErrorCode::SUCCESS, printTasks);
+    }
+    return mNetworkWAN->getPrintTaskList(printerId);
+}
+PrinterNetworkResult<bool> PrinterManager::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
+{
+    if(!mNetworkWAN) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, false);
+    }
+    return mNetworkWAN->deletePrintTasks(printerId, taskIds);
+}
+
+PrinterNetworkResult<std::string> PrinterManager::getRtcToken()
+{
+    if(!mNetworkWAN) {
+        return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::SUCCESS, "");
+    }
+    return mNetworkWAN->getRtcToken();
+}
+PrinterNetworkResult<bool> PrinterManager::sendRtmMessage(const std::string& message)
+{
+    if(!mNetworkWAN) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, false);
+    }
+    return mNetworkWAN->sendRtmMessage(message);
+}
 
 } // namespace Slic3r

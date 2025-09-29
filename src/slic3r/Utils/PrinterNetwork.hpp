@@ -26,9 +26,21 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() = 0;   
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() = 0;
     virtual PrinterNetworkResult<PrinterNetworkInfo> getPrinterAttributes() = 0;
+    virtual PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId) = 0;
+    virtual PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId) = 0;
+    virtual PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds) = 0;
 
+
+    //WAN
+    virtual PrinterNetworkResult<std::string> hasInstalledPlugin() = 0;
+    virtual PrinterNetworkResult<bool> installPlugin(const std::string& pluginPath) = 0;
+    virtual PrinterNetworkResult<bool> uninstallPlugin() = 0;
+    virtual PrinterNetworkResult<bool> loginWAN(const NetworkUserInfo& userInfo) = 0;
+    virtual PrinterNetworkResult<std::string> getRtcToken() = 0;
+    virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& message) = 0;
+
+    
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
-
     // init and uninit the all network
     static void init();
     static void uninit();

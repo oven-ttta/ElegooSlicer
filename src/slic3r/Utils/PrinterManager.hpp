@@ -44,6 +44,19 @@ public:
     PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
 
 
+    PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId);
+    PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId);
+    PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds);
+
+    // WAN
+    PrinterNetworkResult<std::string> getRtcToken();
+    PrinterNetworkResult<bool> sendRtmMessage(const std::string& message);
+    PrinterNetworkResult<bool> onRtcTokenChanged(const std::string& printerId);
+    PrinterNetworkResult<bool> onRtmMessage(const std::string& printerId, const std::string& message);
+    PrinterNetworkResult<bool> onConnectionStatus(const std::string& printerId, const std::string& status);
+    PrinterNetworkResult<bool> onPrinterEventRaw(const std::string& printerId, const std::string& event);
+
+
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
     static std::string imageFileToBase64DataURI(const std::string& image_path);
 
@@ -53,6 +66,7 @@ public:
     // sync old preset printers to network
     void syncOldPresetPrinters();
 
+    PrinterNetworkResult<bool> loginWAN(const NetworkUserInfo& userInfo);
 private:
 
     class PrinterLock
@@ -81,6 +95,7 @@ private:
     std::thread mConnectionThread;
     void monitorPrinterConnections();
 
-
+    NetworkUserInfo mNetworkUserInfo;
+    std::shared_ptr<IPrinterNetwork> mNetworkWAN;
 };
 } // namespace Slic3r::GUI 

@@ -52,7 +52,42 @@ struct PrinterAttributesEvent {
         : printerId(id), printerInfo(info), timestamp(std::chrono::system_clock::now()) {}
 };
 
-using PrinterEvent = std::variant<PrinterConnectStatusEvent, PrinterStatusEvent, PrinterPrintTaskEvent, PrinterAttributesEvent>;
+struct PrinterRtcTokenEvent {
+    std::string printerId;
+    std::string rtcToken;
+    std::chrono::system_clock::time_point timestamp;
+    
+    PrinterRtcTokenEvent(const std::string& id, const std::string& token)
+        : printerId(id), rtcToken(token), timestamp(std::chrono::system_clock::now()) {}
+};
+
+struct PrinterRtmMessageEvent {
+    std::string printerId;
+    std::string message;
+    std::chrono::system_clock::time_point timestamp;
+    
+    PrinterRtmMessageEvent(const std::string& id, const std::string& msg)
+        : printerId(id), message(msg), timestamp(std::chrono::system_clock::now()) {}
+};
+
+struct PrinterConnectionStatusEvent {
+    std::string printerId;
+    std::string status;
+    std::chrono::system_clock::time_point timestamp;
+    
+    PrinterConnectionStatusEvent(const std::string& id, const std::string& s)
+        : printerId(id), status(s), timestamp(std::chrono::system_clock::now()) {}
+};
+
+struct PrinterEventRawEvent {
+    std::string printerId;
+    std::string event;
+    std::chrono::system_clock::time_point timestamp;
+    
+    PrinterEventRawEvent(const std::string& id, const std::string& e)
+        : printerId(id), event(e), timestamp(std::chrono::system_clock::now()) {}
+};
+using PrinterEvent = std::variant<PrinterConnectStatusEvent, PrinterStatusEvent, PrinterPrintTaskEvent, PrinterAttributesEvent, PrinterRtcTokenEvent, PrinterRtmMessageEvent, PrinterConnectionStatusEvent, PrinterEventRawEvent>;
 
 template<typename EventType>
 class PrinterSignal {
@@ -98,7 +133,11 @@ public:
     PrinterSignal<PrinterStatusEvent> statusChanged;
     PrinterSignal<PrinterPrintTaskEvent> printTaskChanged;
     PrinterSignal<PrinterAttributesEvent> attributesChanged;
-    
+    PrinterSignal<PrinterRtcTokenEvent> rtcTokenChanged;
+    PrinterSignal<PrinterRtmMessageEvent> rtmMessageChanged;
+    PrinterSignal<PrinterConnectionStatusEvent> connectionStatusChanged;
+    PrinterSignal<PrinterEventRawEvent> eventRawChanged;
+
 private:
     PrinterNetworkEvent() = default;
     ~PrinterNetworkEvent() = default;

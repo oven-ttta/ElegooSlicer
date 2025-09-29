@@ -20,6 +20,18 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() override;
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() override;
     virtual PrinterNetworkResult<PrinterNetworkInfo> getPrinterAttributes() override;  
+    virtual PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId) override;
+    virtual PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId) override;
+    virtual PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds) override;
+
+
+
+    virtual PrinterNetworkResult<std::string> hasInstalledPlugin() override;
+    virtual PrinterNetworkResult<bool> installPlugin(const std::string& pluginPath) override;
+    virtual PrinterNetworkResult<bool> uninstallPlugin() override;
+    virtual PrinterNetworkResult<bool> loginWAN(const NetworkUserInfo& userInfo) override;
+    virtual PrinterNetworkResult<std::string> getRtcToken() override;
+    virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& message) override;
 
     static void init();
     static void uninit();

@@ -1,11 +1,13 @@
 #ifndef ELEGOO_LINK_WAN_HPP
 #define ELEGOO_LINK_WAN_HPP
 
+#include "Singleton.hpp"
 #include <string>
 #include <memory>
 #include <functional>
 #include <elegoolink/type.h>
 #include "nlohmann/json.hpp"
+
 namespace elink {
 #ifdef ERROR_INVALID_LIBRARY
 #undef ERROR_INVALID_LIBRARY
@@ -222,22 +224,20 @@ public:
     RtcTokenData token; // RTC Token data
 };
 
-class ElegooLinkWAN
+class ElegooLinkWAN : public Slic3r::Singleton<ElegooLinkWAN>
 {
+    friend class Slic3r::Singleton<ElegooLinkWAN>;
 public:
     using FileUploadProgressCallback = std::function<bool(const FileUploadProgressData& progress)>;
     using LogCallback                = std::function<void(int level, const std::string& message)>;
 
 private:
-    ElegooLinkWAN()  = default;
+    ElegooLinkWAN();
+    ElegooLinkWAN(const ElegooLinkWAN&) = delete;
+    ElegooLinkWAN& operator=(const ElegooLinkWAN&) = delete;
+    ~ElegooLinkWAN() = default;
 
 public:
-    ~ElegooLinkWAN()                 = default;
-    /**
-     * Get singleton instance
-     * @return Reference to ElegooLink singleton instance
-     */
-    static ElegooLinkWAN& getInstance();
     LoaderResult loadLibrary(const std::string& library_path);
     LoaderResult unloadLibrary();
     VoidResult   initialize(const NetworkConfig& config);
@@ -327,5 +327,5 @@ private:
     EventBus                           eventBus_;
 };
 
-} // namespace elink
+} // namespace Slic3r
 #endif // ELEGOO_LINK_WAN_HPP

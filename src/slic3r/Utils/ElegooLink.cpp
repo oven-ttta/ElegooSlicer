@@ -5,6 +5,9 @@
 #include "elegoolink/ElegooLink.h"
 #include "libslic3r/Utils.hpp"
 #include "ElegooLinkWAN.hpp"
+
+
+#define ELEGOO_NETWORK_LIBRARY "ElegooNetwork"
 namespace Slic3r {
 
 
@@ -209,25 +212,7 @@ void ElegooLink::init()
         PrinterNetworkInfo info = convertFromElegooPrinterAttributes(event->attributes);
         PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.printerId, info));
     });
-
-    //elink::NetworkConfig config;
-    //config.logLevel         = 1;
-    //config.logEnableConsole = true;
-    //config.logEnableFile    = true;
-    //config.logFileName      = data_dir() + "/log/elegoonetwork.log";
-    //config.logMaxFileSize   = 10 * 1024 * 1024;
-    //auto loadResult         = elink::ElegooLinkWAN::getInstance().loadLibrary(
-    //    "C:\\ElegooProject\\elegoo-network\\build\\bin\\RelWithDebInfo\\ElegooNetwork.dll");
-    //if (loadResult != elink::LoaderResult::SUCCESS) {
-    //    wxLogError("Error loading ElegooNetwork library");
-    //} else {
-    //    wxLogMessage("ElegooNetwork library loaded successfully");
-    //    elink::ElegooLinkWAN::getInstance().initialize(config);
-    //    elink::ElegooLinkWAN::getInstance().setHttpCredential(
-    //        {55, "eeefbbf030897d9e10fc2e3c30d558de", "c0a8cb9b160ea34e6a2eaa424770e5a4", 1773642189797, 1882506189797});
-    //    auto p = elink::ElegooLinkWAN::getInstance().getPrinters();
-    //}
-  
+ 
 }
 
 void ElegooLink::uninit()
@@ -332,6 +317,19 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
                 discoverPrinters.push_back(info);
             }
         } 
+
+        // WAN
+        if(elink::ElegooLinkWAN::getInstance()->isInitialized()) {
+            auto elinkResultWAN = elink::ElegooLinkWAN::getInstance()->getPrinters();
+            resultCode = parseElegooResult(elinkResultWAN.code);
+            if(elinkResultWAN.code == elink::ELINK_ERROR_CODE::SUCCESS && elinkResultWAN.data.has_value()) {
+                for(const auto& printer : elinkResultWAN.value().printers) {
+                    PrinterNetworkInfo info = convertFromElegooPrinterInfo(printer);
+                    info.isWAN = true;
+                    discoverPrinters.push_back(info);
+                }
+            }
+        }
     } catch (const std::exception& e) {
         wxLogError("Exception in ElegooLink::discoverPrinters: %s", e.what());
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
@@ -554,4 +552,98 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
     }
     return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
+
+
+PrinterNetworkResult<std::vector<PrinterPrintFile>> ElegooLink::getFileList(const std::string& printerId)
+{
+    std::vector<PrinterPrintFile> printFiles;
+   // return elink::ElegooLinkWAN::getInstance()->getFileList(elink::GetFileListParams{printerId});
+    return PrinterNetworkResult<std::vector<PrinterPrintFile>>(PrinterNetworkErrorCode::SUCCESS, printFiles);
+}
+
+PrinterNetworkResult<std::vector<PrinterPrintTask>> ElegooLink::getPrintTaskList(const std::string& printerId)
+{
+    std::vector<PrinterPrintTask> printTasks;
+    //return elink::ElegooLinkWAN::getInstance()->getPrintTaskList(elink::GetPrintTaskListParams{printerId});
+    return PrinterNetworkResult<std::vector<PrinterPrintTask>>(PrinterNetworkErrorCode::SUCCESS, printTasks);
+}
+
+PrinterNetworkResult<bool> ElegooLink::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
+{
+    //return elink::ElegooLinkWAN::getInstance()->deletePrintTasks(elink::DeletePrintTasksParams{printerId, taskIds});
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+}
+PrinterNetworkResult<std::string> ElegooLink::hasInstalledPlugin()
+{
+    std::string version = "";
+    if(elink::ElegooLinkWAN::getInstance()->isInitialized()) {
+        version = elink::ElegooLinkWAN::getInstance()->version();
+    }
+    return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::SUCCESS, version);
+}
+
+PrinterNetworkResult<bool> ElegooLink::installPlugin(const std::string& pluginPath)
+{
+     std::string libraryPath;
+ #if defined(_MSC_VER) || defined(_WIN32)
+     libraryPath = pluginPath + "\\" + std::string(ELEGOO_NETWORK_LIBRARY) + ".dll";
+ #else
+     #if defined(__WXMAC__)
+     libraryPath = pluginPath + "/" + std::string("lib") + std::string(ELEGOO_NETWORK_LIBRARY) + ".dylib";
+     #else
+     libraryPath = pluginPath + "/" + std::string("lib") + std::string(ELEGOO_NETWORK_LIBRARY) + ".so";
+     #endif
+ #endif
+
+    uninstallPlugin();
+
+    elink::NetworkConfig config;
+    config.logLevel         = 1;
+    config.logEnableConsole = true;
+    config.logEnableFile    = true;
+    config.logFileName      = data_dir() + "/log/elegoonetwork.log";
+    config.logMaxFileSize   = 10 * 1024 * 1024;
+
+
+    auto loadResult = elink::ElegooLinkWAN::getInstance()->loadLibrary(libraryPath);
+    if (loadResult != elink::LoaderResult::SUCCESS) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, false, "Failed to load ElegooNetwork library");
+    }
+
+    elink::ElegooLinkWAN::getInstance()->initialize(config);
+
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+}
+
+PrinterNetworkResult<bool> ElegooLink::uninstallPlugin()
+{
+    if(elink::ElegooLinkWAN::getInstance()->isInitialized()) {
+        elink::ElegooLinkWAN::getInstance()->cleanup();
+        elink::ElegooLinkWAN::getInstance()->unloadLibrary();
+    }
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+}
+
+PrinterNetworkResult<bool> ElegooLink::loginWAN(const NetworkUserInfo& userInfo)
+{
+    auto result = elink::ElegooLinkWAN::getInstance()->setHttpCredential(elink::HttpCredential{userInfo.userId, userInfo.token, userInfo.refreshToken, (long long)userInfo.accessTokenExpireTime, (long long)userInfo.refreshTokenExpireTime});
+    if(result.code != elink::ELINK_ERROR_CODE::SUCCESS) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, false, "Failed to login WAN");
+    }
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+}
+
+PrinterNetworkResult<std::string> ElegooLink::getRtcToken()
+{
+    //return elink::ElegooLinkWAN::getInstance()->getRtcToken();
+    return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::SUCCESS, "");
+}
+
+PrinterNetworkResult<bool> ElegooLink::sendRtmMessage(const std::string& message)
+{
+    //return elink::ElegooLinkWAN::getInstance()->sendRtmMessage(elink::SendRtmMessageParams{message});
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+}
+
+
 } // namespace Slic3r

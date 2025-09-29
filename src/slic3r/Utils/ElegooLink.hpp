@@ -11,6 +11,7 @@ namespace Slic3r {
 
 class ElegooLink : public Singleton<ElegooLink>
 {
+    friend class Singleton<ElegooLink>;
 public:
     ElegooLink();
     ~ElegooLink();
@@ -24,6 +25,17 @@ public:
     PrinterNetworkResult<bool>                            sendPrintFile(const PrinterNetworkParams& params);
     PrinterNetworkResult<PrinterMmsGroup>                 getPrinterMmsInfo(const std::string& printerId);
     PrinterNetworkResult<PrinterNetworkInfo>              getPrinterAttributes(const std::string& printerId);
+    PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId);
+    PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId);
+    PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds);
+
+    PrinterNetworkResult<std::string> hasInstalledPlugin();
+    PrinterNetworkResult<bool> installPlugin(const std::string& pluginPath);
+    PrinterNetworkResult<bool> uninstallPlugin();
+    PrinterNetworkResult<bool> loginWAN(const NetworkUserInfo& userInfo);
+    PrinterNetworkResult<std::string> getRtcToken();
+    PrinterNetworkResult<bool> sendRtmMessage(const std::string& message);
+
 
 private:
     bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10);

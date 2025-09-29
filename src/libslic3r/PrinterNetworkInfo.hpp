@@ -52,6 +52,13 @@ enum TrayStatus {
     TRAY_STATUS_LOADED_UNKNOWN_FILAMENT = 4, // loaded unknown filament info
     TRAY_STATUS_ERROR = 999, // error
 };
+
+struct PrinterPrintFile
+{
+    std::string fileName;
+    std::string fileSize;
+    std::string fileType;
+};
 struct PrinterPrintTask
 {
     std::string taskId;
@@ -168,6 +175,7 @@ struct PrinterNetworkInfo
     std::string pinCode;
     std::string webUrl;
     std::string connectionUrl;
+    bool        isWAN{false};
     bool        isPhysicalPrinter{false};
     uint64_t    addTime{0};
     uint64_t    modifyTime{0};
@@ -180,6 +188,18 @@ struct PrinterNetworkInfo
     PrinterConnectStatus connectStatus{PRINTER_CONNECT_STATUS_DISCONNECTED};
     PrinterStatus        printerStatus{PRINTER_STATUS_IDLE};
 };
+
+struct NetworkUserInfo
+{
+    int64_t     userId;
+    std::string username;
+    std::string token;
+    std::string refreshToken;
+    std::string hostType;
+    uint64_t    accessTokenExpireTime{0};
+    uint64_t    refreshTokenExpireTime{0};
+};
+
 
 struct PrinterNetworkParams
 {

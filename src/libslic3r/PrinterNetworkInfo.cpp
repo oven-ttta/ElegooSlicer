@@ -59,6 +59,9 @@ PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json)
         if (json.contains("accessCode")) {
             printerNetworkInfo.accessCode = json["accessCode"];
         }
+        if (json.contains("isWAN")) {
+            printerNetworkInfo.isWAN = json["isWAN"].get<bool>();
+        }
         if (json.contains("pinCode")) {
             printerNetworkInfo.pinCode = json["pinCode"];
         }
@@ -162,6 +165,7 @@ nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printer
     json["accessCode"]      = printerNetworkInfo.accessCode;
     json["pinCode"]         = printerNetworkInfo.pinCode;
     json["webUrl"]          = printerNetworkInfo.webUrl;
+    json["isWAN"]           = printerNetworkInfo.isWAN;
     json["connectionUrl"]   = printerNetworkInfo.connectionUrl;
     if (!printerNetworkInfo.extraInfo.empty()) {
         json["extraInfo"] = nlohmann::json::parse(printerNetworkInfo.extraInfo);

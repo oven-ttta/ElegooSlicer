@@ -36,7 +36,6 @@ PrinterNetworkResult<bool> ElegooNetwork::sendPrintFile(const PrinterNetworkPara
 
 }
 
-
 PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo()
 {
     return ElegooLink::getInstance()->getPrinterMmsInfo(mPrinterNetworkInfo.printerId);
@@ -47,6 +46,21 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::getPrinterAttributes()
     return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId);
 }
 
+PrinterNetworkResult<std::vector<PrinterPrintFile>> ElegooNetwork::getFileList(const std::string& printerId)
+{
+    return ElegooLink::getInstance()->getFileList(printerId);
+}
+
+PrinterNetworkResult<std::vector<PrinterPrintTask>> ElegooNetwork::getPrintTaskList(const std::string& printerId)
+{
+    return ElegooLink::getInstance()->getPrintTaskList(printerId);
+}
+
+PrinterNetworkResult<bool> ElegooNetwork::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
+{
+    return ElegooLink::getInstance()->deletePrintTasks(printerId, taskIds);
+}
+
 void ElegooNetwork::uninit()
 {
     ElegooLink::getInstance()->uninit();
@@ -55,6 +69,36 @@ void ElegooNetwork::uninit()
 void ElegooNetwork::init()
 {
     ElegooLink::getInstance()->init();
+}
+
+PrinterNetworkResult<std::string> ElegooNetwork::hasInstalledPlugin()
+{
+    return ElegooLink::getInstance()->hasInstalledPlugin();
+}
+
+PrinterNetworkResult<bool> ElegooNetwork::installPlugin(const std::string& pluginPath)
+{
+    return ElegooLink::getInstance()->installPlugin(pluginPath);
+}   
+
+PrinterNetworkResult<bool> ElegooNetwork::uninstallPlugin()
+{
+    return ElegooLink::getInstance()->uninstallPlugin();
+}
+
+PrinterNetworkResult<bool> ElegooNetwork::loginWAN(const NetworkUserInfo& userInfo)
+{
+    return ElegooLink::getInstance()->loginWAN(userInfo);
+}
+
+PrinterNetworkResult<std::string> ElegooNetwork::getRtcToken()
+{
+    return ElegooLink::getInstance()->getRtcToken();
+}
+
+PrinterNetworkResult<bool> ElegooNetwork::sendRtmMessage(const std::string& message)
+{
+    return ElegooLink::getInstance()->sendRtmMessage(message);
 }
 
 } // namespace Slic3r 
