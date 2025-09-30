@@ -46,14 +46,14 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::getPrinterAttributes()
     return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId);
 }
 
-PrinterNetworkResult<std::vector<PrinterPrintFile>> ElegooNetwork::getFileList(const std::string& printerId)
+PrinterNetworkResult<std::vector<PrinterPrintFile>> ElegooNetwork::getFileList(const std::string& printerId, int pageNumber, int pageSize)
 {
-    return ElegooLink::getInstance()->getFileList(printerId);
+    return ElegooLink::getInstance()->getFileList(printerId, pageNumber, pageSize);
 }
 
-PrinterNetworkResult<std::vector<PrinterPrintTask>> ElegooNetwork::getPrintTaskList(const std::string& printerId)
+PrinterNetworkResult<std::vector<PrinterPrintTask>> ElegooNetwork::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
-    return ElegooLink::getInstance()->getPrintTaskList(printerId);
+    return ElegooLink::getInstance()->getPrintTaskList(printerId, pageNumber, pageSize);
 }
 
 PrinterNetworkResult<bool> ElegooNetwork::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
@@ -91,14 +91,14 @@ PrinterNetworkResult<bool> ElegooNetwork::loginWAN(const NetworkUserInfo& userIn
     return ElegooLink::getInstance()->loginWAN(userInfo);
 }
 
-PrinterNetworkResult<std::string> ElegooNetwork::getRtcToken()
+PrinterNetworkResult<NetworkUserInfo> ElegooNetwork::getRtcToken()
 {
     return ElegooLink::getInstance()->getRtcToken();
 }
 
-PrinterNetworkResult<bool> ElegooNetwork::sendRtmMessage(const std::string& message)
+PrinterNetworkResult<bool> ElegooNetwork::sendRtmMessage(const std::string& printerId, const std::string& message)
 {
-    return ElegooLink::getInstance()->sendRtmMessage(message);
+    return ElegooLink::getInstance()->sendRtmMessage(printerId, message);
 }
 
 } // namespace Slic3r 

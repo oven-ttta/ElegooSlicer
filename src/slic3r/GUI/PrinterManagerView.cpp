@@ -28,6 +28,7 @@
 #include "slic3r/Utils/WebviewIPCManager.h"
 #include <fstream>
 #include <mutex>
+#include "slic3r/Utils/PrinterNetworkEvent.hpp"
 
 #define FIRST_TAB_NAME _L("Connected Printer")
 #define TAB_MAX_WIDTH 200
@@ -373,49 +374,58 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
         TargetUrl = wxString::Format("%s?lang=%s", TargetUrl, strlang);
     if(wxGetApp().app_config->get_bool("developer_mode")){
             TargetUrl = TargetUrl + "&dev=true";
-    }
-
-    
+    }  
     //TargetUrl = "https://np-sit.elegoo.com.cn/account/slicer-login?language=en&region=US";
     mBrowser->LoadURL(TargetUrl);
     
-//     // 设置 ElegooSlicer UserAgent
-//     wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
-// #ifdef __WIN32__
-//     mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
-//         SLIC3R_VERSION, theme));
-// #elif defined(__WXMAC__)
-//     mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", 
-//         SLIC3R_VERSION, theme));
-// #elif defined(__linux__)
-//     mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (X11; Linux x86_64)", 
-//         SLIC3R_VERSION, theme));
-// #else
-//     mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (compatible; ElegooSlicer)", 
-//         SLIC3R_VERSION, theme));
-// #endif
+    // 设置 ElegooSlicer UserAgent
+    wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
+#ifdef __WIN32__
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
+        SLIC3R_VERSION, theme));
+#elif defined(__WXMAC__)
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", 
+        SLIC3R_VERSION, theme));
+#elif defined(__linux__)
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (X11; Linux x86_64)", 
+        SLIC3R_VERSION, theme));
+#else
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (compatible; ElegooSlicer)", 
+        SLIC3R_VERSION, theme));
+#endif
 
-//     std::thread([this]() {
-//         try {
+    std::thread([this]() {
+        try {
 
-//             std::this_thread::sleep_for(std::chrono::seconds(5));
-//             if (m_lifeTracker && *m_lifeTracker) {
-//                 // 发送区域设置消息
-//                 nlohmann::json regionMessage;
-//                 regionMessage["code"] = "CN";
-//                 regionMessage["name"] = "中国大陆";
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+            if (m_lifeTracker && *m_lifeTracker) {
                 
-//                 m_ipc->request("client.setRegion", regionMessage, [](const webviewIpc::IPCResult& response) {
-//                     BOOST_LOG_TRIVIAL(info) << "Region setting response: " << response.message;
-//                 });
-//                 BOOST_LOG_TRIVIAL(info) << "Sent region setting message via IPC after 3s delay";
-//             } else {
-//                 BOOST_LOG_TRIVIAL(info) << "PrinterManagerView destroyed, skipping language/region setting";
-//             }
-//         } catch (const std::exception& e) {
-//             BOOST_LOG_TRIVIAL(error) << "Error in delayed language/region setting: " << e.what();
-//         }
-//     }).detach();
+                // 发送语言设置消息
+                nlohmann::json languageMessage;
+                languageMessage["code"] = "zh-CN";
+                languageMessage["name"] = "中文";
+                
+                m_ipc->request("client.setLanguage", languageMessage, [](const webviewIpc::IPCResult& response) {
+                    BOOST_LOG_TRIVIAL(info) << "Language setting response: " << response.message;
+                });
+
+
+                // 发送区域设置消息
+                nlohmann::json regionMessage;
+                regionMessage["code"] = "CN";
+                regionMessage["name"] = "中国大陆";
+                
+                m_ipc->request("client.setRegion", regionMessage, [](const webviewIpc::IPCResult& response) {
+                    BOOST_LOG_TRIVIAL(info) << "Region setting response: " << response.message;
+                });
+                BOOST_LOG_TRIVIAL(info) << "Sent region setting message via IPC after 3s delay";
+            } else {
+                BOOST_LOG_TRIVIAL(info) << "PrinterManagerView destroyed, skipping language/region setting";
+            }
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << "Error in delayed language/region setting: " << e.what();
+        }
+    }).detach();
 
     // Load saved tab state
     loadTabState();
@@ -771,26 +781,69 @@ void PrinterManagerView::setupIPCHandlers()
         return webviewIpc::IPCResult::success();
     });
 
-    //m_ipc->onRequest("report.userInfo", [this](const webviewIpc::IPCRequest& request){
-    //    auto params = request.params;
-    //    std::string uuid = params.value("uuid", "");
-    //    std::string userId = params.value("userId", "");
-    //    std::string accessToken = params.value("accessToken", "");
-    //    std::string refreshToken = params.value("refreshToken", "");
-    //    std::string expiresTime = params.value("expiresTime", "");
-    //    std::string openid = params.value("openid", "");
-    //    std::string avatar = params.value("avatar", "");
-    //    std::string email = params.value("email", "");
-    //    std::string nickname = params.value("nickname", "");
-    //    std::string userSetting = params.value("userSetting", "");
-    //    std::string host = params.value("host", "");
-    //    return webviewIpc::IPCResult::success();
-    //  
-    //});
+    
+    PrinterNetworkEvent::getInstance()->connectStatusChanged.connect([this](const PrinterConnectStatusEvent& event) {
+        // RTC token change handled by network layer
+        for(auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
+            if(it->first == event.printerId) {
+                nlohmann::json data;
+                data["status"] = event.status;
+                it->second->onConnectionStatus(data);
+                break;
+            }
+        }
+    });
+    PrinterNetworkEvent::getInstance()->eventRawChanged.connect([this](const PrinterEventRawEvent& event) {
+        // Event raw change handled by network layer
+        for(auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
+            if(it->first == event.printerId) {
+                nlohmann::json data;
+                data["event"] = event.event;
+                it->second->onPrinterEventRaw(data);
+                break;
+            }
+        }
+    });
+
+    PrinterNetworkEvent::getInstance()->rtcTokenChanged.connect([this](const PrinterRtcTokenEvent& event) {
+        // RTC token change handled by network layer
+        for(auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
+            nlohmann::json data;
+            data["rtcToken"] = event.userInfo.rtcToken;
+            data["userId"] = event.userInfo.userId;
+            data["rtcTokenExpireTime"] = event.userInfo.rtcTokenExpireTime;
+            it->second->onRtcTokenChanged(data);          
+        }
+    });
+    PrinterNetworkEvent::getInstance()->rtmMessageChanged.connect([this](const PrinterRtmMessageEvent& event) {
+        // RTM message change handled by network layer
+        for(auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
+            if(it->first == event.printerId) {
+                nlohmann::json data;
+                data["message"] = event.message;
+                it->second->onRtmMessage(data);
+                break;
+            }
+        }
+    });
+    
+    m_ipc->onRequest("report.userInfo", [this](const webviewIpc::IPCRequest& request){
+       auto params = request.params;
+       return webviewIpc::IPCResult::success();
+     
+    });
 
     // m_ipc->onRequest("request_send_rtm_message", [this](const webviewIpc::IPCRequest& request){
     //     return sendRtmMessage(request.params);
     // });
+    m_ipc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string url = params.value("url", "");
+        wxLaunchDefaultBrowser(url);
+        return webviewIpc::IPCResult::success();
+    });
+
+    
 }
 
 webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)

@@ -27,6 +27,7 @@
 #include <wx/tbarbase.h>
 #include "wx/textctrl.h"
 #include <wx/timer.h>
+#include "slic3r/Utils/WebviewIPCManager.h"
 
 namespace webviewIpc {
 class WebviewIPCManager;
@@ -47,6 +48,13 @@ public:
     void OnLoaded(const wxWebViewEvent& evt);
     void reload();
     void update_mode();
+
+
+    void onRtcTokenChanged(const nlohmann::json& data);
+    void onRtmMessage(const nlohmann::json& data);
+    void onConnectionStatus(const nlohmann::json& data);
+    void onPrinterEventRaw(const nlohmann::json& data);
+
 
 private:
     void SendAPIKey();

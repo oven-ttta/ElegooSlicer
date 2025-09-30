@@ -20,74 +20,81 @@ struct PrinterConnectStatusEvent {
     std::string printerId;
     PrinterConnectStatus status;
     std::chrono::system_clock::time_point timestamp;
-    
-    PrinterConnectStatusEvent(const std::string& id, const PrinterConnectStatus& s)
-        : printerId(id), status(s), timestamp(std::chrono::system_clock::now()) {}
+    NetworkType networkType;
+    PrinterConnectStatusEvent(const std::string& id, const PrinterConnectStatus& s, const NetworkType& nt)
+        : printerId(id), networkType(nt), status(s), timestamp(std::chrono::system_clock::now()) {}
 };
 
 struct PrinterStatusEvent {
     std::string printerId;
     PrinterStatus status;
     std::chrono::system_clock::time_point timestamp;
-    
-    PrinterStatusEvent(const std::string& id, const PrinterStatus& s)
-        : printerId(id), status(s), timestamp(std::chrono::system_clock::now()) {}
+    NetworkType networkType;
+    PrinterStatusEvent(const std::string& id, const PrinterStatus& s, const NetworkType& nt)
+        : printerId(id), networkType(nt), status(s), timestamp(std::chrono::system_clock::now()) {}
 };
 
 struct PrinterPrintTaskEvent {
     std::string printerId;
     PrinterPrintTask task;
     std::chrono::system_clock::time_point timestamp;
-    
-    PrinterPrintTaskEvent(const std::string& id, const PrinterPrintTask& t)
-        : printerId(id), task(t), timestamp(std::chrono::system_clock::now()) {}
+    NetworkType networkType;
+    PrinterPrintTaskEvent(const std::string& id, const PrinterPrintTask& t, const NetworkType& nt)
+        : printerId(id), networkType(nt), task(t), timestamp(std::chrono::system_clock::now()) {}
 };
 
 struct PrinterAttributesEvent {
     std::string printerId;    
     PrinterNetworkInfo printerInfo;
     std::chrono::system_clock::time_point timestamp;
-
-    PrinterAttributesEvent(const std::string& id, const PrinterNetworkInfo& info)
-        : printerId(id), printerInfo(info), timestamp(std::chrono::system_clock::now()) {}
+    NetworkType networkType;
+    PrinterAttributesEvent(const std::string& id, const PrinterNetworkInfo& info, const NetworkType& nt)
+        : printerId(id), networkType(nt), printerInfo(info), timestamp(std::chrono::system_clock::now()) {}
 };
 
 struct PrinterRtcTokenEvent {
-    std::string printerId;
-    std::string rtcToken;
+    NetworkUserInfo userInfo;
     std::chrono::system_clock::time_point timestamp;
-    
-    PrinterRtcTokenEvent(const std::string& id, const std::string& token)
-        : printerId(id), rtcToken(token), timestamp(std::chrono::system_clock::now()) {}
+    NetworkType networkType;
+    PrinterRtcTokenEvent(const NetworkUserInfo& userInfo, const NetworkType& nt)
+        : networkType(nt), userInfo(userInfo), timestamp(std::chrono::system_clock::now()) {}
 };
 
 struct PrinterRtmMessageEvent {
     std::string printerId;
     std::string message;
     std::chrono::system_clock::time_point timestamp;
-    
-    PrinterRtmMessageEvent(const std::string& id, const std::string& msg)
-        : printerId(id), message(msg), timestamp(std::chrono::system_clock::now()) {}
+    NetworkType networkType;
+    PrinterRtmMessageEvent(const std::string& id, const std::string& msg, const NetworkType& nt)
+        : printerId(id), networkType(nt), message(msg), timestamp(std::chrono::system_clock::now()) {}
 };
 
 struct PrinterConnectionStatusEvent {
     std::string printerId;
     std::string status;
     std::chrono::system_clock::time_point timestamp;
-    
-    PrinterConnectionStatusEvent(const std::string& id, const std::string& s)
-        : printerId(id), status(s), timestamp(std::chrono::system_clock::now()) {}
+    NetworkType networkType;
+    PrinterConnectionStatusEvent(const std::string& id, const std::string& s, const NetworkType& nt)
+        : printerId(id), networkType(nt), status(s), timestamp(std::chrono::system_clock::now()) {}
 };
 
 struct PrinterEventRawEvent {
     std::string printerId;
     std::string event;
     std::chrono::system_clock::time_point timestamp;
-    
-    PrinterEventRawEvent(const std::string& id, const std::string& e)
-        : printerId(id), event(e), timestamp(std::chrono::system_clock::now()) {}
+    NetworkType networkType;
+    PrinterEventRawEvent(const std::string& id, const std::string& e, const NetworkType& nt)
+        : printerId(id), networkType(nt), event(e), timestamp(std::chrono::system_clock::now()) {}
 };
-using PrinterEvent = std::variant<PrinterConnectStatusEvent, PrinterStatusEvent, PrinterPrintTaskEvent, PrinterAttributesEvent, PrinterRtcTokenEvent, PrinterRtmMessageEvent, PrinterConnectionStatusEvent, PrinterEventRawEvent>;
+
+
+struct LoggedInElsewhereEvent {
+    std::chrono::system_clock::time_point timestamp;
+    NetworkType networkType;
+    LoggedInElsewhereEvent(const NetworkType& nt)
+        : networkType(nt), timestamp(std::chrono::system_clock::now()) {}
+};
+using PrinterEvent = std::variant<PrinterConnectStatusEvent, PrinterStatusEvent, PrinterPrintTaskEvent, PrinterAttributesEvent, PrinterRtcTokenEvent, PrinterRtmMessageEvent, PrinterConnectionStatusEvent, PrinterEventRawEvent, LoggedInElsewhereEvent>;
 
 template<typename EventType>
 class PrinterSignal {
@@ -135,8 +142,8 @@ public:
     PrinterSignal<PrinterAttributesEvent> attributesChanged;
     PrinterSignal<PrinterRtcTokenEvent> rtcTokenChanged;
     PrinterSignal<PrinterRtmMessageEvent> rtmMessageChanged;
-    PrinterSignal<PrinterConnectionStatusEvent> connectionStatusChanged;
     PrinterSignal<PrinterEventRawEvent> eventRawChanged;
+    PrinterSignal<LoggedInElsewhereEvent> loggedInElsewhereChanged;
 
 private:
     PrinterNetworkEvent() = default;

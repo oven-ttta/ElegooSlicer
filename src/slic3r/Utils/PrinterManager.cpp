@@ -152,33 +152,26 @@ void PrinterManager::init() {
     // connect status changed event
     PrinterNetworkEvent::getInstance()->connectStatusChanged.connect([this](const PrinterConnectStatusEvent& event) {
         PrinterCache::getInstance()->updatePrinterConnectStatus(event.printerId, event.status);
+        // Printer connection status change handled by PrinterCache
     });
 
     // printer status changed event
     PrinterNetworkEvent::getInstance()->statusChanged.connect(
-        [this](const PrinterStatusEvent& event) { PrinterCache::getInstance()->updatePrinterStatus(event.printerId, event.status); });
+        [this](const PrinterStatusEvent& event) { 
+            PrinterCache::getInstance()->updatePrinterStatus(event.printerId, event.status);
+        });
 
     // printer print task changed event
     PrinterNetworkEvent::getInstance()->printTaskChanged.connect(
-        [this](const PrinterPrintTaskEvent& event) { PrinterCache::getInstance()->updatePrinterPrintTask(event.printerId, event.task); });
+        [this](const PrinterPrintTaskEvent& event) { 
+            PrinterCache::getInstance()->updatePrinterPrintTask(event.printerId, event.task);
+        });
 
     // printer attributes changed event
     PrinterNetworkEvent::getInstance()->attributesChanged.connect([this](const PrinterAttributesEvent& event) {
         PrinterCache::getInstance()->updatePrinterAttributesByNotify(event.printerId, event.printerInfo);
     });
 
-    PrinterNetworkEvent::getInstance()->rtcTokenChanged.connect([this](const PrinterRtcTokenEvent& event) {
-        //PrinterCache::getInstance()->updatePrinterRtcToken(event.printerId, event.rtcToken);
-    });
-    PrinterNetworkEvent::getInstance()->rtmMessageChanged.connect([this](const PrinterRtmMessageEvent& event) {
-        //PrinterCache::getInstance()->updatePrinterRtmMessage(event.printerId, event.message);
-    });
-    PrinterNetworkEvent::getInstance()->connectionStatusChanged.connect([this](const PrinterConnectionStatusEvent& event) {
-        //PrinterCache::getInstance()->updatePrinterConnectionStatus(event.printerId, event.status);
-    });
-    PrinterNetworkEvent::getInstance()->eventRawChanged.connect([this](const PrinterEventRawEvent& event) {
-        //PrinterCache::getInstance()->updatePrinterEventRaw(event.printerId, event.event);
-    });
 
     mIsRunning        = true;
     mConnectionThread = std::thread([this]() { monitorPrinterConnections(); });
@@ -192,10 +185,10 @@ void PrinterManager::init() {
     NetworkUserInfo userInfo;
     userInfo.userId = 55;
     userInfo.username = "";
-    userInfo.token = "f0658a8465277e9e4dc7dcd0b86611af";
-    userInfo.refreshToken = "669e3d8504d7ae4bbf6ff1b2ef134bc2";
-    userInfo.accessTokenExpireTime = 1774601839521;
-    userInfo.refreshTokenExpireTime = 1883465839521;
+    userInfo.token = "45f234d84b4c14546fe0487bbbe77015";
+    userInfo.refreshToken = "c891b3a4730edb86f26133708321e11d";
+    userInfo.accessTokenExpireTime = 1774681687887;
+    userInfo.refreshTokenExpireTime = 1883545687887;
     userInfo.hostType = "ElegooLink";
 
     loginWAN(userInfo);
@@ -228,6 +221,9 @@ PrinterNetworkResult<bool> PrinterManager::deletePrinter(const std::string& prin
     PrinterCache::getInstance()->deletePrinter(printerId);
     PrinterCache::getInstance()->savePrinterList();
     wxLogMessage("Delete printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
+    
+    // Printer deletion notification removed as requested
+
     return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 
@@ -349,6 +345,9 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
         PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
         PrinterCache::getInstance()->savePrinterList();
         wxLogMessage("Added printer: %s %s %s", printerNetworkInfo.host, printerNetworkInfo.printerName, printerNetworkInfo.printerModel);
+        
+        // Printer addition notification removed as requested
+        
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
     } 
     wxLogWarning("Failed to add printer %s %s %s: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
@@ -876,21 +875,21 @@ PrinterNetworkResult<bool> PrinterManager::loginWAN(const NetworkUserInfo& userI
     return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 
-PrinterNetworkResult<std::vector<PrinterPrintFile>> PrinterManager::getFileList(const std::string& printerId)
+PrinterNetworkResult<std::vector<PrinterPrintFile>> PrinterManager::getFileList(const std::string& printerId, int pageNumber, int pageSize)
 {
     std::vector<PrinterPrintFile> printFiles;
     if(!mNetworkWAN) {
         return PrinterNetworkResult<std::vector<PrinterPrintFile>>(PrinterNetworkErrorCode::SUCCESS, printFiles);
     }
-    return mNetworkWAN->getFileList(printerId);
+    return mNetworkWAN->getFileList(printerId, pageNumber, pageSize);
 }
-PrinterNetworkResult<std::vector<PrinterPrintTask>> PrinterManager::getPrintTaskList(const std::string& printerId)
+PrinterNetworkResult<std::vector<PrinterPrintTask>> PrinterManager::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
     std::vector<PrinterPrintTask> printTasks;
     if(!mNetworkWAN) {
         return PrinterNetworkResult<std::vector<PrinterPrintTask>>(PrinterNetworkErrorCode::SUCCESS, printTasks);
     }
-    return mNetworkWAN->getPrintTaskList(printerId);
+    return mNetworkWAN->getPrintTaskList(printerId, pageNumber, pageSize);
 }
 PrinterNetworkResult<bool> PrinterManager::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
 {
@@ -900,19 +899,23 @@ PrinterNetworkResult<bool> PrinterManager::deletePrintTasks(const std::string& p
     return mNetworkWAN->deletePrintTasks(printerId, taskIds);
 }
 
-PrinterNetworkResult<std::string> PrinterManager::getRtcToken()
+PrinterNetworkResult<NetworkUserInfo> PrinterManager::getRtcToken()
 {
     if(!mNetworkWAN) {
-        return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::SUCCESS, "");
+        return PrinterNetworkResult<NetworkUserInfo>(PrinterNetworkErrorCode::SUCCESS, NetworkUserInfo());
     }
     return mNetworkWAN->getRtcToken();
 }
-PrinterNetworkResult<bool> PrinterManager::sendRtmMessage(const std::string& message)
+PrinterNetworkResult<bool> PrinterManager::sendRtmMessage(const std::string& printerId, const std::string& message)
 {
     if(!mNetworkWAN) {
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, false);
     }
-    return mNetworkWAN->sendRtmMessage(message);
+    
+    auto result = mNetworkWAN->sendRtmMessage(printerId, message);
+    return result;
 }
+
+
 
 } // namespace Slic3r

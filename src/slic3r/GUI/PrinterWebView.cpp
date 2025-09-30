@@ -396,6 +396,108 @@ void PrinterWebView::setupIPCHandlers()
             sendResponse(webviewIpc::IPCResult::error("Upload initialization failed"));
         }
     });
+
+
+    m_ipc->onRequest("getRtcToken", [this](const webviewIpc::IPCRequest& request){
+        auto rtcToken = PrinterManager::getInstance()->getRtcToken();
+        webviewIpc::IPCResult result;
+        result.message = rtcToken.message;
+        result.code = rtcToken.isSuccess() ? 0 : static_cast<int>(rtcToken.code);
+        return result;
+    });
+    m_ipc->onRequest("sendRtmMessage", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        std::string message = params.value("message", "");
+        auto sendRtmMessage = PrinterManager::getInstance()->sendRtmMessage(printerId, message);
+        webviewIpc::IPCResult result;
+        result.message = sendRtmMessage.message;
+        result.code = sendRtmMessage.isSuccess() ? 0 : static_cast<int>(sendRtmMessage.code);
+        return result;
+    });
+    m_ipc->onRequest("getFileList", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        int pageNumber = params.value("pageNumber", 1);
+        int pageSize = params.value("pageSize", 10);
+        auto fileList = PrinterManager::getInstance()->getFileList(printerId, pageNumber, pageSize);
+        webviewIpc::IPCResult result;
+        nlohmann::json fileListJson;
+        if(fileList.hasData()) {
+            for(auto& file : fileList.data.value()) {
+                nlohmann::json fileJson;
+                fileJson["fileId"] = file.fileName;
+                fileJson["fileName"] = file.fileName;
+                fileJson["printTime"] = file.printTime;
+                fileJson["layer"] = file.layer;
+                fileJson["layerHeight"] = file.layerHeight;
+                fileJson["thumbnail"] = file.thumbnail;
+                fileJson["size"] = file.size;
+                fileJson["createTime"] = file.createTime;
+                fileJson["totalFilamentUsed"] = file.totalFilamentUsed;
+                fileJson["totalFilamentUsedLength"] = file.totalFilamentUsedLength;
+                fileJson["totalPrintTimes"] = file.totalPrintTimes;
+                fileJson["lastPrintTime"] = file.lastPrintTime;           
+                fileListJson.push_back(fileJson);
+            }
+        }
+        result.data = fileListJson;
+        result.message = fileList.message;
+        result.code = fileList.isSuccess() ? 0 : static_cast<int>(fileList.code);
+        return result;
+    });
+    m_ipc->onRequest("getPrintTaskList", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        int pageNumber = params.value("pageNumber", 1);
+        int pageSize = params.value("pageSize", 10);
+        auto printTaskList = PrinterManager::getInstance()->getPrintTaskList(printerId, pageNumber, pageSize);
+        webviewIpc::IPCResult result;
+        nlohmann::json printTaskListJson;
+        if(printTaskList.hasData()) {
+            for(auto& printTask : printTaskList.data.value()) {
+                nlohmann::json printTaskJson;
+                printTaskJson["taskId"] = printTask.taskId;
+                printTaskJson["taskName"] = printTask.taskName;
+                printTaskJson["thumbnail"] = printTask.thumbnail;
+                printTaskJson["totalTime"] = printTask.totalTime;
+                printTaskJson["currentTime"] = printTask.currentTime;
+                printTaskJson["estimatedTime"] = printTask.estimatedTime;
+                printTaskJson["beginTime"] = printTask.beginTime;
+                printTaskJson["endTime"] = printTask.endTime;
+                printTaskJson["progress"] = printTask.progress;
+                printTaskJson["taskStatus"] = printTask.taskStatus;
+                printTaskListJson.push_back(printTaskJson);
+            }
+        }
+        result.data = printTaskListJson;
+        result.message = printTaskList.message;
+        result.code = printTaskList.isSuccess() ? 0 : static_cast<int>(printTaskList.code);
+        return result;
+    });
+    m_ipc->onRequest("deletePrintTasks", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        std::vector<std::string> taskIds = params.value("taskIds", std::vector<std::string>());
+        auto deletePrintTasks = PrinterManager::getInstance()->deletePrintTasks(printerId, taskIds);
+        webviewIpc::IPCResult result;
+        result.message = deletePrintTasks.message;
+        result.code = deletePrintTasks.isSuccess() ? 0 : static_cast<int>(deletePrintTasks.code);
+        return result;
+    });
+
 }
 
+void PrinterWebView::onRtcTokenChanged(const nlohmann::json& data){
+    m_ipc->sendEvent("onRtcTokenChanged", data, m_ipc->generateRequestId());
+}
+void PrinterWebView::onRtmMessage(const nlohmann::json& data){
+    m_ipc->sendEvent("onRtmMessage", data, m_ipc->generateRequestId());
+}
+void PrinterWebView::onConnectionStatus(const nlohmann::json& data){
+    m_ipc->sendEvent("onConnectionStatus", data, m_ipc->generateRequestId());
+}
+void PrinterWebView::onPrinterEventRaw(const nlohmann::json& data){
+    m_ipc->sendEvent("onPrinterEventRaw", data, m_ipc->generateRequestId());
+}
 }} // namespace Slic3r::GUI

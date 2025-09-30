@@ -350,5 +350,6 @@ private:
     EventBus                           eventBus_;
 };
 
+} // namespace elink
 
 #endif // ELEGOO_LINK_WAN_HPP

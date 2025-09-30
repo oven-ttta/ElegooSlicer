@@ -55,18 +55,31 @@ enum TrayStatus {
 
 struct PrinterPrintFile
 {
-    std::string fileName;
-    std::string fileSize;
-    std::string fileType;
+    std::string fileName;                       // File name
+    int64_t     printTime{0};                   // Print time (seconds)
+    int         layer{0};                       // Total layers
+    double      layerHeight{0};                 // Layer height (millimeters)
+    std::string thumbnail;                      // Thumbnail URL
+    int64_t     size{0};                        // File size (bytes)
+    int64_t     createTime{0};                  // File creation time (timestamp/seconds)
+    double      totalFilamentUsed{0.0f};        // Estimated total filament consumption weight (grams)
+    double      totalFilamentUsedLength{0.0f};  // Estimated total filament consumption length (millimeters)
+    int         totalPrintTimes{0};             // Total print times
+    int64_t     lastPrintTime{0};               // Last print time (timestamp/seconds)
 };
 struct PrinterPrintTask
 {
     std::string taskId;
+    std::string thumbnail;     // Thumbnail URL
+    std::string taskName;      // Task name
     std::string fileName;
-    int         totalTime{0};
-    int         currentTime{0};
-    int         estimatedTime{0};
-    int         progress{0};
+    int64_t     totalTime{0};    // Total time (seconds)
+    int64_t     currentTime{0};  // Current time (seconds)
+    int64_t     estimatedTime{0};// Estimated time (seconds)
+    int64_t     beginTime{0};    // Start time (timestamp/seconds)
+    int64_t     endTime{0};      // End time (timestamp/seconds)
+    int         progress{0};     // Progress (0-100)
+    int         taskStatus{0};   // Task status
 };
 
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_HOST "deviceUi"
@@ -154,6 +167,12 @@ enum PrinterAuthMode {
     PRINTER_AUTH_MODE_ACCESS_CODE = 2,
     PRINTER_AUTH_MODE_PIN_CODE = 3,
 };
+
+enum NetworkType {
+    NETWORK_TYPE_WAN = 0,
+    NETWORK_TYPE_LAN = 1,
+};
+
 struct PrinterNetworkInfo
 {
     std::string printerName;
@@ -175,7 +194,7 @@ struct PrinterNetworkInfo
     std::string pinCode;
     std::string webUrl;
     std::string connectionUrl;
-    bool        isWAN{false};
+    NetworkType networkType{NETWORK_TYPE_LAN};
     bool        isPhysicalPrinter{false};
     uint64_t    addTime{0};
     uint64_t    modifyTime{0};
@@ -198,6 +217,8 @@ struct NetworkUserInfo
     std::string hostType;
     uint64_t    accessTokenExpireTime{0};
     uint64_t    refreshTokenExpireTime{0};
+    std::string rtcToken; // video rtc token
+    uint64_t    rtcTokenExpireTime{0};
 };
 
 

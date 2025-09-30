@@ -44,17 +44,13 @@ public:
     PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
 
 
-    PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId);
-    PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId);
+    PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId, int pageNumber, int pageSize);
+    PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds);
 
     // WAN
-    PrinterNetworkResult<std::string> getRtcToken();
-    PrinterNetworkResult<bool> sendRtmMessage(const std::string& message);
-    PrinterNetworkResult<bool> onRtcTokenChanged(const std::string& printerId);
-    PrinterNetworkResult<bool> onRtmMessage(const std::string& printerId, const std::string& message);
-    PrinterNetworkResult<bool> onConnectionStatus(const std::string& printerId, const std::string& status);
-    PrinterNetworkResult<bool> onPrinterEventRaw(const std::string& printerId, const std::string& event);
+    PrinterNetworkResult<NetworkUserInfo> getRtcToken();
+    PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
 
 
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
