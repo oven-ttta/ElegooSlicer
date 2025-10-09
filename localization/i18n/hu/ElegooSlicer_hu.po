@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-10 17:35+0800\n"
+"POT-Creation-Date: 2025-09-30 18:25+0800\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9537,6 +9537,9 @@ msgid ""
 "following format: \"XxY, XxY, ...\""
 msgstr ""
 
+msgid "Bed texture area"
+msgstr ""
+
 msgid "Bed custom texture"
 msgstr "Egyedi tárgyasztal textúra"
 
@@ -16810,7 +16813,7 @@ msgstr ""
 msgid "Access denied. Please try again later."
 msgstr ""
 
-msgid "Missing bed leveling data. Please check and try again."
+msgid "Missing bed leveling data. Please level the bed."
 msgstr ""
 
 msgid "Print file not found. Please troubleshoot."
@@ -16856,14 +16859,11 @@ msgstr ""
 msgid "Printer already connected"
 msgstr ""
 
-msgid "Unknown error. Please try again later or restart the printer."
-msgstr ""
-
-msgid "Printer network error. Please contact support at 3dp@elegoo.com."
+msgid "Printer network error. Please try again later or restart the printer."
 msgstr ""
 
 msgid ""
-"Invalid printer data received. Please contact support at 3dp@elegoo.com."
+"Invalid printer data received. Please try again later or restart the printer."
 msgstr ""
 
 msgid "Printer MMS connection failed"

@@ -377,14 +377,14 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
         }
 
         elink::VoidResult autoRefillResult;
-        if(params.hasMms) {
-        if(params.autoRefill) {
-            autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, true});
+        if (params.hasMms) {
+            if (params.autoRefill) {
+                autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, true});
             } else {
                 autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, false});
             }
         }
-        
+
         resultCode = parseElegooResult(autoRefillResult.code);
         if(resultCode != PrinterNetworkErrorCode::SUCCESS) {
             return PrinterNetworkResult<bool>(resultCode, false, parseUnknownErrorMsg(resultCode, autoRefillResult.message));
@@ -392,7 +392,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
 
         elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
         resultCode  = parseElegooResult(elinkResult.code);
-        if(resultCode == PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA && startPrintParams.autoBedLeveling == false) {
+        if(resultCode == PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA && startPrintParams.autoBedLeveling) {
             //missing bed leveling data, send bed leveling data
             startPrintParams.autoBedLeveling = true;
             startPrintParams.bedLevelForce = true;

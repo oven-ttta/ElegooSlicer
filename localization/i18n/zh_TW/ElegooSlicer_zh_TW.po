@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-10 17:35+0800\n"
+"POT-Creation-Date: 2025-09-30 18:25+0800\n"
 "PO-Revision-Date: 2023-11-06 14:37+0800\n"
 "Last-Translator: ablegods <ablegods@gmail.com>\n"
 "Language-Team: \n"
@@ -9599,6 +9599,9 @@ msgid ""
 msgstr ""
 "XY 平面上的不可列印區域。這個多邊形區域由以下格式的點表示：“XxY，XxY，…”"
 
+msgid "Bed texture area"
+msgstr ""
+
 #, fuzzy
 msgid "Bed custom texture"
 msgstr "自訂列印板紋理"
@@ -16876,7 +16879,7 @@ msgstr ""
 msgid "Access denied. Please try again later."
 msgstr ""
 
-msgid "Missing bed leveling data. Please check and try again."
+msgid "Missing bed leveling data. Please level the bed."
 msgstr ""
 
 msgid "Print file not found. Please troubleshoot."
@@ -16922,14 +16925,11 @@ msgstr ""
 msgid "Printer already connected"
 msgstr ""
 
-msgid "Unknown error. Please try again later or restart the printer."
-msgstr ""
-
-msgid "Printer network error. Please contact support at 3dp@elegoo.com."
+msgid "Printer network error. Please try again later or restart the printer."
 msgstr ""
 
 msgid ""
-"Invalid printer data received. Please contact support at 3dp@elegoo.com."
+"Invalid printer data received. Please try again later or restart the printer."
 msgstr ""
 
 msgid "Printer MMS connection failed"
