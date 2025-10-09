@@ -80,7 +80,7 @@ class IPCManager {
             const pendingRequest = this.pendingRequests.get(eventId);
             if (pendingRequest && pendingRequest.eventCallback) {
                 try {
-                    pendingRequest.eventCallback(data, method);
+                    pendingRequest.eventCallback(method, data);
                 } catch (error) {
                     console.error(`IPC: Request event callback execution failed ${method}`, error);
                 }
@@ -363,7 +363,7 @@ class IPCManager {
      *     const result = await ipcManager.requestWithEvents(
      *         'startPrint',
      *         { filename: 'model.gcode' },
-     *         (eventData, eventMethod) => {
+     *         (eventMethod, eventData) => {
      *             if (eventMethod === 'onPrintProgress') {
      *                 console.log(`Print progress: ${eventData.progress}%`);
      *             } else if (eventMethod === 'onPrintStarted') {
@@ -388,7 +388,7 @@ class IPCManager {
      * const downloadResult = await ipcManager.requestWithEvents(
      *     'downloadFile',
      *     { url: 'https://example.com/file.zip', destination: './downloads/' },
-     *     (data, method) => {
+     *     (method, data) => {
      *         if (method === 'onDownloadProgress') {
      *             const percent = Math.round((data.downloaded / data.totalSize) * 100);
      *             console.log(`Download progress: ${percent}% (${data.speed})`);

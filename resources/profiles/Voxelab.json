@@ -1,7 +1,7 @@
 {
     "name": "Voxelab",
     "url": "",
-    "version": "01.02.00.12",
+    "version": "01.02.00.13",
     "force_update": "0",
     "description": "Voxelab configurations",
     "machine_model_list": [
