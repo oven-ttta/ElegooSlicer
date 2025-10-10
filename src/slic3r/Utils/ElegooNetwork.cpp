@@ -46,12 +46,12 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::getPrinterAttributes()
     return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId);
 }
 
-PrinterNetworkResult<std::vector<PrinterPrintFile>> ElegooNetwork::getFileList(const std::string& printerId, int pageNumber, int pageSize)
+PrinterNetworkResult<PrinterPrintFileResponse> ElegooNetwork::getFileList(const std::string& printerId, int pageNumber, int pageSize)
 {
     return ElegooLink::getInstance()->getFileList(printerId, pageNumber, pageSize);
 }
 
-PrinterNetworkResult<std::vector<PrinterPrintTask>> ElegooNetwork::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
+PrinterNetworkResult<PrinterPrintTaskResponse> ElegooNetwork::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
     return ElegooLink::getInstance()->getPrintTaskList(printerId, pageNumber, pageSize);
 }

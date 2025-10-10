@@ -590,59 +590,70 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
 }
 
 
-PrinterNetworkResult<std::vector<PrinterPrintFile>> ElegooLink::getFileList(const std::string& printerId, int pageNumber, int pageSize)
+PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileList(const std::string& printerId, int pageNumber, int pageSize)
 {
     std::vector<PrinterPrintFile> printFiles;
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    PrinterPrintFileResponse printFileResponse;
+    printFileResponse.totalFiles = 0;
+    printFileResponse.fileList.clear();
     elink::GetFileListParams params;
     params.printerId = printerId;
     params.pageNumber = pageNumber;
     params.pageSize = pageSize;
     auto elinkResult = elink::ElegooLinkWAN::getInstance()->getFileList(params);
-    resultCode = parseElegooResult(elinkResult.code);
-    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
-        for(const auto& printFile : elinkResult.value().fileList) {
-            PrinterPrintFile file;
-            file.fileName = printFile.fileName;
-            file.printTime = printFile.printTime;
-            file.layer = printFile.layer;
-            file.layerHeight = printFile.layerHeight;
-            file.thumbnail = printFile.thumbnail;
-            file.size = printFile.size;
-            file.createTime = printFile.createTime;
-            file.totalFilamentUsed = printFile.totalFilamentUsed;
-            file.totalFilamentUsedLength = printFile.totalFilamentUsedLength;
-            file.totalPrintTimes = printFile.totalPrintTimes;
-            file.lastPrintTime = printFile.lastPrintTime;
-            printFiles.push_back(file);
+    resultCode        = parseElegooResult(elinkResult.code);
+    if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
+        if (elinkResult.hasData()) {
+            printFileResponse.totalFiles = elinkResult.value().totalFiles;
+            for (const auto& printFile : elinkResult.value().fileList) {
+                PrinterPrintFile file;
+                file.fileName                = printFile.fileName;
+                file.printTime               = printFile.printTime;
+                file.layer                   = printFile.layer;
+                file.layerHeight             = printFile.layerHeight;
+                file.thumbnail               = printFile.thumbnail;
+                file.size                    = printFile.size;
+                file.createTime              = printFile.createTime;
+                file.totalFilamentUsed       = printFile.totalFilamentUsed;
+                file.totalFilamentUsedLength = printFile.totalFilamentUsedLength;
+                file.totalPrintTimes         = printFile.totalPrintTimes;
+                file.lastPrintTime           = printFile.lastPrintTime;
+                printFileResponse.fileList.push_back(file);
+            }
         }
     }
-    return PrinterNetworkResult<std::vector<PrinterPrintFile>>(resultCode, printFiles, parseUnknownErrorMsg(resultCode, elinkResult.message));
+    return PrinterNetworkResult<PrinterPrintFileResponse>(resultCode, printFileResponse, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
-PrinterNetworkResult<std::vector<PrinterPrintTask>> ElegooLink::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
+PrinterNetworkResult<PrinterPrintTaskResponse> ElegooLink::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
-    std::vector<PrinterPrintTask> printTasks;
-    PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    PrinterPrintTaskResponse   printTaskResponse;
+    printTaskResponse.totalTasks = 0;
+    printTaskResponse.taskList.clear();
+    PrinterNetworkErrorCode    resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::PrintTaskListParams params;
-    params.printerId = printerId;
+    params.printerId  = printerId;
     params.pageNumber = pageNumber;
-    params.pageSize = pageSize;
-    auto elinkResult = elink::ElegooLinkWAN::getInstance()->getPrintTaskList(params);
-    resultCode = parseElegooResult(elinkResult.code);
-    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
-        for(const auto& printTask : elinkResult.value().taskList) {
-            PrinterPrintTask task;
-            task.taskId = printTask.taskId;
-            task.thumbnail = printTask.thumbnail;
-            task.taskName = printTask.taskName;
-            task.beginTime = printTask.beginTime;
-            task.endTime = printTask.endTime;
-            task.taskStatus = printTask.taskStatus;
-            printTasks.push_back(task);
+    params.pageSize   = pageSize;
+    auto elinkResult  = elink::ElegooLinkWAN::getInstance()->getPrintTaskList(params);
+    resultCode        = parseElegooResult(elinkResult.code);
+    if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
+        if (elinkResult.hasData()) {
+            printTaskResponse.totalTasks = elinkResult.value().totalTasks;
+            for (const auto& printTask : elinkResult.value().taskList) {
+                PrinterPrintTask task;
+                task.taskId     = printTask.taskId;
+                task.thumbnail  = printTask.thumbnail;
+                task.taskName   = printTask.taskName;
+                task.beginTime  = printTask.beginTime;
+                task.endTime    = printTask.endTime;
+                task.taskStatus = printTask.taskStatus;
+                printTaskResponse.taskList.push_back(task);
+            }
         }
     }
-    return PrinterNetworkResult<std::vector<PrinterPrintTask>>(PrinterNetworkErrorCode::SUCCESS, printTasks);
+    return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::SUCCESS, printTaskResponse);
 }
 
 PrinterNetworkResult<bool> ElegooLink::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)

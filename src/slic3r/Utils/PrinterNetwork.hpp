@@ -26,8 +26,8 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() = 0;   
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() = 0;
     virtual PrinterNetworkResult<PrinterNetworkInfo> getPrinterAttributes() = 0;
-    virtual PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId, int pageNumber, int pageSize) = 0;
-    virtual PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize) = 0;
+    virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize) = 0;
+    virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize) = 0;
     virtual PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds) = 0;
 
 

@@ -875,19 +875,19 @@ PrinterNetworkResult<bool> PrinterManager::loginWAN(const NetworkUserInfo& userI
     return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 
-PrinterNetworkResult<std::vector<PrinterPrintFile>> PrinterManager::getFileList(const std::string& printerId, int pageNumber, int pageSize)
+PrinterNetworkResult<PrinterPrintFileResponse> PrinterManager::getFileList(const std::string& printerId, int pageNumber, int pageSize)
 {
-    std::vector<PrinterPrintFile> printFiles;
+    PrinterPrintFileResponse printFiles;
     if(!mNetworkWAN) {
-        return PrinterNetworkResult<std::vector<PrinterPrintFile>>(PrinterNetworkErrorCode::SUCCESS, printFiles);
+        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::SUCCESS, printFiles);
     }
     return mNetworkWAN->getFileList(printerId, pageNumber, pageSize);
 }
-PrinterNetworkResult<std::vector<PrinterPrintTask>> PrinterManager::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
+PrinterNetworkResult<PrinterPrintTaskResponse> PrinterManager::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
-    std::vector<PrinterPrintTask> printTasks;
+    PrinterPrintTaskResponse printTasks;
     if(!mNetworkWAN) {
-        return PrinterNetworkResult<std::vector<PrinterPrintTask>>(PrinterNetworkErrorCode::SUCCESS, printTasks);
+        return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::SUCCESS, printTasks);
     }
     return mNetworkWAN->getPrintTaskList(printerId, pageNumber, pageSize);
 }

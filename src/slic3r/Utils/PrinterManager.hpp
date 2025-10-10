@@ -44,8 +44,8 @@ public:
     PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
 
 
-    PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId, int pageNumber, int pageSize);
-    PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize);
+    PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize);
+    PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds);
 
     // WAN

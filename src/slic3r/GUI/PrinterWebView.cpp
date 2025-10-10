@@ -420,11 +420,14 @@ void PrinterWebView::setupIPCHandlers()
         std::string printerId = params.value("printerId", "");
         int pageNumber = params.value("pageNumber", 1);
         int pageSize = params.value("pageSize", 10);
-        auto fileList = PrinterManager::getInstance()->getFileList(printerId, pageNumber, pageSize);
+        auto fileResponse = PrinterManager::getInstance()->getFileList(printerId, pageNumber, pageSize);
         webviewIpc::IPCResult result;
         nlohmann::json fileListJson;
-        if(fileList.hasData()) {
-            for(auto& file : fileList.data.value()) {
+        fileListJson["totalFiles"] = 0;
+        fileListJson["fileList"] = nlohmann::json::array();
+        if(fileResponse.hasData()) {
+            fileListJson["totalFiles"] = fileResponse.data.value().totalFiles;
+            for(auto& file : fileResponse.data.value().fileList) {
                 nlohmann::json fileJson;
                 fileJson["fileId"] = file.fileName;
                 fileJson["fileName"] = file.fileName;
@@ -438,12 +441,12 @@ void PrinterWebView::setupIPCHandlers()
                 fileJson["totalFilamentUsedLength"] = file.totalFilamentUsedLength;
                 fileJson["totalPrintTimes"] = file.totalPrintTimes;
                 fileJson["lastPrintTime"] = file.lastPrintTime;           
-                fileListJson.push_back(fileJson);
+                fileListJson["fileList"].push_back(fileJson);
             }
         }
         result.data = fileListJson;
-        result.message = fileList.message;
-        result.code = fileList.isSuccess() ? 0 : static_cast<int>(fileList.code);
+        result.message = fileResponse.message;
+        result.code = fileResponse.isSuccess() ? 0 : static_cast<int>(fileResponse.code);
         return result;
     });
     m_ipc->onRequest("getPrintTaskList", [this](const webviewIpc::IPCRequest& request){
@@ -451,15 +454,19 @@ void PrinterWebView::setupIPCHandlers()
         std::string printerId = params.value("printerId", "");
         int pageNumber = params.value("pageNumber", 1);
         int pageSize = params.value("pageSize", 10);
-        auto printTaskList = PrinterManager::getInstance()->getPrintTaskList(printerId, pageNumber, pageSize);
+        auto printTaskResponse = PrinterManager::getInstance()->getPrintTaskList(printerId, pageNumber, pageSize);
         webviewIpc::IPCResult result;
         nlohmann::json printTaskListJson;
-        if(printTaskList.hasData()) {
-            for(auto& printTask : printTaskList.data.value()) {
+        printTaskListJson["totalTasks"] = 0;
+        printTaskListJson["taskList"] = nlohmann::json::array();
+        if(printTaskResponse.hasData()) {
+            printTaskListJson["totalTasks"] = printTaskResponse.data.value().totalTasks;
+            for(auto& printTask : printTaskResponse.data.value().taskList) {
                 nlohmann::json printTaskJson;
                 printTaskJson["taskId"] = printTask.taskId;
-                printTaskJson["taskName"] = printTask.taskName;
+                printTaskJson["fileName"] = printTask.fileName;
                 printTaskJson["thumbnail"] = printTask.thumbnail;
+                printTaskJson["taskName"] = printTask.taskName;
                 printTaskJson["totalTime"] = printTask.totalTime;
                 printTaskJson["currentTime"] = printTask.currentTime;
                 printTaskJson["estimatedTime"] = printTask.estimatedTime;
@@ -467,12 +474,12 @@ void PrinterWebView::setupIPCHandlers()
                 printTaskJson["endTime"] = printTask.endTime;
                 printTaskJson["progress"] = printTask.progress;
                 printTaskJson["taskStatus"] = printTask.taskStatus;
-                printTaskListJson.push_back(printTaskJson);
+                printTaskListJson["taskList"].push_back(printTaskJson);
             }
         }
         result.data = printTaskListJson;
-        result.message = printTaskList.message;
-        result.code = printTaskList.isSuccess() ? 0 : static_cast<int>(printTaskList.code);
+        result.message = printTaskResponse.message;
+        result.code = printTaskResponse.isSuccess() ? 0 : static_cast<int>(printTaskResponse.code);
         return result;
     });
     m_ipc->onRequest("deletePrintTasks", [this](const webviewIpc::IPCRequest& request){

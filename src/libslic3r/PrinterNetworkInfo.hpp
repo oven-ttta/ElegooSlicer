@@ -82,6 +82,18 @@ struct PrinterPrintTask
     int         taskStatus{0};   // Task status
 };
 
+struct PrinterPrintTaskResponse
+{
+    int totalTasks{0};
+    std::vector<PrinterPrintTask> taskList;
+};
+
+struct PrinterPrintFileResponse
+{
+    int totalFiles{0};
+    std::vector<PrinterPrintFile> fileList;
+};
+
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_HOST "deviceUi"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_PORT "httpsCaFile"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_VENDOR "apiKey"

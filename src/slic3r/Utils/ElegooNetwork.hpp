@@ -20,8 +20,8 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() override;
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() override;
     virtual PrinterNetworkResult<PrinterNetworkInfo> getPrinterAttributes() override;  
-    virtual PrinterNetworkResult<std::vector<PrinterPrintFile>> getFileList(const std::string& printerId, int pageNumber, int pageSize) override;
-    virtual PrinterNetworkResult<std::vector<PrinterPrintTask>> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize) override;
+    virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize) override;
+    virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize) override;
     virtual PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds) override;
 
 
