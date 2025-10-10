@@ -2,7 +2,7 @@
 elegooslicer_add_cmake_project(elegoolink
 
     GIT_REPOSITORY      https://github.com/wujie-elegoo/elegoolink
-    GIT_TAG             origin/main
+    GIT_TAG             origin/wan
     
 
 
