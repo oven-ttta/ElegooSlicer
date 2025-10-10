@@ -57,6 +57,8 @@ private:
     std::map<std::string, PrinterWebView*> mPrinterViews;
     std::atomic<bool> m_isDestroying;
     std::shared_ptr<bool> m_lifeTracker;
+
+    bool mIsLogin{false};
    
 };
 }} // namespace Slic3r::GUI 
