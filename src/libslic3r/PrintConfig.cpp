@@ -1780,12 +1780,6 @@ void PrintConfigDef::init_fff_params()
     def->mode = comDevelop;
     def->set_default_value(new ConfigOptionFloat(2.5));
 
-    def          = this->add("bed_mesh_local", coBool);
-    def->label   = L("Adaptive leveling");
-    def->tooltip = L("");
-    def->mode = comAdvanced;
-    def->set_default_value(new ConfigOptionBool(false));
-
     def          = this->add("bed_mesh_min", coPoint);
     def->label   = L("Bed mesh min");
     def->tooltip = L(

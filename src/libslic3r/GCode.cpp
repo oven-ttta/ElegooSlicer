@@ -2018,10 +2018,6 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
             std::ostringstream max_height_z_tip;
             max_height_z_tip<<"; max_z_height: " << std::fixed << std::setprecision(2) << max_height_z << '\n';
             file.writeln(max_height_z_tip.str());
-
-            std::ostringstream bed_mesh_local;
-            bed_mesh_local << "; bed_mesh_local: " << std::fixed << print.config().bed_mesh_local.value << '\n';
-            file.writeln(bed_mesh_local.str());
         }
 
         file.write_format("; HEADER_BLOCK_END\n\n");
