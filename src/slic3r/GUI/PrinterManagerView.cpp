@@ -426,7 +426,7 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
         return;
     }
     PrinterWebView* view = new PrinterWebView(mTabBar);
-    wxString url = printerInfo.webUrl;
+    wxString url = from_u8(printerInfo.webUrl);
     
     if(PrintHost::get_print_host_type(printerInfo.hostType) == htElegooLink && (printerInfo.printerModel == "Elegoo Centauri Carbon 2")) 
     {

@@ -269,6 +269,10 @@ void PrinterWebView::loadInputUrl()
 {
     if (m_loadState == PWLoadState::CONNECTING_LOADED) {
         m_loadState = PWLoadState::URL_LOADING;
+        if (!m_url.StartsWith("http://") && !m_url.StartsWith("https://") && !m_url.StartsWith("file://")) {
+            loadFailedPage();
+            return;
+        }
         loadUrl(m_url);
         return;
     }
