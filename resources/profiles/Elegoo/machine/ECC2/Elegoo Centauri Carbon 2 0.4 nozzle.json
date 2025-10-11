@@ -59,10 +59,10 @@
   "purge_in_prime_tower": "0",
   "gcode_flavor": "klipper",
   "machine_pause_gcode": "M600",
-  "bed_mesh_local": "1",
   "support_multi_filament": "1",
   "bed_mesh_max": "243,245",
   "bed_mesh_min": "10,10",
+  "bed_mesh_probe_distance": "22,22",
   "disable_m73": "0",
   "machine_max_jerk_x": [
     "20",
