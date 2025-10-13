@@ -1780,12 +1780,6 @@ void PrintConfigDef::init_fff_params()
     def->mode = comDevelop;
     def->set_default_value(new ConfigOptionFloat(2.5));
 
-    def          = this->add("bed_mesh_local", coBool);
-    def->label   = L("Adaptive leveling");
-    def->tooltip = L("");
-    def->mode = comAdvanced;
-    def->set_default_value(new ConfigOptionBool(false));
-
     def          = this->add("bed_mesh_min", coPoint);
     def->label   = L("Bed mesh min");
     def->tooltip = L(
@@ -8069,7 +8063,7 @@ static std::map<t_custom_gcode_key, t_config_option_keys> s_CustomGcodeSpecificP
     {"layer_change_gcode",          {"layer_num", "layer_z", "max_layer_z"}},
     {"timelapse_gcode",             {"layer_num", "layer_z", "max_layer_z"}},
     {"change_filament_gcode",       {"layer_num", "layer_z", "max_layer_z", "next_extruder", "previous_extruder", "fan_speed",
-                               "first_flush_volume", "flush_length_1", "flush_length_2", "flush_length_3", "flush_length_4",
+                               "first_flush_volume", "flush_length_1", "flush_length_2", "flush_length_3", "flush_length_4","flush_length",
                                "new_filament_e_feedrate", "new_filament_temp", "new_retract_length",
                                "new_retract_length_toolchange", "old_filament_e_feedrate", "old_filament_temp", "old_retract_length",
                                "old_retract_length_toolchange", "relative_e_axis", "second_flush_volume", "toolchange_count", "toolchange_z",
@@ -8139,6 +8133,7 @@ CustomGcodeSpecificConfigDef::CustomGcodeSpecificConfigDef()
     new_def("flush_length_2", coFloat, "Flush Length 2", "The second flush length");
     new_def("flush_length_3", coFloat, "Flush Length 3", "The third flush length");
     new_def("flush_length_4", coFloat, "Flush Length 4", "The fourth flush length");
+    new_def("flush_length", coFloat, "Flush Length", "The total flush length");
 
 // change_extrusion_role_gcode
     std::string extrusion_role_types = "Possible Values:\n[\"Perimeter\", \"ExternalPerimeter\", "

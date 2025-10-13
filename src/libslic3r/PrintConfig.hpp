@@ -1371,7 +1371,6 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     
     // Orca: support adaptive bed mesh
     ((ConfigOptionFloat,               preferred_orientation))
-    ((ConfigOptionBool,                bed_mesh_local))
     ((ConfigOptionPoint,               bed_mesh_min))
     ((ConfigOptionPoint,               bed_mesh_max))
     ((ConfigOptionPoint,               bed_mesh_probe_distance))

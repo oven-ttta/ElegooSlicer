@@ -70,6 +70,9 @@ PrinterStatus parseElegooStatus(elink::PrinterState mainStatus, elink::PrinterSu
     case elink::PrinterState::UNKNOWN: printerStatus = PRINTER_STATUS_UNKNOWN; break;
     case elink::PrinterState::BUSY: printerStatus = PRINTER_STATUS_BUSY; break;
     case elink::PrinterState::EXCEPTION: printerStatus = PRINTER_STATUS_ERROR; break;
+    case elink::PrinterState::VIDEO_COMPOSING: printerStatus = PRINTER_STATUS_VIDEO_COMPOSING; break;
+    case elink::PrinterState::EMERGENCY_STOP: printerStatus = PRINTER_STATUS_EMERGENCY_STOP; break;
+    case elink::PrinterState::POWER_LOSS_RECOVERY: printerStatus = PRINTER_STATUS_POWER_LOSS_RECOVERY; break;
     default: printerStatus = PRINTER_STATUS_UNKNOWN; break;
     }
 
@@ -241,7 +244,7 @@ void ElegooLink::init()
         PrinterNetworkEvent::getInstance()->rtmMessageChanged.emit(PrinterRtmMessageEvent(event->message.printerId, event->message.message, NETWORK_TYPE_WAN));
     });
     elink::ElegooNetwork::getInstance().subscribeEvent<elink::RtcTokenEvent>([&](const std::shared_ptr<elink::RtcTokenEvent>& event) {
-        UserNetworkInfo userInfo;
+		UserNetworkInfo userInfo;
         userInfo.userId = event->token.userId;
         userInfo.rtcToken = event->token.rtcToken;
         userInfo.rtcTokenExpireTime = event->token.rtcTokenExpireTime;
@@ -257,7 +260,7 @@ void ElegooLink::init()
 }
 
 void ElegooLink::uninit()
-{
+{  
     std::lock_guard<std::mutex> lock(mMutex);
     if(!mIsInitialized) {
         return;
@@ -487,6 +490,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
         }
 
         elink::VoidResult autoRefillResult;
+
         if (params.hasMms) {
             if (params.autoRefill) {
                 if(isWan) {
@@ -514,7 +518,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
             elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
         }
         resultCode  = parseElegooResult(elinkResult.code);
-        if(resultCode == PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA && startPrintParams.autoBedLeveling == false) {
+        if(resultCode == PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA && startPrintParams.autoBedLeveling) {
             //missing bed leveling data, send bed leveling data
             startPrintParams.autoBedLeveling = true;
             startPrintParams.bedLevelForce = true;

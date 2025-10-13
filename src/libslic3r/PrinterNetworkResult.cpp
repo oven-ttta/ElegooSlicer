@@ -21,7 +21,7 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::PRINTER_ACCESS_DENIED:
             return _u8L("Access denied. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA:
-            return _u8L("Missing bed leveling data. Please check and try again.");
+            return _u8L("Missing bed leveling data. Please level the bed.");
         case PrinterNetworkErrorCode::PRINTER_PRINT_FILE_NOT_FOUND:
             return _u8L("Print file not found. Please troubleshoot.");
         case PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR:
