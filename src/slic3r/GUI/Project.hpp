@@ -38,7 +38,7 @@
 #define AUFILE_GREY500 wxColour(158, 158, 158)
 #define AUFILE_GREY300 wxColour(238, 238, 238)
 #define AUFILE_GREY200 wxColour(248, 248, 248)
-#define AUFILE_BRAND wxColour(0, 120, 189)
+#define AUFILE_BRAND wxColour(22, 119, 255)
 ///#define AUFILE_BRAND_TRANSPARENT wxColour(215, 232, 222)
 #define AUFILE_BRAND_TRANSPARENT wxColour(255, 255, 255)
 //#define AUFILE_PICTURES_SIZE wxSize(FromDIP(300), FromDIP(300))

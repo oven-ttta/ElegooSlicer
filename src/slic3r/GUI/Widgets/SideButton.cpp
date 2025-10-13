@@ -4,7 +4,7 @@
 #include <wx/dcclient.h>
 #include <wx/dcgraph.h>
 
-BEGIN_EVENT_TABLE(SideButton, wxPanel)
+BEGIN_EVENT_TABLE(SideButton, wxWindow)
 EVT_LEFT_DOWN(SideButton::mouseDown)
 EVT_LEFT_UP(SideButton::mouseReleased)
 EVT_PAINT(SideButton::paintEvent)
@@ -30,8 +30,8 @@ SideButton::SideButton(wxWindow* parent, wxString text, wxString icon, long stly
 
     border_color.append(0x6B6B6B, StateColor::Disabled);
     border_color.append(wxColour(0, 102, 153), StateColor::Pressed);
-    border_color.append(wxColour(51, 102, 153), StateColor::Hovered);
-    border_color.append(0x0081D7, StateColor::Normal);
+    border_color.append(wxColour(0, 86, 179), StateColor::Hovered);
+    border_color.append(0x1677ff, StateColor::Normal);
     border_color.setTakeFocusedAsHovered(false);
 
     text_color.append(0xACACAC, StateColor::Disabled);
@@ -41,8 +41,8 @@ SideButton::SideButton(wxWindow* parent, wxString text, wxString icon, long stly
 
     background_color.append(0x6B6B6B, StateColor::Disabled);
     background_color.append(wxColour(0, 102, 153), StateColor::Pressed);
-    background_color.append(wxColour(51, 102, 153), StateColor::Hovered);
-    background_color.append(0x0081D7, StateColor::Normal);
+    background_color.append(wxColour(0, 86, 179), StateColor::Hovered);
+    background_color.append(0x1677ff, StateColor::Normal);
     background_color.setTakeFocusedAsHovered(false);
 
     SetBottomColour(wxColour("#3B4446"));

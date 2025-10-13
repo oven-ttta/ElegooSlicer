@@ -254,7 +254,7 @@ void Downloader::on_progress(wxCommandEvent& event)
     std::lock_guard<std::mutex> lock(m_mutex); 
 
     size_t id      = event.GetInt();
-    float  percent = (float) std::stoi(boost::nowide::narrow(event.GetString())) / 100.f;
+    float  percent = (float) std::stoi(event.GetString().ToStdString()) / 100.f;
     // BOOST_LOG_TRIVIAL(error) << "progress " << id << ": " << percent;
 
     auto it = find_download_by_id(id);
@@ -290,7 +290,7 @@ void Downloader::on_error(wxCommandEvent& event)
         }
     } else if (it->get()->get_down_type() == DownType1) {
         NotificationManager* ntf_mngr = wxGetApp().notification_manager();
-        ntf_mngr->set_download_URL_error(id, boost::nowide::narrow(event.GetString()));
+        ntf_mngr->set_download_URL_error(id, event.GetString().ToStdString());
     }
 
     set_download_state(event.GetInt(), DownloadState::DownloadError);
