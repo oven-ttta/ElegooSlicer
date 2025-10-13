@@ -1,6 +1,6 @@
 {
     "name": "Elegoo",
-    "version": "01.02.00.11",
+    "version": "01.02.00.14",
     "force_update": "0",
     "description": "Elegoo configurations",
     "machine_model_list": [
@@ -1189,6 +1189,10 @@
             "sub_path": "filament/ELEGOO_02_NOZZLE/Elegoo ASA @0.2 nozzle.json"
         },
         {
+            "name": "Elegoo PETG @0.2 nozzle",
+            "sub_path": "filament/ELEGOO_02_NOZZLE/Elegoo PETG @0.2 nozzle.json"
+        },
+        {
             "name": "Elegoo PETG PRO @0.2 nozzle",
             "sub_path": "filament/ELEGOO_02_NOZZLE/Elegoo PETG PRO @0.2 nozzle.json"
         },
@@ -1267,6 +1271,10 @@
         {
             "name": "Elegoo PLA-CF @ECC",
             "sub_path": "filament/ECC/Elegoo PLA-CF @ECC.json"
+        },
+        {
+            "name": "Elegoo PETG @ECC",
+            "sub_path": "filament/ECC/Elegoo PETG @ECC.json"
         },
         {
             "name": "Elegoo PETG PRO @ECC",
@@ -1359,6 +1367,10 @@
         {
             "name": "Elegoo PLA Matte @EC",
             "sub_path": "filament/EC/Elegoo PLA Matte @EC.json"
+        },
+        {
+            "name": "Elegoo PETG @EC",
+            "sub_path": "filament/EC/Elegoo PETG @EC.json"
         },
         {
             "name": "Elegoo PETG PRO @EC",
@@ -1457,6 +1469,10 @@
             "sub_path": "filament/ECC2/Elegoo PLA-CF @ECC2.json"
         },
         {
+            "name": "Elegoo PETG @ECC2",
+            "sub_path": "filament/ECC2/Elegoo PETG @ECC2.json"
+        },
+        {
             "name": "Elegoo PETG PRO @ECC2",
             "sub_path": "filament/ECC2/Elegoo PETG PRO @ECC2.json"
         },
@@ -1553,6 +1569,10 @@
             "sub_path": "filament/EN4SERIES/Elegoo PLA-CF @EN4 Series.json"
         },
         {
+            "name": "Elegoo PETG @EN4 Series",
+            "sub_path": "filament/EN4SERIES/Elegoo PETG @EN4 Series.json"
+        },
+        {
             "name": "Elegoo PETG PRO @EN4 Series",
             "sub_path": "filament/EN4SERIES/Elegoo PETG PRO @EN4 Series.json"
         },
@@ -1631,6 +1651,10 @@
         {
             "name": "Elegoo PLA-CF @EN3 Series",
             "sub_path": "filament/EN3SERIES/Elegoo PLA-CF @EN3 Series.json"
+        },
+        {
+            "name": "Elegoo PETG @EN3 Series",
+            "sub_path": "filament/EN3SERIES/Elegoo PETG @EN3 Series.json"
         },
         {
             "name": "Elegoo PETG PRO @EN3 Series",
@@ -1713,6 +1737,10 @@
             "sub_path": "filament/EN2SERIES/Elegoo PLA-CF @EN2 Series.json"
         },
         {
+            "name": "Elegoo PETG @EN2 Series",
+            "sub_path": "filament/EN2SERIES/Elegoo PETG @EN2 Series.json"
+        },
+        {
             "name": "Elegoo PETG PRO @EN2 Series",
             "sub_path": "filament/EN2SERIES/Elegoo PETG PRO @EN2 Series.json"
         },
@@ -1763,6 +1791,10 @@
         {
             "name": "Elegoo ASA @EOS Giga",
             "sub_path": "filament/EOSGIGA/Elegoo ASA @EOS Giga.json"
+        },
+        {
+            "name": "Elegoo PETG @EOS Giga",
+            "sub_path": "filament/EOSGIGA/Elegoo PETG @EOS Giga.json"
         },
         {
             "name": "Elegoo PETG PRO @EOS Giga",

@@ -86,7 +86,7 @@ VendorProfile getMachineProfile(const std::string& vendorName, const std::string
     return machineProfile;
 }
 std::string PrinterManager::imageFileToBase64DataURI(const std::string& image_path) {
-    std::ifstream ifs(image_path, std::ios::binary);
+    std::ifstream ifs(std::filesystem::u8path(image_path), std::ios::binary);
     if (!ifs) return "";
     std::ostringstream oss;
     oss << ifs.rdbuf();

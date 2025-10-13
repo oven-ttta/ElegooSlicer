@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-10 17:35+0800\n"
+"POT-Creation-Date: 2025-10-09 10:56+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -9239,6 +9239,9 @@ msgid ""
 msgstr ""
 "XY平面上的不可打印区域。这个多边形区域由以下格式的点表示：“XxY，XxY，…”"
 
+msgid "Bed texture area"
+msgstr ""
+
 msgid "Bed custom texture"
 msgstr "自定义热床纹理"
 
@@ -11524,7 +11527,7 @@ msgid "Klipper"
 msgstr ""
 
 msgid "Pellet Modded Printer"
-msgstr ""
+msgstr "颗粒改装打印机"
 
 msgid "Enable this option if your printer uses pellets instead of filaments"
 msgstr ""
@@ -12326,7 +12329,7 @@ msgstr ""
 "抽。"
 
 msgid "Long retraction when cut(beta)"
-msgstr ""
+msgstr "切料时回抽(beta)"
 
 msgid ""
 "Experimental feature.Retracting and cutting off the filament at a longer "
@@ -13553,7 +13556,7 @@ msgstr ""
 "对于擦拭塔外墙，无论此设置如何，都使用内墙速度。"
 
 msgid "Wall type"
-msgstr ""
+msgstr "外墙类型"
 
 msgid ""
 "Wipe tower outer wall type.\n"
@@ -13563,24 +13566,30 @@ msgid ""
 "tower.\n"
 "3. Rib: Adds four ribs to the tower wall for enhanced stability."
 msgstr ""
+"擦拭塔外墙类型。\n"
+"1. 矩形：默认的墙类型，具有固定宽度的矩形高度。\n"
+"2. 锥体：底部带有圆角的锥体，有助于稳定擦拭塔。\n"
+"3. 肋条：在塔壁上增加四条肋条，以增强稳定性。"
 
 msgid "Extra rib length"
-msgstr ""
+msgstr "斜肋额外的长度"
 
 msgid ""
 "Positive values can increase the size of the rib wall, while negative values "
 "can reduce the size.However, the size of the rib wall can not be smaller "
 "than that determined by the cleaning volume."
 msgstr ""
+"正值增大斜肋外墙的大小，负值则减小。斜肋外墙的大小不能小于由清理量确定的最小"
+"值。"
 
 msgid "Rib width"
-msgstr ""
+msgstr "斜肋宽度"
 
 msgid "Fillet wall"
-msgstr ""
+msgstr "外墙倒圆角"
 
 msgid "The wall of prime tower will fillet."
-msgstr ""
+msgstr "擦拭塔外墙倒圆角"
 
 msgid ""
 "The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
@@ -16430,8 +16439,8 @@ msgstr "操作已取消"
 msgid "Access denied. Please try again later."
 msgstr "拒绝访问，请稍后重试"
 
-msgid "Missing bed leveling data. Please check and try again."
-msgstr ""
+msgid "Missing bed leveling data. Please level the bed."
+msgstr "缺少网床数据，请调平"
 
 msgid "Print file not found. Please troubleshoot."
 msgstr "文件未找到，请检查"
@@ -16475,9 +16484,6 @@ msgstr "操作失败，请稍后重试"
 
 msgid "Printer already connected"
 msgstr "打印机已存在"
-
-msgid "Unknown error. Please try again later or restart the printer."
-msgstr ""
 
 msgid "Printer network error. Please try again later or restart the printer."
 msgstr "打印机网络异常，请稍后重试或者重启打印机"
@@ -16812,6 +16818,9 @@ msgid ""
 msgstr ""
 "避免翘曲\n"
 "您知道吗？打印ABS这类易翘曲耗材时，适当提高热床温度可以降低翘曲的概率。"
+
+#~ msgid "Missing bed leveling data. Please check and try again."
+#~ msgstr "缺少网床数据，请调平"
 
 #~ msgid "An unknown network error occurred. Please try again later."
 #~ msgstr "发生未知的网络错误，请稍后重试"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-10 17:35+0800\n"
+"POT-Creation-Date: 2025-10-09 10:56+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Guislain Cyril, Thomas Lété\n"
@@ -9949,6 +9949,9 @@ msgstr ""
 "Zone non imprimable dans le plan XY. La zone est un polygone défini par des "
 "points au format suivant : \"XxY, XxY, ...\""
 
+msgid "Bed texture area"
+msgstr ""
+
 msgid "Bed custom texture"
 msgstr "Texture personnalisée du plateau"
 
@@ -18359,7 +18362,7 @@ msgstr ""
 msgid "Access denied. Please try again later."
 msgstr ""
 
-msgid "Missing bed leveling data. Please check and try again."
+msgid "Missing bed leveling data. Please level the bed."
 msgstr ""
 
 msgid "Print file not found. Please troubleshoot."
@@ -18405,14 +18408,11 @@ msgstr ""
 msgid "Printer already connected"
 msgstr ""
 
-msgid "Unknown error. Please try again later or restart the printer."
-msgstr ""
-
-msgid "Printer network error. Please contact support at 3dp@elegoo.com."
+msgid "Printer network error. Please try again later or restart the printer."
 msgstr ""
 
 msgid ""
-"Invalid printer data received. Please contact support at 3dp@elegoo.com."
+"Invalid printer data received. Please try again later or restart the printer."
 msgstr ""
 
 msgid "Printer MMS connection failed"

@@ -70,6 +70,9 @@ PrinterStatus parseElegooStatus(elink::PrinterState mainStatus, elink::PrinterSu
     case elink::PrinterState::UNKNOWN: printerStatus = PRINTER_STATUS_UNKNOWN; break;
     case elink::PrinterState::BUSY: printerStatus = PRINTER_STATUS_BUSY; break;
     case elink::PrinterState::EXCEPTION: printerStatus = PRINTER_STATUS_ERROR; break;
+    case elink::PrinterState::VIDEO_COMPOSING: printerStatus = PRINTER_STATUS_VIDEO_COMPOSING; break;
+    case elink::PrinterState::EMERGENCY_STOP: printerStatus = PRINTER_STATUS_EMERGENCY_STOP; break;
+    case elink::PrinterState::POWER_LOSS_RECOVERY: printerStatus = PRINTER_STATUS_POWER_LOSS_RECOVERY; break;
     default: printerStatus = PRINTER_STATUS_UNKNOWN; break;
     }
 
@@ -430,14 +433,14 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
         }
 
         elink::VoidResult autoRefillResult;
-        if(params.hasMms) {
-        if(params.autoRefill) {
-            autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, true});
+        if (params.hasMms) {
+            if (params.autoRefill) {
+                autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, true});
             } else {
                 autoRefillResult = elink::ElegooLink::getInstance().setAutoRefill({params.printerId, false});
             }
         }
-        
+
         resultCode = parseElegooResult(autoRefillResult.code);
         if(resultCode != PrinterNetworkErrorCode::SUCCESS) {
             return PrinterNetworkResult<bool>(resultCode, false, parseUnknownErrorMsg(resultCode, autoRefillResult.message));
@@ -445,7 +448,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
 
         elinkResult = elink::ElegooLink::getInstance().startPrint(startPrintParams);
         resultCode  = parseElegooResult(elinkResult.code);
-        if(resultCode == PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA && startPrintParams.autoBedLeveling == false) {
+        if(resultCode == PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA && startPrintParams.autoBedLeveling) {
             //missing bed leveling data, send bed leveling data
             startPrintParams.autoBedLeveling = true;
             startPrintParams.bedLevelForce = true;
