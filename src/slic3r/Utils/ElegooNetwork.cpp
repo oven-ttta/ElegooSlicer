@@ -19,46 +19,57 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::connectToPrinter()
 
 PrinterNetworkResult<bool> ElegooNetwork::disconnectFromPrinter()
 {
-    return ElegooLink::getInstance()->disconnectFromPrinter(mPrinterNetworkInfo.printerId);
+    return ElegooLink::getInstance()->disconnectFromPrinter(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
 }
+
+PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo)
+{
+    return ElegooLink::getInstance()->bindWANPrinter(printerNetworkInfo);
+}
+
+PrinterNetworkResult<bool> ElegooNetwork::unbindWANPrinter(const std::string& printerId)
+{
+    return ElegooLink::getInstance()->unbindWANPrinter(printerId);
+}
+
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooNetwork::discoverPrinters()   
 {
     return ElegooLink::getInstance()->discoverPrinters();
 }
 PrinterNetworkResult<bool> ElegooNetwork::sendPrintTask(const PrinterNetworkParams& params)
 {
-    return ElegooLink::getInstance()->sendPrintTask(params);
+    return ElegooLink::getInstance()->sendPrintTask(params, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
 
 }
 PrinterNetworkResult<bool> ElegooNetwork::sendPrintFile(const PrinterNetworkParams& params)
 {
-    return ElegooLink::getInstance()->sendPrintFile(params);
+    return ElegooLink::getInstance()->sendPrintFile(params, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
 
 }
 
 PrinterNetworkResult<PrinterMmsGroup> ElegooNetwork::getPrinterMmsInfo()
 {
-    return ElegooLink::getInstance()->getPrinterMmsInfo(mPrinterNetworkInfo.printerId);
+    return ElegooLink::getInstance()->getPrinterMmsInfo(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
 }
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::getPrinterAttributes()
 {
-    return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId);
+    return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
 }
 
-PrinterNetworkResult<PrinterPrintFileResponse> ElegooNetwork::getFileList(const std::string& printerId, int pageNumber, int pageSize)
+PrinterNetworkResult<PrinterPrintFileResponse> ElegooNetwork::getFileList(int pageNumber, int pageSize)
 {
-    return ElegooLink::getInstance()->getFileList(printerId, pageNumber, pageSize);
+    return ElegooLink::getInstance()->getFileList(mPrinterNetworkInfo.printerId, pageNumber, pageSize);
 }
 
-PrinterNetworkResult<PrinterPrintTaskResponse> ElegooNetwork::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
+PrinterNetworkResult<PrinterPrintTaskResponse> ElegooNetwork::getPrintTaskList(int pageNumber, int pageSize)
 {
-    return ElegooLink::getInstance()->getPrintTaskList(printerId, pageNumber, pageSize);
+    return ElegooLink::getInstance()->getPrintTaskList(mPrinterNetworkInfo.printerId, pageNumber, pageSize);
 }
 
-PrinterNetworkResult<bool> ElegooNetwork::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
+PrinterNetworkResult<bool> ElegooNetwork::deletePrintTasks(const std::vector<std::string>& taskIds)
 {
-    return ElegooLink::getInstance()->deletePrintTasks(printerId, taskIds);
+    return ElegooLink::getInstance()->deletePrintTasks(mPrinterNetworkInfo.printerId, taskIds);
 }
 
 void ElegooNetwork::uninit()
@@ -71,34 +82,9 @@ void ElegooNetwork::init()
     ElegooLink::getInstance()->init();
 }
 
-PrinterNetworkResult<std::string> ElegooNetwork::hasInstalledPlugin()
+PrinterNetworkResult<bool> ElegooNetwork::sendRtmMessage(const std::string& message)
 {
-    return ElegooLink::getInstance()->hasInstalledPlugin();
-}
-
-PrinterNetworkResult<bool> ElegooNetwork::installPlugin(const std::string& pluginPath)
-{
-    return ElegooLink::getInstance()->installPlugin(pluginPath);
-}   
-
-PrinterNetworkResult<bool> ElegooNetwork::uninstallPlugin()
-{
-    return ElegooLink::getInstance()->uninstallPlugin();
-}
-
-PrinterNetworkResult<bool> ElegooNetwork::loginWAN(const NetworkUserInfo& userInfo)
-{
-    return ElegooLink::getInstance()->loginWAN(userInfo);
-}
-
-PrinterNetworkResult<NetworkUserInfo> ElegooNetwork::getRtcToken()
-{
-    return ElegooLink::getInstance()->getRtcToken();
-}
-
-PrinterNetworkResult<bool> ElegooNetwork::sendRtmMessage(const std::string& printerId, const std::string& message)
-{
-    return ElegooLink::getInstance()->sendRtmMessage(printerId, message);
+    return ElegooLink::getInstance()->sendRtmMessage(mPrinterNetworkInfo.printerId, message);
 }
 
 } // namespace Slic3r 

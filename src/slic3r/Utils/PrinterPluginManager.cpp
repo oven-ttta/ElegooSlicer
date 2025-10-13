@@ -1,7 +1,7 @@
 #include "PrinterPluginManager.hpp"
 #include "PrintHost.hpp"
 #include "libslic3r/Utils.hpp"
-
+#include "PrinterNetwork.hpp"
 namespace Slic3r {
 
 
@@ -29,9 +29,9 @@ bool PrinterPluginManager::uninit() {
 
 PrinterNetworkResult<std::string> PrinterPluginManager::hasInstalledPlugin(const std::string& hostTypeStr) {
  
-    PrinterNetworkInfo printer;
-    printer.hostType = hostTypeStr;
-    std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printer);
+    PluginNetworkInfo plugin;
+    plugin.hostType = hostTypeStr;
+    std::shared_ptr<IPluginNetwork> network = NetworkFactory::createPluginNetwork(plugin);
     if(network) {
         return network->hasInstalledPlugin();
     }
@@ -45,9 +45,9 @@ PrinterNetworkResult<bool> PrinterPluginManager::installPlugin(const std::string
     boost::filesystem::path dataDirPath(dataDirStr);
     auto pluginFolderPath = dataDirPath / "plugins" / hostTypeStr;
 
-    PrinterNetworkInfo printer;
-    printer.hostType = hostTypeStr;
-    std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printer);
+    PluginNetworkInfo plugin;
+    plugin.hostType = hostTypeStr;
+    std::shared_ptr<IPluginNetwork> network = NetworkFactory::createPluginNetwork(plugin);
     if(network) {
         return network->installPlugin(pluginFolderPath.string());
     }
@@ -55,9 +55,9 @@ PrinterNetworkResult<bool> PrinterPluginManager::installPlugin(const std::string
 }
 
 PrinterNetworkResult<bool> PrinterPluginManager::uninstallPlugin(const std::string& hostTypeStr) {
-    PrinterNetworkInfo printer;
-    printer.hostType = hostTypeStr;
-    std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printer);
+    PluginNetworkInfo plugin;
+    plugin.hostType = hostTypeStr;
+    std::shared_ptr<IPluginNetwork> network = NetworkFactory::createPluginNetwork(plugin);
     if(network) {
         return network->uninstallPlugin();
     }

@@ -2,6 +2,7 @@
 #include <map>
 #include "slic3r/Utils/PrinterNetwork.hpp"
 #include "slic3r/Utils/Singleton.hpp"
+#include "slic3r/Utils/PrinterNetwork.hpp"
 
 namespace Slic3r { 
 
@@ -42,16 +43,15 @@ public:
     PrinterNetworkResult<bool> updatePrinterHost(const std::string& printerId, const std::string& host);
     PrinterNetworkResult<bool> deletePrinter(const std::string& printerId);
     PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
-
-
     PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds);
-
-    // WAN
-    PrinterNetworkResult<NetworkUserInfo> getRtcToken();
     PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
 
+    // WAN
+    void setCurrentUserInfo(const UserNetworkInfo& userInfo);
+    PrinterNetworkResult<UserNetworkInfo> getRtcToken();
+    
 
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
     static std::string imageFileToBase64DataURI(const std::string& image_path);
@@ -62,9 +62,8 @@ public:
     // sync old preset printers to network
     void syncOldPresetPrinters();
 
-    PrinterNetworkResult<bool> loginWAN(const NetworkUserInfo& userInfo);
 private:
-
+    PrinterManager();
     class PrinterLock
     {
     public:
@@ -77,21 +76,21 @@ private:
         static std::mutex sMutex;       
     };
 
-private:
-    PrinterManager();
-
-    std::mutex mConnectionsMutex;
-    std::map<std::string, std::shared_ptr<IPrinterNetwork>> mNetworkConnections;
+    std::mutex mPrinterNetworkMutex;
+    std::map<std::string, std::shared_ptr<IPrinterNetwork>> mPrinterNetworkConnections;
     bool addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network);
     bool deletePrinterNetwork(const std::string& printerId);
     std::shared_ptr<IPrinterNetwork> getPrinterNetwork(const std::string& printerId);
 
+    // WAN
+    std::mutex mUserNetworkMutex;
+    UserNetworkInfo mUserNetworkInfo;
+    std::shared_ptr<IUserNetwork> mUserNetwork;
+    void getWANPrinters();
+ 
     // thread to monitor printer connections
     std::atomic<bool> mIsRunning;
     std::thread mConnectionThread;
     void monitorPrinterConnections();
-
-    NetworkUserInfo mNetworkUserInfo;
-    std::shared_ptr<IPrinterNetwork> mNetworkWAN;
 };
 } // namespace Slic3r::GUI 

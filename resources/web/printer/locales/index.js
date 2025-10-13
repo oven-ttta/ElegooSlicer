@@ -53,6 +53,7 @@ const langMessages = {
       "noDevicesFound": "No Devices Found",
       "connectable": "Connectable",
       "connectToPrinter": "Connect to Printer",
+      "bindPrinter": "Bind Printer",
       "refresh": "Refresh",
       "close": "Close",
       "cannotFindPrinter": "Can't find printer?",
@@ -83,7 +84,7 @@ const langMessages = {
       "pleaseSelectHostType": "Please select host type",
       "pleaseEnterHostNameIpUrl": "Please enter hostname, IP or URL"
     },
-    "printerAuth": {
+    "printerAccessAuth": {
       "enterAccessCode": "Please check the access code on the screen and enter it below to add the printer",
       "cannotAccessCode": "Can't get the access code?",
       "close": "Close",
@@ -96,6 +97,16 @@ const langMessages = {
       "bindPrinter": "Bind Printer",
       "failedToAddPrinterInvalidAccessCode": "Invalid access code. Failed to add printer. Please check and try again.",
       "failedToAddPrinter": "Failed to add printer. Please check the network of your computer and the printer, then try again."
+    },
+    "printerPinAuth": {
+      "enterPinCode": "Please check the PIN code on the screen and enter it below to bind the printer",
+      "cannotPinCode": "Can't get the PIN code?",
+      "close": "Close",
+      "connect": "Bind",
+      "help": "Help",
+      "helpMessage": "Please make sure the printer firmware is updated to the latest version and check the screen for the PIN code.",
+      "ok": "OK",
+      "pleaseEnterCompletePinCode": "Please enter the complete 6-character PIN code"
     },
     "printerSetting": {
       "deleteDevice": "Delete Device",
@@ -203,6 +214,7 @@ const langMessages = {
       "noDevicesFound": "未找到设备",
       "connectable": "可连接",
       "connectToPrinter": "连接到打印机",
+      "bindPrinter": "绑定打印机",
       "refresh": "刷新",
       "close": "关闭",
       "cannotFindPrinter": "找不到打印机?",
@@ -234,7 +246,7 @@ const langMessages = {
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
       "vendorCannotBeModified": "现有打印机无法修改厂商"
     },
-    "printerAuth": {
+    "printerAccessAuth": {
       "enterAccessCode": "请查看屏幕上显示的访问码，并在下方输入框中填入，以完成添加",
       "cannotAccessCode": "无法获取访问码？",
       "close": "关闭",
@@ -247,6 +259,16 @@ const langMessages = {
       "bindPrinter": "绑定打印机",
       "failedToAddPrinterInvalidAccessCode": "访问码异常，添加打印机失败，请检查后重新尝试",
       "failedToAddPrinter": "添加打印机失败，请检查电脑、打印机的网络情况后重试"
+    },
+    "printerPinAuth": {
+      "enterPinCode": "请查看屏幕上显示的PIN码，并在下方输入框中填入，以完成绑定",
+      "cannotPinCode": "无法获取PIN码？",
+      "close": "关闭",
+      "connect": "绑定",
+      "help": "帮助",
+      "helpMessage": "请确定打印机固件已经更新到最新版本，并在屏幕上查看PIN码。",
+      "ok": "确定",
+      "pleaseEnterCompletePinCode": "请输入完整的6位PIN码"
     },
     "printerSetting": {
       "deleteDevice": "删除设备",

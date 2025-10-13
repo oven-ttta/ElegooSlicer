@@ -148,7 +148,7 @@ PrinterManager::PrinterManager(){ }
 PrinterManager::~PrinterManager() { }
 
 void PrinterManager::init() {
-    IPrinterNetwork::init();
+
     // connect status changed event
     PrinterNetworkEvent::getInstance()->connectStatusChanged.connect([this](const PrinterConnectStatusEvent& event) {
         PrinterCache::getInstance()->updatePrinterConnectStatus(event.printerId, event.status);
@@ -173,25 +173,17 @@ void PrinterManager::init() {
     });
 
 
-    mIsRunning        = true;
-    mConnectionThread = std::thread([this]() { monitorPrinterConnections(); });
-
     PrinterCache::getInstance()->loadPrinterList();
-
     syncOldPresetPrinters();
+
+    for (const auto& [printerId, network] : mPrinterNetworkConnections) {
+        network->init();
+    }
 
     PrinterPluginManager::getInstance()->init();
 
-    NetworkUserInfo userInfo;
-    userInfo.userId = 55;
-    userInfo.username = "";
-    userInfo.token = "45f234d84b4c14546fe0487bbbe77015";
-    userInfo.refreshToken = "c891b3a4730edb86f26133708321e11d";
-    userInfo.accessTokenExpireTime = 1774681687887;
-    userInfo.refreshTokenExpireTime = 1883545687887;
-    userInfo.hostType = "ElegooLink";
-
-    loginWAN(userInfo);
+    mIsRunning        = true;
+    mConnectionThread = std::thread([this]() { monitorPrinterConnections(); });
 }
 
 void PrinterManager::close() { 
@@ -203,13 +195,22 @@ void PrinterManager::close() {
     if (mConnectionThread.joinable()) {
         mConnectionThread.join();
     }
-    std::lock_guard<std::mutex> lock(mConnectionsMutex);
-    for (const auto& [printerId, network] : mNetworkConnections) {
+    std::lock_guard<std::mutex> lock(mPrinterNetworkMutex);
+    for (const auto& [printerId, network] : mPrinterNetworkConnections) {
         network->disconnectFromPrinter();
     }
-    mNetworkConnections.clear();
+
     PrinterCache::getInstance()->savePrinterList();
-    IPrinterNetwork::uninit();  
+
+    for (const auto& [printerId, network] : mPrinterNetworkConnections) {
+        network->uninit();
+    }
+    mPrinterNetworkConnections.clear();
+
+    if(mUserNetwork) {
+        mUserNetwork->uninit();
+    }
+    mUserNetwork = nullptr;
 }
 
 PrinterNetworkResult<bool> PrinterManager::deletePrinter(const std::string& printerId)
@@ -217,6 +218,12 @@ PrinterNetworkResult<bool> PrinterManager::deletePrinter(const std::string& prin
     auto printer = PrinterCache::getInstance()->getPrinter(printerId);
     if (!printer.has_value()) {
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+    }
+    if(printer.value().networkType == NETWORK_TYPE_WAN) {
+        auto unbindResult = getPrinterNetwork(printerId)->unbindWANPrinter(printerId);
+        if(!unbindResult.isSuccess()) {
+            return unbindResult;
+        }
     }
     PrinterCache::getInstance()->deletePrinter(printerId);
     PrinterCache::getInstance()->savePrinterList();
@@ -258,7 +265,7 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterHost(const std::string& 
     deletePrinterNetwork(printerId);
 
     printer.value().host = host;
-    std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printer.value());
+    std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printer.value());
     if (!network) {
         wxLogError("Failed to create network for printer, host: %s, printerName: %s, printerModel: %s, hostType: %s", printer.value().host, printer.value().printerName,
                    printer.value().printerModel, printer.value().hostType);
@@ -314,12 +321,32 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     printerNetworkInfo.lastActiveTime = now;
     printerNetworkInfo.printerId = boost::uuids::to_string(boost::uuids::random_generator{}());
 
-    std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
+    std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printerNetworkInfo);
     if (!network) {
         wxLogError("Failed to create network for printer, host: %s, printerName: %s, printerModel: %s, hostType: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                    printerNetworkInfo.printerModel, printerNetworkInfo.hostType);
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::CREATE_NETWORK_FOR_HOST_TYPE_FAILED, false);
     }
+    // bind the printer if it is a WAN printer
+    if(printerNetworkInfo.networkType == NETWORK_TYPE_WAN) {
+        auto bindResult = network->bindWANPrinter(printerNetworkInfo);
+        if(bindResult.isSuccess() && bindResult.data.has_value()) {
+            printerNetworkInfo = bindResult.data.value();
+        } else {
+            wxLogWarning("Failed to bind printer %s %s %s: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
+                         printerNetworkInfo.printerModel, bindResult.message.c_str());
+            return PrinterNetworkResult<bool>(bindResult.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : bindResult.code,false);
+        }
+
+        printerNetworkInfo.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
+        addPrinterNetwork(network);
+        PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
+        PrinterCache::getInstance()->savePrinterList();
+    
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+       
+    }
+
     auto connectResult = network->connectToPrinter();
     if (connectResult.isSuccess() && connectResult.data.has_value()) {   
         auto attributes = network->getPrinterAttributes();
@@ -362,7 +389,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPr
                                   htESP3D, htCrealityPrint, htObico, htFlashforge, htSimplyPrint}) {
         PrinterNetworkInfo printerNetworkInfo;
         printerNetworkInfo.hostType = PrintHost::get_print_host_type_str(printerHostType);
-        std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printerNetworkInfo);
+        std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printerNetworkInfo);
         if(!network) {
             continue;
         }
@@ -541,6 +568,26 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
                                                  PrinterMmsGroup());
 }
 
+void PrinterManager::setCurrentUserInfo(const UserNetworkInfo& userInfo)
+{
+    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
+    if(mUserNetwork) {
+        UserNetworkInfo loginUser = mUserNetwork->getUserNetworkInfo();
+        if(loginUser.userId == userInfo.userId && loginUser.username == userInfo.username) {
+            return;
+        }
+        if(loginUser.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+            mUserNetwork->uninit();
+        }
+
+    }
+    mUserNetwork = NetworkFactory::createUserNetwork(userInfo);
+    if(!mUserNetwork) {
+        return;
+    }
+    mUserNetwork->init();
+    mUserNetworkInfo = userInfo;
+}
 
 void PrinterManager::monitorPrinterConnections()
 {
@@ -548,6 +595,8 @@ void PrinterManager::monitorPrinterConnections()
         auto printerList = PrinterCache::getInstance()->getPrinters();
         std::vector<std::future<void>> connectionFutures;
         
+        getWANPrinters();
+
         for (const auto& printer : printerList) {
             std::string printerId = printer.printerId;
             auto future = std::async(std::launch::async, [this, printerId]() {
@@ -580,7 +629,7 @@ void PrinterManager::monitorPrinterConnections()
                     PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
                     deletePrinterNetwork(printerId);
                 }
-                std::shared_ptr<IPrinterNetwork> network = PrinterNetworkFactory::createNetwork(printer.value());
+                std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printer.value());
                 if(!network) {
                     wxLogError("Failed to create network for printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
                     return;
@@ -638,8 +687,8 @@ void PrinterManager::monitorPrinterConnections()
         // disconnect from printers that are not in the printer list, mutex lock is needed
         std::vector<std::string> printerIdsToRemove;
         {
-            std::lock_guard<std::mutex> lock(mConnectionsMutex);
-            for (const auto& [printerId, network] : mNetworkConnections) {
+            std::lock_guard<std::mutex> lock(mPrinterNetworkMutex);
+            for (const auto& [printerId, network] : mPrinterNetworkConnections) {
                 auto printer = PrinterCache::getInstance()->getPrinter(printerId);
                 if (!printer.has_value() || printer.value().host != network->getPrinterNetworkInfo().host) {
                     printerIdsToRemove.push_back(printerId);
@@ -654,6 +703,50 @@ void PrinterManager::monitorPrinterConnections()
             deletePrinterNetwork(printerId);
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
+void PrinterManager::getWANPrinters()
+{
+    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
+
+    if (!mUserNetwork || mUserNetwork->getUserNetworkInfo().loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
+        UserNetworkInfo userInfo;
+        userInfo.userId                 = 55;
+        userInfo.username               = "";
+        userInfo.token                  = "350ce9ac41550fa9376d152cb957b8dd";
+        userInfo.refreshToken           = "2e8089587c5ba915b93bc579423d19f4";
+        userInfo.accessTokenExpireTime  = 1775731518483;
+        userInfo.refreshTokenExpireTime = 1884595518483;
+        userInfo.hostType               = "ElegooLink";
+        mUserNetwork                    = NetworkFactory::createUserNetwork(userInfo);
+
+        mUserNetwork->init();
+
+        auto loginResult = mUserNetwork->loginWAN(userInfo);
+        if (loginResult.isError()) {
+            return;
+        }
+        UserNetworkInfo loginUser = loginResult.data.value();
+        if (loginUser.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+            mUserNetworkInfo = loginUser;
+        }
+    }
+    // 10 seconds once get WAN printers
+    // static std::chrono::steady_clock::time_point lastGetPrintersTime = std::chrono::steady_clock::now();
+    // if (std::chrono::steady_clock::now() - lastGetPrintersTime < std::chrono::seconds(10)) {
+    //     return;
+    // }
+    // lastGetPrintersTime = std::chrono::steady_clock::now();
+    if (mUserNetwork && mUserNetwork->getUserNetworkInfo().loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+        auto printersResult = mUserNetwork->getPrinters();
+        if (printersResult.isSuccess()) {
+            for (PrinterNetworkInfo printer : printersResult.data.value()) {
+                printer.networkType   = NETWORK_TYPE_WAN;
+                printer.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
+                PrinterCache::getInstance()->addPrinter(printer);
+            }
+        }
     }
 }
 // first get selected printer by modelName and printerId
@@ -693,35 +786,7 @@ PrinterNetworkInfo PrinterManager::getSelectedPrinter(const std::string &printer
     }
     return selectedPrinter;
 }
-bool PrinterManager::addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network)
-{
-    std::lock_guard<std::mutex> lock(mConnectionsMutex);
-    mNetworkConnections[network->getPrinterNetworkInfo().printerId] = network;
-    return true;
-}
-bool PrinterManager::deletePrinterNetwork(const std::string& printerId)
-{
-    std::lock_guard<std::mutex> lock(mConnectionsMutex);
-    auto it = mNetworkConnections.find(printerId);
-    if(it == mNetworkConnections.end()) {
-        return false;
-    }
-    auto network = it->second;
-    network->disconnectFromPrinter();
-    mNetworkConnections.erase(it);
-    return true;
-}
 
-std::shared_ptr<IPrinterNetwork> PrinterManager::getPrinterNetwork(const std::string& printerId)
-{
-    std::lock_guard<std::mutex> lock(mConnectionsMutex);
-    auto it = mNetworkConnections.find(printerId);
-
-    if (it != mNetworkConnections.end()) {
-        return it->second;
-    }
-    return nullptr;
-}
 
 void PrinterManager::syncOldPresetPrinters()
 {
@@ -858,64 +923,124 @@ void PrinterManager::syncOldPresetPrinters()
     }
 }
 
-PrinterNetworkResult<bool> PrinterManager::loginWAN(const NetworkUserInfo& userInfo)
-{
-    PrinterNetworkInfo printerInfo;
-    printerInfo.hostType = userInfo.hostType;
-
-    std::shared_ptr<IPrinterNetwork> work = PrinterNetworkFactory::createNetwork(printerInfo);
-    if(!work) {
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
-    }
-    mNetworkWAN = work;
-    auto result = mNetworkWAN->loginWAN(userInfo);
-    if(result.isSuccess()) {
-        mNetworkUserInfo = userInfo;
-    }
-    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
-}
 
 PrinterNetworkResult<PrinterPrintFileResponse> PrinterManager::getFileList(const std::string& printerId, int pageNumber, int pageSize)
 {
-    PrinterPrintFileResponse printFiles;
-    if(!mNetworkWAN) {
-        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::SUCCESS, printFiles);
+    auto printer = PrinterCache::getInstance()->getPrinter(printerId);
+    if (!printer.has_value()) {
+        wxLogError("Printer not found, printerId: %s", printerId.c_str());
+        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterPrintFileResponse());
     }
-    return mNetworkWAN->getFileList(printerId, pageNumber, pageSize);
+    if (printer.value().connectStatus != PRINTER_CONNECT_STATUS_CONNECTED) {
+        wxLogError("Printer not connected, printerId: %s", printerId.c_str());
+        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR, PrinterPrintFileResponse());
+    }
+
+    std::shared_ptr<IPrinterNetwork>  network = getPrinterNetwork(printerId);
+    if (!network) {
+        wxLogError("No network connection for printer: %s", printerId.c_str());
+        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterPrintFileResponse());
+    }
+
+
+    return network->getFileList(pageNumber, pageSize);
 }
 PrinterNetworkResult<PrinterPrintTaskResponse> PrinterManager::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
-    PrinterPrintTaskResponse printTasks;
-    if(!mNetworkWAN) {
-        return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::SUCCESS, printTasks);
+    auto printer = PrinterCache::getInstance()->getPrinter(printerId);
+    if (!printer.has_value()) {
+        wxLogError("Printer not found, printerId: %s", printerId.c_str());
+        return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterPrintTaskResponse());
     }
-    return mNetworkWAN->getPrintTaskList(printerId, pageNumber, pageSize);
+    if (printer.value().connectStatus != PRINTER_CONNECT_STATUS_CONNECTED) {
+        wxLogError("Printer not connected, printerId: %s", printerId.c_str());
+        return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR, PrinterPrintTaskResponse());
+    }
+
+    std::shared_ptr<IPrinterNetwork>  network = getPrinterNetwork(printerId);
+    if (!network) {
+        wxLogError("No network connection for printer: %s", printerId.c_str());
+        return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterPrintTaskResponse());
+    }
+
+    return network->getPrintTaskList(pageNumber, pageSize);
 }
 PrinterNetworkResult<bool> PrinterManager::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
 {
-    if(!mNetworkWAN) {
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, false);
+    auto printer = PrinterCache::getInstance()->getPrinter(printerId);
+    if (!printer.has_value()) {
+        wxLogError("Printer not found, printerId: %s", printerId.c_str());
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
     }
-    return mNetworkWAN->deletePrintTasks(printerId, taskIds);
+    if (printer.value().connectStatus != PRINTER_CONNECT_STATUS_CONNECTED) {
+        wxLogError("Printer not connected, printerId: %s", printerId.c_str());
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR, false);
+    }
+
+    std::shared_ptr<IPrinterNetwork>  network = getPrinterNetwork(printerId);
+    if (!network) {
+        wxLogError("No network connection for printer: %s", printerId.c_str());
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+    }
+
+    return network->deletePrintTasks(taskIds);
 }
 
-PrinterNetworkResult<NetworkUserInfo> PrinterManager::getRtcToken()
+PrinterNetworkResult<UserNetworkInfo> PrinterManager::getRtcToken()
 {
-    if(!mNetworkWAN) {
-        return PrinterNetworkResult<NetworkUserInfo>(PrinterNetworkErrorCode::SUCCESS, NetworkUserInfo());
+    if(!mUserNetwork) {
+        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, UserNetworkInfo());
     }
-    return mNetworkWAN->getRtcToken();
+    return mUserNetwork->getRtcToken();
 }
 PrinterNetworkResult<bool> PrinterManager::sendRtmMessage(const std::string& printerId, const std::string& message)
 {
-    if(!mNetworkWAN) {
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, false);
+    auto printer = PrinterCache::getInstance()->getPrinter(printerId);
+    if (!printer.has_value()) {
+        wxLogError("Printer not found, printerId: %s", printerId.c_str());
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
     }
-    
-    auto result = mNetworkWAN->sendRtmMessage(printerId, message);
-    return result;
+    if (printer.value().connectStatus != PRINTER_CONNECT_STATUS_CONNECTED) {
+        wxLogError("Printer not connected, printerId: %s", printerId.c_str());
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR, false);
+    }
+    std::shared_ptr<IPrinterNetwork>  network = getPrinterNetwork(printerId);
+    if (!network) {
+        wxLogError("No network connection for printer: %s", printerId.c_str());
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+    }
+    return network->sendRtmMessage(message);
 }
 
 
+bool PrinterManager::addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network)
+{
+    std::lock_guard<std::mutex> lock(mPrinterNetworkMutex);
+    mPrinterNetworkConnections[network->getPrinterNetworkInfo().printerId] = network;
+    return true;
+}
+bool PrinterManager::deletePrinterNetwork(const std::string& printerId)
+{
+    std::lock_guard<std::mutex> lock(mPrinterNetworkMutex);
+    auto it = mPrinterNetworkConnections.find(printerId);
+    if(it == mPrinterNetworkConnections.end()) {
+        return false;
+    }
+    auto network = it->second;
+    network->disconnectFromPrinter();
+    mPrinterNetworkConnections.erase(it);
+    return true;
+}
+
+std::shared_ptr<IPrinterNetwork> PrinterManager::getPrinterNetwork(const std::string& printerId)
+{
+    std::lock_guard<std::mutex> lock(mPrinterNetworkMutex);
+    auto it = mPrinterNetworkConnections.find(printerId);
+
+    if (it != mPrinterNetworkConnections.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
 
 } // namespace Slic3r

@@ -220,9 +220,16 @@ struct PrinterNetworkInfo
     PrinterStatus        printerStatus{PRINTER_STATUS_IDLE};
 };
 
-struct NetworkUserInfo
+
+enum LoginStatus {
+    LOGIN_STATUS_NOT_LOGIN = 0,
+    LOGIN_STATUS_LOGIN_SUCCESS = 1,
+    LOGIN_STATUS_LOGIN_FAILED = 2,
+};
+
+struct UserNetworkInfo
 {
-    int64_t     userId;
+    std::string userId;
     std::string username;
     std::string token;
     std::string refreshToken;
@@ -231,7 +238,18 @@ struct NetworkUserInfo
     uint64_t    refreshTokenExpireTime{0};
     std::string rtcToken; // video rtc token
     uint64_t    rtcTokenExpireTime{0};
+    LoginStatus loginStatus{LOGIN_STATUS_NOT_LOGIN};
+
 };
+
+struct PluginNetworkInfo
+{
+    std::string pluginPath;
+    std::string hostType;
+    std::string version;
+    bool        installed{false};
+};
+
 
 
 struct PrinterNetworkParams

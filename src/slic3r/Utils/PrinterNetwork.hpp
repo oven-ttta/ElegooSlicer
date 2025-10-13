@@ -15,47 +15,89 @@ class IPrinterNetwork
 {
 public:
     IPrinterNetwork(const PrinterNetworkInfo& printerNetworkInfo) : mPrinterNetworkInfo(printerNetworkInfo) {}
-    IPrinterNetwork()=delete;
-    IPrinterNetwork(const IPrinterNetwork&)=delete;
-    IPrinterNetwork& operator=(const IPrinterNetwork&)=delete;
-    virtual ~IPrinterNetwork() = default;
-    virtual PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter() = 0;
-    virtual PrinterNetworkResult<bool> disconnectFromPrinter() = 0;
-    virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params) = 0;
-    virtual PrinterNetworkResult<bool> sendPrintFile(const PrinterNetworkParams& params) = 0;
-    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() = 0;   
-    virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() = 0;
-    virtual PrinterNetworkResult<PrinterNetworkInfo> getPrinterAttributes() = 0;
-    virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize) = 0;
-    virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize) = 0;
-    virtual PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds) = 0;
+    IPrinterNetwork()                                  = delete;
+    IPrinterNetwork(const IPrinterNetwork&)            = delete;
+    IPrinterNetwork& operator=(const IPrinterNetwork&) = delete;
+    virtual ~IPrinterNetwork()                         = default;
 
+public:
+    virtual PrinterNetworkResult<PrinterNetworkInfo>              connectToPrinter()                                                    = 0;
+    virtual PrinterNetworkResult<bool>                            disconnectFromPrinter()                                               = 0;
+    virtual PrinterNetworkResult<bool>                            sendPrintTask(const PrinterNetworkParams& params)                     = 0;
+    virtual PrinterNetworkResult<bool>                            sendPrintFile(const PrinterNetworkParams& params)                     = 0;
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters()                                                    = 0;
+    virtual PrinterNetworkResult<PrinterMmsGroup>                 getPrinterMmsInfo()                                                   = 0;
+    virtual PrinterNetworkResult<PrinterNetworkInfo>              getPrinterAttributes()                                                = 0;
+    virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileList(int pageNumber, int pageSize)      = 0;
+    virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(int pageNumber, int pageSize) = 0;
+    virtual PrinterNetworkResult<bool> deletePrintTasks(const std::vector<std::string>& taskIds)          = 0;
+    virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& message)                         = 0;
 
-    //WAN
-    virtual PrinterNetworkResult<std::string> hasInstalledPlugin() = 0;
-    virtual PrinterNetworkResult<bool> installPlugin(const std::string& pluginPath) = 0;
-    virtual PrinterNetworkResult<bool> uninstallPlugin() = 0;
-    virtual PrinterNetworkResult<bool> loginWAN(const NetworkUserInfo& userInfo) = 0;
-    virtual PrinterNetworkResult<NetworkUserInfo> getRtcToken() = 0;
-    virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message) = 0;
+    // WAN
+    virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
+    virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId) = 0;
 
-    
+    virtual void init()   = 0;
+    virtual void uninit() = 0;
+
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
-    // init and uninit the all network
-    static void init();
-    static void uninit();
 
 protected:
     PrinterNetworkInfo mPrinterNetworkInfo;
     // if 1 to 1, implement http websocket etc. network management here
     // if ElegooLink, just redirect the interface
-
 };
 
-class PrinterNetworkFactory
+class IUserNetwork
 {
 public:
-    static std::shared_ptr<IPrinterNetwork> createNetwork(const PrinterNetworkInfo& printerNetworkInfo);
+    IUserNetwork(const UserNetworkInfo& userNetworkInfo) : mUserNetworkInfo(userNetworkInfo) {}
+    IUserNetwork()                               = delete;
+    IUserNetwork(const IUserNetwork&)            = delete;
+    IUserNetwork& operator=(const IUserNetwork&) = delete;
+    virtual ~IUserNetwork()                      = default;
+
+    virtual PrinterNetworkResult<UserNetworkInfo> loginWAN(const UserNetworkInfo& userInfo) = 0;
+    virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken()                             = 0;
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters()             = 0;
+
+    virtual void init()   = 0;
+    virtual void uninit() = 0;
+
+    const UserNetworkInfo& getUserNetworkInfo() const { return mUserNetworkInfo; }
+
+protected:
+    UserNetworkInfo mUserNetworkInfo;
+};
+
+class IPluginNetwork
+{
+public:
+    IPluginNetwork(const PluginNetworkInfo& pluginNetworkInfo) : mPluginNetworkInfo(pluginNetworkInfo) {}
+    IPluginNetwork()                                 = delete;
+    IPluginNetwork(const IPluginNetwork&)            = delete;
+    IPluginNetwork& operator=(const IPluginNetwork&) = delete;
+    virtual ~IPluginNetwork()                        = default;
+
+    virtual PrinterNetworkResult<std::string> hasInstalledPlugin()                         = 0;
+    virtual PrinterNetworkResult<bool>        installPlugin(const std::string& pluginPath) = 0;
+    virtual PrinterNetworkResult<bool>        uninstallPlugin()                            = 0;
+
+    virtual void init()   = 0;
+    virtual void uninit() = 0;
+
+    const PluginNetworkInfo& getPluginNetworkInfo() const { return mPluginNetworkInfo; }
+
+protected:
+    PluginNetworkInfo mPluginNetworkInfo;
+};
+
+class NetworkFactory
+{
+public:
+    static std::shared_ptr<IPrinterNetwork> createPrinterNetwork(const PrinterNetworkInfo& printerNetworkInfo);
+    static std::shared_ptr<IUserNetwork>    createUserNetwork(const UserNetworkInfo& userNetworkInfo);
+    static std::shared_ptr<IPluginNetwork>  createPluginNetwork(const PluginNetworkInfo& pluginNetworkInfo);
 };
 
 } // namespace Slic3r

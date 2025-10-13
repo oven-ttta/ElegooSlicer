@@ -20,21 +20,16 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters() override;
     virtual PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo() override;
     virtual PrinterNetworkResult<PrinterNetworkInfo> getPrinterAttributes() override;  
-    virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize) override;
-    virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize) override;
-    virtual PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds) override;
+    virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileList(int pageNumber, int pageSize) override;
+    virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(int pageNumber, int pageSize) override;
+    virtual PrinterNetworkResult<bool> deletePrintTasks(const std::vector<std::string>& taskIds) override;
+    virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& message) override;
 
+    virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
+    virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId) override;
 
-
-    virtual PrinterNetworkResult<std::string> hasInstalledPlugin() override;
-    virtual PrinterNetworkResult<bool> installPlugin(const std::string& pluginPath) override;
-    virtual PrinterNetworkResult<bool> uninstallPlugin() override;
-    virtual PrinterNetworkResult<bool> loginWAN(const NetworkUserInfo& userInfo) override;
-    virtual PrinterNetworkResult<NetworkUserInfo> getRtcToken() override;
-    virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message) override;
-
-    static void init();
-    static void uninit();
+    virtual void init() override;
+    virtual void uninit() override;
 };
 
 } // namespace Slic3r

@@ -53,10 +53,10 @@ struct PrinterAttributesEvent {
 };
 
 struct PrinterRtcTokenEvent {
-    NetworkUserInfo userInfo;
+    UserNetworkInfo userInfo;
     std::chrono::system_clock::time_point timestamp;
     NetworkType networkType;
-    PrinterRtcTokenEvent(const NetworkUserInfo& userInfo, const NetworkType& nt)
+    PrinterRtcTokenEvent(const UserNetworkInfo& userInfo, const NetworkType& nt)
         : networkType(nt), userInfo(userInfo), timestamp(std::chrono::system_clock::now()) {}
 };
 

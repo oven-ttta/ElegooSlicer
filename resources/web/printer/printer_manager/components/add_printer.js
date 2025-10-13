@@ -48,9 +48,14 @@ const AddPrinterTemplate = /*html*/`
                 </el-tab-pane>
             </el-tabs>
 
-            <el-dialog v-model="showPrinterAuth" :title="$t('addPrinterDialog.connectToPrinter')" width="600" center>
-                <printer-auth-component ref="printerAuthComponent" :printer="pendingAuthPrinter" @close-modal="clearAuthData"
-                    @add-printer="connectPrinter1"></printer-auth-component>
+            <el-dialog v-model="showPrinterAccessAuth" :title="$t('addPrinterDialog.connectToPrinter')" width="600" center>
+                <printer-access-auth-component ref="printerAccessAuthComponent" :printer="pendingAccessAuthPrinter" @close-modal="clearAccessAuthData"
+                    @add-printer="connectPrinterAuth"></printer-access-auth-component>
+            </el-dialog>
+
+            <el-dialog v-model="showPrinterPinAuth" :title="$t('addPrinterDialog.bindPrinter')" width="600" center>
+                <printer-pin-auth-component ref="printerPinAuthComponent" :printer="pendingPinAuthPrinter" @close-modal="clearPinAuthData"
+                    @add-printer="connectPrinterAuth"></printer-pin-auth-component>
             </el-dialog>
 
             <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">{{ $t('addPrinterDialog.refresh') }}</button>
@@ -96,8 +101,10 @@ const AddPrinterComponent = {
         return {
             activeTab: 'discover',
             selectedPrinterIdx: null,
-            showPrinterAuth: false,
-            pendingAuthPrinter: null,
+            showPrinterAccessAuth: false,
+            showPrinterPinAuth: false,
+            pendingAccessAuthPrinter: null,
+            pendingPinAuthPrinter: null,
             showHelpDialog: false
         };
     },
@@ -125,12 +132,22 @@ const AddPrinterComponent = {
             this.activeTab = tab;
         },
 
-        clearAuthData() {
-            // this.pendingAuthPrinter = null;
-            this.showPrinterAuth = false;
+        clearAccessAuthData() {
+            this.pendingAccessAuthPrinter = null;
+            this.showPrinterAccessAuth = false;
             this.$nextTick(() => {
-                if (this.$refs.printerAuthComponent) {
-                    this.$refs.printerAuthComponent.accessCodes = ["", "", "", "", "", ""];
+                if (this.$refs.printerAccessAuthComponent) {
+                    this.$refs.printerAccessAuthComponent.accessCodes = ["", "", "", "", "", ""];
+                }
+            });
+        },
+
+        clearPinAuthData() {
+            this.pendingPinAuthPrinter = null;
+            this.showPrinterPinAuth = false;
+            this.$nextTick(() => {
+                if (this.$refs.printerPinAuthComponent) {
+                    this.$refs.printerPinAuthComponent.pinCodes = ["", "", "", "", "", ""];
                 }
             });
         },
@@ -146,7 +163,6 @@ const AddPrinterComponent = {
             try {
                 if (this.activeTab === 'discover') {
                     if (this.selectedPrinterIdx === null) {
-                        // alert(this.$t('addPrinterDialog.pleaseSelectPrinter'));
                         ElementPlus.ElMessage({
                             message: this.$t('addPrinterDialog.pleaseSelectPrinter'),
                             type: 'error',
@@ -154,22 +170,38 @@ const AddPrinterComponent = {
                         return;
                     }
                     const printer = this.printers[this.selectedPrinterIdx];
+                    
+                    // authMode === 2: requires access code
                     if (printer.authMode === 2 && (printer.accessCode === '' || printer.accessCode === null)) {
-                        this.pendingAuthPrinter = printer;
-                        this.showPrinterAuth = true;
+                        this.pendingAccessAuthPrinter = printer;
+                        this.showPrinterAccessAuth = true;
                         this.$nextTick(() => {
-                            if (this.$refs.printerAuthComponent) {
-                                this.$refs.printerAuthComponent.accessCodes = ["", "", "", "", "", ""];
-                                this.$refs.printerAuthComponent.focusFirstInput();
+                            if (this.$refs.printerAccessAuthComponent) {
+                                this.$refs.printerAccessAuthComponent.accessCodes = ["", "", "", "", "", ""];
+                                this.$refs.printerAccessAuthComponent.focusFirstInput();
                             }
                         });
-
-                    } else {
-                        await this.printerStore.requestAddPrinter(printer);
+                        return;
                     }
+                    
+                    // authMode === 3: requires pin code
+                    if (printer.authMode === 3 && (printer.pinCode === '' || printer.pinCode === null)) {
+                        this.pendingPinAuthPrinter = printer;
+                        this.showPrinterPinAuth = true;
+                        this.$nextTick(() => {
+                            if (this.$refs.printerPinAuthComponent) {
+                                this.$refs.printerPinAuthComponent.pinCodes = ["", "", "", "", "", ""];
+                                this.$refs.printerPinAuthComponent.focusFirstInput();
+                            }
+                        });
+                        return;
+                    }
+                    
+                    // no auth required or auth already provided
+                    await this.printerStore.requestAddPrinter(printer);
                     return;
                 } else {
-                    // call method directly through component reference
+                    // manual add tab
                     if (this.$refs.manualFormComponent) {
                         const printer = await this.$refs.manualFormComponent.getFormData();
                         if (printer) {
@@ -181,14 +213,15 @@ const AddPrinterComponent = {
                 }
 
             } catch (error) {
-
+                console.error('Failed to connect printer:', error);
             }
         },
 
-        async connectPrinter1(printer) {
+        async connectPrinterAuth(printer) {
             try {
                 await this.printerStore.requestAddPrinter(printer);
-                this.clearAuthData();
+                this.clearAccessAuthData();
+                this.clearPinAuthData();
             } catch (error) {
                 console.error('Failed to connect printer:', error);
             }

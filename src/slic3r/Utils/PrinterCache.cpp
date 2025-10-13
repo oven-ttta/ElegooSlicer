@@ -51,6 +51,10 @@ bool PrinterCache::savePrinterList() {
     fs::path printerListPath = fs::path(Slic3r::data_dir()) / "user" / "printer_list.json";
     nlohmann::json jsonData;
     for (const auto& [printerId, printerInfo] : mPrinters) {
+        if(printerInfo.networkType == NETWORK_TYPE_WAN) {
+            // wan printer not save to file
+            continue;
+        }
         nlohmann::json printerJson = convertPrinterNetworkInfoToJson(printerInfo);  
         // Remove runtime status fields that shouldn't be persisted
         printerJson.erase("connectStatus");

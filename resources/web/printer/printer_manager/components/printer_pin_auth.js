@@ -1,49 +1,49 @@
-const PrinterAuthTemplate =
+const PrinterPinAuthTemplate =
     /*html*/
     `
-        <div class="printer-auth-dialog">
-            <div class="printer-auth-content">
+        <div class="printer-pin-auth-dialog">
+            <div class="printer-pin-auth-content">
                 <div class="printer-image-container">
                     <img :src="connectGuideImg" />
                 </div>
-                <p class="instruction-text">{{ $t('printerAuth.enterAccessCode') }}</p>
+                <p class="instruction-text">{{ $t('printerPinAuth.enterPinCode') }}</p>
                 
-                <div class="access-code-inputs">
+                <div class="pin-code-inputs">
                     <el-input 
-                        v-for="(code, index) in accessCodes" 
+                        v-for="(pinCode, index) in pinCodes" 
                         :key="index"
                         :ref="el => setInputRef(el, index)"
                         type="text" 
-                        class="code-input" 
+                        class="pin-code-input" 
                         maxlength="1" 
-                        v-model="accessCodes[index]"
-                        @input="onCodeInput(index, $event)"
-                        @keydown="onCodeKeydown(index, $event)"
+                        v-model="pinCodes[index]"
+                        @input="onPinCodeInput(index, $event)"
+                        @keydown="onPinCodeKeydown(index, $event)"
                         spellcheck="false"
                         autocorrect="off"
                     />
                 </div>
                 
-                <a href="#" class="help-link" @click.prevent="showHelp">{{ $t('printerAuth.cannotAccessCode') }}</a>
+                <a href="#" class="help-link" @click.prevent="showHelp">{{ $t('printerPinAuth.cannotPinCode') }}</a>
 
                 
             </div>
-            <div class="printer-auth-btn">
-                <button class="btn-secondary" @click="closeModal">{{ $t('printerAuth.close') }}</button>
-                <button class="btn-primary" @click="connectPrinter">{{ $t('printerAuth.connect') }}</button>
+            <div class="printer-pin-auth-btn">
+                <button class="btn-secondary" @click="closeModal">{{ $t('printerPinAuth.close') }}</button>
+                <button class="btn-primary" @click="connectPrinter">{{ $t('printerPinAuth.connect') }}</button>
             </div>
             
             <!-- Help Dialog -->
             <el-dialog 
                 v-model="showHelpDialog"
-                :title="$t('printerAuth.help')"
+                :title="$t('printerPinAuth.help')"
                 width="400px"
                 center
             >
-                <p>{{ $t('printerAuth.helpMessage') }}</p>
+                <p>{{ $t('printerPinAuth.helpMessage') }}</p>
                 <template #footer>
                     <span class="dialog-footer">
-                        <button class="btn-primary" @click="showHelpDialog = false">{{ $t('printerAuth.ok') }}</button>
+                        <button class="btn-primary" @click="showHelpDialog = false">{{ $t('printerPinAuth.ok') }}</button>
                     </span>
                 </template>
             </el-dialog>
@@ -51,8 +51,8 @@ const PrinterAuthTemplate =
     `;
 
 // Printer Auth Component
-const PrinterAuthComponent = {
-    template: PrinterAuthTemplate,
+const PrinterPinAuthComponent = {
+    template: PrinterPinAuthTemplate,
 
     props: {
         printer: {
@@ -65,7 +65,7 @@ const PrinterAuthComponent = {
 
     data() {
         return {
-            accessCodes: ["", "", "", "", "", ""],
+            pinCodes: ["", "", "", "", "", ""],
             inputRefs: [],
             showHelpDialog: false,
         };
@@ -91,7 +91,7 @@ const PrinterAuthComponent = {
         printer: {
             handler(newVal) {
                 if (newVal) {
-                    this.renderPrinterAuth(newVal);
+                    this.renderPrinterPinAuth(newVal);
                 }
             },
             immediate: true,
@@ -106,11 +106,11 @@ const PrinterAuthComponent = {
             }
         },
 
-        renderPrinterAuth(printer) {
+        renderPrinterPinAuth(printer) {
             if (!printer) return;
 
-            // clear access code
-            this.accessCodes = ["", "", "", "", "", ""];
+            // clear pin code
+            this.pinCodes = ["", "", "", "", "", ""];
 
             // set focus to first input box
             this.$nextTick(() => {
@@ -119,16 +119,7 @@ const PrinterAuthComponent = {
         },
 
         getHeaderTitle() {
-            const authMode = this.printer && this.printer.authMode;
-
-            switch (authMode) {
-                case 2:
-                    return this.$t("printerAuth.connectToPrinter");
-                case 3:
-                    return this.$t("printerAuth.bindPrinter");
-                default:
-                    return this.$t("printerAuth.connectToPrinter");
-            }
+            return this.$t("printerAuth.bindPrinter");
         },
 
         closeModal() {
@@ -137,12 +128,11 @@ const PrinterAuthComponent = {
 
         connectPrinter() {
             // merge all input values
-            const accessCode = this.accessCodes.join("");
+            const pinCode = this.pinCodes.join("");
 
-            if (accessCode.length !== 6) {
-                // alert(this.$t("printerAuth.pleaseEnterCompleteAccessCode"));
+            if (pinCode.length !== 6) {
                 ElementPlus.ElMessage({
-                    message: this.$t("printerAuth.pleaseEnterCompleteAccessCode"),
+                    message: this.$t("printerPinAuth.pleaseEnterCompletePinCode"),
                     type: "error",
                 });
                 return;
@@ -150,22 +140,22 @@ const PrinterAuthComponent = {
 
             const updatedPrinter = {
                 ...this.printer,
-                accessCode: accessCode,
+                pinCode: pinCode,
             };
 
             this.$emit("add-printer", updatedPrinter);
         },
 
-        onCodeInput(index, value) {
+        onPinCodeInput(index, value) {
             // Element Plus @input event directly passes value, not event object
-            console.log('onCodeInput called:', index, value);
+            console.log('onPinCodeInput called:', index, value);
 
             // ensure value is a string
             const stringValue = String(value || '');
 
             // only allow numbers and uppercase letters
             if (!/^[a-zA-Z0-9]*$/.test(stringValue)) {
-                this.accessCodes[index] = "";
+                this.pinCodes[index] = "";
                 return;
             }
 
@@ -195,7 +185,7 @@ const PrinterAuthComponent = {
                         } catch (error) {
                             console.warn('Focus failed:', error);
                             // Fallback: try to find input by DOM traversal
-                            const nextInputElement = document.querySelectorAll('.code-input input')[index + 1];
+                            const nextInputElement = document.querySelectorAll('.pin-code-input input')[index + 1];
                             if (nextInputElement) {
                                 nextInputElement.focus();
                             }
@@ -205,11 +195,11 @@ const PrinterAuthComponent = {
             }
         },
 
-        onCodeKeydown(index, event) {
+        onPinCodeKeydown(index, event) {
             // handle backspace key
             if (
                 event.key === "Backspace" &&
-                this.accessCodes[index] === "" &&
+                this.pinCodes[index] === "" &&
                 index > 0
             ) {
                 // Use setTimeout for better compatibility with Safari
@@ -236,7 +226,7 @@ const PrinterAuthComponent = {
                         } catch (error) {
                             console.warn('Focus failed:', error);
                             // Fallback: try to find input by DOM traversal
-                            const prevInputElement = document.querySelectorAll('.code-input input')[index - 1];
+                            const prevInputElement = document.querySelectorAll('.pin-code-input input')[index - 1];
                             if (prevInputElement) {
                                 prevInputElement.focus();
                             }
@@ -271,7 +261,7 @@ const PrinterAuthComponent = {
                     } catch (error) {
                         console.warn('Focus failed:', error);
                         // Fallback: try to find first input by DOM traversal
-                        const firstInputElement = document.querySelector('.code-input input');
+                        const firstInputElement = document.querySelector('.pin-code-input input');
                         if (firstInputElement) {
                             firstInputElement.focus();
                         }

@@ -601,6 +601,10 @@ set(SLIC3R_GUI_SOURCES
     Utils/WebviewIPCManager.cpp
     Utils/PrinterPluginManager.cpp
     Utils/PrinterPluginManager.hpp
+    Utils/ElegooUserNetwork.hpp
+    Utils/ElegooUserNetwork.cpp
+    Utils/ElegooPluginNetwork.hpp
+    Utils/ElegooPluginNetwork.cpp
 
 )
 

@@ -26,7 +26,7 @@ body {
 
 /* ===================== Printer Auth Dialog ===================== */
 
-.printer-auth-content {
+.printer-access-auth-content, .printer-pin-auth-content {
   padding: 16px 0px;
   text-align: center;
   flex: 1;
@@ -39,14 +39,14 @@ body {
   margin-bottom: 16px;
 }
 
-.printer-auth-content img {
+.printer-access-auth-content img, .printer-pin-auth-content img {
   /* width: 180px; */
   height: 192px;
   object-fit: contain;
   border-radius: 8px;
 }
 
-.printer-auth-content h3 {
+.printer-access-auth-content h3, .printer-pin-auth-content h3 {
   font-family: Roboto;
   font-size: 22px;
   font-weight: 600;
@@ -63,7 +63,7 @@ body {
   max-width: 400px;
 }
 
-.access-code-inputs {
+.access-code-inputs, .pin-code-inputs {
   display: flex;
   gap: 8px;
   justify-content: center;
@@ -72,7 +72,7 @@ body {
   height: 48px;
 }
 
-.code-input .el-input__inner {
+.access-code-input .el-input__inner, .pin-code-input .el-input__inner {
   text-align: center;
   font-size: 16px;
 }
@@ -379,7 +379,7 @@ body {
 }
 
 .printer-setting-dialog,
-.printer-auth-dialog {
+.printer-access-auth-dialog, .printer-pin-auth-dialog {
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
@@ -586,7 +586,7 @@ body {
 }
 
 /* ===================== Dialog Buttons ===================== */
-.printer-auth-btn {
+.printer-access-auth-btn, .printer-pin-auth-btn {
   display: flex;
   align-items: center;
   background: var(--bg-primary);
