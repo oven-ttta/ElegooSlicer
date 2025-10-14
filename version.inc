@@ -12,7 +12,7 @@ set(BBL_INTERNAL_TESTING "0")
 endif()
 
 if(NOT DEFINED BUILD_NUMBER)
-    set(BUILD_NUMBER "14")
+    set(BUILD_NUMBER "15")
 endif()
 
 set(ELEGOOSLICER_SHORT_VERSION "1.2.0")
@@ -28,4 +28,4 @@ set(SLIC3R_VERSION ${ELEGOOSLICER_VERSION})
 set(SLIC3R_BUILD_ID "${ELEGOOSLICER_VERSION}")
 
 # The forked version of Orca, used for some compatibility
-set(ORCA_VERSION "2.2.0")
+set(ORCA_VERSION "2.3.1")
