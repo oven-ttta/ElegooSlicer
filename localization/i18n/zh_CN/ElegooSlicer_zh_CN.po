@@ -15921,12 +15921,6 @@ msgstr "延时摄影"
 msgid "Heated Bed Leveling"
 msgstr "热床调平"
 
-msgid "Textured Build Plate (Side A)"
-msgstr "纹理构建板（A面）"
-
-msgid "Smooth Build Plate (Side B)"
-msgstr "光滑构建板（B面）"
-
 msgid "Unable to perform boolean operation on selected parts"
 msgstr "无法对所选部件执行布尔运算"
 
@@ -17696,18 +17690,6 @@ msgstr ""
 #, c-format, boost-format
 #~ msgid "Initialize failed (%s)!"
 #~ msgstr "初始化失败（%s）!"
-
-#~ msgid "Network unreachable"
-#~ msgstr "网络不可访问"
-
-#, c-format, boost-format
-#~ msgid ""
-#~ "Plate% d: %s is not suggested to be used to print filament %s(%s). If you "
-#~ "still want to do this printing, please set this filament's bed "
-#~ "temperature to non zero."
-#~ msgstr ""
-#~ "热床% d：%s不建议被用于打印%s（%s）耗材。如果你依然想打印，请设置耗材对应"
-#~ "的热床温度为非零值。"
 
 #~ msgid ""
 #~ "Improve shell precision by adjusting outer wall spacing. This also "

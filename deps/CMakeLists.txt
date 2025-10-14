@@ -294,9 +294,6 @@ include(CGAL/CGAL.cmake)
 include(NLopt/NLopt.cmake)
 include(libnoise/libnoise.cmake)
 
-include(ixwebsocket/ixwebsocket.cmake)
-include(PahoMqttCpp/PahoMqttCpp.cmake)
-include(elegoolink/elegoolink.cmake)
 # I *think* 1.1 is used for *just* md5 hashing?
 # 3.1 has everything in the right place, but the md5 funcs used are deprecated
 # a grep across the repo shows it is used for other things
@@ -306,6 +303,10 @@ if(NOT OPENSSL_FOUND)
     include(OpenSSL/OpenSSL.cmake)
     set(OPENSSL_PKG dep_OpenSSL)
 endif()
+
+include(ixwebsocket/ixwebsocket.cmake)
+include(PahoMqttCpp/PahoMqttCpp.cmake)
+include(elegoolink/elegoolink.cmake)
 
 # we don't want to load a "wrong" openssl when loading curl
 # so, just don't even bother 
