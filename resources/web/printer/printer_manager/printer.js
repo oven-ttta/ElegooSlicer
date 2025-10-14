@@ -81,7 +81,7 @@ const PrinterManager = {
                 [17]: this.$t("printerManager.rfidRecognizing"),
                 [18]: this.$t("printerManager.videoComposing"),
                 [19]: this.$t("printerManager.emergencyStop"),
-                [20]: this.$t("printerManager.idle"),// In power resume state, temporarily show idle
+                [20]: this.$t("printerManager.powerLossRecovery"),
                 [998]: this.$t("printerManager.busy"),
                 [999]: this.$t("printerManager.error"),
                 [1000]: this.$t("printerManager.idNotMatch"),
@@ -99,7 +99,7 @@ const PrinterManager = {
                     backgroundColor: 'var(--printer-status-offline-bg)'
                 };
             }
-            if (printerStatus === 16 || printerStatus === 0 || printerStatus === 20) {
+            if (printerStatus === 16 || printerStatus === 0) {
                 return {
                     color: 'var(--printer-status-success-color)',
                     backgroundColor: 'var(--printer-status-success-bg)'
@@ -109,7 +109,7 @@ const PrinterManager = {
                     color: 'var(--printer-status-error-color)',
                     backgroundColor: 'var(--printer-status-error-bg)'
                 };
-            } else if (printerStatus === 1000 || printerStatus === 2 || printerStatus === 3) {
+            } else if (printerStatus === 1000 || printerStatus === 2 || printerStatus === 3 || printerStatus === 20) {
                 return {
                     color: 'var(--printer-status-warning-color)',
                     backgroundColor: 'var(--printer-status-warning-bg)'
