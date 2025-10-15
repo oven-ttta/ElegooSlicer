@@ -4,26 +4,11 @@ const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOp
 const Navigation = {
     data() {
         return {
+            
             userInfo: {
                 userId: '',
-                username: '',
-                token: '',
-                refreshToken: '',
-                hostType: '',
-                accessTokenExpireTime: 0,
-                refreshTokenExpireTime: 0,
-                rtcToken: '',
-                rtcTokenExpireTime: 0,
                 nickname: '',
-                email: '',
                 avatar: '',
-                openid: '',
-                phone: '',
-                country: '',
-                language: '',
-                timezone: '',
-                createTime: 0,
-                lastLoginTime: 0,
                 loginStatus: 0
             },
             currentPage: 'recent',
@@ -34,11 +19,9 @@ const Navigation = {
         async init() {
             try {
                 const response = await this.ipcRequest('getUserInfo', {});
-                if (response && response.success) {
-                    this.userInfo = {
-                        ...this.userInfo,
-                        ...response.data
-                    };
+                console.log('getUserInfo response:', response);
+                if (response) {
+                    this.userInfo = response;
                 }
             } catch (error) {
                 console.error('Failed to get user info:', error);
@@ -78,27 +61,44 @@ const Navigation = {
         },
 
         toggleUserMenu() {
-            // Since we removed the user menu, this method can be empty or removed
-            console.log('User menu toggle clicked - menu is currently disabled');
+            this.showUserMenu = !this.showUserMenu;
+            console.log('User menu toggled:', this.showUserMenu);
+        },
+        
+        async onLogout() {
+            console.log('Logout clicked');
+            try {
+                await this.ipcRequest('logout', {});
+                // Reset user info after logout
+                this.userInfo.loginStatus = 0;
+                this.userInfo.nickname = '';
+                this.userInfo.avatar = '';
+                this.userInfo.userId = '';
+                this.showUserMenu = false;
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
         },
 
-        refreshUserInfo(data) {
-            //this.init();
-            this.userInfo = {
-                ...this.userInfo,
-                ...data
-            };
-        }
+        closeUserMenu() {
+            this.showUserMenu = false;
+        },
 
+        handleImageError(event) {
+            // 当头像图片加载失败时，设置为默认头像
+            event.target.src = 'img/default-avatar.jpg';
+            event.target.onerror = null; // 防止无限循环
+        },
     },
     
     async mounted() {
         await this.init();
         nativeIpc.on('onUserInfoUpdated', (data) => {
             console.log('Received user info update event from backend:', data);
-            // Refresh user info
-            this.refreshUserInfo(data);
-        })
+            this.userInfo = data;
+        });
+        
+        await this.ipcRequest('ready', {});
     }
 };
 

@@ -52,16 +52,13 @@ public:
     void setCurrentUserInfo(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     UserNetworkInfo getUserNetworkInfo();
-    
+    void logout();
 
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
     static std::string imageFileToBase64DataURI(const std::string& image_path);
 
     void init();
     void close();
-    
-    // sync old preset printers to network
-    void syncOldPresetPrinters();
 
 private:
     PrinterManager();
@@ -83,14 +80,22 @@ private:
     bool deletePrinterNetwork(const std::string& printerId);
     std::shared_ptr<IPrinterNetwork> getPrinterNetwork(const std::string& printerId);
 
+        
+    // sync old preset printers to network
+    void syncOldPresetPrinters();
+
     // WAN
     std::mutex mUserNetworkMutex;
     UserNetworkInfo mUserNetworkInfo;
     std::shared_ptr<IUserNetwork> mUserNetwork;
     void getWANPrinters();
+    void saveUserInfo(const UserNetworkInfo& userInfo);
+    void loadUserInfo();
  
+    std::atomic<bool> mIsInitialized;
+    std::mutex mInitializedMutex;
+    void checkInitialized();
     // thread to monitor printer connections
-    std::atomic<bool> mIsRunning;
     std::thread mConnectionThread;
     void monitorPrinterConnections();
 };

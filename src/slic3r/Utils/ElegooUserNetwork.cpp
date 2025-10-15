@@ -26,7 +26,8 @@ PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::loginWAN(const UserNetw
 {
     mUserNetworkInfo = userInfo;
     auto result = ElegooLink::getInstance()->loginWAN(userInfo);
-    if(result.isSuccess()) {
+    if(result.isSuccess() && result.hasData()) {
+        mUserNetworkInfo = result.data.value();
         mUserNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
     } else {
         mUserNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_FAILED;

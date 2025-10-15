@@ -116,6 +116,7 @@ void UserLoginView::setupIPCHandlers()
         if (data.contains("nickname")) {
             userNetworkInfo.nickname = data.value("nickname", "");
         }
+        userNetworkInfo.hostType = PrintHost::get_print_host_type_str(PrintHostType::htElegooLink);
         PrinterManager::getInstance()->setCurrentUserInfo(userNetworkInfo);
         return webviewIpc::IPCResult::success();
     });

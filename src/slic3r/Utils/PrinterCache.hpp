@@ -89,6 +89,7 @@ public:
      */
     void updatePrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task);
 
+    void removeWanPrinters();
 private:
     PrinterCache();
     mutable std::mutex mCacheMutex;

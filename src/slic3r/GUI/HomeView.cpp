@@ -148,6 +148,7 @@ void HomeView::setupIPCHandlers()
     mIpc->onRequest("getUserInfo", [this](const webviewIpc::IPCRequest& request) { return handleGetUserInfo(); });
     mIpc->onRequest("logout", [this](const webviewIpc::IPCRequest& request) { return handleLogout(); });
     mIpc->onRequest("showLoginDialog", [this](const webviewIpc::IPCRequest& request) { return handleShowLoginDialog(); });
+    mIpc->onRequest("ready", [this](const webviewIpc::IPCRequest& request) { return handleReady(); });
 }
 
 void HomeView::cleanupIPC()
@@ -183,18 +184,34 @@ webviewIpc::IPCResult HomeView::handleGetUserInfo()
     UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getUserNetworkInfo();   
     nlohmann::json data; 
     data = convertUserNetworkInfoToJson(userNetworkInfo);
-    if(userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
-        return webviewIpc::IPCResult::error(data);
-    }
+    //if(userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
+    //    return webviewIpc::IPCResult::error(data);
+    //}
     return webviewIpc::IPCResult::success(data);
 }
-webviewIpc::IPCResult HomeView::handleLogout() { return webviewIpc::IPCResult::success(); }
+webviewIpc::IPCResult HomeView::handleLogout() { 
+    PrinterManager::getInstance()->logout();
+    return webviewIpc::IPCResult::success(); 
+}
+
+webviewIpc::IPCResult HomeView::handleReady()
+{
+    lock_guard<mutex> lock(mUserInfoMutex);
+    mIsReady = true;
+    // Send any pending user info with delay to ensure frontend is ready
+    if(!mRefreshUserInfo.userId.empty() && mIpc) {
+        nlohmann::json data = convertUserNetworkInfoToJson(mRefreshUserInfo);
+        mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
+        mRefreshUserInfo = UserNetworkInfo();
+        wxLogMessage("HomeView: Sent pending user info to WebView");
+    }
+    wxLogMessage("HomeView: Ready");  
+    return webviewIpc::IPCResult::success();
+}
 
 void HomeView::onWebViewLoaded(wxWebViewEvent& event)
 {
-    // WebView loaded successfully
-    // IPC is already initialized in constructor
-    wxLogMessage("HomeView: Navigation WebView loaded successfully");
+
 }
 
 void HomeView::onWebViewError(wxWebViewEvent& event)
@@ -226,6 +243,7 @@ webviewIpc::IPCResult HomeView::handleShowLoginDialog()
     return webviewIpc::IPCResult::success();
 }
 
+
 void HomeView::updateMode()
 {
     // Update mode if needed
@@ -240,12 +258,14 @@ void HomeView::updateMode()
 
 void HomeView::refreshUserInfo()
 {
-    // Send refresh signal to navigation webview via IPC
+    lock_guard<mutex> lock(mUserInfoMutex);
     UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getUserNetworkInfo();
-    nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
-    
-    if (mIpc) {
+    if (mIpc && mIsReady) {
+    // Send refresh signal to navigation webview via IPC
+        nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
         mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
+    } else {
+        mRefreshUserInfo = userNetworkInfo;
     }
     //send event to homepage views
     for (auto& pair : mHomepageViews) {

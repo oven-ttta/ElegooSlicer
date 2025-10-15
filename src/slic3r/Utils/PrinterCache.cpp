@@ -216,4 +216,15 @@ void PrinterCache::updatePrinterAttributesByNotify(const std::string& printerId,
         it->second.firmwareVersion = printerInfo.firmwareVersion;
     }
 }   
+
+void PrinterCache::removeWanPrinters() {
+    std::lock_guard<std::mutex> lock(mCacheMutex);
+    for (auto it = mPrinters.begin(); it != mPrinters.end();) {
+        if (it->second.networkType == NETWORK_TYPE_WAN) {
+            it = mPrinters.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
 } // namespace Slic3r

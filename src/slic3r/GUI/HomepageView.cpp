@@ -160,6 +160,7 @@ webviewIpc::IPCResult RecentHomepageView::handleRemoveFromRecent(const nlohmann:
 void RecentHomepageView::onWebViewLoaded(wxWebViewEvent& event)
 {
     // IPC is already initialized in constructor
+    mIsReady = true;
     wxLogMessage("RecentHomepageView: WebView loaded successfully");
 }
 
@@ -206,23 +207,19 @@ void OnlineModelsHomepageView::initUI()
     mIpc = new webviewIpc::WebviewIPCManager(mBrowser);
     setupIPCHandlers();
 
-    //Load online models page from remote URL
+    // Load online models page from remote URL
     wxString onlineUrl = "https://np-sit.elegoo.com.cn/elegooSlicer";
     mBrowser->LoadURL(onlineUrl);
     // 设置 ElegooSlicer UserAgent
     wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
 #ifdef __WIN32__
-    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
-        SLIC3R_VERSION, theme));
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", SLIC3R_VERSION, theme));
 #elif defined(__WXMAC__)
-    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", 
-        SLIC3R_VERSION, theme));
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", SLIC3R_VERSION, theme));
 #elif defined(__linux__)
-    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (X11; Linux x86_64)", 
-        SLIC3R_VERSION, theme));
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (X11; Linux x86_64)", SLIC3R_VERSION, theme));
 #else
-    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (compatible; ElegooSlicer)", 
-        SLIC3R_VERSION, theme));
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (compatible; ElegooSlicer)", SLIC3R_VERSION, theme));
 #endif
 
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
@@ -244,18 +241,16 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         return;
 
     mIpc->onRequest("report.getClientUserInfo", [this](const webviewIpc::IPCRequest& request) {
-
         UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getUserNetworkInfo();
-        nlohmann::json data;
-        data["userId"] = userNetworkInfo.userId;
-        data["accessToken"] = userNetworkInfo.token;
+        nlohmann::json  data;
+        data["userId"]       = userNetworkInfo.userId;
+        data["accessToken"]  = userNetworkInfo.token;
         data["refreshToken"] = userNetworkInfo.refreshToken;
-        data["expiresTime"] = userNetworkInfo.accessTokenExpireTime;
-        if(userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
+        data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
+        if (userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
             return webviewIpc::IPCResult::error(data);
         }
         return webviewIpc::IPCResult::success(data);
-
     });
 
     mIpc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request) {
@@ -265,16 +260,29 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         return webviewIpc::IPCResult::success();
     });
 
-    mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) {
-        return webviewIpc::IPCResult::success();
+    mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) { return webviewIpc::IPCResult::success(); });
+
+    mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) {
+        return handleReady();
     });
 }
 void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetworkInfo)
 {
+    lock_guard<mutex> lock(mUserInfoMutex);
     // Update user info in webview
-    if (mIpc) {
-        mIpc->sendEvent("onUserInfoUpdated", convertUserNetworkInfoToJson(userNetworkInfo), mIpc->generateRequestId());
+    if (!mIpc || !mIsReady) {
+        mRefreshUserInfo = userNetworkInfo;
+        return;
     }
+
+    nlohmann::json data;
+    data["userId"]      = userNetworkInfo.userId;
+    data["accessToken"] = userNetworkInfo.token;
+    data["avatar"]      = userNetworkInfo.avatar;
+    data["email"]       = userNetworkInfo.email;
+    data["nickname"]    = userNetworkInfo.nickname;
+    mIpc->sendEvent("client.onUserInfoUpdated", data, mIpc->generateRequestId());
+    wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
 }
 void OnlineModelsHomepageView::cleanupIPC()
 {
@@ -284,10 +292,26 @@ void OnlineModelsHomepageView::cleanupIPC()
     }
 }
 
+webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
+{
+    lock_guard<mutex> lock(mUserInfoMutex);
+    mIsReady = true;
+    if (mIpc && !mRefreshUserInfo.userId.empty()) {
+        nlohmann::json data;
+        data["userId"]      = mRefreshUserInfo.userId;
+        data["accessToken"] = mRefreshUserInfo.token;
+        data["avatar"]      = mRefreshUserInfo.avatar;
+        data["email"]       = mRefreshUserInfo.email;
+        data["nickname"]    = mRefreshUserInfo.nickname;
+        mIpc->sendEvent("client.onUserInfoUpdated", data, mIpc->generateRequestId());
+        wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
+        mRefreshUserInfo = UserNetworkInfo();
+    }
+    return webviewIpc::IPCResult::success();
+}
 void OnlineModelsHomepageView::onWebViewLoaded(wxWebViewEvent& event)
 {
-    // IPC is already initialized in constructor
-    wxLogMessage("OnlineModelsHomepageView: WebView loaded successfully");
+
 }
 
 void OnlineModelsHomepageView::onWebViewError(wxWebViewEvent& event)

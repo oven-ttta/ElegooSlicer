@@ -823,16 +823,27 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::loginWAN(const UserNetworkInfo
     params.refreshToken = userInfo.refreshToken;
     params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
     params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
-    //VoidResult setHttpCredential(const HttpCredential &credential);
-    auto result = elink::ElegooNetwork::getInstance().setHttpCredential(params);
-       
+
     UserNetworkInfo userInfoRet = userInfo;
-    if(result.code != elink::ELINK_ERROR_CODE::SUCCESS) {
+
+    elink::VoidResult setHttpCredentialResult = elink::ElegooNetwork::getInstance().setHttpCredential(params);
+    if(setHttpCredentialResult.code != elink::ELINK_ERROR_CODE::SUCCESS) {
+        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, userInfo,
+                                                     "failed to set HTTP credential: " + setHttpCredentialResult.message);
+    }
+
+    elink::GetUserInfoResult userInfoResult = elink::ElegooNetwork::getInstance().getUserInfo();    
+    if(userInfoResult.code != elink::ELINK_ERROR_CODE::SUCCESS) {
         userInfoRet.loginStatus = LOGIN_STATUS_LOGIN_FAILED;
         return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, userInfoRet,
-                                                     "failed to login WAN: " + result.message);
+                                                     "failed to login WAN: " + userInfoResult.message);
     }
     userInfoRet.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
+    userInfoRet.userId = userInfoResult.value().userId;
+    userInfoRet.phone = userInfoResult.value().phone;
+    userInfoRet.email = userInfoResult.value().email;
+    userInfoRet.nickname = userInfoResult.value().nickName;
+    userInfoRet.avatar = userInfoResult.value().avatar;
     return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, userInfoRet);
 }
 

@@ -5,7 +5,12 @@
 #include <wx/webview.h>
 #include <memory>
 #include <map>
+#include <atomic>
+#include <mutex>
+#include <optional>
+#include <nlohmann/json.hpp>
 #include "slic3r/Utils/WebviewIPCManager.h"
+#include "libslic3r/PrinterNetworkInfo.hpp"
 
 namespace Slic3r { namespace GUI {
 
@@ -22,7 +27,7 @@ public:
     void updateMode();
     void switchToPage(const wxString& pageName);
     void refreshUserInfo();
-    
+
 private:
     void initUI();
     void setupIPCHandlers();
@@ -35,6 +40,7 @@ private:
     webviewIpc::IPCResult handleLogout();
     webviewIpc::IPCResult handleNavigateToPage(const nlohmann::json& data);
     webviewIpc::IPCResult handleShowLoginDialog();
+    webviewIpc::IPCResult handleReady();
     
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
@@ -47,7 +53,6 @@ private:
     wxStaticLine* mDividerLine;     // Vertical divider line
     wxPanel* mContentPanel;         // Right content panel
     wxBoxSizer* mContentSizer;     // Sizer for content panel
-    
     // IPC
     webviewIpc::WebviewIPCManager* mIpc;
     
@@ -55,6 +60,10 @@ private:
     std::map<wxString, HomepageView*> mHomepageViews;
     HomepageView* mCurrentView;
     
+
+    std::atomic<bool> mIsReady = false;
+    std::mutex mUserInfoMutex; // Mutex to protect user info
+    UserNetworkInfo mRefreshUserInfo; // User info
     DECLARE_EVENT_TABLE()
 };
 

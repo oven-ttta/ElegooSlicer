@@ -20,9 +20,11 @@ public:
     virtual void onUserInfoUpdated(const UserNetworkInfo& userNetworkInfo) {}
 
     const wxString& getName() const { return mName; }
-    
+    const bool isReady() const { return mIsReady; }
+
 protected:
     wxString mName;
+    std::atomic<bool> mIsReady = false;
 };
 
 // Recent files homepage view
@@ -79,11 +81,14 @@ private:
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
     void onWebViewError(wxWebViewEvent& event);
-    
+    webviewIpc::IPCResult handleReady();
+
 private:
     wxWebView* mBrowser;
     webviewIpc::WebviewIPCManager* mIpc;
     
+    std::mutex mUserInfoMutex; // Mutex to protect user info
+    UserNetworkInfo mRefreshUserInfo; // User info
     DECLARE_EVENT_TABLE()
 };
 
