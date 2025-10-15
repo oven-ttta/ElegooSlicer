@@ -7,6 +7,26 @@ const langMessages = {
     "confirm": "Confirm",
     "cancel": "Cancel",
     "noPrinterConnected": "No printer connected. Please go to \"Devices\" to discover or add a new printer.",
+    "homepage": {
+      "title": "Home",
+      "login": "Login",
+      "register": "Register",
+      "logout": "Logout",
+      "recent": "Recent",
+      "newProject": "New Project",
+      "createNewProject": "Create New Project",
+      "openProject": "Open Project",
+      "recentOpen": "Recent Open",
+      "clearAll": "Clear All",
+      "clear": "Clear",
+      "openInExplorer": "Open In Explorer",
+      "networkPluginNotDetected": "Network plugin not detected. Click here to install it.",
+      "clickHere": "here",
+      "toInstallIt": " to install it.",
+      "onlineModels": "Online Models",
+      "myProjects": "My Projects",
+      "allCategories": "All Categories",
+    },
     "printerManager": {
       "connectedPrinters": "Connected Printers",
       "addPrinter": "Add Printer",
@@ -171,6 +191,26 @@ const langMessages = {
     "confirm": "确认",
     "cancel": "取消",
     "noPrinterConnected": "未连接任何打印机，请前往\“设备\"发现或添加新打印机",
+    "homepage": {
+      "title": "首页",
+      "login": "登录",
+      "register": "注册",
+      "logout": "退出",
+      "recent": "最近",
+      "newProject": "新项目",
+      "createNewProject": "创建新项目",
+      "openProject": "打开项目",
+      "recentOpen": "最近打开",
+      "clearAll": "清除全部",
+      "clear": "清除",
+      "openInExplorer": "在资源管理器中打开",
+      "networkPluginNotDetected": "未检测到网络插件。点击",
+      "clickHere": "这里",
+      "toInstallIt": "安装。",
+      "onlineModels": "在线模型",
+      "myProjects": "我的项目",
+      "allCategories": "所有分类"
+    },
     "printerManager": {
       "localPrinters": "本地打印机",
       "connectedPrinters": "已连接的打印机",
@@ -361,5 +401,6 @@ const i18n = createI18n({
   locale: defaultLanguage(),
   fallbackLocale: 'en',
   messages: langMessages,
-
 });
+
+

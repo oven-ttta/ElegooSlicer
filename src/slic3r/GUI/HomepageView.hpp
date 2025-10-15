@@ -1,0 +1,92 @@
+#ifndef HOMEPAGEVIEW_HPP
+#define HOMEPAGEVIEW_HPP
+
+#include <wx/wx.h>
+#include <wx/webview.h>
+#include <memory>
+#include "slic3r/Utils/WebviewIPCManager.h"
+#include "libslic3r/PrinterNetworkInfo.hpp"
+namespace Slic3r { namespace GUI {
+
+// Base class for different homepage views
+class HomepageView : public wxPanel
+{
+public:
+    HomepageView(wxWindow* parent, const wxString& name);
+    virtual ~HomepageView() = default;
+    
+    virtual void initialize() {}
+    virtual void updateMode() {}
+    virtual void onUserInfoUpdated(const UserNetworkInfo& userNetworkInfo) {}
+
+    const wxString& getName() const { return mName; }
+    
+protected:
+    wxString mName;
+};
+
+// Recent files homepage view
+class RecentHomepageView : public HomepageView
+{
+public:
+    RecentHomepageView(wxWindow* parent);
+    ~RecentHomepageView();
+    
+    void initialize() override;
+    void updateMode() override;
+
+private:
+    void initUI();
+    void setupIPCHandlers();
+    void cleanupIPC();
+    
+    // IPC handlers
+    webviewIpc::IPCResult handleGetRecentFiles(const nlohmann::json& data);
+    webviewIpc::IPCResult handleClearRecentFiles(const nlohmann::json& data);
+    webviewIpc::IPCResult handleOpenFile(const nlohmann::json& data);
+    webviewIpc::IPCResult handleCreateNewProject(const nlohmann::json& data);
+    webviewIpc::IPCResult handleOpenProject(const nlohmann::json& data);
+    webviewIpc::IPCResult handleOpenFileInExplorer(const nlohmann::json& data);
+    webviewIpc::IPCResult handleRemoveFromRecent(const nlohmann::json& data);
+    
+    // Event handlers
+    void onWebViewLoaded(wxWebViewEvent& event);
+    void onWebViewError(wxWebViewEvent& event);
+    
+private:
+    wxWebView* mBrowser;
+    webviewIpc::WebviewIPCManager* mIpc;
+    
+    DECLARE_EVENT_TABLE()
+};
+
+// Online models homepage view - simple webview that loads remote URL
+class OnlineModelsHomepageView : public HomepageView
+{
+public:
+    OnlineModelsHomepageView(wxWindow* parent);
+    ~OnlineModelsHomepageView();
+    
+    void initialize() override;
+    void updateMode() override;
+    void onUserInfoUpdated(const UserNetworkInfo& userNetworkInfo) override;
+ 
+private:
+    void initUI();
+    void setupIPCHandlers();
+    void cleanupIPC();
+    
+    // Event handlers
+    void onWebViewLoaded(wxWebViewEvent& event);
+    void onWebViewError(wxWebViewEvent& event);
+    
+private:
+    wxWebView* mBrowser;
+    webviewIpc::WebviewIPCManager* mIpc;
+    
+    DECLARE_EVENT_TABLE()
+};
+
+}} // namespace Slic3r::GUI
+
+#endif // HOMEPAGEVIEW_HPP

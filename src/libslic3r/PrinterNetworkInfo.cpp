@@ -116,16 +116,19 @@ PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json)
         }
         if (json.contains("printCapabilities")) {
             if (json["printCapabilities"].contains("supportsAutoBedLeveling")) {
-                printerNetworkInfo.printCapabilities.supportsAutoBedLeveling = json["printCapabilities"]["supportsAutoBedLeveling"].get<bool>();
+                printerNetworkInfo.printCapabilities.supportsAutoBedLeveling = json["printCapabilities"]["supportsAutoBedLeveling"]
+                                                                                   .get<bool>();
             }
             if (json["printCapabilities"].contains("supportsTimeLapse")) {
                 printerNetworkInfo.printCapabilities.supportsTimeLapse = json["printCapabilities"]["supportsTimeLapse"].get<bool>();
             }
             if (json["printCapabilities"].contains("supportsHeatedBedSwitching")) {
-                printerNetworkInfo.printCapabilities.supportsHeatedBedSwitching = json["printCapabilities"]["supportsHeatedBedSwitching"].get<bool>();
+                printerNetworkInfo.printCapabilities.supportsHeatedBedSwitching = json["printCapabilities"]["supportsHeatedBedSwitching"]
+                                                                                      .get<bool>();
             }
             if (json["printCapabilities"].contains("supportsFilamentMapping")) {
-                printerNetworkInfo.printCapabilities.supportsFilamentMapping = json["printCapabilities"]["supportsFilamentMapping"].get<bool>();
+                printerNetworkInfo.printCapabilities.supportsFilamentMapping = json["printCapabilities"]["supportsFilamentMapping"]
+                                                                                   .get<bool>();
             }
         }
         if (json.contains("systemCapabilities")) {
@@ -187,16 +190,16 @@ nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printer
     printTaskJson["progress"]      = printerNetworkInfo.printTask.progress;
     json["printTask"]              = printTaskJson;
     nlohmann::json printCapabilitiesJson;
-    printCapabilitiesJson["supportsAutoBedLeveling"] = printerNetworkInfo.printCapabilities.supportsAutoBedLeveling;
-    printCapabilitiesJson["supportsTimeLapse"] = printerNetworkInfo.printCapabilities.supportsTimeLapse;
+    printCapabilitiesJson["supportsAutoBedLeveling"]    = printerNetworkInfo.printCapabilities.supportsAutoBedLeveling;
+    printCapabilitiesJson["supportsTimeLapse"]          = printerNetworkInfo.printCapabilities.supportsTimeLapse;
     printCapabilitiesJson["supportsHeatedBedSwitching"] = printerNetworkInfo.printCapabilities.supportsHeatedBedSwitching;
-    printCapabilitiesJson["supportsFilamentMapping"] = printerNetworkInfo.printCapabilities.supportsFilamentMapping;
-    json["printCapabilities"] = printCapabilitiesJson;
+    printCapabilitiesJson["supportsFilamentMapping"]    = printerNetworkInfo.printCapabilities.supportsFilamentMapping;
+    json["printCapabilities"]                           = printCapabilitiesJson;
     nlohmann::json systemCapabilitiesJson;
     systemCapabilitiesJson["supportsMultiFilament"] = printerNetworkInfo.systemCapabilities.supportsMultiFilament;
-    systemCapabilitiesJson["canGetDiskInfo"] = printerNetworkInfo.systemCapabilities.canGetDiskInfo;
-    systemCapabilitiesJson["canSetPrinterName"] = printerNetworkInfo.systemCapabilities.canSetPrinterName;
-    json["systemCapabilities"] = systemCapabilitiesJson;
+    systemCapabilitiesJson["canGetDiskInfo"]        = printerNetworkInfo.systemCapabilities.canGetDiskInfo;
+    systemCapabilitiesJson["canSetPrinterName"]     = printerNetworkInfo.systemCapabilities.canSetPrinterName;
+    json["systemCapabilities"]                      = systemCapabilitiesJson;
     return json;
 }
 
@@ -306,13 +309,13 @@ PrinterMmsGroup convertJsonToPrinterMmsGroup(const nlohmann::json& json)
 {
     PrinterMmsGroup mmsGroup;
     try {
-        mmsGroup.connectNum   = json["connectNum"];
-        mmsGroup.connected    = json["connected"];
-        mmsGroup.activeMmsId  = json["activeMmsId"];
-        mmsGroup.activeTrayId = json["activeTrayId"];
-        mmsGroup.autoRefill   = json["autoRefill"];
+        mmsGroup.connectNum    = json["connectNum"];
+        mmsGroup.connected     = json["connected"];
+        mmsGroup.activeMmsId   = json["activeMmsId"];
+        mmsGroup.activeTrayId  = json["activeTrayId"];
+        mmsGroup.autoRefill    = json["autoRefill"];
         mmsGroup.mmsSystemName = json["mmsSystemName"];
-        mmsGroup.vtTray       = convertJsonToPrinterMmsTray(json["vtTray"]);
+        mmsGroup.vtTray        = convertJsonToPrinterMmsTray(json["vtTray"]);
         if (json.contains("mmsList")) {
             for (auto& mms : json["mmsList"]) {
                 mmsGroup.mmsList.push_back(convertJsonToPrinterMms(mms));
@@ -356,6 +359,100 @@ PrintFilamentMmsMapping convertJsonToPrintFilamentMmsMapping(const nlohmann::jso
         throw std::runtime_error("Failed to convert json to print filament mms mapping: " + std::string(e.what()));
     }
     return printFilamentMmsMapping;
+}
+
+nlohmann::json convertUserNetworkInfoToJson(const UserNetworkInfo& userNetworkInfo)
+{
+    nlohmann::json json            = nlohmann::json::object();
+    json["userId"]                 = userNetworkInfo.userId;
+    json["username"]               = userNetworkInfo.username;
+    json["token"]                  = userNetworkInfo.token;
+    json["refreshToken"]           = userNetworkInfo.refreshToken;
+    json["hostType"]               = userNetworkInfo.hostType;
+    json["accessTokenExpireTime"]  = userNetworkInfo.accessTokenExpireTime;
+    json["refreshTokenExpireTime"] = userNetworkInfo.refreshTokenExpireTime;
+    json["rtcToken"]               = userNetworkInfo.rtcToken;
+    json["rtcTokenExpireTime"]     = userNetworkInfo.rtcTokenExpireTime;
+    json["nickname"]               = userNetworkInfo.nickname;
+    json["email"]                  = userNetworkInfo.email;
+    json["avatar"]                 = userNetworkInfo.avatar;
+    json["openid"]                 = userNetworkInfo.openid;
+    json["phone"]                  = userNetworkInfo.phone;
+    json["country"]                = userNetworkInfo.country;
+    json["language"]               = userNetworkInfo.language;
+    json["timezone"]               = userNetworkInfo.timezone;
+    json["createTime"]             = userNetworkInfo.createTime;
+    json["lastLoginTime"]          = userNetworkInfo.lastLoginTime;
+    json["loginStatus"]            = userNetworkInfo.loginStatus;
+    return json;
+}
+UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json)
+{
+    UserNetworkInfo userNetworkInfo;
+    if (json.contains("userId")) {
+        userNetworkInfo.userId = json["userId"];
+    }
+    if (json.contains("username")) {
+        userNetworkInfo.username = json["username"];
+    }
+    if (json.contains("token")) {
+        userNetworkInfo.token = json["token"];
+    }
+    if (json.contains("refreshToken")) {
+        userNetworkInfo.refreshToken = json["refreshToken"];
+    }
+    if (json.contains("hostType")) {
+        userNetworkInfo.hostType = json["hostType"];
+    }
+    if (json.contains("accessTokenExpireTime")) {
+        userNetworkInfo.accessTokenExpireTime = json["accessTokenExpireTime"];
+    }
+    if (json.contains("refreshTokenExpireTime")) {
+        userNetworkInfo.refreshTokenExpireTime = json["refreshTokenExpireTime"];
+    }
+    if (json.contains("rtcToken")) {
+        userNetworkInfo.rtcToken = json["rtcToken"];
+    }
+    if (json.contains("rtcTokenExpireTime")) {
+        userNetworkInfo.rtcTokenExpireTime = json["rtcTokenExpireTime"];
+    }
+    if (json.contains("nickname")) {
+        userNetworkInfo.rtcTokenExpireTime = json["rtcTokenExpireTime"];
+    }
+    if (json.contains("email")) {
+        userNetworkInfo.email = json["email"];
+    }
+    if (json.contains("avatar")) {
+        userNetworkInfo.avatar = json["avatar"];
+    }
+    if (json.contains("nickname")) {
+        userNetworkInfo.nickname = json["nickname"];
+    }
+    if (json.contains("openid")) {
+        userNetworkInfo.openid = json["openid"];
+    }
+    if (json.contains("phone")) {
+        userNetworkInfo.phone = json["phone"];
+    }
+    if (json.contains("country")) {
+        userNetworkInfo.country = json["country"];
+    }
+    if (json.contains("language")) {
+        userNetworkInfo.language = json["language"];
+    }
+    if (json.contains("timezone")) {
+        userNetworkInfo.timezone = json["timezone"];
+    }
+    if (json.contains("createTime")) {
+        userNetworkInfo.createTime = json["createTime"];
+    }
+    if (json.contains("lastLoginTime")) {
+        userNetworkInfo.lastLoginTime = json["lastLoginTime"];
+    }
+    if (json.contains("loginStatus")) {
+        userNetworkInfo.loginStatus = json["loginStatus"];
+    }
+    return userNetworkInfo;
 }
 
 } // namespace Slic3r

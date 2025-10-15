@@ -571,22 +571,21 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
 void PrinterManager::setCurrentUserInfo(const UserNetworkInfo& userInfo)
 {
     std::lock_guard<std::mutex> lock(mUserNetworkMutex);
-    if(mUserNetwork) {
-        UserNetworkInfo loginUser = mUserNetwork->getUserNetworkInfo();
-        if(loginUser.userId == userInfo.userId && loginUser.username == userInfo.username) {
-            return;
-        }
-        if(loginUser.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-            mUserNetwork->uninit();
-        }
-
-    }
-    mUserNetwork = NetworkFactory::createUserNetwork(userInfo);
+    mUserNetworkInfo = userInfo;
+    mUserNetworkInfo.loginStatus = LOGIN_STATUS_NOT_LOGIN;
+    mUserNetwork = NetworkFactory::createUserNetwork(mUserNetworkInfo);
     if(!mUserNetwork) {
         return;
     }
-    mUserNetwork->init();
-    mUserNetworkInfo = userInfo;
+}
+
+UserNetworkInfo PrinterManager::getUserNetworkInfo()
+{
+    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
+    if(!mUserNetwork) {
+        return UserNetworkInfo();
+    }
+    return mUserNetworkInfo;
 }
 
 void PrinterManager::monitorPrinterConnections()
@@ -710,43 +709,52 @@ void PrinterManager::getWANPrinters()
 {
     std::lock_guard<std::mutex> lock(mUserNetworkMutex);
 
+    if (mUserNetworkInfo.userId.empty() || mUserNetworkInfo.token.empty() || mUserNetworkInfo.refreshToken.empty()) {
+        return;
+    }
+
     if (!mUserNetwork || mUserNetwork->getUserNetworkInfo().loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
-        UserNetworkInfo userInfo;
-        userInfo.userId                 = 55;
-        userInfo.username               = "";
-        userInfo.token                  = "350ce9ac41550fa9376d152cb957b8dd";
-        userInfo.refreshToken           = "2e8089587c5ba915b93bc579423d19f4";
-        userInfo.accessTokenExpireTime  = 1775731518483;
-        userInfo.refreshTokenExpireTime = 1884595518483;
-        userInfo.hostType               = "ElegooLink";
-        mUserNetwork                    = NetworkFactory::createUserNetwork(userInfo);
-
+        mUserNetwork    = NetworkFactory::createUserNetwork(mUserNetworkInfo);
         mUserNetwork->init();
-
-        auto loginResult = mUserNetwork->loginWAN(userInfo);
+        auto loginResult = mUserNetwork->loginWAN(mUserNetworkInfo);
         if (loginResult.isError()) {
             return;
         }
         UserNetworkInfo loginUser = loginResult.data.value();
         if (loginUser.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
             mUserNetworkInfo = loginUser;
+            
+            // Send signal to main frame to refresh UI
+            auto evt = new wxCommandEvent(EVT_USER_INFO_UPDATED);
+            wxQueueEvent(wxGetApp().mainframe, evt);
         }
     }
-    // 10 seconds once get WAN printers
-    // static std::chrono::steady_clock::time_point lastGetPrintersTime = std::chrono::steady_clock::now();
-    // if (std::chrono::steady_clock::now() - lastGetPrintersTime < std::chrono::seconds(10)) {
-    //     return;
-    // }
-    // lastGetPrintersTime = std::chrono::steady_clock::now();
-    if (mUserNetwork && mUserNetwork->getUserNetworkInfo().loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-        auto printersResult = mUserNetwork->getPrinters();
-        if (printersResult.isSuccess()) {
-            for (PrinterNetworkInfo printer : printersResult.data.value()) {
-                printer.networkType   = NETWORK_TYPE_WAN;
-                printer.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
-                PrinterCache::getInstance()->addPrinter(printer);
-            }
-        }
+
+    // Only get printers if user is logged in
+    if (!mUserNetwork || mUserNetwork->getUserNetworkInfo().loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
+        return;
+    }
+
+    // Get WAN printers every 10 seconds
+    static std::chrono::steady_clock::time_point lastGetPrintersTime{}; // 初始化为0
+    auto now = std::chrono::steady_clock::now();
+    
+    // Skip if less than 10 seconds since last call (first call will execute immediately)
+    if (now - lastGetPrintersTime < std::chrono::seconds(10)) {
+        return;
+    }
+    lastGetPrintersTime = now;
+    
+    auto printersResult = mUserNetwork->getPrinters();
+    if (!printersResult.isSuccess() || !printersResult.hasData()) {
+        return;
+    }    
+    // Add printers to cache
+    for (const auto& printer : printersResult.data.value()) {
+        PrinterNetworkInfo wanPrinter = printer;
+        wanPrinter.networkType = NETWORK_TYPE_WAN;
+        wanPrinter.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
+        PrinterCache::getInstance()->addPrinter(wanPrinter);
     }
 }
 // first get selected printer by modelName and printerId

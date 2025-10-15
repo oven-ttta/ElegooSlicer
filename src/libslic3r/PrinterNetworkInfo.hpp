@@ -242,6 +242,16 @@ struct UserNetworkInfo
     std::string rtcToken; // video rtc token
     uint64_t    rtcTokenExpireTime{0};
     LoginStatus loginStatus{LOGIN_STATUS_NOT_LOGIN};
+    std::string nickname;     // User display name
+    std::string email;        // User email
+    std::string avatar;       // User avatar URL
+    std::string openid;       // OpenID for third-party login
+    std::string phone;        // User phone number
+    std::string country;      // User country
+    std::string language;     // User preferred language
+    std::string timezone;     // User timezone
+    uint64_t    createTime{0}; // Account creation time
+    uint64_t    lastLoginTime{0}; // Last login time
 
 };
 
@@ -287,6 +297,8 @@ nlohmann::json convertPrinterMmsGroupToJson(const PrinterMmsGroup& mmsGroup);
 PrinterMmsGroup convertJsonToPrinterMmsGroup(const nlohmann::json& json);
 nlohmann::json convertPrintFilamentMmsMappingToJson(const PrintFilamentMmsMapping& printFilamentMmsMapping);
 PrintFilamentMmsMapping convertJsonToPrintFilamentMmsMapping(const nlohmann::json& json);
+nlohmann::json convertUserNetworkInfoToJson(const UserNetworkInfo& userNetworkInfo);
+UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json);
 
 } // namespace Slic3r
 

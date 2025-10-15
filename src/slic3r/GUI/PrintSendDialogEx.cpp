@@ -101,8 +101,8 @@ void PrintSendDialogEx::init()
     wxString strlang = wxGetApp().current_language_code_safe();
     if (strlang != "")
         TargetUrl = wxString::Format("%s?lang=%s", TargetUrl, strlang);
-    if(wxGetApp().app_config->get_bool("developer_mode")){
-            TargetUrl = TargetUrl + "&dev=true";
+    if (wxGetApp().app_config->get_bool("developer_mode")) {
+        TargetUrl = TargetUrl + "&dev=true";
     }
     mBrowser->LoadURL(TargetUrl);
 

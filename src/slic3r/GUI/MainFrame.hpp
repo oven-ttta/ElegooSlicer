@@ -32,6 +32,7 @@
 #include "BBLTopbar.hpp"
 #include "calib_dlg.hpp"
 #include "MultiMachinePage.hpp"
+#include "HomeView.hpp"
 
 #define ENABEL_PRINT_ALL 0
 
@@ -368,7 +369,8 @@ public:
     ProjectPanel*         m_project{ nullptr };
 
     CalibrationPanel*     m_calibration{ nullptr };
-    WebViewPanel*         m_webview { nullptr };
+    //WebViewPanel*         m_webview { nullptr };
+    HomeView*             m_home_view { nullptr };
     PrinterWebView*       m_printer_view{nullptr};
     PrinterManagerView*   m_printer_manager_view{nullptr};
     wxLogWindow*          m_log_window { nullptr };
@@ -414,6 +416,7 @@ public:
 wxDECLARE_EVENT(EVT_HTTP_ERROR, wxCommandEvent);
 wxDECLARE_EVENT(EVT_USER_LOGIN, wxCommandEvent);
 wxDECLARE_EVENT(EVT_USER_LOGIN_HANDLE, wxCommandEvent);
+wxDECLARE_EVENT(EVT_USER_INFO_UPDATED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_CHECK_PRIVACY_VER, wxCommandEvent);
 wxDECLARE_EVENT(EVT_CHECK_PRIVACY_SHOW, wxCommandEvent);
 wxDECLARE_EVENT(EVT_SHOW_IP_DIALOG, wxCommandEvent);

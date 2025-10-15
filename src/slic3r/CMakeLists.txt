@@ -582,6 +582,12 @@ set(SLIC3R_GUI_SOURCES
     
     GUI/PrintSendDialogEx.cpp
     GUI/PrintSendDialogEx.hpp
+    GUI/HomeView.cpp
+    GUI/HomeView.hpp
+    GUI/HomepageView.cpp
+    GUI/HomepageView.hpp
+    GUI/UserLoginView.cpp
+    GUI/UserLoginView.hpp
     Utils/Singleton.hpp
     Utils/PrinterManager.cpp
     Utils/PrinterManager.hpp
@@ -605,6 +611,7 @@ set(SLIC3R_GUI_SOURCES
     Utils/ElegooUserNetwork.cpp
     Utils/ElegooPluginNetwork.hpp
     Utils/ElegooPluginNetwork.cpp
+
 
 )
 

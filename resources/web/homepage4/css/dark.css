@@ -1,0 +1,233 @@
+body
+{
+	background-color:#242428;
+}
+
+#app
+{
+	width: 100%;
+	height: 100vh;
+}
+
+/* Navigation only styles */
+#left-board
+{
+	height: 100vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+*
+{
+	border-color: #3E3E45;
+}
+
+
+.text-s1
+{
+	color:#efeff0;
+}
+
+.text-s2
+{
+	color:#B3B3B5;
+}
+
+.z-scroll::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    background-color: #939395;
+}
+
+.z-scroll::-webkit-scrollbar-track {/*滚动条里面轨道*/
+        background: #161618;
+}
+
+
+
+
+/*----Left Menu Button----*/
+
+.login-btn-style
+{
+	font-weight: 700;
+}
+
+.spacer-14
+{
+	height: 14px;
+}
+
+.btn-item
+{
+	color:#B3B3B5;
+}
+
+.btn-item:hover
+{
+	color: #efeff0;
+	background-color: #0066dd;
+}
+
+.btn-item:hover .left-icon
+{
+	filter: brightness(300%);
+}
+
+.btn-item-selected
+{
+	color: #efeff0;
+	background-color: #0066dd;
+}
+
+.btn-item-selected .left-icon
+{
+	filter: brightness(300%);
+}
+
+/*-----Right Top MenuBtn-----*/
+.menu-item:hover
+{
+	border-color: #4066b6;
+	background-color: #0066dd;
+}
+
+#recent-clear-all-btn:hover
+{
+	color: #000;
+}
+
+.FileImg
+{
+	background-color: #36363C; /*ORCA use darker color for dark theme for thumbnails*/
+}
+
+#recent-context-menu
+{
+	color: #efeff0;
+	background-color:#242428;
+	border: 0px;
+	box-shadow: 0px 0px 3px #DCDCDC;
+}
+
+.ct-item:hover
+{
+	background-color:#00675b; /*ORCA color*/
+}
+
+/*----User Manual------*/
+.ug-desc
+{
+	color:#818183;
+}
+
+/*---Staff Pick----*/
+#hot-model-swiper
+{
+	
+}
+
+.hot-model-name-text
+{
+	height: 32px;
+}
+
+.hot-model-piece
+{
+	border: 1px solid #4C4C55;
+	box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.04);
+	background-color: #4C4C55;
+}
+
+#hot-model-right-title
+{
+	color: #818183;
+}
+
+.swiper
+{
+    --swiper-navigation-color: #EFEFF0;/* 单独设置按钮颜色 */
+}
+
+.swiper-button-prev
+{
+	background: rgba(54, 54, 60, 0.88);
+    border: 1px solid rgba(129, 129, 131, 0.64);
+}
+
+.swiper-button-next
+{
+	background: rgba(54, 54, 60, 0.88);
+    border: 1px solid rgba(129, 129, 131, 0.64);
+}
+
+/* Dark theme user area styles */
+#user-area {
+	width: 100%;
+	padding: 20px 0;
+}
+
+/* Login state styles */
+#login-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	cursor: pointer;
+	padding: 10px;
+}
+
+#empty-avatar {
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	overflow: hidden;
+	margin-bottom: 10px;
+}
+
+#empty-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+#login-text {
+	font-size: 14px;
+	color: #a8a8a8;
+	text-align: center;
+}
+
+/* User state styles */
+#user-state {
+	position: relative;
+}
+
+#user-info {
+	display: flex;
+	align-items: center;
+	padding: 10px;
+}
+
+#user-avatar {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	overflow: hidden;
+	margin-right: 12px;
+}
+
+#user-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+#user-name {
+	flex: 1;
+	font-size: 14px;
+	color: #efeff0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+

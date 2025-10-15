@@ -1464,7 +1464,7 @@ var LangText = {
   },
 };
 
-var LANG_COOKIE_NAME = "BambuWebLang";
+var LANG_COOKIE_NAME = "ElegooSlicerLang";
 var LANG_COOKIE_EXPIRESECOND = 365 * 86400;
 
 function TranslatePage() {

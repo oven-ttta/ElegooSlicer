@@ -108,6 +108,8 @@
 #include "ModelMall.hpp"
 #include "HintNotification.hpp"
 #include "PrinterWebView.hpp"
+
+#include "UserLoginView.hpp"
 //#ifdef WIN32
 //#include "BaseException.h"
 //#endif
@@ -3477,22 +3479,26 @@ void GUI_App::ShowDownNetPluginDlg() {
 void GUI_App::ShowUserLogin(bool show)
 {
     // BBS: User Login Dialog
-    if (show) {
-        try {
-            if (!login_dlg)
-                login_dlg = new ZUserLogin();
-            else {
-                delete login_dlg;
-                login_dlg = new ZUserLogin();
-            }
-            login_dlg->ShowModal();
-        } catch (std::exception &) {
-            ;
-        }
-    } else {
-        if (login_dlg)
-            login_dlg->EndModal(wxID_OK);
-    }
+    // if (show) {
+    //     try {
+    //         if (!login_dlg)
+    //             login_dlg = new ZUserLogin();
+    //         else {
+    //             delete login_dlg;
+    //             login_dlg = new ZUserLogin();
+    //         }
+    //         login_dlg->ShowModal();
+    //     } catch (std::exception &) {
+    //         ;
+    //     }
+    // } else {
+    //     if (login_dlg)
+    //         login_dlg->EndModal(wxID_OK);
+    // }
+
+    UserLoginView* userLoginView = new UserLoginView(wxGetApp().mainframe);
+    userLoginView->ShowModal();
+    delete userLoginView;
 }
 
 
@@ -3713,7 +3719,7 @@ void GUI_App::get_login_info()
             wxString strJS = wxString::Format("window.postMessage(%s)", logout_cmd);
             GUI::wxGetApp().run_script(strJS);
         }
-        mainframe->m_webview->SetLoginPanelVisibility(true);
+        //mainframe->m_webview->SetLoginPanelVisibility(true);
     }
 }
 
@@ -3845,13 +3851,13 @@ std::string GUI_App::handle_web_request(std::string cmd)
             else if (command_str.compare("homepage_openproject") == 0) {
                 this->request_open_project({});
             }
-            else if (command_str.compare("get_recent_projects") == 0) {
-                if (mainframe) {
-                    if (mainframe->m_webview) {
-                        mainframe->m_webview->SendRecentList(INT_MAX);
-                    }
-                }
-            }
+            // else if (command_str.compare("get_recent_projects") == 0) {
+            //     if (mainframe) {
+            //         if (mainframe->m_webview) {
+            //             mainframe->m_webview->SendRecentList(INT_MAX);
+            //         }
+            //     }
+            // }
             // else if (command_str.compare("modelmall_model_advise_get") == 0) {
             //     if (mainframe && this->app_config->get("staff_pick_switch") == "true") {
             //         if (mainframe->m_webview) {
@@ -5200,7 +5206,7 @@ void GUI_App::stop_http_server()
 
 void GUI_App::switch_staff_pick(bool on)
 {
-    mainframe->m_webview->SendDesignStaffpick(on);
+    //mainframe->m_webview->SendDesignStaffpick(on);
 }
 
 bool GUI_App::switch_language()
@@ -5627,7 +5633,7 @@ void GUI_App::update_mode()
         mainframe->m_param_dialog->panel()->update_mode();
     if (mainframe->m_printer_view)
         mainframe->m_printer_view->update_mode();
-    mainframe->m_webview->update_mode();
+    mainframe->m_home_view->updateMode();
 
 #ifdef _MSW_DARK_MODE
     if (!wxGetApp().tabs_as_menu())
@@ -5645,7 +5651,7 @@ void GUI_App::update_mode()
 }
 
 void GUI_App::update_internal_development() {
-    mainframe->m_webview->update_mode();
+    mainframe->m_home_view->updateMode();
     if (mainframe->m_printer_view)
         mainframe->m_printer_view->update_mode();
 }

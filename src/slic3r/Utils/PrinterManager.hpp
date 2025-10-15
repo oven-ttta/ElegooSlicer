@@ -51,6 +51,7 @@ public:
     // WAN
     void setCurrentUserInfo(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
+    UserNetworkInfo getUserNetworkInfo();
     
 
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();

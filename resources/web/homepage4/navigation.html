@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Cache-Control" content="max-age=7200" />
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+	<title>Navigation</title>
+	<link rel="stylesheet" type="text/css" href="./css/light.css" />
+	<link rel="stylesheet" type="text/css" href="./css/dark.css" />
+
+	<script type="text/javascript" src="../include/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript" src="../include/json2.js"></script>
+	<script type="text/javascript" src="../include/globalapi.js"></script>
+	<script type="text/javascript" src="../data/text.js"></script>
+
+	<script type="text/javascript" src="../vue/thirdparty/vue/vue.global.prod.min.js"></script>
+	<script type="text/javascript" src="../vue/thirdparty/vue/pinia.iife.prod.js"></script>
+	<script type="text/javascript" src="../vue/thirdparty/vue/vue-i18n.global.prod.js"></script>
+	<script type="text/javascript" src="../vue/thirdparty/element-plus/index.full.min.js"></script>
+	<script type="text/javascript" src="../vue/utils/util.js"></script>
+	<script type="text/javascript" src="../vue/utils/ipc.js"></script>
+
+	<script type="text/javascript" src="../locales/index.js"></script>
+</head>
+
+<body>
+	<div id="app">
+		<div id="left-board">
+			<!-- User area - show different content based on login status -->
+			<div id="user-area">
+				<!-- Not logged in state -->
+				<div v-if="userInfo.loginStatus == 0" id="login-state" @click="onLoginOrRegister()">
+					<div id="empty-avatar">
+						<img src="img/default-avatar.jpg" alt="Empty Avatar" />
+					</div>
+					<div id="login-text" class="text-s1">{{ $t("homepage.login") }}/{{ $t("homepage.register") }}</div>
+				</div>
+
+				<!-- Logged in state -->
+				<div v-if="userInfo.loginStatus == 1" id="user-state">
+					<div id="user-info" @click="toggleUserMenu()">
+						<div id="user-avatar">
+							<img :src="userInfo.avatar || 'img/default-avatar.jpg'"
+								onerror="this.onerror=null;this.src='img/default-avatar.jpg';" alt="User Avatar" />
+						</div>
+						<div id="user-name" class="text-s1">{{ userInfo.nickname }}</div>
+						<div id="dropdown-arrow">▼</div>
+					</div>
+
+				</div>
+			</div>
+
+			<!-- Navigation buttons -->
+			<div id="btn-area">
+				<div menu="recent" :class="['btn-item', { 'btn-item-selected': currentPage === 'recent' }]" @click="navigateToPage('recent')">
+					<div class="btn-icon"><img class="left-icon" src="img/recent-icon.png" /></div>
+					<div>{{ $t("homepage.recent") }}</div>
+				</div>
+				<div menu="online-models" :class="['btn-item', { 'btn-item-selected': currentPage === 'online-models' }]" @click="navigateToPage('online-models')">
+					<div class="btn-icon"><img class="left-icon" src="img/online-models-icon.png" /></div>
+					<div>{{ $t("homepage.onlineModels") }}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="./navigation.js"></script>
+</body>
+
+</html>

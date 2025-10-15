@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Cache-Control" content="max-age=7200" />
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+	<title>Recent Files</title>
+	<link rel="stylesheet" type="text/css" href="./css/light.css" />
+	<link rel="stylesheet" type="text/css" href="./css/dark.css" />
+
+	<script type="text/javascript" src="../include/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript" src="../include/json2.js"></script>
+	<script type="text/javascript" src="../include/globalapi.js"></script>
+	<script type="text/javascript" src="../data/text.js"></script>
+
+	<script type="text/javascript" src="../vue/thirdparty/vue/vue.global.prod.min.js"></script>
+	<script type="text/javascript" src="../vue/thirdparty/vue/pinia.iife.prod.js"></script>
+	<script type="text/javascript" src="../vue/thirdparty/vue/vue-i18n.global.prod.js"></script>
+	<script type="text/javascript" src="../vue/thirdparty/element-plus/index.full.min.js"></script>
+	<script type="text/javascript" src="../vue/utils/util.js"></script>
+	<script type="text/javascript" src="../vue/utils/ipc.js"></script>
+
+	<script type="text/javascript" src="../locales/index.js"></script>
+</head>
+
+<body>
+	<div id="app">
+		<div id="content-board" class="z-scroll" board="recent">
+			<div class="spacer-14"></div>
+			<div id="menu-area">
+				<div class="menu-item" @click="onClickNewProject()">
+					<div class="menu-icon"><img src="img/new-project-icon.png"></div>
+					<div>
+						<div class="text-s1">{{ $t("homepage.newProject") }}</div>
+						<div class="menu-desc">{{ $t("homepage.createNewProject") }}</div>
+					</div>
+				</div>
+				<div class="menu-item" @click="onClickOpenProject()">
+					<div class="menu-icon"><img src="img/open-project-icon.png"></div>
+					<div>
+						<div class="text-s1">{{ $t("homepage.openProject") }}</div>
+						<div class="menu-desc">3mf</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="debug-text"></div>
+			<div id="recent-file-area">
+				<div id="recent-title-block">
+					<div id="recent-title" class="content-title text-s1">{{ $t("homepage.recentOpen") }}</div>
+					<div id="recent-clear-all-btn" class="text-s1" @click="onDeleteAllRecentFiles()">{{
+						$t("homepage.clearAll") }}</div>
+				</div>
+				<div id="file-list">
+				</div>
+			</div>
+
+			<div class="spacer-14"></div>
+
+			<div id="recent-context-menu">
+				<div id="ct-delete-bar" class="ct-item" @click="onDeleteRecentFile()">
+					<div class="ct-icon ct-delete"></div>
+					<div class="ct-text">{{ $t("homepage.clear") }}</div>
+				</div>
+				<div id="ct-folder-bar" class="ct-item " @click="onExploreRecentFile()">
+					<div class="ct-icon ct-explore"></div>
+					<div class="ct-text">{{ $t("homepage.openInExplorer") }}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="./recent.js"></script>
+</body>
+
+</html>
