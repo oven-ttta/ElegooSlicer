@@ -1,6 +1,8 @@
 Build
 Build.bat
 /build*/
+CMakeLists.txt.user
+**/CMakeLists.txt.autosave
 deps/build*
 MYMETA.json
 MYMETA.yml
@@ -17,6 +19,7 @@ xs/assertlib*
 local-lib
 /src/TAGS
 /.vscode/
+/.vscode
 build-linux/*
 deps/build*/*
 **/.DS_Store
@@ -38,3 +41,4 @@ CMakePresets.json
 *.env
 *.code-workspace
 resources/web/elegoo-fdm-web/
+deps_src/build/

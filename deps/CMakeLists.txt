@@ -45,7 +45,7 @@ if (NPROC EQUAL 0)
 endif ()
 
 set(DESTDIR "${CMAKE_CURRENT_BINARY_DIR}/destdir" CACHE PATH "Destination directory")
-set(DEP_DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/../DL_CACHE CACHE PATH "Path for downloaded source packages.")
+set(DEP_DOWNLOAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DL_CACHE CACHE PATH "Path for downloaded source packages.")
 set(FLATPAK FALSE CACHE BOOL "Toggles various build settings for flatpak, like /usr/local in DESTDIR or not building wxwidgets")
 if (NOT FLATPAK)
     set(DESTDIR "${DESTDIR}/usr/local/")
@@ -203,13 +203,13 @@ endfunction(elegooslicer_add_cmake_project)
 
 
 if (MSVC)
-    if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        message(STATUS "\nDetected 64-bit compiler => building 64-bit deps bundle\n")
-        set(DEPS_BITS 64)
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "AMD64")
+        message(STATUS "\nDetected X64 compiler => building X64 deps bundle\n")
+        set(DEPS_ARCH "x64")
         include("deps-windows.cmake")
-    elseif ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
-        message(STATUS "\nDetected 32-bit compiler => building 32-bit deps bundle\n")
-        set(DEPS_BITS 32)
+    elseif ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "X86")
+        message(STATUS "\nDetected X86 compiler => building X86 deps bundle\n")
+        set(DEPS_ARCH "x86")
         include("deps-windows.cmake")
     else ()
         message(FATAL_ERROR "Unable to detect architecture")
@@ -248,7 +248,6 @@ if(FLATPAK)
     find_package(EXPAT)
     find_package(CURL)
     find_package(JPEG)
-    find_package(TIFF)
     find_package(Freetype)
     find_package(OpenSSL 1.1...<3.2)
     find_package(CURL)
@@ -295,9 +294,6 @@ include(CGAL/CGAL.cmake)
 include(NLopt/NLopt.cmake)
 include(libnoise/libnoise.cmake)
 
-include(ixwebsocket/ixwebsocket.cmake)
-include(PahoMqttCpp/PahoMqttCpp.cmake)
-include(elegoolink/elegoolink.cmake)
 # I *think* 1.1 is used for *just* md5 hashing?
 # 3.1 has everything in the right place, but the md5 funcs used are deprecated
 # a grep across the repo shows it is used for other things
@@ -307,6 +303,10 @@ if(NOT OPENSSL_FOUND)
     include(OpenSSL/OpenSSL.cmake)
     set(OPENSSL_PKG dep_OpenSSL)
 endif()
+
+include(ixwebsocket/ixwebsocket.cmake)
+include(PahoMqttCpp/PahoMqttCpp.cmake)
+include(elegoolink/elegoolink.cmake)
 
 # we don't want to load a "wrong" openssl when loading curl
 # so, just don't even bother 
@@ -321,12 +321,6 @@ set(JPEG_PKG "")
 if (NOT JPEG_FOUND)
     include(JPEG/JPEG.cmake)
     set(JPEG_PKG dep_JPEG)
-endif()
-
-set(TIFF_PKG "")
-if (NOT TIFF_FOUND)
-    include(TIFF/TIFF.cmake)
-    set(TIFF_PKG "dep_TIFF")
 endif()
 
 # flatpak builds wxwidgets separately 

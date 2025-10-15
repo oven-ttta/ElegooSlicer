@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-while getopts ":dpa:snt:xbc:ehu" opt; do
+while getopts ":dpa:snt:xbc:1eh" opt; do
   case "${opt}" in
     d )
         export BUILD_TARGET="deps"
@@ -24,7 +24,7 @@ while getopts ":dpa:snt:xbc:ehu" opt; do
         export OSX_DEPLOYMENT_TARGET="$OPTARG"
         ;;
     x )
-        export SLICER_CMAKE_GENERATOR="Ninja"
+        export SLICER_CMAKE_GENERATOR="Ninja Multi-Config"
         export SLICER_BUILD_TARGET="all"
         export DEPS_CMAKE_GENERATOR="Ninja"
         ;;
@@ -40,19 +40,15 @@ while getopts ":dpa:snt:xbc:ehu" opt; do
     e )
         export ELEGOO_TEST="1"
         ;;
-    u )
-        export BUILD_UNIVERSAL="1"
-        ;;
     h ) echo "Usage: ./build_release_macos.sh [-d]"
         echo "   -d: Build deps only"
-        echo "   -a: Set ARCHITECTURE (arm64 or x86_64)"
+        echo "   -a: Set ARCHITECTURE (arm64 or x86_64 or universal)"
         echo "   -s: Build slicer only"
         echo "   -n: Nightly build"
         echo "   -t: Specify minimum version of the target platform, default is 11.3"
-        echo "   -x: Use Ninja CMake generator, default is Xcode"
+        echo "   -x: Use Ninja Multi-Config CMake generator, default is Xcode"
         echo "   -b: Build without reconfiguring CMake"
         echo "   -c: Set CMake build configuration, default is Release"
-        echo "   -u: Build universal binary (both arm64 and x86_64)"
         echo "   -1: Use single job for building"
         echo "   -e: Test environment"
         exit 0
@@ -65,16 +61,8 @@ done
 # Set defaults
 
 if [ -z "$ARCH" ]; then
-  if [ "1." == "$BUILD_UNIVERSAL". ]; then
-    ARCH="universal"
-  else
     ARCH="$(uname -m)"
-  fi
-  export ARCH
-fi
-
-if [ "1." == "$BUILD_UNIVERSAL". ]; then
-  echo "Universal build enabled - will create a combined arm64/x86_64 binary"
+    export ARCH
 fi
 
 if [ -z "$BUILD_CONFIG" ]; then
@@ -127,176 +115,198 @@ echo
 # fi
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_BUILD_DIR="$PROJECT_DIR/build_$ARCH"
+PROJECT_BUILD_DIR="$PROJECT_DIR/build/$ARCH"
 DEPS_DIR="$PROJECT_DIR/deps"
-DEPS_BUILD_DIR="$DEPS_DIR/build_$ARCH"
-DEPS="$DEPS_BUILD_DIR/ElegooSlicer_dep_$ARCH"
+DEPS_BUILD_DIR="$DEPS_DIR/build/$ARCH"
+DEPS="$DEPS_BUILD_DIR/ElegooSlicer_deps"
 
-# Fix for Multi-config generators
-if [ "$SLICER_CMAKE_GENERATOR" == "Xcode" ]; then
-    export BUILD_DIR_CONFIG_SUBDIR="/$BUILD_CONFIG"
-else
-    export BUILD_DIR_CONFIG_SUBDIR=""
-fi
+# For Multi-config generators like Ninja and Xcode
+export BUILD_DIR_CONFIG_SUBDIR="/$BUILD_CONFIG"
 
 function build_deps() {
-    echo "Building deps..."
-    (
-        set -x
-        mkdir -p "$DEPS"
-        cd "$DEPS_BUILD_DIR"
-        if [ "1." != "$BUILD_ONLY". ]; then
-            cmake .. \
-                -G "${DEPS_CMAKE_GENERATOR}" \
-                -DDESTDIR="$DEPS" \
-                -DOPENSSL_ARCH="darwin64-${ARCH}-cc" \
-                -DCMAKE_BUILD_TYPE="$BUILD_CONFIG" \
-                -DCMAKE_OSX_ARCHITECTURES:STRING="${ARCH}" \
-                -DCMAKE_OSX_DEPLOYMENT_TARGET="${OSX_DEPLOYMENT_TARGET}"
+    # iterate over two architectures: x86_64 and arm64
+    for _ARCH in x86_64 arm64; do
+        # if ARCH is universal or equal to _ARCH
+        if [ "$ARCH" == "universal" ] || [ "$ARCH" == "$_ARCH" ]; then
+
+            PROJECT_BUILD_DIR="$PROJECT_DIR/build/$_ARCH"
+            DEPS_BUILD_DIR="$DEPS_DIR/build/$_ARCH"
+            DEPS="$DEPS_BUILD_DIR/ElegooSlicer_dep"
+
+            echo "Building deps..."
+            (
+                set -x
+                mkdir -p "$DEPS"
+                cd "$DEPS_BUILD_DIR"
+                if [ "1." != "$BUILD_ONLY". ]; then
+                    cmake "${DEPS_DIR}" \
+                        -G "${DEPS_CMAKE_GENERATOR}" \
+                        -DDESTDIR="$DEPS" \
+                        -DOPENSSL_ARCH="darwin64-${_ARCH}-cc" \
+                        -DCMAKE_BUILD_TYPE="$BUILD_CONFIG" \
+                        -DCMAKE_OSX_ARCHITECTURES:STRING="${_ARCH}" \
+                        -DCMAKE_OSX_DEPLOYMENT_TARGET="${OSX_DEPLOYMENT_TARGET}"
+                fi
+                cmake --build . --config "$BUILD_CONFIG" --target deps
+            )
         fi
-        cmake --build . --config "$BUILD_CONFIG" --target deps
-    )
+    done
 }
 
 function pack_deps() {
     echo "Packing deps..."
     (
         set -x
-        mkdir -p "$DEPS"
-        cd "$DEPS_BUILD_DIR"
-        tar -zcvf "ElegooSlicer_dep_mac_${ARCH}_$(date +"%Y%m%d").tar.gz" "ElegooSlicer_dep_$ARCH"
+        cd "$DEPS_DIR"
+        tar -zcvf "ElegooSlicer_dep_mac_${ARCH}_$(date +"%Y%m%d").tar.gz" "build"
     )
 }
 
 function build_slicer() {
-    echo "Building slicer..."
-    (
-        set -x
-        mkdir -p "$PROJECT_BUILD_DIR"
-        cd "$PROJECT_BUILD_DIR"
-        if [ "1." != "$BUILD_ONLY". ]; then
-            cmake .. \
-                -G "${SLICER_CMAKE_GENERATOR}" \
-                -DBBL_RELEASE_TO_PUBLIC=1 \
-                -DCMAKE_PREFIX_PATH="$DEPS/usr/local" \
-                -DCMAKE_INSTALL_PREFIX="$PWD/ElegooSlicer" \
-                -DCMAKE_BUILD_TYPE="$BUILD_CONFIG" \
-                -DCMAKE_MACOSX_RPATH=ON \
-                -DCMAKE_INSTALL_RPATH="${DEPS}/usr/local" \
-                -DCMAKE_MACOSX_BUNDLE=ON \
-                -DCMAKE_OSX_ARCHITECTURES="${ARCH}" \
-                -DCMAKE_OSX_DEPLOYMENT_TARGET="${OSX_DEPLOYMENT_TARGET}" \
-                -DELEGOO_TEST="${ELEGOO_TEST}"
-        fi
-        cmake --build . --config "$BUILD_CONFIG" --target "$SLICER_BUILD_TARGET"
-    )
+    # iterate over two architectures: x86_64 and arm64
+    for _ARCH in x86_64 arm64; do
+        # if ARCH is universal or equal to _ARCH
+        if [ "$ARCH" == "universal" ] || [ "$ARCH" == "$_ARCH" ]; then
 
-    echo "Verify localization with gettext..."
-    (
-        cd "$PROJECT_DIR"
-        ./run_gettext.sh
-    )
+            PROJECT_BUILD_DIR="$PROJECT_DIR/build/$_ARCH"
+            DEPS_BUILD_DIR="$DEPS_DIR/build/$_ARCH"
+            DEPS="$DEPS_BUILD_DIR/ElegooSlicer_dep"
 
-    echo "Fix macOS app package..."
-    (
-        cd "$PROJECT_BUILD_DIR"
-        mkdir -p ElegooSlicer
-        cd ElegooSlicer
-        # remove previously built app
-        rm -rf ./ElegooSlicer.app
-        # fully copy newly built app
-        cp -pR "../src$BUILD_DIR_CONFIG_SUBDIR/ElegooSlicer.app" ./ElegooSlicer.app
-        # fix resources
-        resources_path=$(readlink ./ElegooSlicer.app/Contents/Resources)
-        rm ./ElegooSlicer.app/Contents/Resources
-        cp -R "$resources_path" ./ElegooSlicer.app/Contents/Resources
-        # delete .DS_Store file
-        find ./ElegooSlicer.app/ -name '.DS_Store' -delete
-    )
+            echo "Building slicer for $_ARCH..."
+            (
+                set -x
+            mkdir -p "$PROJECT_BUILD_DIR"
+            cd "$PROJECT_BUILD_DIR"
+            if [ "1." != "$BUILD_ONLY". ]; then
+                cmake "${PROJECT_DIR}" \
+                    -G "${SLICER_CMAKE_GENERATOR}" \
+                    -DBBL_RELEASE_TO_PUBLIC=1 \
+                    -DORCA_TOOLS=ON \
+                    -DCMAKE_PREFIX_PATH="$DEPS/usr/local" \
+                    -DCMAKE_INSTALL_PREFIX="$PWD/ElegooSlicer" \
+                    -DCMAKE_BUILD_TYPE="$BUILD_CONFIG" \
+                    -DCMAKE_MACOSX_RPATH=ON \
+                    -DCMAKE_INSTALL_RPATH="${DEPS}/usr/local" \
+                    -DCMAKE_MACOSX_BUNDLE=ON \
+                    -DCMAKE_OSX_ARCHITECTURES="${_ARCH}" \
+                    -DCMAKE_OSX_DEPLOYMENT_TARGET="${OSX_DEPLOYMENT_TARGET}" \
+                    -DELEGOO_TEST="${ELEGOO_TEST}"
+            fi
+            cmake --build . --config "$BUILD_CONFIG" --target "$SLICER_BUILD_TARGET"
+        )
 
-    # extract version
-    # export ver=$(grep '^#define ELEGOOSLICER_VERSION' ../src/libslic3r/libslic3r_version.h | cut -d ' ' -f3)
-    # ver="_V${ver//\"}"
-    # echo $PWD
-    # if [ "1." != "$NIGHTLY_BUILD". ];
-    # then
-    #     ver=${ver}_dev
-    # fi
+        echo "Verify localization with gettext..."
+        (
+            cd "$PROJECT_DIR"
+            ./scripts/run_gettext.sh
+        )
 
-    # zip -FSr ElegooSlicer${ver}_Mac_${ARCH}.zip ElegooSlicer.app
+        echo "Fix macOS app package..."
+        (
+            cd "$PROJECT_BUILD_DIR"
+            mkdir -p ElegooSlicer
+            cd ElegooSlicer
+            # remove previously built app
+            rm -rf ./ElegooSlicer.app
+            # fully copy newly built app
+            cp -pR "../src$BUILD_DIR_CONFIG_SUBDIR/ElegooSlicer.app" ./ElegooSlicer.app
+            # fix resources
+            resources_path=$(readlink ./ElegooSlicer.app/Contents/Resources)
+            rm ./ElegooSlicer.app/Contents/Resources
+            cp -R "$resources_path" ./ElegooSlicer.app/Contents/Resources
+            # delete .DS_Store file
+            find ./ElegooSlicer.app/ -name '.DS_Store' -delete
+            
+            # Copy ElegooSlicer_profile_validator.app if it exists
+            if [ -f "../src$BUILD_DIR_CONFIG_SUBDIR/ElegooSlicer_profile_validator.app/Contents/MacOS/ElegooSlicer_profile_validator" ]; then
+                echo "Copying ElegooSlicer_profile_validator.app..."
+                rm -rf ./ElegooSlicer_profile_validator.app
+                cp -pR "../src$BUILD_DIR_CONFIG_SUBDIR/ElegooSlicer_profile_validator.app" ./ElegooSlicer_profile_validator.app
+                # delete .DS_Store file
+                find ./ElegooSlicer_profile_validator.app/ -name '.DS_Store' -delete
+            fi
+        )
+
+        # extract version
+        # export ver=$(grep '^#define SoftFever_VERSION' ../src/libslic3r/libslic3r_version.h | cut -d ' ' -f3)
+        # ver="_V${ver//\"}"
+        # echo $PWD
+        # if [ "1." != "$NIGHTLY_BUILD". ];
+        # then
+        #     ver=${ver}_dev
+        # fi
+
+        # zip -FSr ElegooSlicer${ver}_Mac_${_ARCH}.zip ElegooSlicer.app
+
+    fi
+    done
 }
 
 function build_universal() {
     echo "Building universal binary..."
-    # Save current ARCH
-    ORIGINAL_ARCH="$ARCH"
-    
-    # Build x86_64
-    ARCH="x86_64"
-    PROJECT_BUILD_DIR="$PROJECT_DIR/build_$ARCH"
-    DEPS_BUILD_DIR="$DEPS_DIR/build_$ARCH"
-    DEPS="$DEPS_BUILD_DIR/OrcaSlicer_dep_$ARCH"
-    build_deps
-    build_slicer
-    
-    # Build arm64
-    ARCH="arm64"
-    PROJECT_BUILD_DIR="$PROJECT_DIR/build_$ARCH"
-    DEPS_BUILD_DIR="$DEPS_DIR/build_$ARCH"
-    DEPS="$DEPS_BUILD_DIR/OrcaSlicer_dep_$ARCH"
-    build_deps
-    build_slicer
-    
-    # Restore original ARCH
-    ARCH="$ORIGINAL_ARCH"
-    PROJECT_BUILD_DIR="$PROJECT_DIR/build_$ARCH"
-    DEPS_BUILD_DIR="$DEPS_DIR/build_$ARCH"
-    DEPS="$DEPS_BUILD_DIR/OrcaSlicer_dep_$ARCH"
+
+    PROJECT_BUILD_DIR="$PROJECT_DIR/build/$ARCH"
     
     # Create universal binary
     echo "Creating universal binary..."
-    PROJECT_BUILD_DIR="$PROJECT_DIR/build_Universal"
-    mkdir -p "$PROJECT_BUILD_DIR/OrcaSlicer"
-    UNIVERSAL_APP="$PROJECT_BUILD_DIR/OrcaSlicer/Universal_OrcaSlicer.app"
+    # PROJECT_BUILD_DIR="$PROJECT_DIR/build_Universal"
+    mkdir -p "$PROJECT_BUILD_DIR/ElegooSlicer"
+    UNIVERSAL_APP="$PROJECT_BUILD_DIR/ElegooSlicer/ElegooSlicer.app"
     rm -rf "$UNIVERSAL_APP"
-    cp -R "$PROJECT_DIR/build_x86_64/OrcaSlicer/OrcaSlicer.app" "$UNIVERSAL_APP"
+    cp -R "$PROJECT_DIR/build/arm64/ElegooSlicer/ElegooSlicer.app" "$UNIVERSAL_APP"
     
     # Get the binary path inside the .app bundle
-    BINARY_PATH="Contents/MacOS/OrcaSlicer"
+    BINARY_PATH="Contents/MacOS/ElegooSlicer"
     
     # Create universal binary using lipo
     lipo -create \
-        "$PROJECT_DIR/build_x86_64/OrcaSlicer/OrcaSlicer.app/$BINARY_PATH" \
-        "$PROJECT_DIR/build_arm64/OrcaSlicer/OrcaSlicer.app/$BINARY_PATH" \
+        "$PROJECT_DIR/build/x86_64/ElegooSlicer/ElegooSlicer.app/$BINARY_PATH" \
+        "$PROJECT_DIR/build/arm64/ElegooSlicer/ElegooSlicer.app/$BINARY_PATH" \
         -output "$UNIVERSAL_APP/$BINARY_PATH"
         
     echo "Universal binary created at $UNIVERSAL_APP"
+    
+    # Create universal binary for profile validator if it exists
+    if [ -f "$PROJECT_DIR/build/arm64/ElegooSlicer/ElegooSlicer_profile_validator.app/Contents/MacOS/ElegooSlicer_profile_validator" ] && \
+       [ -f "$PROJECT_DIR/build/x86_64/ElegooSlicer/ElegooSlicer_profile_validator.app/Contents/MacOS/ElegooSlicer_profile_validator" ]; then
+        echo "Creating universal binary for ElegooSlicer_profile_validator..."
+        UNIVERSAL_VALIDATOR_APP="$PROJECT_BUILD_DIR/ElegooSlicer/ElegooSlicer_profile_validator.app"
+        rm -rf "$UNIVERSAL_VALIDATOR_APP"
+        cp -R "$PROJECT_DIR/build/arm64/ElegooSlicer/ElegooSlicer_profile_validator.app" "$UNIVERSAL_VALIDATOR_APP"
+        
+        # Get the binary path inside the profile validator .app bundle
+        VALIDATOR_BINARY_PATH="Contents/MacOS/ElegooSlicer_profile_validator"
+        
+        # Create universal binary using lipo
+        lipo -create \
+            "$PROJECT_DIR/build/x86_64/ElegooSlicer/ElegooSlicer_profile_validator.app/$VALIDATOR_BINARY_PATH" \
+            "$PROJECT_DIR/build/arm64/ElegooSlicer/ElegooSlicer_profile_validator.app/$VALIDATOR_BINARY_PATH" \
+            -output "$UNIVERSAL_VALIDATOR_APP/$VALIDATOR_BINARY_PATH"
+            
+        echo "Universal binary for ElegooSlicer_profile_validator created at $UNIVERSAL_VALIDATOR_APP"
+    fi
 }
 
 case "${BUILD_TARGET}" in
     all)
-        if [ "1." == "$BUILD_UNIVERSAL". ]; then
-            build_universal
-        else
-            build_deps
-            build_slicer
-        fi
+        build_deps
+        build_slicer
         ;;
     deps)
         build_deps
         ;;
     slicer)
-        if [ "1." == "$BUILD_UNIVERSAL". ]; then
-            build_universal
-        else
-            build_slicer
-        fi
+        build_slicer
         ;;
     *)
         echo "Unknown target: $BUILD_TARGET. Available targets: deps, slicer, all."
         exit 1
         ;;
 esac
+
+if [ "$ARCH" = "universal" ] && [ "$BUILD_TARGET" != "deps" ]; then
+    build_universal
+fi
 
 if [ "1." == "$PACK_DEPS". ]; then
     pack_deps

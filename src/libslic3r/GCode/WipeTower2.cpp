@@ -1412,7 +1412,7 @@ void WipeTower2::set_extruder(size_t idx, const PrintConfig& config)
         // We will use the same variables internally, but the correspondence to the configuration options will be different.
         float vol  = config.filament_multitool_ramming_volume.get_at(idx);
         float flow = config.filament_multitool_ramming_flow.get_at(idx);
-        m_filpar[idx].multitool_ramming = config.filament_multitool_ramming.get_at(idx);
+        m_filpar[idx].multitool_ramming = config.filament_multitool_ramming.get_at(idx) && vol > 0.f && flow > 0.f;
         m_filpar[idx].ramming_line_width_multiplicator = 2.;
         m_filpar[idx].ramming_step_multiplicator = 1.;
 
@@ -1422,7 +1422,7 @@ void WipeTower2::set_extruder(size_t idx, const PrintConfig& config)
         // ramming_speed vector that would respect both the volume and flow (because of 
         // rounding issues with small volumes and high flow).
         m_filpar[idx].ramming_speed.push_back(flow);
-        m_filpar[idx].multitool_ramming_time = vol/flow;
+        m_filpar[idx].multitool_ramming_time = flow > 0.f ? vol/flow : 0.f;
     }
 
     m_used_filament_length.resize(std::max(m_used_filament_length.size(), idx + 1)); // makes sure that the vector is big enough so we don't have to check later
@@ -2328,6 +2328,13 @@ void WipeTower2::generate(std::vector<std::vector<WipeTower::ToolChangeResult>> 
         plan_tower();
     }
 #endif
+
+    m_rib_length = std::max({m_rib_length, sqrt(m_wipe_tower_depth * m_wipe_tower_depth + m_wipe_tower_width * m_wipe_tower_width)});
+    m_rib_length += m_extra_rib_length;
+    m_rib_length = std::max(0.f, m_rib_length);
+    m_rib_width  = std::min(m_rib_width, std::min(m_wipe_tower_depth, m_wipe_tower_width) /
+                                             2.f); // Ensure that the rib wall of the wipetower are attached to the infill.
+
 
     m_layer_info = m_plan.begin();
     m_current_height = 0.f;
