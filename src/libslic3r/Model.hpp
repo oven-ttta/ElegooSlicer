@@ -1600,7 +1600,7 @@ public:
     // BBS: backup
     static Model read_from_archive(
         const std::string& input_file,
-        DynamicPrintConfig* config, ConfigSubstitutionContext* config_substitutions, En3mfType& out_file_type,
+        DynamicPrintConfig* config, ConfigSubstitutionContext* config_substitutions, En3mfType& out_file_type, std::string& generator,
         LoadStrategy options = LoadStrategy::AddDefaultInstances, PlateDataPtrs* plate_data = nullptr, std::vector<Preset*>* project_presets = nullptr, Semver* file_version = nullptr, Import3mfProgressFn proFn = nullptr, BBLProject* project = nullptr);
 
     // Add a new ModelObject to this Model, generate a new ID for this ModelObject.

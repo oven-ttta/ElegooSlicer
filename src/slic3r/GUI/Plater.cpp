@@ -3828,11 +3828,12 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                     // BBS: add part plate related logic
                     PlateDataPtrs             plate_data;
                     En3mfType                 en_3mf_file_type = En3mfType::From_BBS;
+                    std::string generator;
                     ConfigSubstitutionContext config_substitutions{ForwardCompatibilitySubstitutionRule::Enable};
                     std::vector<Preset *>     project_presets;
                     // BBS: backup & restore
                     q->skip_thumbnail_invalid = true;
-                    model = Slic3r::Model::read_from_archive(path.string(), &config_loaded, &config_substitutions, en_3mf_file_type, strategy, &plate_data, &project_presets,
+                    model = Slic3r::Model::read_from_archive(path.string(), &config_loaded, &config_substitutions, en_3mf_file_type, generator, strategy, &plate_data, &project_presets,
                                                              &file_version,
                                                              [this, &dlg, real_filename, &progress_percent, &file_percent, stage_percent, INPUT_FILES_RATIO, total_files, i,
                                                               &is_user_cancel](int import_stage, int current, int total, bool &cancel) {
@@ -3849,6 +3850,45 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ":" << __LINE__
                                             << boost::format(", plate_data.size %1%, project_preset.size %2%, is_bbs_3mf %3%, file_version %4% \n") % plate_data.size() %
                                                    project_presets.size() % (en_3mf_file_type == En3mfType::From_BBS) % file_version.to_string();
+
+                    // BBS: version check
+                    Semver app_version = *(Semver::parse(ORCA_COMPATIBLE_VERSION));// Temporarily use Orca version to avoid compatibility issues when loading models.
+                    bool is_elegoo_slicer_3mf = false;
+                    if(generator.find("ElegooSlicer") != std::string::npos || file_version < Semver("1.3.0")) {
+                        is_elegoo_slicer_3mf = true;
+                        app_version = *(Semver::parse(ELEGOOSLICER_VERSION)); // ElegooSlicer version
+                    }
+
+                    std::string import_project_action = wxGetApp().app_config->get("import_project_action");
+                    LoadType load_type;
+                    if (import_project_action.empty())
+                        load_type = LoadType::Unknown;
+                    else
+                        load_type  = static_cast<LoadType>(std::stoi(import_project_action));
+
+                    if (en_3mf_file_type == En3mfType::From_Prusa) {
+                        // do not reset the model config
+                        load_config = false;
+                        if(load_type != LoadType::LoadGeometry)
+                            show_info(q, _L("The 3mf is not supported by ElegooSlicer, load geometry data only."), _L("Load 3mf"));
+                    }
+                    else if(load_config && !is_elegoo_slicer_3mf) {
+                        MessageDialog msg_window(q, _L("The imported 3mf file may have some incompatibilities, continuing to import may cause some issues. Do you want to continue importing the whole file or only import the model data?"),
+                                                    _L("Load 3mf"), wxYES_NO | wxCANCEL | wxCENTRE);
+                        msg_window.SetButtonLabel(wxID_YES, _L("Load Whole File"));
+                        msg_window.SetButtonLabel(wxID_NO, _L("Load Model Only"));
+                        msg_window.SetButtonLabel(wxID_CANCEL, _L("Cancel"));
+                        int result = msg_window.ShowModal();
+                        if(result == wxID_YES) {
+                            
+                        } else if(result == wxID_NO) {
+                            load_type = LoadType::LoadGeometry;
+                            load_config = false;
+                        } else {
+                            is_user_cancel = true;
+                            return empty_result;
+                        }
+                    }
 
                     // 1. add extruder for prusa model if the number of existing extruders is not enough
                     // 2. add extruder for BBS or Other model if only import geometry
@@ -3875,21 +3915,6 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                         wxGetApp().get_tab(Preset::TYPE_PRINT)->update();
                     }
 
-                    std::string import_project_action = wxGetApp().app_config->get("import_project_action");
-                    LoadType load_type;
-                    if (import_project_action.empty())
-                        load_type = LoadType::Unknown;
-                    else
-                        load_type  = static_cast<LoadType>(std::stoi(import_project_action));
-
-                    // BBS: version check
-                    Semver app_version = *(Semver::parse(ORCA_VERSION));// Temporarily use Orca version to avoid compatibility issues when loading models.
-                    if (en_3mf_file_type == En3mfType::From_Prusa) {
-                        // do not reset the model config
-                        load_config = false;
-                        if(load_type != LoadType::LoadGeometry)
-                            show_info(q, _L("The 3mf is not supported by ElegooSlicer, load geometry data only."), _L("Load 3mf"));
-                    }
                     // else if (load_config && (file_version.maj() != app_version.maj())) {
                     //     // version mismatch, only load geometries
                     //     load_config = false;
@@ -3916,6 +3941,10 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                     //         for (ModelVolume *model_volume : model_object->volumes) model_volume->config.reset();
                     //     }
                     // }
+
+                    if(file_version < Semver("1.3.0")) {
+                        // If it is less than version 1.3.0, it is an old version of ElegooSlicer, we do not need to prompt any information
+                    }
                     // Orca: check if the project is created with OrcaSlicer 2.3.1-alpha and use the sparse infill rotation template for non-safe infill patterns
                     else if (load_config && (file_version < app_version) && file_version == Semver("2.3.1-alpha")) {
                         if (!config_loaded.opt_string("sparse_infill_rotate_template").empty()) {
@@ -3942,31 +3971,38 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
 
                     } else if (load_config && (file_version > app_version)) {
                         if (config_substitutions.unrecogized_keys.size() > 0) {
-                            wxString text  = wxString::Format(_L("The 3mf's version %s is newer than %s's version %s, found following unrecognized keys:"),
-                                                             file_version.to_string(), std::string(SLIC3R_APP_FULL_NAME), app_version.to_string_sf());
+                            // wxString text  = wxString::Format(_L("The 3mf's version %s is newer than %s's version %s, found following unrecognized keys:"),
+                            //                                  file_version.to_string(), std::string(SLIC3R_APP_FULL_NAME), app_version.to_string());
+                            // text += "\n";
+                            // bool     first = true;
+                            // // std::string context = into_u8(text);
+                            // wxString context = text;
+                            // // if (wxGetApp().app_config->get("user_mode") == "develop") {
+                            // //     for (auto &key : config_substitutions.unrecogized_keys) {
+                            // //         context += "  -";
+                            // //         context += key;
+                            // //         context += ";\n";
+                            // //         first = false;
+                            // //     }
+                            // // }
+                            // wxString append = _L("You'd better upgrade your software.\n");
+                            // context += "\n\n";
+                            // // context += into_u8(append);
+                            // context += append;
+                            // show_info(q, context, _L("Newer 3mf version"));
+
+                            app_version = *(Semver::parse(ELEGOOSLICER_VERSION)); // used to display the current version number
+                            wxString text  = wxString::Format(_L("The 3mf's version %s is newer than %s's version %s, Suggest to upgrade your software."),
+                            file_version.to_string(), std::string(SLIC3R_APP_FULL_NAME), app_version.to_string());
                             text += "\n";
-                            bool     first = true;
-                            // std::string context = into_u8(text);
-                            wxString context = text;
-                            // if (wxGetApp().app_config->get("user_mode") == "develop") {
-                            //     for (auto &key : config_substitutions.unrecogized_keys) {
-                            //         context += "  -";
-                            //         context += key;
-                            //         context += ";\n";
-                            //         first = false;
-                            //     }
-                            // }
-                            wxString append = _L("You'd better upgrade your software.\n");
-                            context += "\n\n";
-                            // context += into_u8(append);
-                            context += append;
-                            show_info(q, context, _L("Newer 3mf version"));
+                            show_info(q, text, _L("Newer 3mf version"));
                         }
                         else {
                             //if the minor version is not matched
                             if (file_version.min() != app_version.min()) {
+                                app_version = *(Semver::parse(ELEGOOSLICER_VERSION)); // used to display the current version number
                                 wxString text  = wxString::Format(_L("The 3mf's version %s is newer than %s's version %s, Suggest to upgrade your software."),
-                                                 file_version.to_string(), std::string(SLIC3R_APP_FULL_NAME), app_version.to_string_sf());
+                                                 file_version.to_string(), std::string(SLIC3R_APP_FULL_NAME), app_version.to_string());
                                 text += "\n";
                                 show_info(q, text, _L("Newer 3mf version"));
                             }
@@ -4071,7 +4107,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                             notify_manager->bbl_show_3mf_warn_notification(error_message);
                         }
                     }
-                    if (!config_substitutions.empty()) show_substitutions_info(config_substitutions.substitutions, filename.string());
+                    if (load_config && !config_substitutions.empty()) show_substitutions_info(config_substitutions.substitutions, filename.string());
 
                     // BBS
                     if (load_model && !load_config) {
