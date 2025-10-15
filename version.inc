@@ -28,4 +28,7 @@ set(SLIC3R_VERSION ${ELEGOOSLICER_VERSION})
 set(SLIC3R_BUILD_ID "${ELEGOOSLICER_VERSION}")
 
 # The forked version of Orca, used for some compatibility
-set(ORCA_VERSION "2.3.1")
+set(ORCA_COMPATIBLE_VERSION "2.3.1")
+
+#Bambu compatible version
+set(BAMBU_COMPATIBLE_VERSION "01.10.01.50")

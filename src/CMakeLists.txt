@@ -86,8 +86,8 @@ if(ORCA_TOOLS)
         set_target_properties(ElegooSlicer_profile_validator PROPERTIES
             MACOSX_BUNDLE TRUE
             MACOSX_BUNDLE_BUNDLE_NAME "ElegooSlicer Profile Validator"
-            MACOSX_BUNDLE_BUNDLE_VERSION "${SLIC3R_VERSION}"
-            MACOSX_BUNDLE_SHORT_VERSION_STRING "${SLIC3R_VERSION}"
+            MACOSX_BUNDLE_BUNDLE_VERSION "${ELEGOOSLICER_VERSION}"
+            MACOSX_BUNDLE_SHORT_VERSION_STRING "${ELEGOOSLICER_VERSION}"
             MACOSX_BUNDLE_IDENTIFIER "com.softfever.elegooslicer.profile-validator"
             MACOSX_BUNDLE_COPYRIGHT "© 2024 SoftFever"
             MACOSX_BUNDLE_GUI_IDENTIFIER "com.softfever.elegooslicer.profile-validator"

@@ -377,6 +377,55 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     }  
     //TargetUrl = "https://np-sit.elegoo.com.cn//elegooSlicer";
     mBrowser->LoadURL(TargetUrl);
+    
+    // 设置 ElegooSlicer UserAgent
+    wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
+#ifdef __WIN32__
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
+        ELEGOOSLICER_VERSION, theme));
+#elif defined(__WXMAC__)
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", 
+        ELEGOOSLICER_VERSION, theme));
+#elif defined(__linux__)
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (X11; Linux x86_64)", 
+        ELEGOOSLICER_VERSION, theme));
+#else
+    mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (compatible; ElegooSlicer)", 
+        ELEGOOSLICER_VERSION, theme));
+#endif
+
+    std::thread([this]() {
+        try {
+
+            // std::this_thread::sleep_for(std::chrono::seconds(10));
+            // if (m_lifeTracker && *m_lifeTracker) {
+                
+            //     // 发送语言设置消息
+            //     nlohmann::json languageMessage;
+            //     languageMessage["code"] = "zh-CN";
+            //     languageMessage["name"] = "中文";
+                
+            //     m_ipc->request("client.setLanguage", languageMessage, [](const webviewIpc::IPCResult& response) {
+            //         BOOST_LOG_TRIVIAL(info) << "Language setting response: " << response.message;
+            //     });
+
+
+            //     // 发送区域设置消息
+            //     nlohmann::json regionMessage;
+            //     regionMessage["code"] = "CN";
+            //     regionMessage["name"] = "中国大陆";
+                
+            //     m_ipc->request("client.setRegion", regionMessage, [](const webviewIpc::IPCResult& response) {
+            //         BOOST_LOG_TRIVIAL(info) << "Region setting response: " << response.message;
+            //     });
+            //     BOOST_LOG_TRIVIAL(info) << "Sent region setting message via IPC after 3s delay";
+          /*  } else {
+                BOOST_LOG_TRIVIAL(info) << "PrinterManagerView destroyed, skipping language/region setting";
+            }*/
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << "Error in delayed language/region setting: " << e.what();
+        }
+    }).detach();
 
     // Load saved tab state
     loadTabState();
@@ -777,7 +826,56 @@ void PrinterManagerView::setupIPCHandlers()
             }
         }
     });
-       
+    
+    m_ipc->onRequest("report.userInfo", [this](const webviewIpc::IPCRequest& request){
+       auto data = request.params.value("data", nlohmann::json::object());
+       std::string uuid = data.value("uuid", "");
+       if(uuid.empty()) {
+            return webviewIpc::IPCResult::success();
+       }
+       std::string user_id = data.value("user_id", "");
+       std::string access_token = data.value("access_token", "");
+       std::string refresh_token = data.value("refresh_token", "");
+       int64_t expires_time = data.value("expires_time", 0);
+       std::string openid = data.value("openid", "");
+       std::string avatar = data.value("avatar", "");
+       std::string email = data.value("email", "");
+       std::string nickname = data.value("nickname", "");
+
+       mBrowser->LoadURL("https://np-sit.elegoo.com.cn//elegooSlicer");
+
+       //528270068@qq.com
+       mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
+        ELEGOOSLICER_VERSION, wxGetApp().dark_mode() ? "dark" : "light"));
+        return webviewIpc::IPCResult::success();
+    });
+
+
+    m_ipc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string url = params.value("url", "");
+        wxLaunchDefaultBrowser(url);
+        return webviewIpc::IPCResult::success();
+    });
+
+
+    m_ipc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string url = params.value("url", "");
+        wxLaunchDefaultBrowser(url);
+        return webviewIpc::IPCResult::success();
+    });
+
+    m_ipc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request){
+        if (mIsLogin)
+            return webviewIpc::IPCResult::success();
+        mIsLogin     = true;
+        wxString url = "https://np-sit.elegoo.com.cn//account//slicer-login?language=zh-CN&region=US";
+        //wxLaunchDefaultBrowser(url);
+        mBrowser->LoadURL(url);
+        return webviewIpc::IPCResult::success();
+    });
+
 }
 
 webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)

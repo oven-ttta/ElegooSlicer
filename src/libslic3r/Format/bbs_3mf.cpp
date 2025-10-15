@@ -137,7 +137,6 @@ const std::string BBL_APPLICATION_TAG               = "Application";
 const std::string BBL_MAKERLAB_TAG                  = "MakerLab";
 const std::string BBL_MAKERLAB_VERSION_TAG          = "MakerLabVersion";
 
-
 const std::string BBL_PROFILE_TITLE_TAG             = "ProfileTitle";
 const std::string BBL_PROFILE_COVER_TAG             = "ProfileCover";
 const std::string BBL_PROFILE_DESCRIPTION_TAG       = "ProfileDescription";
@@ -989,6 +988,7 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
         std::string  m_Profile_description;
         std::string  m_profile_user_id;
         std::string  m_profile_user_name;
+        std::string  m_generator;
 
         XML_Parser m_xml_parser;
         // Error code returned by the application side of the parser. In that case the expat may not reliably deliver the error state
@@ -1045,7 +1045,7 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
         //BBS: add plate data related logic
         // add backup & restore logic
         bool load_model_from_file(const std::string& filename, Model& model, PlateDataPtrs& plate_data_list, std::vector<Preset*>& project_presets, DynamicPrintConfig& config,
-            ConfigSubstitutionContext& config_substitutions, LoadStrategy strategy, bool& is_bbl_3mf, Semver& file_version, Import3mfProgressFn proFn = nullptr, BBLProject *project = nullptr, int plate_id = 0);
+            ConfigSubstitutionContext& config_substitutions, LoadStrategy strategy, bool& is_bbl_3mf, std::string& generator, Semver& file_version, Import3mfProgressFn proFn = nullptr, BBLProject *project = nullptr, int plate_id = 0);
         bool get_thumbnail(const std::string &filename, std::string &data);
         bool load_gcode_3mf_from_stream(std::istream & data, Model& model, PlateDataPtrs& plate_data_list, DynamicPrintConfig& config, Semver& file_version);
         unsigned int version() const { return m_version; }
@@ -1253,7 +1253,7 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
     //BBS: add plate data related logic
         // add backup & restore logic
     bool _BBS_3MF_Importer::load_model_from_file(const std::string& filename, Model& model, PlateDataPtrs& plate_data_list, std::vector<Preset*>& project_presets, DynamicPrintConfig& config,
-        ConfigSubstitutionContext& config_substitutions, LoadStrategy strategy, bool& is_bbl_3mf, Semver& file_version, Import3mfProgressFn proFn, BBLProject *project, int plate_id)
+        ConfigSubstitutionContext& config_substitutions, LoadStrategy strategy, bool& is_bbl_3mf, std::string& generator, Semver& file_version, Import3mfProgressFn proFn, BBLProject *project, int plate_id)
     {
         m_version = 0;
         m_fdm_supports_painting_version = 0;
@@ -1307,6 +1307,7 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
         }
         bool result = _load_model_from_file(filename, model, plate_data_list, project_presets, config, config_substitutions, proFn, project, plate_id);
         is_bbl_3mf = m_is_bbl_3mf;
+        generator = m_generator;
         if (m_bambuslicer_generator_version)
             file_version = *m_bambuslicer_generator_version;
         // save for restore
@@ -3727,15 +3728,26 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
                 throw version_error(msg);
             }*/
         } else if (m_curr_metadata_name == BBL_APPLICATION_TAG) {
+            m_generator = m_curr_characters;
             // Generator application of the 3MF.
             // SLIC3R_APP_KEY - ELEGOOSLICER_VERSION
             if (boost::starts_with(m_curr_characters, "BambuStudio-")) {
                 m_is_bbl_3mf = true;
                 m_bambuslicer_generator_version = Semver::parse(m_curr_characters.substr(12));
             }
-            else if (boost::starts_with(m_curr_characters, "ElegooSlicer-")) {
+            else if (boost::starts_with(m_curr_characters, "OrcaSlicer-")) {
                 m_is_bbl_3mf = true;
                 m_bambuslicer_generator_version = Semver::parse(m_curr_characters.substr(11));
+            }
+            else if (boost::starts_with(m_curr_characters, "ElegooSlicer-")) {
+                m_is_bbl_3mf = true;
+                static const boost::regex regex_ver(R"((\d+)\.(\d+)\.(\d+)(?:\.(\d+))?)");
+                boost::smatch what;
+                if (boost::regex_search(m_curr_characters, what, regex_ver)) {
+                    if (what.size() >= 4) { 
+                        m_bambuslicer_generator_version = Semver::parse(what[0].str());
+                    }
+                }
             }
         //TODO: currently use version 0, no need to load&&save this string
         /*} else if (m_curr_metadata_name == BBS_FDM_SUPPORTS_PAINTING_VERSION) {
@@ -3801,7 +3813,8 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
             ;
         } else if (m_curr_metadata_name == BBL_MODIFICATION_TAG) {
             ;
-        } else {
+        }
+        else {
             ;
         }
         if (!m_curr_metadata_name.empty()) {
@@ -7799,6 +7812,7 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
         stream << "  <" << SLICE_HEADER_TAG << ">\n";
         stream << "    <" << SLICE_HEADER_ITEM_TAG << " " << KEY_ATTR << "=\"" << "X-BBL-Client-Type"    << "\" " << VALUE_ATTR << "=\"" << "slicer" << "\"/>\n";
         stream << "    <" << SLICE_HEADER_ITEM_TAG << " " << KEY_ATTR << "=\"" << "X-BBL-Client-Version" << "\" " << VALUE_ATTR << "=\"" << convert_to_full_version(ELEGOOSLICER_VERSION) << "\"/>\n";
+        stream << "    <" << SLICE_HEADER_ITEM_TAG << " " << KEY_ATTR << "=\"" << "X-BBL-Client-Name"    << "\" " << VALUE_ATTR << "=\"" << SLIC3R_APP_NAME << "\"/>\n";
         stream << "  </" << SLICE_HEADER_TAG << ">\n";
 
         for (unsigned int i = 0; i < (unsigned int)plate_data_list.size(); ++i)
@@ -8450,7 +8464,7 @@ private:
 
 //BBS: add plate data list related logic
 bool load_bbs_3mf(const char* path, DynamicPrintConfig* config, ConfigSubstitutionContext* config_substitutions, Model* model, PlateDataPtrs* plate_data_list, std::vector<Preset*>* project_presets,
-                    bool* is_bbl_3mf, Semver* file_version, Import3mfProgressFn proFn, LoadStrategy strategy, BBLProject *project, int plate_id)
+                    bool* is_bbl_3mf, std::string& generator, Semver* file_version, Import3mfProgressFn proFn, LoadStrategy strategy, BBLProject *project, int plate_id)
 {
     if (path == nullptr || config == nullptr || model == nullptr)
         return false;
@@ -8458,7 +8472,7 @@ bool load_bbs_3mf(const char* path, DynamicPrintConfig* config, ConfigSubstituti
     // All import should use "C" locales for number formatting.
     CNumericLocalesSetter locales_setter;
     _BBS_3MF_Importer importer;
-    bool res = importer.load_model_from_file(path, *model, *plate_data_list, *project_presets, *config, *config_substitutions, strategy, *is_bbl_3mf, *file_version, proFn, project, plate_id);
+    bool res = importer.load_model_from_file(path, *model, *plate_data_list, *project_presets, *config, *config_substitutions, strategy, *is_bbl_3mf, generator, *file_version, proFn, project, plate_id);
     importer.log_errors();
     //BBS: remove legacy project logic currently
     //handle_legacy_project_loaded(importer.version(), *config);
