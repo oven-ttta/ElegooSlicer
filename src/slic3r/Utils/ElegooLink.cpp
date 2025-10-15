@@ -817,11 +817,14 @@ PrinterNetworkResult<bool> ElegooLink::uninstallPlugin()
 
 PrinterNetworkResult<UserNetworkInfo> ElegooLink::loginWAN(const UserNetworkInfo& userInfo)
 {
-    auto result = elink::ElegooNetwork::getInstance().setHttpCredential(elink::HttpCredential{std::stoi(userInfo.userId), 
-        userInfo.token, 
-        userInfo.refreshToken, 
-        (long long)userInfo.accessTokenExpireTime, 
-        (long long)userInfo.refreshTokenExpireTime});
+    elink::HttpCredential params;
+    params.userId = userInfo.userId;
+    params.accessToken = userInfo.token;
+    params.refreshToken = userInfo.refreshToken;
+    params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
+    params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
+    //VoidResult setHttpCredential(const HttpCredential &credential);
+    auto result = elink::ElegooNetwork::getInstance().setHttpCredential(params);
        
     UserNetworkInfo userInfoRet = userInfo;
     if(result.code != elink::ELINK_ERROR_CODE::SUCCESS) {
