@@ -5,7 +5,7 @@
 #define SLIC3R_APP_FULL_NAME "ElegooSlicer"
 #define GCODEVIEWER_APP_NAME "ElegooSlicer G-code Viewer"
 #define GCODEVIEWER_APP_KEY  "ElegooSlicerGcodeViewer"
-#define GCODEVIEWER_BUILD_ID std::string("ElegooSlicer G-code Viewer-") + std::string(SLIC3R_VERSION) + std::string("-RC")
+#define GCODEVIEWER_BUILD_ID std::string("ElegooSlicer G-code Viewer-") + std::string(ELEGOOSLICER_VERSION) + std::string("-RC")
 
 // this needs to be included early for MSVC (listing it in Build.PL is not enough)
 #include <memory>

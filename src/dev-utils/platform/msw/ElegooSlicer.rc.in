@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION @SLIC3R_VERSION@
-PRODUCTVERSION @SLIC3R_VERSION@
+FILEVERSION @ELEGOO_VERSION_MAJOR@,@ELEGOO_VERSION_MINOR@,@ELEGOO_VERSION_PATCH@,@ELEGOO_VERSION_TWEAK@
+PRODUCTVERSION @ELEGOO_VERSION_MAJOR@,@ELEGOO_VERSION_MINOR@,@ELEGOO_VERSION_PATCH@,@ELEGOO_VERSION_TWEAK@
 {
  BLOCK "StringFileInfo"
  {
@@ -8,11 +8,11 @@ PRODUCTVERSION @SLIC3R_VERSION@
   {
    VALUE "CompanyName", "Shenzhen Elegoo Technology Co.,Ltd"
    VALUE "FileDescription", "@SLIC3R_APP_NAME@"
-   VALUE "FileVersion", "@SLIC3R_BUILD_ID@"
+   VALUE "FileVersion", "@ELEGOOSLICER_VERSION@"
    VALUE "ProductName", "@SLIC3R_APP_NAME@"
-   VALUE "ProductVersion", "@SLIC3R_BUILD_ID@"
+   VALUE "ProductVersion", "@ELEGOOSLICER_VERSION@"
    VALUE "InternalName", "@SLIC3R_APP_NAME@"
-   VALUE "LegalCopyright", ""
+   VALUE "LegalCopyright", "Copyright (C) 2025 ELEGOO All Rights Reserved."
    VALUE "OriginalFilename", "elegoo-slicer.exe"
   }
  }
