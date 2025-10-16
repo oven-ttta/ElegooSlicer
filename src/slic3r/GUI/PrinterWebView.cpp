@@ -60,7 +60,7 @@ PrinterWebView::PrinterWebView(wxWindow* parent) : wxPanel(parent, wxID_ANY, wxD
     auto injectJsPath = boost::format("%1%/web/orca/inject.js") % _dir;
     // read file
     std::string   injectJs;
-    std::ifstream injectJsFile(injectJsPath.str());
+    std::ifstream injectJsFile(std::filesystem::u8path(injectJsPath.str()));
     if (injectJsFile.is_open()) {
         std::string line;
         while (std::getline(injectJsFile, line)) {
