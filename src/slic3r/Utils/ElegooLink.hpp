@@ -44,7 +44,7 @@ private:
     bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10, bool isWan = false);
 
     std::mutex mMutex;
-    bool       mIsInitialized{false};
+    bool mIsInitialized{false};
 };
 
 } // namespace Slic3r

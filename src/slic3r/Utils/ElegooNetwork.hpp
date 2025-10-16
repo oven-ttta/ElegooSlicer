@@ -29,8 +29,8 @@ public:
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
     virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId) override;
 
-    virtual void init() override;
-    virtual void uninit() override;
+    static void init();
+    static void uninit();
 };
 
 } // namespace Slic3r

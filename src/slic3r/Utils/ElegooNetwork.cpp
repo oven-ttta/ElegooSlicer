@@ -12,6 +12,18 @@ ElegooNetwork::~ElegooNetwork(){
 
 }
 
+
+void ElegooNetwork::init()
+{
+    ElegooLink::getInstance()->init();
+}
+
+void ElegooNetwork::uninit()
+{
+    ElegooLink::getInstance()->uninit();
+}
+
+
 PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::connectToPrinter()
 {
     return ElegooLink::getInstance()->connectToPrinter(mPrinterNetworkInfo);
@@ -74,16 +86,6 @@ PrinterNetworkResult<PrinterPrintTaskResponse> ElegooNetwork::getPrintTaskList(i
 PrinterNetworkResult<bool> ElegooNetwork::deletePrintTasks(const std::vector<std::string>& taskIds)
 {
     return ElegooLink::getInstance()->deletePrintTasks(mPrinterNetworkInfo.printerId, taskIds);
-}
-
-void ElegooNetwork::uninit()
-{
-    ElegooLink::getInstance()->uninit();
-}
-
-void ElegooNetwork::init()
-{
-    ElegooLink::getInstance()->init();
 }
 
 PrinterNetworkResult<bool> ElegooNetwork::sendRtmMessage(const std::string& message)

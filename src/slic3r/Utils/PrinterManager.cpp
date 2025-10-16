@@ -54,13 +54,27 @@ PrinterManager::PrinterLock::~PrinterLock()
     }
 }
 
+// Cached preset bundle - load only once
+static PresetBundle* getCachedSystemBundle()
+{
+    static std::unique_ptr<PresetBundle> cachedBundle;
+    static std::once_flag initFlag;
+    
+    std::call_once(initFlag, []() {
+        cachedBundle = std::make_unique<PresetBundle>();
+        cachedBundle->load_system_models_from_json(ForwardCompatibilitySubstitutionRule::EnableSilent);
+    });
+    
+    return cachedBundle.get();
+}
+
 VendorProfile getMachineProfile(const std::string& vendorName, const std::string& machineModel, VendorProfile::PrinterModel& printerModel)
 {
     std::string   profile_vendor_name;
     VendorProfile machineProfile;
-    PresetBundle  bundle;
-    auto [substitutions, errors] = bundle.load_system_models_from_json(ForwardCompatibilitySubstitutionRule::EnableSilent);
-    for (const auto& vendor : bundle.vendors) {
+    PresetBundle* bundle = getCachedSystemBundle();
+    
+    for (const auto& vendor : bundle->vendors) {
         const auto& vendor_profile = vendor.second;
         if (boost::to_upper_copy(vendor_profile.name) == boost::to_upper_copy(vendorName)) {
             // find the profile model name from the vendor profile
@@ -88,6 +102,80 @@ VendorProfile getMachineProfile(const std::string& vendorName, const std::string
     }
     return machineProfile;
 }
+
+void PrinterManager::validateAndCompletePrinterInfo(PrinterNetworkInfo& printerInfo)
+{
+    // Validate and update vendor and model info
+    VendorProfile::PrinterModel printerModel;
+    VendorProfile machineProfile = getMachineProfile(printerInfo.vendor, printerInfo.printerModel, printerModel);
+    
+    if (machineProfile.name.empty()) {
+        return; // No matching profile found
+    }
+    
+    printerInfo.vendor = machineProfile.name;
+    if (printerInfo.printerName.empty()) {
+        printerInfo.printerName = printerModel.name;
+    }
+    printerInfo.printerModel = printerModel.name;
+    
+    // Update hostType to keep consistent with system preset
+    auto vendorPrinterModelConfigMap = getVendorPrinterModelConfig();
+    if (vendorPrinterModelConfigMap.find(printerInfo.vendor) != vendorPrinterModelConfigMap.end()) {
+        auto modelConfigMap = vendorPrinterModelConfigMap[printerInfo.vendor];
+        if (modelConfigMap.find(printerInfo.printerModel) != modelConfigMap.end()) {
+            auto config = modelConfigMap[printerInfo.printerModel];
+            const auto opt = config.option<ConfigOptionEnum<PrintHostType>>("host_type");
+            const auto hostType = opt != nullptr ? opt->value : htOctoPrint;
+            std::string hostTypeStr = PrintHost::get_print_host_type_str(hostType);
+            if (!hostTypeStr.empty()) {
+                printerInfo.hostType = hostTypeStr;
+            }
+        }
+    }
+}
+
+std::map<std::string, std::map<std::string, DynamicPrintConfig>> PrinterManager::getVendorPrinterModelConfig()
+{
+    // Cache the vendor printer model config - build only once
+    static std::map<std::string, std::map<std::string, DynamicPrintConfig>> cachedConfig;
+    static std::once_flag initFlag;
+    
+    std::call_once(initFlag, []() {
+        PresetBundle* bundle = getCachedSystemBundle();
+        
+        for (const auto& vendor : bundle->vendors) {
+            const std::string& vendorName = vendor.first;
+            PresetBundle       vendorBundle;
+            try {
+                // load the vendor configs from the resources dir
+                vendorBundle.load_vendor_configs_from_json((boost::filesystem::path(Slic3r::resources_dir()) / "profiles").string(), vendorName,
+                                                           PresetBundle::LoadMachineOnly, ForwardCompatibilitySubstitutionRule::EnableSilent,
+                                                           nullptr);
+            } catch (const std::exception& e) {
+                wxLogMessage("get printer model list load vendor %s error: %s", vendorName.c_str(), e.what());
+                continue;
+            }
+            for (const auto& printer : vendorBundle.printers) {
+                if (!printer.vendor) {
+                    continue;
+                }
+                auto printerModel = printer.config.option<ConfigOptionString>("printer_model");
+                if (!printerModel) {
+                    continue;
+                }
+
+                std::string modelName = printerModel->value;
+                if (PrintHost::support_device_list_management(printer.config)) {
+                    cachedConfig[printer.vendor->name][modelName] = printer.config;
+                }
+            }
+        }
+    });
+    
+    return cachedConfig;
+}
+
 std::string PrinterManager::imageFileToBase64DataURI(const std::string& image_path)
 {
     std::ifstream ifs(std::filesystem::u8path(image_path), std::ios::binary);
@@ -110,44 +198,6 @@ std::string PrinterManager::imageFileToBase64DataURI(const std::string& image_pa
     return "data:image/" + ext + ";base64," + encoded;
 }
 
-std::map<std::string, std::map<std::string, DynamicPrintConfig>> PrinterManager::getVendorPrinterModelConfig()
-{
-    std::map<std::string, std::map<std::string, DynamicPrintConfig>> vendorPrinterModelConfigMap;
-    PresetBundle                                                     bundle;
-    // load the system models from the resources dir
-    auto [substitutions, errors] = bundle.load_system_models_from_json(ForwardCompatibilitySubstitutionRule::EnableSilent);
-
-    for (const auto& vendor : bundle.vendors) {
-        const std::string& vendorName = vendor.first;
-        PresetBundle       vendorBundle;
-        try {
-            // load the vendor configs from the resources dir
-            vendorBundle.load_vendor_configs_from_json((boost::filesystem::path(Slic3r::resources_dir()) / "profiles").string(), vendorName,
-                                                       PresetBundle::LoadMachineOnly, ForwardCompatibilitySubstitutionRule::EnableSilent,
-                                                       nullptr);
-        } catch (const std::exception& e) {
-            wxLogMessage("get printer model list load vendor %s error: %s", vendorName.c_str(), e.what());
-            continue;
-        }
-        for (const auto& printer : vendorBundle.printers) {
-            if (!printer.vendor) {
-                continue;
-            }
-            std::string vendorName   = printer.vendor->name;
-            auto        printerModel = printer.config.option<ConfigOptionString>("printer_model");
-            if (!printerModel) {
-                continue;
-            }
-
-            std::string modelName = printerModel->value;
-            if (PrintHost::support_device_list_management(printer.config)) {
-                vendorPrinterModelConfigMap[vendorName][modelName] = printer.config;
-            }
-        }
-    }
-
-    return vendorPrinterModelConfigMap;
-}
 PrinterManager::PrinterManager() {}
 PrinterManager::~PrinterManager() {}
 
@@ -182,9 +232,8 @@ void PrinterManager::init()
     // Load user info from config
     loadUserInfo();
 
-    for (const auto& [printerId, network] : mPrinterNetworkConnections) {
-        network->init();
-    }
+    // Initialize network
+    NetworkFactory::initNetwork();
 
     PrinterPluginManager::getInstance()->init();
 
@@ -206,19 +255,14 @@ void PrinterManager::close()
     for (const auto& [printerId, network] : mPrinterNetworkConnections) {
         network->disconnectFromPrinter();
     }
-
-    PrinterCache::getInstance()->savePrinterList();
-
-    for (const auto& [printerId, network] : mPrinterNetworkConnections) {
-        network->uninit();
-    }
     mPrinterNetworkConnections.clear();
 
-    auto network = getUserNetwork();
-    if (network) {
-        network->uninit();
-    }
+    PrinterCache::getInstance()->savePrinterList();
+    
     clearUserData();
+    
+    // Uninitialize network
+    NetworkFactory::uninitNetwork();
 }
 void PrinterManager::checkInitialized()
 {
@@ -878,7 +922,6 @@ void PrinterManager::connectToIot()
             break;
         }
 
-        currentNetwork->init();
         auto loginResult = currentNetwork->connectToIot(currentInfo);
         if (!loginResult.isSuccess() || !loginResult.hasData()) {
             currentNetwork = nullptr;
@@ -988,37 +1031,7 @@ PrinterNetworkInfo PrinterManager::getSelectedPrinter(const std::string& printer
     return selectedPrinter;
 }
 
-void PrinterManager::validateAndCompletePrinterInfo(PrinterNetworkInfo& printerInfo)
-{
-    // Validate and update vendor and model info
-    VendorProfile::PrinterModel printerModel;
-    VendorProfile machineProfile = getMachineProfile(printerInfo.vendor, printerInfo.printerModel, printerModel);
-    
-    if (machineProfile.name.empty()) {
-        return; // No matching profile found
-    }
-    
-    printerInfo.vendor = machineProfile.name;
-    if (printerInfo.printerName.empty()) {
-        printerInfo.printerName = printerModel.name;
-    }
-    printerInfo.printerModel = printerModel.name;
-    
-    // Update hostType to keep consistent with system preset
-    auto vendorPrinterModelConfigMap = getVendorPrinterModelConfig();
-    if (vendorPrinterModelConfigMap.find(printerInfo.vendor) != vendorPrinterModelConfigMap.end()) {
-        auto modelConfigMap = vendorPrinterModelConfigMap[printerInfo.vendor];
-        if (modelConfigMap.find(printerInfo.printerModel) != modelConfigMap.end()) {
-            auto config = modelConfigMap[printerInfo.printerModel];
-            const auto opt = config.option<ConfigOptionEnum<PrintHostType>>("host_type");
-            const auto hostType = opt != nullptr ? opt->value : htOctoPrint;
-            std::string hostTypeStr = PrintHost::get_print_host_type_str(hostType);
-            if (!hostTypeStr.empty()) {
-                printerInfo.hostType = hostTypeStr;
-            }
-        }
-    }
-}
+
 
 void PrinterManager::syncOldPresetPrinters()
 {

@@ -38,9 +38,6 @@ public:
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
     virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId) = 0;
 
-    virtual void init()   = 0;
-    virtual void uninit() = 0;
-
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
 
 protected:
@@ -62,9 +59,6 @@ public:
     virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken()                             = 0;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters()             = 0;
 
-    virtual void init()   = 0;
-    virtual void uninit() = 0;
-
     const UserNetworkInfo& getUserNetworkInfo() const { return mUserNetworkInfo; }
 
 protected:
@@ -84,9 +78,6 @@ public:
     virtual PrinterNetworkResult<bool>        installPlugin(const std::string& pluginPath) = 0;
     virtual PrinterNetworkResult<bool>        uninstallPlugin()                            = 0;
 
-    virtual void init()   = 0;
-    virtual void uninit() = 0;
-
     const PluginNetworkInfo& getPluginNetworkInfo() const { return mPluginNetworkInfo; }
 
 protected:
@@ -99,7 +90,12 @@ public:
     static std::shared_ptr<IPrinterNetwork> createPrinterNetwork(const PrinterNetworkInfo& printerNetworkInfo);
     static std::shared_ptr<IUserNetwork>    createUserNetwork(const UserNetworkInfo& userNetworkInfo);
     static std::shared_ptr<IPluginNetwork>  createPluginNetwork(const PluginNetworkInfo& pluginNetworkInfo);
+
+    static void initNetwork();
+    static void uninitNetwork();
 };
+
+
 
 } // namespace Slic3r
 

@@ -18,8 +18,10 @@ public:
     virtual PrinterNetworkResult<bool>        installPlugin(const std::string& pluginPath) override;
     virtual PrinterNetworkResult<bool>        uninstallPlugin() override;
 
-    virtual void init() override;
-    virtual void uninit() override;
+
+    
+    static void init();
+    static void uninit();
 };
 
 } // namespace Slic3r

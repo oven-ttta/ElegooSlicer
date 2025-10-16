@@ -41,4 +41,19 @@ std::shared_ptr<IPluginNetwork> NetworkFactory::createPluginNetwork(const Plugin
     }
     return nullptr;
 }
+
+void NetworkFactory::initNetwork()
+{
+    ElegooNetwork::init();
+    ElegooUserNetwork::init();
+    ElegooPluginNetwork::init();
+}
+
+void NetworkFactory::uninitNetwork()
+{
+    ElegooNetwork::uninit();
+    ElegooUserNetwork::uninit();
+    ElegooPluginNetwork::uninit();
+}
+
 } // namespace Slic3r

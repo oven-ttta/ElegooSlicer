@@ -18,8 +18,8 @@ public:
     virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken() override;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters() override;
 
-    virtual void init() override;
-    virtual void uninit() override;
+    static void init();
+    static void uninit();
 };
 
 } // namespace Slic3r
