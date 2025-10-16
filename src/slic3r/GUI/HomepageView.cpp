@@ -257,7 +257,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         auto        params = request.params;
         std::string url    = params.value("url", "");
 
-        GUI::wxGetApp().start_download(url);
+        GUI::wxGetApp().request_model_download(wxString(url));
 
         return webviewIpc::IPCResult::success();
     });
