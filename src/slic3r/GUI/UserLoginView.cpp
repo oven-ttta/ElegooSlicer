@@ -117,7 +117,12 @@ void UserLoginView::setupIPCHandlers()
             userNetworkInfo.nickname = data.value("nickname", "");
         }
         userNetworkInfo.hostType = PrintHost::get_print_host_type_str(PrintHostType::htElegooLink);
-        PrinterManager::getInstance()->setCurrentUserInfo(userNetworkInfo);
+        userNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
+
+        auto evt = new wxCommandEvent(EVT_USER_INFO_UPDATED);
+        wxQueueEvent(wxGetApp().mainframe, evt);
+
+        PrinterManager::getInstance()->setIotUserInfo(userNetworkInfo);
         return webviewIpc::IPCResult::success();
     });
 

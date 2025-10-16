@@ -56,47 +56,6 @@ enum TrayStatus {
     TRAY_STATUS_ERROR = 999, // error
 };
 
-struct PrinterPrintFile
-{
-    std::string fileName;                       // File name
-    int64_t     printTime{0};                   // Print time (seconds)
-    int         layer{0};                       // Total layers
-    double      layerHeight{0};                 // Layer height (millimeters)
-    std::string thumbnail;                      // Thumbnail URL
-    int64_t     size{0};                        // File size (bytes)
-    int64_t     createTime{0};                  // File creation time (timestamp/seconds)
-    double      totalFilamentUsed{0.0f};        // Estimated total filament consumption weight (grams)
-    double      totalFilamentUsedLength{0.0f};  // Estimated total filament consumption length (millimeters)
-    int         totalPrintTimes{0};             // Total print times
-    int64_t     lastPrintTime{0};               // Last print time (timestamp/seconds)
-};
-struct PrinterPrintTask
-{
-    std::string taskId;
-    std::string thumbnail;     // Thumbnail URL
-    std::string taskName;      // Task name
-    std::string fileName;
-    int64_t     totalTime{0};    // Total time (seconds)
-    int64_t     currentTime{0};  // Current time (seconds)
-    int64_t     estimatedTime{0};// Estimated time (seconds)
-    int64_t     beginTime{0};    // Start time (timestamp/seconds)
-    int64_t     endTime{0};      // End time (timestamp/seconds)
-    int         progress{0};     // Progress (0-100)
-    int         taskStatus{0};   // Task status
-};
-
-struct PrinterPrintTaskResponse
-{
-    int totalTasks{0};
-    std::vector<PrinterPrintTask> taskList;
-};
-
-struct PrinterPrintFileResponse
-{
-    int totalFiles{0};
-    std::vector<PrinterPrintFile> fileList;
-};
-
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_HOST "deviceUi"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_PORT "httpsCaFile"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_VENDOR "apiKey"
@@ -188,6 +147,51 @@ enum NetworkType {
     NETWORK_TYPE_LAN = 1,
 };
 
+
+
+struct PrinterPrintFile
+{
+    std::string fileName;                       // File name
+    int64_t     printTime{0};                   // Print time (seconds)
+    int         layer{0};                       // Total layers
+    double      layerHeight{0};                 // Layer height (millimeters)
+    std::string thumbnail;                      // Thumbnail URL
+    int64_t     size{0};                        // File size (bytes)
+    int64_t     createTime{0};                  // File creation time (timestamp/seconds)
+    double      totalFilamentUsed{0.0f};        // Estimated total filament consumption weight (grams)
+    double      totalFilamentUsedLength{0.0f};  // Estimated total filament consumption length (millimeters)
+    int         totalPrintTimes{0};             // Total print times
+    int64_t     lastPrintTime{0};               // Last print time (timestamp/seconds)
+    std::vector<PrintFilamentMmsMapping> filamentMmsMappingList; // Filament color mapping for multi-color printing
+};
+struct PrinterPrintTask
+{
+    std::string taskId;
+    std::string thumbnail;     // Thumbnail URL
+    std::string taskName;      // Task name
+    std::string fileName;
+    int64_t     totalTime{0};    // Total time (seconds)
+    int64_t     currentTime{0};  // Current time (seconds)
+    int64_t     estimatedTime{0};// Estimated time (seconds)
+    int64_t     beginTime{0};    // Start time (timestamp/seconds)
+    int64_t     endTime{0};      // End time (timestamp/seconds)
+    int         progress{0};     // Progress (0-100)
+    int         taskStatus{0};   // Task status
+};
+
+struct PrinterPrintTaskResponse
+{
+    int totalTasks{0};
+    std::vector<PrinterPrintTask> taskList;
+};
+
+struct PrinterPrintFileResponse
+{
+    int totalFiles{0};
+    std::vector<PrinterPrintFile> fileList;
+};
+
+
 struct PrinterNetworkInfo
 {
     std::string printerName;
@@ -252,6 +256,7 @@ struct UserNetworkInfo
     std::string timezone;     // User timezone
     uint64_t    createTime{0}; // Account creation time
     uint64_t    lastLoginTime{0}; // Last login time
+    bool connectedToIot{false}; // connected to iot
 
 };
 

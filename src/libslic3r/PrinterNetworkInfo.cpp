@@ -384,6 +384,7 @@ nlohmann::json convertUserNetworkInfoToJson(const UserNetworkInfo& userNetworkIn
     json["createTime"]             = userNetworkInfo.createTime;
     json["lastLoginTime"]          = userNetworkInfo.lastLoginTime;
     json["loginStatus"]            = userNetworkInfo.loginStatus;
+    json["connectedToIot"]         = userNetworkInfo.connectedToIot;
     return json;
 }
 UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json)
@@ -451,6 +452,9 @@ UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json)
     }
     if (json.contains("loginStatus")) {
         userNetworkInfo.loginStatus = json["loginStatus"];
+    }
+    if (json.contains("connectedToIot")) {
+        userNetworkInfo.connectedToIot = json["connectedToIot"];
     }
     return userNetworkInfo;
 }

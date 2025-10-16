@@ -90,6 +90,7 @@ public:
     void updatePrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task);
 
     void removeWanPrinters();
+    void removeWanPrintersNotInList(const std::vector<PrinterNetworkInfo>& validPrinters);
 private:
     PrinterCache();
     mutable std::mutex mCacheMutex;

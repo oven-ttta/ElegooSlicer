@@ -24,7 +24,8 @@ public:
     virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(int pageNumber, int pageSize) override;
     virtual PrinterNetworkResult<bool> deletePrintTasks(const std::vector<std::string>& taskIds) override;
     virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& message) override;
-
+    virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& fileName) override;
+    
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
     virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId) override;
 

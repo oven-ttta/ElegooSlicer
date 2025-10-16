@@ -497,6 +497,41 @@ void PrinterWebView::setupIPCHandlers()
         return result;
     });
 
+    m_ipc->onRequest("getFileDetail", [this](const webviewIpc::IPCRequest& request){
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        std::string fileName = params.value("fileName", "");
+        auto fileDetail = PrinterManager::getInstance()->getFileDetail(printerId, fileName);
+        webviewIpc::IPCResult result;
+        nlohmann::json fileDetailJson;
+        if(fileDetail.isSuccess() && fileDetail.hasData()) {
+            for(auto& file : fileDetail.data.value().fileList) {
+                fileDetailJson["fileName"] = file.fileName;
+                fileDetailJson["printTime"] = file.printTime;
+                fileDetailJson["layer"] = file.layer;
+                fileDetailJson["layerHeight"] = file.layerHeight;
+                fileDetailJson["thumbnail"] = file.thumbnail;
+                fileDetailJson["size"] = file.size;
+                fileDetailJson["createTime"] = file.createTime;
+                fileDetailJson["totalFilamentUsed"] = file.totalFilamentUsed;
+                fileDetailJson["totalFilamentUsedLength"] = file.totalFilamentUsedLength;
+                fileDetailJson["totalPrintTimes"] = file.totalPrintTimes;
+                fileDetailJson["lastPrintTime"] = file.lastPrintTime;      
+                for(auto& filamentMmsMapping : file.filamentMmsMappingList) {
+                    nlohmann::json filamentMmsMappingJson;
+                    filamentMmsMappingJson["color"] = filamentMmsMapping.filamentColor;
+                    filamentMmsMappingJson["type"] = filamentMmsMapping.filamentType;
+                    filamentMmsMappingJson["t"] = filamentMmsMapping.index;
+                    fileDetailJson["colorMapping"].push_back(filamentMmsMappingJson);
+                }
+                break;
+            }
+        }
+        result.data = fileDetailJson;
+        result.message = fileDetail.message;
+        result.code = fileDetail.isSuccess() ? 0 : static_cast<int>(fileDetail.code);
+        return result;
+    });
 }
 
 void PrinterWebView::onRtcTokenChanged(const nlohmann::json& data){

@@ -32,6 +32,7 @@ public:
     virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(int pageNumber, int pageSize) = 0;
     virtual PrinterNetworkResult<bool> deletePrintTasks(const std::vector<std::string>& taskIds)          = 0;
     virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& message)                         = 0;
+    virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& fileName) = 0;
 
     // WAN
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
@@ -57,7 +58,7 @@ public:
     IUserNetwork& operator=(const IUserNetwork&) = delete;
     virtual ~IUserNetwork()                      = default;
 
-    virtual PrinterNetworkResult<UserNetworkInfo> loginWAN(const UserNetworkInfo& userInfo) = 0;
+    virtual PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo) = 0;
     virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken()                             = 0;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters()             = 0;
 

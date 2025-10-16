@@ -22,15 +22,17 @@ void ElegooUserNetwork::init()
 }
 
 
-PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::loginWAN(const UserNetworkInfo& userInfo)
+PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::connectToIot(const UserNetworkInfo& userInfo)
 {
     mUserNetworkInfo = userInfo;
-    auto result = ElegooLink::getInstance()->loginWAN(userInfo);
+    auto result = ElegooLink::getInstance()->connectToIot(userInfo);
     if(result.isSuccess() && result.hasData()) {
         mUserNetworkInfo = result.data.value();
         mUserNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
+        mUserNetworkInfo.connectedToIot = true;
     } else {
         mUserNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_FAILED;
+        mUserNetworkInfo.connectedToIot = false;
     }
     return result;
 }

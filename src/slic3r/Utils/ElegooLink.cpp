@@ -114,6 +114,10 @@ PrinterNetworkInfo convertFromElegooPrinterInfo(const elink::PrinterInfo& printe
     } else if(printerInfo.authMode == "pinCode") {
         info.authMode = PRINTER_AUTH_MODE_PIN_CODE;
     }
+
+    if (info.networkType == NETWORK_TYPE_WAN) {
+        info.authMode = PRINTER_AUTH_MODE_PIN_CODE;
+    }
     
     return info;
 }
@@ -422,7 +426,6 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
         if (elinkResult.code == elink::ELINK_ERROR_CODE::SUCCESS && elinkResult.data.has_value()) {
            for (const auto& printer : elinkResult.value().printers) {
                PrinterNetworkInfo info = convertFromElegooPrinterInfo(printer);
-               info.networkType = NETWORK_TYPE_LAN;
                discoverPrinters.push_back(info);
            }
         } 
@@ -729,6 +732,48 @@ PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileList(const std
     return PrinterNetworkResult<PrinterPrintFileResponse>(resultCode, printFileResponse, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
+PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileDetail(const std::string& printerId, const std::string& fileName)
+{
+    PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    PrinterPrintFileResponse printFileResponse;
+    printFileResponse.fileList.clear();
+    elink::GetFileDetailParams params;
+    params.printerId = printerId;
+    params.fileName = fileName;
+    auto elinkResult = elink::ElegooNetwork::getInstance().getFileDetail(params);
+    resultCode = parseElegooResult(elinkResult.code);
+
+
+    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+        if(elinkResult.hasData()) {
+            const auto& fileDetail = elinkResult.value();
+            PrinterPrintFile printFile;
+            printFile.fileName = fileDetail.fileName;
+            printFile.printTime = fileDetail.printTime;
+            printFile.layer = fileDetail.layer;
+            printFile.layerHeight = fileDetail.layerHeight;
+            printFile.thumbnail = fileDetail.thumbnail;
+            printFile.size = fileDetail.size;
+            printFile.createTime = fileDetail.createTime;
+            printFile.totalFilamentUsed = fileDetail.totalFilamentUsed;
+            printFile.totalFilamentUsedLength = fileDetail.totalFilamentUsedLength;
+            printFile.totalPrintTimes = fileDetail.totalPrintTimes;
+            printFile.lastPrintTime = fileDetail.lastPrintTime;
+            for(const auto& colorMapping : fileDetail.colorMapping) {
+                PrintFilamentMmsMapping filamentMmsMapping;
+
+                filamentMmsMapping.filamentColor = colorMapping.color;
+                filamentMmsMapping.filamentType = colorMapping.type;
+                // index of the tray in the multi-color printing GCode T command
+                filamentMmsMapping.index = colorMapping.t;
+                printFile.filamentMmsMappingList.push_back(filamentMmsMapping);
+            }
+            printFileResponse.fileList.push_back(printFile);
+
+        }
+    }
+    return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::SUCCESS, PrinterPrintFileResponse());
+}
 PrinterNetworkResult<PrinterPrintTaskResponse> ElegooLink::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
     PrinterPrintTaskResponse   printTaskResponse;
@@ -815,7 +860,7 @@ PrinterNetworkResult<bool> ElegooLink::uninstallPlugin()
     return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 
-PrinterNetworkResult<UserNetworkInfo> ElegooLink::loginWAN(const UserNetworkInfo& userInfo)
+PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetworkInfo& userInfo)
 {
     elink::HttpCredential params;
     params.userId = userInfo.userId;
@@ -836,9 +881,10 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::loginWAN(const UserNetworkInfo
     if(userInfoResult.code != elink::ELINK_ERROR_CODE::SUCCESS) {
         userInfoRet.loginStatus = LOGIN_STATUS_LOGIN_FAILED;
         return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, userInfoRet,
-                                                     "failed to login WAN: " + userInfoResult.message);
+                                                     "failed to connect to iot: " + userInfoResult.message);
     }
     userInfoRet.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
+    userInfoRet.connectedToIot = true;
     userInfoRet.userId = userInfoResult.value().userId;
     userInfoRet.phone = userInfoResult.value().phone;
     userInfoRet.email = userInfoResult.value().email;

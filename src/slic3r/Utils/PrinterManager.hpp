@@ -47,12 +47,13 @@ public:
     PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds);
     PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
+    PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& printerId, const std::string& fileName);
 
     // WAN
-    void setCurrentUserInfo(const UserNetworkInfo& userInfo);
+    void setIotUserInfo(const UserNetworkInfo& userInfo);
+    void clearIotUserInfo();
+    UserNetworkInfo getIotUserInfo();
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
-    UserNetworkInfo getUserNetworkInfo();
-    void logout();
 
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
     static std::string imageFileToBase64DataURI(const std::string& image_path);
@@ -83,12 +84,22 @@ private:
         
     // sync old preset printers to network
     void syncOldPresetPrinters();
+    
+    // Validate and complete printer info with system preset
+    void validateAndCompletePrinterInfo(PrinterNetworkInfo& printerInfo);
 
-    // WAN
-    std::mutex mUserNetworkMutex;
-    UserNetworkInfo mUserNetworkInfo;
-    std::shared_ptr<IUserNetwork> mUserNetwork;
-    void getWANPrinters();
+    // User network
+    mutable std::mutex mUserNetworkMutex;
+    UserNetworkInfo mUserInfo;  
+    std::shared_ptr<IUserNetwork> mUserNetwork;  
+    UserNetworkInfo getUserInfo() const;
+    void setUserInfo(const UserNetworkInfo& userInfo);
+    std::shared_ptr<IUserNetwork> getUserNetwork() const;
+    void setUserNetwork(std::shared_ptr<IUserNetwork> network);
+    bool updateUserInfo(const UserNetworkInfo& userInfo);
+    void clearUserData();
+    
+    void connectToIot();
     void saveUserInfo(const UserNetworkInfo& userInfo);
     void loadUserInfo();
  

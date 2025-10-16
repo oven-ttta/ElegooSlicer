@@ -28,11 +28,12 @@ public:
     PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds);
+    PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& printerId, const std::string& fileName);
 
     PrinterNetworkResult<std::string> hasInstalledPlugin();
     PrinterNetworkResult<bool> installPlugin(const std::string& pluginPath);
     PrinterNetworkResult<bool> uninstallPlugin();
-    PrinterNetworkResult<UserNetworkInfo> loginWAN(const UserNetworkInfo& userInfo);
+    PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters();
     PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
@@ -43,7 +44,7 @@ private:
     bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10, bool isWan = false);
 
     std::mutex mMutex;
-    bool mIsInitialized;
+    bool       mIsInitialized{false};
 };
 
 } // namespace Slic3r

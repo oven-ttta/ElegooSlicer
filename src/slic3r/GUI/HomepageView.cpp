@@ -241,7 +241,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         return;
 
     mIpc->onRequest("report.getClientUserInfo", [this](const webviewIpc::IPCRequest& request) {
-        UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getUserNetworkInfo();
+        UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getIotUserInfo();
         nlohmann::json  data;
         data["userId"]       = userNetworkInfo.userId;
         data["accessToken"]  = userNetworkInfo.token;
@@ -253,17 +253,19 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         return webviewIpc::IPCResult::success(data);
     });
 
-    mIpc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request) {
-        auto        params = request.params;
-        std::string url    = params.value("url", "");
-        wxLaunchDefaultBrowser(url);
-        return webviewIpc::IPCResult::success();
-    });
-
     mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) { return webviewIpc::IPCResult::success(); });
 
     mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) {
         return handleReady();
+    });
+
+    mIpc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request) {
+        auto params = request.params;
+        std::string url = params.value("url", "");
+        
+        GUI::wxGetApp().download(url);
+        
+        return webviewIpc::IPCResult::success();
     });
 }
 void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetworkInfo)

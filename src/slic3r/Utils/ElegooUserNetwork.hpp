@@ -14,7 +14,7 @@ public:
     ElegooUserNetwork& operator=(const ElegooUserNetwork&)=delete;
     virtual ~ElegooUserNetwork();
 
-    virtual PrinterNetworkResult<UserNetworkInfo> loginWAN(const UserNetworkInfo& userInfo) override;
+    virtual PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo) override;
     virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken() override;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters() override;
 

@@ -181,7 +181,7 @@ webviewIpc::IPCResult HomeView::handleNavigateToPage(const nlohmann::json& data)
 webviewIpc::IPCResult HomeView::handleGetUserInfo()
 {
     // Get user network info
-    UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getUserNetworkInfo();   
+    UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getIotUserInfo();   
     nlohmann::json data; 
     data = convertUserNetworkInfoToJson(userNetworkInfo);
     //if(userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
@@ -190,7 +190,7 @@ webviewIpc::IPCResult HomeView::handleGetUserInfo()
     return webviewIpc::IPCResult::success(data);
 }
 webviewIpc::IPCResult HomeView::handleLogout() { 
-    PrinterManager::getInstance()->logout();
+    PrinterManager::getInstance()->clearIotUserInfo();
     return webviewIpc::IPCResult::success(); 
 }
 
@@ -259,7 +259,7 @@ void HomeView::updateMode()
 void HomeView::refreshUserInfo()
 {
     lock_guard<mutex> lock(mUserInfoMutex);
-    UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getUserNetworkInfo();
+    UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getIotUserInfo();
     if (mIpc && mIsReady) {
     // Send refresh signal to navigation webview via IPC
         nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
