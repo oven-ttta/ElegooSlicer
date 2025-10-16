@@ -49,7 +49,7 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
         return;
     }
 
-    m_ipc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
     setupIPCHandlers();
     // mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrinterMmsSyncView::onScriptMessage, this);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
@@ -99,10 +99,10 @@ PrinterMmsSyncView::~PrinterMmsSyncView() {
 
 void PrinterMmsSyncView::setupIPCHandlers()
 {
-    if (!m_ipc) return;
+    if (!mIpc) return;
 
     // Handle getPrinterList
-    m_ipc->onRequest("getPrinterList", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onRequest("getPrinterList", [this](const webviewIpc::IPCRequest& request) {
         try {
             return getPrinterList();
         } catch (const std::exception& e) {
@@ -112,7 +112,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
     });
 
     // Handle getPrinterFilamentInfo (async due to potentially time-consuming operations)
-    m_ipc->onRequestAsync("getPrinterFilamentInfo", [this](const webviewIpc::IPCRequest& request,
+    mIpc->onRequestAsync("getPrinterFilamentInfo", [this](const webviewIpc::IPCRequest& request,
                                                           std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         nlohmann::json params = request.params;
         
@@ -161,7 +161,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
     });
 
     // Handle syncMmsFilament
-    m_ipc->onEvent("syncMmsFilament", [this](const webviewIpc::IPCEvent& event) {
+    mIpc->onEvent("syncMmsFilament", [this](const webviewIpc::IPCEvent& event) {
         try {
             syncMmsFilament(event.data);
             EndModal(wxID_OK);
@@ -171,7 +171,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
     });
 
     // Handle closeDialog
-    m_ipc->onEvent("closeDialog", [this](const webviewIpc::IPCEvent& event) {
+    mIpc->onEvent("closeDialog", [this](const webviewIpc::IPCEvent& event) {
         try {
             EndModal(wxID_CANCEL);
         } catch (const std::exception& e) {

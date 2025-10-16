@@ -54,7 +54,7 @@ private:
     wxPanel* mContentPanel;         // Right content panel
     wxBoxSizer* mContentSizer;     // Sizer for content panel
     // IPC
-    webviewIpc::WebviewIPCManager* mIpc;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     
     // Homepage views
     std::map<wxString, HomepageView*> mHomepageViews;

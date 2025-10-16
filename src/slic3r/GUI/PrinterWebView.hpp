@@ -90,7 +90,7 @@ private:
     std::mutex        m_uploadMutex;
 
 private:
-    std::unique_ptr<webviewIpc::WebviewIPCManager> m_ipc;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     
 };
 

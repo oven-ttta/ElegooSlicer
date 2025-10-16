@@ -80,7 +80,7 @@ void HomeView::initUI()
     SetSizer(mMainSizer);
 
     // Initialize IPC for navigation
-    mIpc = new webviewIpc::WebviewIPCManager(mNavigationBrowser);
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mNavigationBrowser);
     setupIPCHandlers();
 
     // Create homepage views
@@ -153,10 +153,6 @@ void HomeView::setupIPCHandlers()
 
 void HomeView::cleanupIPC()
 {
-    if (mIpc) {
-        delete mIpc;
-        mIpc = nullptr;
-    }
 }
 
 webviewIpc::IPCResult HomeView::handleNavigateToPage(const nlohmann::json& data)

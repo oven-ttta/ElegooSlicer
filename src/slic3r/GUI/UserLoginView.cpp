@@ -64,7 +64,7 @@ void UserLoginView::initUI()
 
     mBrowser->LoadURL(url);
 
-    mIpc = new webviewIpc::WebviewIPCManager(mBrowser);
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
     setupIPCHandlers();
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
 
@@ -136,10 +136,6 @@ void UserLoginView::setupIPCHandlers()
 
 void UserLoginView::cleanupIPC()
 {
-    if (mIpc) {
-        delete mIpc;
-        mIpc = nullptr;
-    }
 }
 void UserLoginView::onWebViewLoaded(wxWebViewEvent& event)
 {

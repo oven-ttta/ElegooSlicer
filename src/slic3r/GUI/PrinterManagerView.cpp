@@ -360,7 +360,7 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
         return;
     }
     
-    m_ipc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
     setupIPCHandlers();
     
     mTabBar->AddPage(mBrowser, FIRST_TAB_NAME);
@@ -393,39 +393,6 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (compatible; ElegooSlicer)", 
         ELEGOOSLICER_VERSION, theme));
 #endif
-
-    std::thread([this]() {
-        try {
-
-            // std::this_thread::sleep_for(std::chrono::seconds(10));
-            // if (m_lifeTracker && *m_lifeTracker) {
-                
-            //     // 发送语言设置消息
-            //     nlohmann::json languageMessage;
-            //     languageMessage["code"] = "zh-CN";
-            //     languageMessage["name"] = "中文";
-                
-            //     m_ipc->request("client.setLanguage", languageMessage, [](const webviewIpc::IPCResult& response) {
-            //         BOOST_LOG_TRIVIAL(info) << "Language setting response: " << response.message;
-            //     });
-
-
-            //     // 发送区域设置消息
-            //     nlohmann::json regionMessage;
-            //     regionMessage["code"] = "CN";
-            //     regionMessage["name"] = "中国大陆";
-                
-            //     m_ipc->request("client.setRegion", regionMessage, [](const webviewIpc::IPCResult& response) {
-            //         BOOST_LOG_TRIVIAL(info) << "Region setting response: " << response.message;
-            //     });
-            //     BOOST_LOG_TRIVIAL(info) << "Sent region setting message via IPC after 3s delay";
-          /*  } else {
-                BOOST_LOG_TRIVIAL(info) << "PrinterManagerView destroyed, skipping language/region setting";
-            }*/
-        } catch (const std::exception& e) {
-            BOOST_LOG_TRIVIAL(error) << "Error in delayed language/region setting: " << e.what();
-        }
-    }).detach();
 
     // Load saved tab state
     loadTabState();
@@ -571,25 +538,25 @@ void PrinterManagerView::onTabChanged(wxAuiNotebookEvent& event)
 
 void PrinterManagerView::setupIPCHandlers()
 {
-    if (!m_ipc) return;
+    if (!mIpc) return;
 
     // Handle request_printer_list
-    m_ipc->onRequest("request_printer_list", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_printer_list", [this](const webviewIpc::IPCRequest& request){
         return getPrinterList();
     });
 
     // Handle request_printer_model_list
-    m_ipc->onRequest("request_printer_model_list", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_printer_model_list", [this](const webviewIpc::IPCRequest& request){
         return getPrinterModelList();
     });
 
     // Handle request_printer_list_status
-    m_ipc->onRequest("request_printer_list_status", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_printer_list_status", [this](const webviewIpc::IPCRequest& request){
         return getPrinterListStatus();
     });
 
     // Handle request_printer_detail
-    m_ipc->onRequest("request_printer_detail", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_printer_detail", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         if (!printerId.empty()) {
@@ -599,7 +566,7 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     // Handle request_discover_printers (async due to time-consuming operation)
-    m_ipc->onRequestAsync("request_discover_printers", [this](const webviewIpc::IPCRequest& request, 
+    mIpc->onRequestAsync("request_discover_printers", [this](const webviewIpc::IPCRequest& request, 
                                                            std::function<void(const webviewIpc::IPCResult&)> sendResponse) {  
         // Create a weak reference to track object lifetime
         std::weak_ptr<bool> life_tracker = m_lifeTracker;   
@@ -627,7 +594,7 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     // Handle request_add_printer (async)
-    m_ipc->onRequestAsync("request_add_printer", [this](const webviewIpc::IPCRequest& request,
+    mIpc->onRequestAsync("request_add_printer", [this](const webviewIpc::IPCRequest& request,
                                                         std::function<void(const webviewIpc::IPCResult&)> sendResponse) {  
         auto params = request.params;
         if (!params.contains("printer")) {
@@ -664,7 +631,7 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     // Handle request_add_physical_printer (async)
-    m_ipc->onRequestAsync("request_add_physical_printer", [this](const webviewIpc::IPCRequest& request,
+    mIpc->onRequestAsync("request_add_physical_printer", [this](const webviewIpc::IPCRequest& request,
                                                                  std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
       
         auto params = request.params;
@@ -704,7 +671,7 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     // Handle request_update_printer_name
-    m_ipc->onRequest("request_update_printer_name", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_update_printer_name", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string printerName = params.value("printerName", "");
@@ -712,7 +679,7 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     // Handle request_update_printer_host
-    m_ipc->onRequestAsync("request_update_printer_host", [this](const webviewIpc::IPCRequest& request,
+    mIpc->onRequestAsync("request_update_printer_host", [this](const webviewIpc::IPCRequest& request,
                                                                  std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
@@ -747,31 +714,31 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     // Handle request_delete_printer
-    m_ipc->onRequest("request_delete_printer", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_delete_printer", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         return deletePrinter(printerId);
     });
 
     // Handle request_browse_ca_file
-    m_ipc->onRequest("request_browse_ca_file", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_browse_ca_file", [this](const webviewIpc::IPCRequest& request){
         return browseCAFile();
     });
 
     // Handle request_refresh_printers
-    m_ipc->onRequest("request_refresh_printers", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_refresh_printers", [this](const webviewIpc::IPCRequest& request){
         // Implementation for refresh printers
         return webviewIpc::IPCResult::success();
     });
 
     // Handle request_logout_print_host
-    m_ipc->onRequest("request_logout_print_host", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_logout_print_host", [this](const webviewIpc::IPCRequest& request){
         // Implementation for logout print host
         return webviewIpc::IPCResult::success();
     });
 
     // Handle request_connect_physical_printer
-    m_ipc->onRequest("request_connect_physical_printer", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("request_connect_physical_printer", [this](const webviewIpc::IPCRequest& request){
         // Implementation for connect physical printer
         return webviewIpc::IPCResult::success();
     });
@@ -822,54 +789,7 @@ void PrinterManagerView::setupIPCHandlers()
         }
     });
     
-    m_ipc->onRequest("report.userInfo", [this](const webviewIpc::IPCRequest& request){
-       auto data = request.params.value("data", nlohmann::json::object());
-       std::string uuid = data.value("uuid", "");
-       if(uuid.empty()) {
-            return webviewIpc::IPCResult::success();
-       }
-       std::string user_id = data.value("user_id", "");
-       std::string access_token = data.value("access_token", "");
-       std::string refresh_token = data.value("refresh_token", "");
-       int64_t expires_time = data.value("expires_time", 0);
-       std::string openid = data.value("openid", "");
-       std::string avatar = data.value("avatar", "");
-       std::string email = data.value("email", "");
-       std::string nickname = data.value("nickname", "");
-
-       mBrowser->LoadURL("https://np-sit.elegoo.com.cn//elegooSlicer");
-
-       //528270068@qq.com
-       mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
-        ELEGOOSLICER_VERSION, wxGetApp().dark_mode() ? "dark" : "light"));
-        return webviewIpc::IPCResult::success();
-    });
-
-
-    m_ipc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request){
-        auto params = request.params;
-        std::string url = params.value("url", "");
-        wxLaunchDefaultBrowser(url);
-        return webviewIpc::IPCResult::success();
-    });
-
-
-    m_ipc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request){
-        auto params = request.params;
-        std::string url = params.value("url", "");
-        wxLaunchDefaultBrowser(url);
-        return webviewIpc::IPCResult::success();
-    });
-
-    m_ipc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request){
-        if (mIsLogin)
-            return webviewIpc::IPCResult::success();
-        mIsLogin     = true;
-        wxString url = "https://np-sit.elegoo.com.cn//account//slicer-login?language=zh-CN&region=US";
-        //wxLaunchDefaultBrowser(url);
-        mBrowser->LoadURL(url);
-        return webviewIpc::IPCResult::success();
-    });
+   
 
 }
 

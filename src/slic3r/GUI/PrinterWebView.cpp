@@ -41,7 +41,7 @@ PrinterWebView::PrinterWebView(wxWindow* parent) : wxPanel(parent, wxID_ANY, wxD
     this->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
     m_browser->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
     m_browser->SetOwnBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
-    m_ipc = std::make_unique<webviewIpc::WebviewIPCManager>(m_browser);
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(m_browser);
     setupIPCHandlers();
     m_browser->Bind(wxEVT_WEBVIEW_ERROR, &PrinterWebView::OnError, this);
     m_browser->Bind(wxEVT_WEBVIEW_LOADED, &PrinterWebView::OnLoaded, this);
@@ -283,11 +283,11 @@ void PrinterWebView::runScript(const wxString& javascript)
 
 void PrinterWebView::setupIPCHandlers()
 {
-    if (!m_ipc)
+    if (!mIpc)
         return;
 
     // handle open url request
-    m_ipc->onRequest("open", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onRequest("open", [this](const webviewIpc::IPCRequest& request) {
         auto        params       = request.params;
         std::string url          = params.value("url", "");
         bool        needDownload = params.value("needDownload", false);
@@ -301,7 +301,7 @@ void PrinterWebView::setupIPCHandlers()
     });
 
     // handle reload request
-    m_ipc->onRequest("reload", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onRequest("reload", [this](const webviewIpc::IPCRequest& request) {
         auto params = request.params;
         if (!m_url.IsEmpty()) {
             m_loadState = PWLoadState::URL_LOADING;
@@ -311,7 +311,7 @@ void PrinterWebView::setupIPCHandlers()
     });
 
     // handle file dialog request
-    m_ipc->onRequest("open_file_dialog", [this](const webviewIpc::IPCRequest& request) {
+    mIpc->onRequest("open_file_dialog", [this](const webviewIpc::IPCRequest& request) {
         auto params = request.params;
         try {
             auto         filter = params.value("filter", "All files (*.*)|*.*");
@@ -331,7 +331,7 @@ void PrinterWebView::setupIPCHandlers()
     });
 
     // handle file upload request (using asynchronous event handler)
-    m_ipc->onRequestAsyncWithEvents("upload_file", [this](const webviewIpc::IPCRequest&                     request,
+    mIpc->onRequestAsyncWithEvents("upload_file", [this](const webviewIpc::IPCRequest&                     request,
                                                           std::function<void(const webviewIpc::IPCResult&)> sendResponse,
                                                           std::function<void(const std::string&, const nlohmann::json&)> sendEvent) mutable {
         auto params = request.params;
@@ -397,14 +397,14 @@ void PrinterWebView::setupIPCHandlers()
     });
 
 
-    m_ipc->onRequest("getRtcToken", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("getRtcToken", [this](const webviewIpc::IPCRequest& request){
         auto rtcToken = PrinterManager::getInstance()->getRtcToken();
         webviewIpc::IPCResult result;
         result.message = rtcToken.message;
         result.code = rtcToken.isSuccess() ? 0 : static_cast<int>(rtcToken.code);
         return result;
     });
-    m_ipc->onRequest("sendRtmMessage", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("sendRtmMessage", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string message = params.value("message", "");
@@ -414,7 +414,7 @@ void PrinterWebView::setupIPCHandlers()
         result.code = sendRtmMessage.isSuccess() ? 0 : static_cast<int>(sendRtmMessage.code);
         return result;
     });
-    m_ipc->onRequest("getFileList", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("getFileList", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         int pageNumber = params.value("pageNumber", 1);
@@ -448,7 +448,7 @@ void PrinterWebView::setupIPCHandlers()
         result.code = fileResponse.isSuccess() ? 0 : static_cast<int>(fileResponse.code);
         return result;
     });
-    m_ipc->onRequest("getPrintTaskList", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("getPrintTaskList", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         int pageNumber = params.value("pageNumber", 1);
@@ -481,7 +481,7 @@ void PrinterWebView::setupIPCHandlers()
         result.code = printTaskResponse.isSuccess() ? 0 : static_cast<int>(printTaskResponse.code);
         return result;
     });
-    m_ipc->onRequest("deletePrintTasks", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("deletePrintTasks", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::vector<std::string> taskIds = params.value("taskIds", std::vector<std::string>());
@@ -492,7 +492,7 @@ void PrinterWebView::setupIPCHandlers()
         return result;
     });
 
-    m_ipc->onRequest("getFileDetail", [this](const webviewIpc::IPCRequest& request){
+    mIpc->onRequest("getFileDetail", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string fileName = params.value("fileName", "");
@@ -530,15 +530,15 @@ void PrinterWebView::setupIPCHandlers()
 }
 
 void PrinterWebView::onRtcTokenChanged(const nlohmann::json& data){
-    m_ipc->sendEvent("onRtcTokenChanged", data, m_ipc->generateRequestId());
+    mIpc->sendEvent("onRtcTokenChanged", data, mIpc->generateRequestId());
 }
 void PrinterWebView::onRtmMessage(const nlohmann::json& data){
-    m_ipc->sendEvent("onRtmMessage", data, m_ipc->generateRequestId());
+    mIpc->sendEvent("onRtmMessage", data, mIpc->generateRequestId());
 }
 void PrinterWebView::onConnectionStatus(const nlohmann::json& data){
-    m_ipc->sendEvent("onConnectionStatus", data, m_ipc->generateRequestId());
+    mIpc->sendEvent("onConnectionStatus", data, mIpc->generateRequestId());
 }
 void PrinterWebView::onPrinterEventRaw(const nlohmann::json& data){
-    m_ipc->sendEvent("onPrinterEventRaw", data, m_ipc->generateRequestId());
+    mIpc->sendEvent("onPrinterEventRaw", data, mIpc->generateRequestId());
 }
 }} // namespace Slic3r::GUI

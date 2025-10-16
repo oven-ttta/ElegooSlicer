@@ -39,7 +39,7 @@ private:
     void onShow();
 
     wxWebView* mBrowser;   
-    std::unique_ptr<webviewIpc::WebviewIPCManager> m_ipc;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     PrinterMmsGroup mMmsGroup;
     std::atomic<bool> m_isDestroying;
     std::shared_ptr<bool> m_lifeTracker;

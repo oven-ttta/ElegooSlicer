@@ -27,7 +27,7 @@ private:
 
 private:
     wxWebView* mBrowser;
-    webviewIpc::WebviewIPCManager* mIpc;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     
     DECLARE_EVENT_TABLE()
 };

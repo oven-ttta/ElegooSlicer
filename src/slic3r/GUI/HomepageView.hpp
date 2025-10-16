@@ -57,7 +57,7 @@ private:
     
 private:
     wxWebView* mBrowser;
-    webviewIpc::WebviewIPCManager* mIpc;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     
     DECLARE_EVENT_TABLE()
 };
@@ -85,7 +85,7 @@ private:
 
 private:
     wxWebView* mBrowser;
-    webviewIpc::WebviewIPCManager* mIpc;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     
     std::mutex mUserInfoMutex; // Mutex to protect user info
     UserNetworkInfo mRefreshUserInfo; // User info

@@ -87,7 +87,7 @@ void PrintSendDialogEx::init()
         return;
     }
 
-    mipc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
     setupIPCHandlers();
     // mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrintSendDialogEx::onScriptMessage, this);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));

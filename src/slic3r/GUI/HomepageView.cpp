@@ -56,7 +56,8 @@ void RecentHomepageView::initUI()
     SetSizer(sizer);
 
     // Initialize IPC
-    mIpc = new webviewIpc::WebviewIPCManager(mBrowser);
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
+
     setupIPCHandlers();
 
     // Load recent files page
@@ -96,13 +97,7 @@ void RecentHomepageView::setupIPCHandlers()
     mIpc->onRequest("removeFromRecent", [this](const webviewIpc::IPCRequest& request) { return handleRemoveFromRecent(request.params); });
 }
 
-void RecentHomepageView::cleanupIPC()
-{
-    if (mIpc) {
-        delete mIpc;
-        mIpc = nullptr;
-    }
-}
+void RecentHomepageView::cleanupIPC() {}
 
 webviewIpc::IPCResult RecentHomepageView::handleGetRecentFiles(const nlohmann::json& data)
 {
@@ -204,7 +199,8 @@ void OnlineModelsHomepageView::initUI()
     SetSizer(sizer);
 
     // Initialize IPC
-    mIpc = new webviewIpc::WebviewIPCManager(mBrowser);
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
+
     setupIPCHandlers();
 
     // Load online models page from remote URL
@@ -255,16 +251,14 @@ void OnlineModelsHomepageView::setupIPCHandlers()
 
     mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) { return webviewIpc::IPCResult::success(); });
 
-    mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) {
-        return handleReady();
-    });
+    mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) { return handleReady(); });
 
     mIpc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request) {
-        auto params = request.params;
-        std::string url = params.value("url", "");
-        
-        GUI::wxGetApp().download(url);
-        
+        auto        params = request.params;
+        std::string url    = params.value("url", "");
+
+        GUI::wxGetApp().start_download(url);
+
         return webviewIpc::IPCResult::success();
     });
 }
@@ -288,10 +282,7 @@ void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetw
 }
 void OnlineModelsHomepageView::cleanupIPC()
 {
-    if (mIpc) {
-        delete mIpc;
-        mIpc = nullptr;
-    }
+
 }
 
 webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
@@ -311,10 +302,7 @@ webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
     }
     return webviewIpc::IPCResult::success();
 }
-void OnlineModelsHomepageView::onWebViewLoaded(wxWebViewEvent& event)
-{
-
-}
+void OnlineModelsHomepageView::onWebViewLoaded(wxWebViewEvent& event) {}
 
 void OnlineModelsHomepageView::onWebViewError(wxWebViewEvent& event)
 {
