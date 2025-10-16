@@ -101,6 +101,10 @@ DWORD DownloadAndInstallWV2RT() {
 class WebViewEdge : public wxWebViewEdge
 {
 public:
+    ~WebViewEdge(){
+        // Clean up any registered script message handlers
+        RemoveScriptMessageHandler("wx");
+    }
     bool SetUserAgent(const wxString &userAgent)
     {
         bool dark = userAgent.Contains("dark");

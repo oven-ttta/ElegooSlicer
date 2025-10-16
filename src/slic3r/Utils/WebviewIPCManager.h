@@ -179,6 +179,7 @@ private:
     void stopTimeoutChecker();
 
     void onScriptMessage(wxWebViewEvent& event);
+    void onWebviewDestroy(wxEvent& event);
 public:
     explicit WebviewIPCManager(wxWebView* webView);
     ~WebviewIPCManager();
@@ -306,5 +307,8 @@ private:
      * @param message JSON message object
      */
     void sendMessage(const json& message);
+
+    static std::vector<WebviewIPCManager*> s_instances;
+    static std::mutex s_instancesMutex;
 };
 }

@@ -53,7 +53,7 @@ private:
     
     wxAuiNotebook* mTabBar;
     wxWebView* mBrowser;
-    webviewIpc::WebviewIPCManager* m_ipc;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> m_ipc;
     std::map<std::string, PrinterWebView*> mPrinterViews;
     std::atomic<bool> m_isDestroying;
     std::shared_ptr<bool> m_lifeTracker;

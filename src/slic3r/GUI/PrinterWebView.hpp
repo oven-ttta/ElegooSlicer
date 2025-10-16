@@ -28,7 +28,7 @@
 #include "wx/textctrl.h"
 #include <wx/timer.h>
 #include "slic3r/Utils/WebviewIPCManager.h"
-
+#include <memory>
 namespace webviewIpc {
 class WebviewIPCManager;
 }
@@ -90,7 +90,8 @@ private:
     std::mutex        m_uploadMutex;
 
 private:
-    webviewIpc::WebviewIPCManager* m_ipc = nullptr;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> m_ipc;
+    
 };
 
 }} // namespace Slic3r::GUI

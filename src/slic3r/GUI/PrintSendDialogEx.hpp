@@ -64,7 +64,7 @@ private:
     void    refresh();
 
     wxWebView* mBrowser;
-    webviewIpc::WebviewIPCManager* mIpc = nullptr;
+    std::unique_ptr<webviewIpc::WebviewIPCManager> mipc;
     Plater*  mPlater{ nullptr };
     int mPrintPlateIdx;
 

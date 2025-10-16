@@ -70,11 +70,6 @@ PrintSendDialogEx::~PrintSendDialogEx()
 
     // Reset the life tracker to signal all async operations that this object is being destroyed
     mLifeTracker.reset();
-
-    if (mIpc) {
-        delete mIpc;
-        mIpc = nullptr;
-    }
 }
 
 void PrintSendDialogEx::init()
@@ -92,7 +87,7 @@ void PrintSendDialogEx::init()
         return;
     }
 
-    mIpc = new webviewIpc::WebviewIPCManager(mBrowser);
+    mipc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
     setupIPCHandlers();
     // mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrintSendDialogEx::onScriptMessage, this);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));

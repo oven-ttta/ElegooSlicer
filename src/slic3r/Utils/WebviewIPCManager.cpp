@@ -6,12 +6,20 @@
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include "slic3r/GUI/GUI_App.hpp"
 namespace webviewIpc {
+std::vector<WebviewIPCManager*>WebviewIPCManager::s_instances;
+std::mutex WebviewIPCManager::s_instancesMutex;
 WebviewIPCManager::WebviewIPCManager(wxWebView* webView)
     : m_webView(webView), m_requestIdCounter(1000), m_running(false) {
-        initialize();
+    initialize();
+    std::lock_guard<std::mutex> lock(s_instancesMutex);
+    s_instances.push_back(this);
 }
 
 WebviewIPCManager::~WebviewIPCManager() {
+    {
+        std::lock_guard<std::mutex> lock(s_instancesMutex);
+        s_instances.erase(std::remove(s_instances.begin(), s_instances.end(), this), s_instances.end());
+    }
     cleanup();
 }
 
@@ -21,6 +29,7 @@ void WebviewIPCManager::initialize() {
     }
     if(m_webView){
         m_webView->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &WebviewIPCManager::onScriptMessage, this);
+        m_webView->Bind(wxEVT_DESTROY, &WebviewIPCManager::onWebviewDestroy, this);
     }
     m_running = true;
     startTimeoutChecker();
@@ -34,12 +43,20 @@ void WebviewIPCManager::cleanup() {
     }
     m_running = false;
     stopTimeoutChecker();
+    if(m_webView){
+        m_webView->Unbind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &WebviewIPCManager::onScriptMessage, this);
+        m_webView->Unbind(wxEVT_DESTROY, &WebviewIPCManager::onWebviewDestroy, this);
+    }
+    m_webView = nullptr;
     
     // Clear pending requests
     std::lock_guard<std::mutex> lock(m_pendingRequestsMutex);
     m_pendingRequests.clear();
     
     wxLogMessage("IPC: C++ side cleanup complete");
+}
+void WebviewIPCManager::onWebviewDestroy(wxEvent& event){
+    cleanup();
 }
 void WebviewIPCManager::onScriptMessage(wxWebViewEvent& event){
     wxString message = event.GetString();
@@ -515,9 +532,18 @@ void WebviewIPCManager::sendMessage(const json& message) {
         }
         
         wxString strJS = wxString::Format("HandleStudio(%s)", jsonStr);
-        Slic3r::GUI::wxGetApp().CallAfter([this, strJS] { 
+        WebviewIPCManager *_this = this;
+        Slic3r::GUI::wxGetApp().CallAfter([_this, strJS] { 
             try {
-                WebView::RunScript(m_webView, strJS); 
+                {
+                    std::lock_guard<std::mutex> lock(s_instancesMutex);
+                    if(std::find(s_instances.begin(), s_instances.end(), _this) == s_instances.end()){
+                        // Instance has been destroyed
+                        return;
+                    }
+                }
+                if(!_this->m_webView) return;
+                WebView::RunScript(_this->m_webView, strJS); 
             } catch (const std::exception& e) {
                 wxLogError("IPC: Failed to execute script: %s", e.what());
             }

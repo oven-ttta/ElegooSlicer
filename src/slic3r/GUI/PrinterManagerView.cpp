@@ -360,7 +360,7 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
         return;
     }
     
-    m_ipc = new webviewIpc::WebviewIPCManager(mBrowser);
+    m_ipc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
     setupIPCHandlers();
     
     mTabBar->AddPage(mBrowser, FIRST_TAB_NAME);
@@ -448,11 +448,6 @@ PrinterManagerView::~PrinterManagerView() {
     
     // Reset the life tracker to signal all async operations that this object is being destroyed
     m_lifeTracker.reset();
-    
-    if (m_ipc) {
-        delete m_ipc;
-        m_ipc = nullptr;
-    }
 }
 
 void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveState)

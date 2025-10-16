@@ -41,7 +41,7 @@ PrinterWebView::PrinterWebView(wxWindow* parent) : wxPanel(parent, wxID_ANY, wxD
     this->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
     m_browser->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
     m_browser->SetOwnBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
-    m_ipc = new webviewIpc::WebviewIPCManager(m_browser);
+    m_ipc = std::make_unique<webviewIpc::WebviewIPCManager>(m_browser);
     setupIPCHandlers();
     m_browser->Bind(wxEVT_WEBVIEW_ERROR, &PrinterWebView::OnError, this);
     m_browser->Bind(wxEVT_WEBVIEW_LOADED, &PrinterWebView::OnLoaded, this);
@@ -110,11 +110,6 @@ PrinterWebView::~PrinterWebView()
     m_shouldStop = true;
     if (m_uploadThread.joinable()) {
         m_uploadThread.join();
-    }
-
-    if (m_ipc) {
-        delete m_ipc;
-        m_ipc = nullptr;
     }
 
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " End";

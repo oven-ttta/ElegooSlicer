@@ -49,7 +49,7 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
         return;
     }
 
-    mIpc = new webviewIpc::WebviewIPCManager(mBrowser);
+    m_ipc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
     setupIPCHandlers();
     // mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrinterMmsSyncView::onScriptMessage, this);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
@@ -95,19 +95,14 @@ PrinterMmsSyncView::~PrinterMmsSyncView() {
     
     // Reset the life tracker to signal all async operations that this object is being destroyed
     m_lifeTracker.reset();
-    
-    if (mIpc) {
-        delete mIpc;
-        mIpc = nullptr;
-    }
 }
 
 void PrinterMmsSyncView::setupIPCHandlers()
 {
-    if (!mIpc) return;
+    if (!m_ipc) return;
 
     // Handle getPrinterList
-    mIpc->onRequest("getPrinterList", [this](const webviewIpc::IPCRequest& request) {
+    m_ipc->onRequest("getPrinterList", [this](const webviewIpc::IPCRequest& request) {
         try {
             return getPrinterList();
         } catch (const std::exception& e) {
@@ -117,7 +112,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
     });
 
     // Handle getPrinterFilamentInfo (async due to potentially time-consuming operations)
-    mIpc->onRequestAsync("getPrinterFilamentInfo", [this](const webviewIpc::IPCRequest& request,
+    m_ipc->onRequestAsync("getPrinterFilamentInfo", [this](const webviewIpc::IPCRequest& request,
                                                           std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         nlohmann::json params = request.params;
         
@@ -166,7 +161,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
     });
 
     // Handle syncMmsFilament
-    mIpc->onEvent("syncMmsFilament", [this](const webviewIpc::IPCEvent& event) {
+    m_ipc->onEvent("syncMmsFilament", [this](const webviewIpc::IPCEvent& event) {
         try {
             syncMmsFilament(event.data);
             EndModal(wxID_OK);
@@ -176,7 +171,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
     });
 
     // Handle closeDialog
-    mIpc->onEvent("closeDialog", [this](const webviewIpc::IPCEvent& event) {
+    m_ipc->onEvent("closeDialog", [this](const webviewIpc::IPCEvent& event) {
         try {
             EndModal(wxID_CANCEL);
         } catch (const std::exception& e) {
