@@ -248,6 +248,13 @@ void PrinterManager::close()
         return;
     }
     mIsInitialized = false;
+
+     // Disconnect all PrinterNetworkEvent signals
+    PrinterNetworkEvent::getInstance()->connectStatusChanged.disconnectAll();
+    PrinterNetworkEvent::getInstance()->statusChanged.disconnectAll();
+    PrinterNetworkEvent::getInstance()->printTaskChanged.disconnectAll();
+    PrinterNetworkEvent::getInstance()->attributesChanged.disconnectAll();   
+
     if (mConnectionThread.joinable()) {
         mConnectionThread.join();
     }
@@ -260,6 +267,8 @@ void PrinterManager::close()
     PrinterCache::getInstance()->savePrinterList();
     
     clearUserData();
+    
+
     
     // Uninitialize network
     NetworkFactory::uninitNetwork();

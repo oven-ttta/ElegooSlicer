@@ -11,7 +11,7 @@
 #include <boost/filesystem.hpp>
 #include "MainFrame.hpp"
 #include "slic3r/Utils/PrinterManager.hpp"
-
+#include "slic3r/Utils/JsonUtils.hpp"
 namespace Slic3r { namespace GUI {
 
 wxBEGIN_EVENT_TABLE(UserLoginView, MsgDialog) EVT_CLOSE(UserLoginView::onClose) wxEND_EVENT_TABLE()
@@ -47,25 +47,74 @@ void UserLoginView::initUI()
         return;
     }
 
+    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
+    setupIPCHandlers();
+
     // Load login page - online URL
     wxString url = wxString::Format("https://np-sit.elegoo.com.cn/account/slicer-login?");
 
-    if (wxGetApp().app_config->get_language_code() == "zh-cn") {
+    std::string language = wxGetApp().app_config->get_language_code();
+    language = boost::to_upper_copy(language);
+    if (language == "ZH-CN") {
         url += "language=zh-CN";
+    } else if (language == "ZH-TW") {
+        url += "language=zh-TW";
+    } else if (language == "EN") {
+        url += "language=en";
+    } else if (language == "ES") {
+        url += "language=es";
+    } else if (language == "FR") {
+        url += "language=fr";
+    } else if (language == "DE") {
+        url += "language=de";
+    } else if (language == "JA") {
+        url += "language=ja";
+    } else if (language == "KO") {
+        url += "language=ko";
+    } else if (language == "RU") {
+        url += "language=ru";
+    } else if (language == "PT") {
+        url += "language=pt";
+    } else if (language == "IT") {
+        url += "language=it";
+    } else if (language == "NL") {
+        url += "language=nl";
+    } else if (language == "TR") {
+        url += "language=tr";
+    } else if (language == "CS") {
+        url += "language=cs";
     } else {
         url += "language=en";
     }
 
-    if (wxGetApp().app_config->get_country_code() == "CN") {
+    std::string region = wxGetApp().app_config->get_region();
+    region = boost::to_upper_copy(region);
+    if (region == "CHN" || region == "CHINA") {
         url += "&region=CN";
-    } else {
+    } else if (region == "USA" || region == "NORTH AMERICA") {
         url += "&region=US";
+    } else if (region == "EUROPE") {
+        url += "&region=GB";
+    } else if (region == "ASIA-PACIFIC") {
+        url += "&region=JP";
+    } else {
+        url += "&region=other";
     }
 
     mBrowser->LoadURL(url);
 
-    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
-    setupIPCHandlers();
+    // 设置 ElegooSlicer UserAgent
+    wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
+    #ifdef __WIN32__
+        mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", SLIC3R_VERSION, theme));
+    #elif defined(__WXMAC__)
+        mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", SLIC3R_VERSION, theme));
+    #elif defined(__linux__)
+        mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (X11; Linux x86_64)", SLIC3R_VERSION, theme));
+    #else
+        mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (compatible; ElegooSlicer)", SLIC3R_VERSION, theme));
+    #endif 
+     
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
 
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
@@ -88,41 +137,34 @@ void UserLoginView::setupIPCHandlers()
 
     mIpc->onRequest("report.userInfo", [this](const webviewIpc::IPCRequest& request) {
         auto        data     = request.params;
-        std::string data_str = data.dump();
 
         UserNetworkInfo userNetworkInfo;
-
-        if (data.contains("userId")) {
-            userNetworkInfo.userId = data.value("userId", "");
-        }
-        if (data.contains("accessToken")) {
-            userNetworkInfo.token = data.value("accessToken", "");
-        }
-        if (data.contains("refreshToken")) {
-            userNetworkInfo.refreshToken = data.value("refreshToken", "");
-        }
-        if (data.contains("expiresTime")) {
-            userNetworkInfo.accessTokenExpireTime = data.value("expiresTime", 0);
-        }
-        if (data.contains("openid")) {
-            userNetworkInfo.openid = data.value("openid", "");
-        }
-        if (data.contains("avatar")) {
-            userNetworkInfo.avatar = data.value("avatar", "");
-        }
-        if (data.contains("email")) {
-            userNetworkInfo.email = data.value("email", "");
-        }
-        if (data.contains("nickname")) {
-            userNetworkInfo.nickname = data.value("nickname", "");
-        }
+        userNetworkInfo.userId = JsonUtils::safeGetString(data, "userId", "");
+        userNetworkInfo.token = JsonUtils::safeGetString(data, "accessToken", "");
+        userNetworkInfo.refreshToken = JsonUtils::safeGetString(data, "refreshToken", "");
+        userNetworkInfo.accessTokenExpireTime = JsonUtils::safeGetInt(data, "expiresTime", 0);
+        userNetworkInfo.openid = JsonUtils::safeGetString(data, "openid", "");
+        userNetworkInfo.avatar = JsonUtils::safeGetString(data, "avatar", "");
+        userNetworkInfo.email = JsonUtils::safeGetString(data, "email", "");
+        userNetworkInfo.nickname = JsonUtils::safeGetString(data, "nickname", "");
         userNetworkInfo.hostType = PrintHost::get_print_host_type_str(PrintHostType::htElegooLink);
-        userNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
+
+        if(!userNetworkInfo.userId.empty() && !userNetworkInfo.token.empty()) {
+            userNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
+        } else {
+            return webviewIpc::IPCResult::error();
+        }
+   
+        PrinterManager::getInstance()->setIotUserInfo(userNetworkInfo);
 
         auto evt = new wxCommandEvent(EVT_USER_INFO_UPDATED);
         wxQueueEvent(wxGetApp().mainframe, evt);
-
-        PrinterManager::getInstance()->setIotUserInfo(userNetworkInfo);
+      
+        CallAfter([this]() {
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            EndModal(wxID_OK);
+        });
+      
         return webviewIpc::IPCResult::success();
     });
 

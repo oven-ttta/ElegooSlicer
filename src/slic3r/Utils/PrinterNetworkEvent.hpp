@@ -109,6 +109,12 @@ public:
         mHandlers.push_back(std::move(handler));
     }
     
+    // disconnect all handlers
+    void disconnectAll() {
+        std::lock_guard<std::mutex> lock(mHandlersMutex);
+        mHandlers.clear();
+    }
+    
     // emit event (non-blocking)
     void emit(const EventType& event) {
         std::lock_guard<std::mutex> lock(mHandlersMutex);

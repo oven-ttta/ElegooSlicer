@@ -788,9 +788,6 @@ void PrinterManagerView::setupIPCHandlers()
             }
         }
     });
-    
-   
-
 }
 
 webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)

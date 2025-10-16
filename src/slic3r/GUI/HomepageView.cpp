@@ -204,8 +204,58 @@ void OnlineModelsHomepageView::initUI()
     setupIPCHandlers();
 
     // Load online models page from remote URL
-    wxString onlineUrl = "https://np-sit.elegoo.com.cn/elegooSlicer";
-    mBrowser->LoadURL(onlineUrl);
+    wxString url = "https://np-sit.elegoo.com.cn/elegooSlicer?";
+
+    std::string language = wxGetApp().app_config->get_language_code();
+    language = boost::to_upper_copy(language);
+    if (language == "ZH-CN") {
+        url += "language=zh-CN";
+    } else if (language == "ZH-TW") {
+        url += "language=zh-TW";
+    } else if (language == "EN") {
+        url += "language=en";
+    } else if (language == "ES") {
+        url += "language=es";
+    } else if (language == "FR") {
+        url += "language=fr";
+    } else if (language == "DE") {
+        url += "language=de";
+    } else if (language == "JA") {
+        url += "language=ja";
+    } else if (language == "KO") {
+        url += "language=ko";
+    } else if (language == "RU") {
+        url += "language=ru";
+    } else if (language == "PT") {
+        url += "language=pt";
+    } else if (language == "IT") {
+        url += "language=it";
+    } else if (language == "NL") {
+        url += "language=nl";
+    } else if (language == "TR") {
+        url += "language=tr";
+    } else if (language == "CS") {
+        url += "language=cs";
+    } else {
+        url += "language=en";
+    }
+
+    std::string region = wxGetApp().app_config->get_region();
+    region = boost::to_upper_copy(region);
+    if (region == "CHN" || region == "CHINA") {
+        url += "&region=CN";
+    } else if (region == "USA" || region == "NORTH AMERICA") {
+        url += "&region=US";
+    } else if (region == "EUROPE") {
+        url += "&region=GB";
+    } else if (region == "ASIA-PACIFIC") {
+        url += "&region=JP";
+    } else {
+        url += "&region=other";
+    }
+
+
+    mBrowser->LoadURL(url);
     // 设置 ElegooSlicer UserAgent
     wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
 #ifdef __WIN32__
@@ -243,13 +293,20 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         data["accessToken"]  = userNetworkInfo.token;
         data["refreshToken"] = userNetworkInfo.refreshToken;
         data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
-        if (userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
-            return webviewIpc::IPCResult::error(data);
-        }
+        //if (userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
+        //    return webviewIpc::IPCResult::error(data);
+        //}
         return webviewIpc::IPCResult::success(data);
     });
 
-    mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) { return webviewIpc::IPCResult::success(); });
+    mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) { 
+        //UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getIotUserInfo();
+        //if(userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
+        //    auto evt = new wxCommandEvent(EVT_USER_LOGIN);
+        //    wxQueueEvent(wxGetApp().mainframe, evt);
+        //}
+        return webviewIpc::IPCResult::success(); 
+    });
 
     mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) { return handleReady(); });
 
@@ -259,6 +316,12 @@ void OnlineModelsHomepageView::setupIPCHandlers()
 
         GUI::wxGetApp().request_model_download(wxString(url));
 
+        return webviewIpc::IPCResult::success();
+    });
+    mIpc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request) {
+        auto        params = request.params;
+        std::string url    = params.value("url", "");
+        wxLaunchDefaultBrowser(url);
         return webviewIpc::IPCResult::success();
     });
 }
