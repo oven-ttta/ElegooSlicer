@@ -403,6 +403,16 @@ void PrinterWebView::setupIPCHandlers()
         webviewIpc::IPCResult result;
         result.message = rtcToken.message;
         result.code = rtcToken.isSuccess() ? 0 : static_cast<int>(rtcToken.code);
+        // Only populate data if the request was successful
+        if (rtcToken.isSuccess() && rtcToken.data.has_value()) {
+            nlohmann::json data;
+            data["rtcToken"]           = rtcToken.data.value().rtcToken;
+            data["userId"]             = rtcToken.data.value().userId;
+            data["rtcTokenExpireTime"] = rtcToken.data.value().rtcTokenExpireTime;
+            result.data                = data;
+        } else {
+            result.data = nlohmann::json::object();
+        }
         return result;
     });
     mIpc->onRequest("sendRtmMessage", [this](const webviewIpc::IPCRequest& request){
