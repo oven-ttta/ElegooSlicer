@@ -405,7 +405,7 @@ PrinterNetworkResult<bool> ElegooLink::unbindWANPrinter(const std::string& print
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::VoidResult elinkResult;
     elink::UnbindPrinterParams params;
-    params.printerId = printerId;
+    params.serialNumber = printerId;
     elinkResult = elink::ElegooNetwork::getInstance().unbindPrinter(params);
     resultCode = parseElegooResult(elinkResult.code);
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, elinkResult.message));

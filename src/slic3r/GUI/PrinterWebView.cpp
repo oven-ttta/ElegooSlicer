@@ -402,6 +402,16 @@ void PrinterWebView::setupIPCHandlers()
         webviewIpc::IPCResult result;
         result.message = rtcToken.message;
         result.code = rtcToken.isSuccess() ? 0 : static_cast<int>(rtcToken.code);
+        // Only populate data if the request was successful
+        if (rtcToken.isSuccess() && rtcToken.data.has_value()) {
+            nlohmann::json data;
+            data["rtcToken"]           = rtcToken.data.value().rtcToken;
+            data["userId"]             = rtcToken.data.value().userId;
+            data["rtcTokenExpireTime"] = rtcToken.data.value().rtcTokenExpireTime;
+            result.data                = data;
+        } else {
+            result.data = nlohmann::json::object();
+        }
         return result;
     });
     mIpc->onRequest("sendRtmMessage", [this](const webviewIpc::IPCRequest& request){
@@ -416,7 +426,7 @@ void PrinterWebView::setupIPCHandlers()
     });
     mIpc->onRequest("getFileList", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
-        std::string printerId = params.value("printerId", "");
+        std::string printerId = params.value("printerId", "F01SPKF2YBP57D0");
         int pageNumber = params.value("pageNumber", 1);
         int pageSize = params.value("pageSize", 10);
         auto fileResponse = PrinterManager::getInstance()->getFileList(printerId, pageNumber, pageSize);
@@ -537,6 +547,8 @@ void PrinterWebView::onRtmMessage(const nlohmann::json& data){
 }
 void PrinterWebView::onConnectionStatus(const nlohmann::json& data){
     mIpc->sendEvent("onConnectionStatus", data, mIpc->generateRequestId());
+    //打印日志
+    wxLogMessage("onConnectionStatus1111", data.dump().c_str());
 }
 void PrinterWebView::onPrinterEventRaw(const nlohmann::json& data){
     mIpc->sendEvent("onPrinterEventRaw", data, mIpc->generateRequestId());
