@@ -426,7 +426,7 @@ void PrinterWebView::setupIPCHandlers()
     });
     mIpc->onRequest("getFileList", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
-        std::string printerId = params.value("printerId", "F01SPKF2YBP57D0");
+        std::string printerId = params.value("printerId", "");
         int pageNumber = params.value("pageNumber", 1);
         int pageSize = params.value("pageSize", 10);
         auto fileResponse = PrinterManager::getInstance()->getFileList(printerId, pageNumber, pageSize);
@@ -547,8 +547,6 @@ void PrinterWebView::onRtmMessage(const nlohmann::json& data){
 }
 void PrinterWebView::onConnectionStatus(const nlohmann::json& data){
     mIpc->sendEvent("onConnectionStatus", data, mIpc->generateRequestId());
-    //打印日志
-    wxLogMessage("onConnectionStatus1111", data.dump().c_str());
 }
 void PrinterWebView::onPrinterEventRaw(const nlohmann::json& data){
     mIpc->sendEvent("onPrinterEventRaw", data, mIpc->generateRequestId());
