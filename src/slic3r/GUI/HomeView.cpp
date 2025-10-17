@@ -11,7 +11,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <slic3r/Utils/PrinterManager.hpp>
+#include <slic3r/Utils/UserNetworkManager.hpp>
 #include <nlohmann/json.hpp>
 
 namespace Slic3r { namespace GUI {
@@ -177,16 +177,13 @@ webviewIpc::IPCResult HomeView::handleNavigateToPage(const nlohmann::json& data)
 webviewIpc::IPCResult HomeView::handleGetUserInfo()
 {
     // Get user network info
-    UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getIotUserInfo();   
+    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();   
     nlohmann::json data; 
     data = convertUserNetworkInfoToJson(userNetworkInfo);
-    //if(userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
-    //    return webviewIpc::IPCResult::error(data);
-    //}
     return webviewIpc::IPCResult::success(data);
 }
 webviewIpc::IPCResult HomeView::handleLogout() { 
-    PrinterManager::getInstance()->clearIotUserInfo();
+    UserNetworkManager::getInstance()->clearIotUserInfo();
     return webviewIpc::IPCResult::success(); 
 }
 
@@ -255,7 +252,7 @@ void HomeView::updateMode()
 void HomeView::refreshUserInfo()
 {
     lock_guard<mutex> lock(mUserInfoMutex);
-    UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getIotUserInfo();
+    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();
     if (mIpc && mIsReady) {
     // Send refresh signal to navigation webview via IPC
         nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);

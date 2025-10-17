@@ -15,7 +15,8 @@
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <wx/webview.h>
 #include "slic3r/GUI/PhysicalPrinterDialog.hpp"
-#include "PrinterManager.hpp"
+#include "slic3r/Utils/PrinterManager.hpp"
+#include "slic3r/Utils/UserNetworkManager.hpp"
 #include <nlohmann/json.hpp>
 #include <thread>
 #include <mutex>
@@ -398,7 +399,7 @@ void PrinterWebView::setupIPCHandlers()
 
 
     mIpc->onRequest("getRtcToken", [this](const webviewIpc::IPCRequest& request){
-        auto rtcToken = PrinterManager::getInstance()->getRtcToken();
+        auto rtcToken = UserNetworkManager::getInstance()->getRtcToken();
         webviewIpc::IPCResult result;
         result.message = rtcToken.message;
         result.code = rtcToken.isSuccess() ? 0 : static_cast<int>(rtcToken.code);

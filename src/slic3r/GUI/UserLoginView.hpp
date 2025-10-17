@@ -29,6 +29,9 @@ private:
     wxWebView* mBrowser;
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     
+    std::string mLanguage;
+    std::string mRegion;
+    
     DECLARE_EVENT_TABLE()
 };
 

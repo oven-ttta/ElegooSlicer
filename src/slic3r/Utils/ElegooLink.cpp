@@ -135,6 +135,7 @@ PrinterNetworkInfo convertFromElegooPrinterAttributes(const elink::PrinterAttrib
     
     return info;
 }
+
 elink::PrinterType getPrinterType(const PrinterNetworkInfo& printerNetworkInfo)
 {
     std::string model  = printerNetworkInfo.printerModel;
@@ -686,6 +687,8 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
             if(elinkResult.hasData()) {
                 const elink::PrinterAttributes& attributes = elinkResult.value();
                 printerNetworkInfo = convertFromElegooPrinterAttributes(attributes);
+            } else {
+                resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
             }
         }
     } catch (const std::exception& e) {
@@ -695,7 +698,45 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
     return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
+PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterStatus(const std::string& printerId, bool isWan)
+{
+    PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    elink::PrinterStatusResult elinkResult;
+    PrinterNetworkInfo printerNetworkInfo;
+    elink::PrinterStatusParams params;
+    params.printerId = printerId;
+    try {
+        if(isWan) {
+            elinkResult = elink::ElegooNetwork::getInstance().getPrinterStatus(params);
+        } else {
+            elinkResult = elink::ElegooLink::getInstance().getPrinterStatus(params);
+        }
+        resultCode = parseElegooResult(elinkResult.code);
+        if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+            if (elinkResult.hasData()) {
+                const auto&      status = elinkResult.value();
+                PrinterStatus    s      = parseElegooStatus(status.printerStatus.state, status.printerStatus.subState);
+                PrinterPrintTask task;
+                task.taskId        = status.printStatus.taskId;
+                task.fileName      = status.printStatus.fileName;
+                task.totalTime     = status.printStatus.totalTime;
+                task.currentTime   = status.printStatus.currentTime;
+                task.estimatedTime = status.printStatus.estimatedTime;
+                task.progress      = status.printStatus.progress;
+                printerNetworkInfo.printerStatus = s;
+                printerNetworkInfo.printTask     = task;
 
+                // PrinterNetworkEvent::getInstance()->printTaskChanged.emit(PrinterPrintTaskEvent(event->status.printerId, task, NETWORK_TYPE_LAN));
+            } else {
+                resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
+            }
+        }
+    } catch (const std::exception& e) {
+        wxLogError("Exception in ElegooLink::getPrinterStatus: %s", e.what());
+        resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
+    }
+    return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo, parseUnknownErrorMsg(resultCode, elinkResult.message));    
+}
 PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileList(const std::string& printerId, int pageNumber, int pageSize)
 {
     std::vector<PrinterPrintFile> printFiles;
@@ -743,7 +784,6 @@ PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileDetail(const s
     auto elinkResult = elink::ElegooNetwork::getInstance().getFileDetail(params);
     resultCode = parseElegooResult(elinkResult.code);
 
-
     if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
         if(elinkResult.hasData()) {
             const auto& fileDetail = elinkResult.value();
@@ -772,7 +812,7 @@ PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileDetail(const s
 
         }
     }
-    return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::SUCCESS, PrinterPrintFileResponse());
+    return PrinterNetworkResult<PrinterPrintFileResponse>(resultCode, printFileResponse, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 PrinterNetworkResult<PrinterPrintTaskResponse> ElegooLink::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
@@ -801,7 +841,7 @@ PrinterNetworkResult<PrinterPrintTaskResponse> ElegooLink::getPrintTaskList(cons
             }
         }
     }
-    return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::SUCCESS, printTaskResponse);
+    return PrinterNetworkResult<PrinterPrintTaskResponse>(resultCode, printTaskResponse, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
 PrinterNetworkResult<bool> ElegooLink::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
@@ -809,6 +849,120 @@ PrinterNetworkResult<bool> ElegooLink::deletePrintTasks(const std::string& print
     //return elink::ElegooNetwork::getInstance().deletePrintTasks(elink::DeletePrintTasksParams{printerId, taskIds});
     return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
+PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetworkInfo& userInfo)
+{
+    elink::HttpCredential params;
+    params.userId = userInfo.userId;
+    params.accessToken = userInfo.token;
+    params.refreshToken = userInfo.refreshToken;
+    params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
+    params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
+
+    UserNetworkInfo userInfoRet = userInfo;
+
+    elink::VoidResult setHttpCredentialResult = elink::ElegooNetwork::getInstance().setHttpCredential(params);
+    PrinterNetworkErrorCode resultCode = parseElegooResult(setHttpCredentialResult.code);
+    
+    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+    elink::GetUserInfoResult userInfoResult = elink::ElegooNetwork::getInstance().getUserInfo();    
+    resultCode = parseElegooResult(userInfoResult.code);
+        if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+            if(userInfoResult.hasData()) {
+                const auto& userInfoData = userInfoResult.value();
+                userInfoRet.userId = userInfoData.userId;
+                userInfoRet.phone = userInfoData.phone;
+                userInfoRet.email = userInfoData.email;
+                userInfoRet.nickname = userInfoData.nickName;
+                userInfoRet.avatar = userInfoData.avatar;
+            } else {
+                resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
+            }
+        }
+    }
+    userInfoRet.connectedToIot = false;
+    switch (resultCode) {
+    case PrinterNetworkErrorCode::SUCCESS:
+        userInfoRet.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
+        break;
+    case PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD:
+        userInfoRet.loginStatus = LOGIN_STATUS_OFFLINE_INVALID_USER;
+        break;
+    case PrinterNetworkErrorCode::INVALID_TOKEN:
+        userInfoRet.loginStatus = LOGIN_STATUS_OFFLINE_INVALID_TOKEN;
+        break;
+    default:
+        userInfoRet.loginStatus = LOGIN_STATUS_OFFLINE_NETWORK_ERROR;
+        break;
+    }
+
+    return PrinterNetworkResult<UserNetworkInfo>(resultCode, userInfoRet);
+}
+
+PrinterNetworkResult<UserNetworkInfo> ElegooLink::getRtcToken()
+{
+    elink::GetRtcTokenResult result = elink::ElegooNetwork::getInstance().getRtcToken();
+    UserNetworkInfo userInfo;
+    PrinterNetworkErrorCode resultCode = parseElegooResult(result.code);
+    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+        if(result.hasData()) {
+            const auto& rtcTokenData = result.value();
+            userInfo.userId = rtcTokenData.userId;
+            userInfo.rtcToken = rtcTokenData.rtcToken;
+            userInfo.rtcTokenExpireTime = rtcTokenData.rtcTokenExpireTime;
+        }
+    }
+    return PrinterNetworkResult<UserNetworkInfo>(resultCode, userInfo, parseUnknownErrorMsg(resultCode, result.message));
+}
+
+PrinterNetworkResult<UserNetworkInfo> ElegooLink::refreshToken(const UserNetworkInfo& userInfo)
+{
+    UserNetworkInfo userInfoRet = userInfo;
+    //BizResult<HttpCredential> getHttpCredential() const;
+    elink::BizResult<elink::HttpCredential> httpCredentialResult = elink::ElegooNetwork::getInstance().getHttpCredential();
+    PrinterNetworkErrorCode resultCode = parseElegooResult(httpCredentialResult.code);
+    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+        if(httpCredentialResult.hasData() && userInfo.userId == httpCredentialResult.value().userId) {
+            elink::HttpCredential httpCredential = httpCredentialResult.value();
+            userInfoRet.token = httpCredential.accessToken;
+            userInfoRet.refreshToken = httpCredential.refreshToken;
+            userInfoRet.accessTokenExpireTime = httpCredential.accessTokenExpireTime;
+            userInfoRet.refreshTokenExpireTime = httpCredential.refreshTokenExpireTime;
+        } else {
+            resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
+        }
+    }
+    return PrinterNetworkResult<UserNetworkInfo>(resultCode, userInfoRet, parseUnknownErrorMsg(resultCode, httpCredentialResult.message));
+}
+
+PrinterNetworkResult<bool> ElegooLink::sendRtmMessage(const std::string& printerId, const std::string& message)
+{
+    elink::SendRtmMessageParams params;
+    params.printerId = printerId;
+    params.message = message;
+    elink::VoidResult result = elink::ElegooNetwork::getInstance().sendRtmMessage(params);
+    PrinterNetworkErrorCode resultCode = parseElegooResult(result.code);
+    return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, result.message));
+}
+
+PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::getUserBoundPrinters()
+{
+    PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    std::vector<PrinterNetworkInfo> printers;
+    elink::GetPrinterListResult elinkResult;
+    elinkResult = elink::ElegooNetwork::getInstance().getPrinters();
+    resultCode = parseElegooResult(elinkResult.code);
+    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+        if(elinkResult.hasData()) {
+            for(const auto& printer : elinkResult.value().printers) {
+                printers.push_back(convertFromElegooPrinterInfo(printer));
+            }
+        }
+    }
+    return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, printers, parseUnknownErrorMsg(resultCode, elinkResult.message));
+}
+
+
+
 PrinterNetworkResult<std::string> ElegooLink::hasInstalledPlugin()
 {
     std::string version = "";
@@ -860,78 +1014,5 @@ PrinterNetworkResult<bool> ElegooLink::uninstallPlugin()
     return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 
-PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetworkInfo& userInfo)
-{
-    elink::HttpCredential params;
-    params.userId = userInfo.userId;
-    params.accessToken = userInfo.token;
-    params.refreshToken = userInfo.refreshToken;
-    params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
-    params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
-
-    UserNetworkInfo userInfoRet = userInfo;
-
-    elink::VoidResult setHttpCredentialResult = elink::ElegooNetwork::getInstance().setHttpCredential(params);
-    if(setHttpCredentialResult.code != elink::ELINK_ERROR_CODE::SUCCESS) {
-        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, userInfo,
-                                                     "failed to set HTTP credential: " + setHttpCredentialResult.message);
-    }
-
-    elink::GetUserInfoResult userInfoResult = elink::ElegooNetwork::getInstance().getUserInfo();    
-    if(userInfoResult.code != elink::ELINK_ERROR_CODE::SUCCESS) {
-        userInfoRet.loginStatus = LOGIN_STATUS_LOGIN_FAILED;
-        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, userInfoRet,
-                                                     "failed to connect to iot: " + userInfoResult.message);
-    }
-    userInfoRet.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
-    userInfoRet.connectedToIot = true;
-    userInfoRet.userId = userInfoResult.value().userId;
-    userInfoRet.phone = userInfoResult.value().phone;
-    userInfoRet.email = userInfoResult.value().email;
-    userInfoRet.nickname = userInfoResult.value().nickName;
-    userInfoRet.avatar = userInfoResult.value().avatar;
-    return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, userInfoRet);
-}
-
-PrinterNetworkResult<UserNetworkInfo> ElegooLink::getRtcToken()
-{
-    elink::GetRtcTokenResult result = elink::ElegooNetwork::getInstance().getRtcToken();
-    if(result.code != elink::ELINK_ERROR_CODE::SUCCESS || !result.hasData()) {
-        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, UserNetworkInfo(), "Failed to get RTC token");
-    }
-    UserNetworkInfo userInfo;
-    userInfo.userId = result.value().userId;
-    userInfo.rtcToken = result.value().rtcToken;
-    userInfo.rtcTokenExpireTime = result.value().rtcTokenExpireTime;
-    return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, userInfo);
-}
-
-PrinterNetworkResult<bool> ElegooLink::sendRtmMessage(const std::string& printerId, const std::string& message)
-{
-    elink::SendRtmMessageParams params;
-    params.printerId = printerId;
-    params.message = message;
-    if(elink::ElegooNetwork::getInstance().sendRtmMessage(params).code != elink::ELINK_ERROR_CODE::SUCCESS) {
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, false, "Failed to send RTM message");
-    }
-    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
-}
-
-PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::getPrinters()
-{
-    PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
-    std::vector<PrinterNetworkInfo> printers;
-    elink::GetPrinterListResult elinkResult;
-    elinkResult = elink::ElegooNetwork::getInstance().getPrinters();
-    resultCode = parseElegooResult(elinkResult.code);
-    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
-        if(elinkResult.hasData()) {
-            for(const auto& printer : elinkResult.value().printers) {
-                printers.push_back(convertFromElegooPrinterInfo(printer));
-            }
-        }
-    }
-    return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, printers, parseUnknownErrorMsg(resultCode, elinkResult.message));
-}
 
 } // namespace Slic3r

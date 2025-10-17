@@ -217,36 +217,4 @@ void PrinterCache::updatePrinterAttributesByNotify(const std::string& printerId,
     }
 }   
 
-void PrinterCache::removeWanPrinters() {
-    std::lock_guard<std::mutex> lock(mCacheMutex);
-    for (auto it = mPrinters.begin(); it != mPrinters.end();) {
-        if (it->second.networkType == NETWORK_TYPE_WAN) {
-            it = mPrinters.erase(it);
-        } else {
-            ++it;
-        }
-    }
-}
-
-void PrinterCache::removeWanPrintersNotInList(const std::vector<PrinterNetworkInfo>& validPrinters) {
-    std::lock_guard<std::mutex> lock(mCacheMutex);
-    
-    // Build set of valid serial numbers for O(1) lookup
-    std::set<std::string> validSerialNumbers;
-    for (const auto& printer : validPrinters) {
-        if (!printer.serialNumber.empty()) {
-            validSerialNumbers.insert(printer.serialNumber);
-        }
-    }
-    
-    // Remove WAN printers not in the valid list
-    for (auto it = mPrinters.begin(); it != mPrinters.end();) {
-        if (it->second.networkType == NETWORK_TYPE_WAN && 
-            validSerialNumbers.find(it->second.serialNumber) == validSerialNumbers.end()) {
-            it = mPrinters.erase(it);
-        } else {
-            ++it;
-        }
-    }
-}
 } // namespace Slic3r

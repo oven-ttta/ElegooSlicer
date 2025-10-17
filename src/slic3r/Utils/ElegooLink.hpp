@@ -25,6 +25,7 @@ public:
     PrinterNetworkResult<bool>                            sendPrintFile(const PrinterNetworkParams& params, bool isWan = false);
     PrinterNetworkResult<PrinterMmsGroup>                 getPrinterMmsInfo(const std::string& printerId, bool isWan = false);
     PrinterNetworkResult<PrinterNetworkInfo>              getPrinterAttributes(const std::string& printerId, bool isWan = false);
+    PrinterNetworkResult<PrinterNetworkInfo>              getPrinterStatus(const std::string& printerId, bool isWan = false);
     PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize);
     PrinterNetworkResult<bool> deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds);
@@ -35,7 +36,8 @@ public:
     PrinterNetworkResult<bool> uninstallPlugin();
     PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
-    PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters();
+    PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
+    PrinterNetworkResult<UserNetworkInfo> refreshToken(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
     PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId);

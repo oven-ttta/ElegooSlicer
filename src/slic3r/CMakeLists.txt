@@ -672,6 +672,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/ElegooUserNetwork.cpp
     Utils/ElegooPluginNetwork.hpp
     Utils/ElegooPluginNetwork.cpp
+    Utils/UserNetworkManager.cpp
+    Utils/UserNetworkManager.hpp
     Utils/TCPConsole.cpp
     Utils/TCPConsole.hpp
     Utils/UndoRedo.cpp

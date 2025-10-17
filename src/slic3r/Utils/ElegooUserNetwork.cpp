@@ -24,14 +24,12 @@ void ElegooUserNetwork::init()
 
 PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::connectToIot(const UserNetworkInfo& userInfo)
 {
-    mUserNetworkInfo = userInfo;
+    UserNetworkInfo userNetworkInfo = userInfo;
     auto result = ElegooLink::getInstance()->connectToIot(userInfo);
     if(result.isSuccess() && result.hasData()) {
         mUserNetworkInfo = result.data.value();
-        mUserNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
-        mUserNetworkInfo.connectedToIot = true;
     } else {
-        mUserNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_FAILED;
+        mUserNetworkInfo.loginStatus = LOGIN_STATUS_OFFLINE_INVALID_USER;
         mUserNetworkInfo.connectedToIot = false;
     }
     return result;
@@ -42,9 +40,22 @@ PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::getRtcToken()
     return ElegooLink::getInstance()->getRtcToken();
 }
 
-PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooUserNetwork::getPrinters()
+PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::refreshToken(const UserNetworkInfo& userInfo)
 {
-    return ElegooLink::getInstance()->getPrinters();
+    auto result = ElegooLink::getInstance()->refreshToken(userInfo);
+    if(result.isSuccess() && result.hasData()) {
+        UserNetworkInfo userNetworkInfo = result.data.value();
+        mUserNetworkInfo.token = userNetworkInfo.token;
+        mUserNetworkInfo.refreshToken = userNetworkInfo.refreshToken;
+        mUserNetworkInfo.accessTokenExpireTime = userNetworkInfo.accessTokenExpireTime;
+        mUserNetworkInfo.refreshTokenExpireTime = userNetworkInfo.refreshTokenExpireTime;
+    }
+    return result;
+}
+
+PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooUserNetwork::getUserBoundPrinters()
+{
+    return ElegooLink::getInstance()->getUserBoundPrinters();
 }
 
 } // namespace Slic3r 

@@ -49,12 +49,6 @@ public:
     PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
     PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& printerId, const std::string& fileName);
 
-    // WAN
-    void setIotUserInfo(const UserNetworkInfo& userInfo);
-    void clearIotUserInfo();
-    UserNetworkInfo getIotUserInfo();
-    PrinterNetworkResult<UserNetworkInfo> getRtcToken();
-
     static std::map<std::string, std::map<std::string, DynamicPrintConfig>> getVendorPrinterModelConfig();
     static std::string imageFileToBase64DataURI(const std::string& image_path);
 
@@ -88,26 +82,15 @@ private:
     // Validate and complete printer info with system preset
     void validateAndCompletePrinterInfo(PrinterNetworkInfo& printerInfo);
 
-    // User network
-    mutable std::mutex mUserNetworkMutex;
-    UserNetworkInfo mUserInfo;  
-    std::shared_ptr<IUserNetwork> mUserNetwork;  
-    UserNetworkInfo getUserInfo() const;
-    void setUserInfo(const UserNetworkInfo& userInfo);
-    std::shared_ptr<IUserNetwork> getUserNetwork() const;
-    void setUserNetwork(std::shared_ptr<IUserNetwork> network);
-    bool updateUserInfo(const UserNetworkInfo& userInfo);
-    void clearUserData();
-    
-    void connectToIot();
-    void saveUserInfo(const UserNetworkInfo& userInfo);
-    void loadUserInfo();
- 
+    // get user bound printers from user network
+    void getUserBoundPrinters();
+
     std::atomic<bool> mIsInitialized;
     std::mutex mInitializedMutex;
     void checkInitialized();
     // thread to monitor printer connections
     std::thread mConnectionThread;
+    std::chrono::steady_clock::time_point mLastConnectionLoopTime;
     void monitorPrinterConnections();
 };
 } // namespace Slic3r::GUI 

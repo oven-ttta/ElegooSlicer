@@ -28,6 +28,7 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinters()                                                    = 0;
     virtual PrinterNetworkResult<PrinterMmsGroup>                 getPrinterMmsInfo()                                                   = 0;
     virtual PrinterNetworkResult<PrinterNetworkInfo>              getPrinterAttributes()                                                = 0;
+    virtual PrinterNetworkResult<PrinterNetworkInfo>              getPrinterStatus()                                                    = 0;
     virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileList(int pageNumber, int pageSize)      = 0;
     virtual PrinterNetworkResult<PrinterPrintTaskResponse> getPrintTaskList(int pageNumber, int pageSize) = 0;
     virtual PrinterNetworkResult<bool> deletePrintTasks(const std::vector<std::string>& taskIds)          = 0;
@@ -40,6 +41,8 @@ public:
 
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
 
+    static void init();
+    static void uninit();
 protected:
     PrinterNetworkInfo mPrinterNetworkInfo;
     // if 1 to 1, implement http websocket etc. network management here
@@ -57,10 +60,14 @@ public:
 
     virtual PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo) = 0;
     virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken()                             = 0;
-    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters()             = 0;
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters()             = 0;
+    virtual PrinterNetworkResult<UserNetworkInfo> refreshToken(const UserNetworkInfo& userInfo)                         = 0;
 
     const UserNetworkInfo& getUserNetworkInfo() const { return mUserNetworkInfo; }
 
+
+    static void init();
+    static void uninit();
 protected:
     UserNetworkInfo mUserNetworkInfo;
 };
@@ -80,6 +87,8 @@ public:
 
     const PluginNetworkInfo& getPluginNetworkInfo() const { return mPluginNetworkInfo; }
 
+    static void init();
+    static void uninit();
 protected:
     PluginNetworkInfo mPluginNetworkInfo;
 };
@@ -90,9 +99,6 @@ public:
     static std::shared_ptr<IPrinterNetwork> createPrinterNetwork(const PrinterNetworkInfo& printerNetworkInfo);
     static std::shared_ptr<IUserNetwork>    createUserNetwork(const UserNetworkInfo& userNetworkInfo);
     static std::shared_ptr<IPluginNetwork>  createPluginNetwork(const PluginNetworkInfo& pluginNetworkInfo);
-
-    static void initNetwork();
-    static void uninitNetwork();
 };
 
 

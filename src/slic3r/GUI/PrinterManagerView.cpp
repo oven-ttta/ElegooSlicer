@@ -924,13 +924,25 @@ webviewIpc::IPCResult PrinterManagerView::getPrinterList()
 webviewIpc::IPCResult PrinterManagerView::getPrinterListStatus()
 {
     webviewIpc::IPCResult result;
-    auto printerList = PrinterManager::getInstance()->getPrinterList();
+    static std::vector<PrinterNetworkInfo> lastPrinterList;
+    std::vector<PrinterNetworkInfo> printerList = PrinterManager::getInstance()->getPrinterList();
     nlohmann::json response = json::array();
     for (auto& printer : printerList) {
         nlohmann::json printer_obj = nlohmann::json::object();
         printer_obj = convertPrinterNetworkInfoToJson(printer);
+        auto it = std::find_if(lastPrinterList.begin(), lastPrinterList.end(), [&printer](const PrinterNetworkInfo& p) { return p.printerId == printer.printerId; });
+        if(it == lastPrinterList.end()) {
+            if(printer.networkType == NETWORK_TYPE_WAN) {
+                // iot is auto get, need load model image first
+                boost::filesystem::path resources_path(Slic3r::resources_dir());
+                std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
+                printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
+            }
+        }
         response.push_back(printer_obj);
     }
+    
+    lastPrinterList = printerList;
     result.data = response;
     result.code = 0;
     result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);

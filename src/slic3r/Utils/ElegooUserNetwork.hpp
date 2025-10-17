@@ -16,7 +16,8 @@ public:
 
     virtual PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo) override;
     virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken() override;
-    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getPrinters() override;
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters() override;
+    virtual PrinterNetworkResult<UserNetworkInfo> refreshToken(const UserNetworkInfo& userInfo) override;
 
     static void init();
     static void uninit();

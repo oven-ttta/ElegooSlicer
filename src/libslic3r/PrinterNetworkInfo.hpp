@@ -229,9 +229,12 @@ struct PrinterNetworkInfo
 
 
 enum LoginStatus {
-    LOGIN_STATUS_NOT_LOGIN = 0,
-    LOGIN_STATUS_LOGIN_SUCCESS = 1,
-    LOGIN_STATUS_LOGIN_FAILED = 2,
+    LOGIN_STATUS_NOT_LOGIN = 0,              // User not logged in
+    LOGIN_STATUS_LOGIN_SUCCESS = 1,          // Login success and online
+    LOGIN_STATUS_CONNECTING = 2,             // Attempting to connect to IoT
+    LOGIN_STATUS_OFFLINE_NETWORK_ERROR = 3,  // Offline due to network error (can retry)
+    LOGIN_STATUS_OFFLINE_INVALID_TOKEN = 4,  // Offline due to token invalid (need re-login)
+    LOGIN_STATUS_OFFLINE_INVALID_USER = 5    // Offline due to invalid user info (need re-login)
 };
 
 struct UserNetworkInfo
@@ -251,11 +254,12 @@ struct UserNetworkInfo
     std::string avatar;       // User avatar URL
     std::string openid;       // OpenID for third-party login
     std::string phone;        // User phone number
-    std::string country;      // User country
+    std::string region;      // User region
     std::string language;     // User preferred language
-    std::string timezone;     // User timezone
     uint64_t    createTime{0}; // Account creation time
-    uint64_t    lastLoginTime{0}; // Last login time
+    uint64_t    loginTime{0}; //  login time
+    uint64_t    connnectToIotTime{0}; // connnect to iot time
+    uint64_t    lastTokenRefreshTime{0}; // Last token refresh time
     bool connectedToIot{false}; // connected to iot
 
 };

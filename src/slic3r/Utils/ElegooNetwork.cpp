@@ -73,6 +73,11 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::getPrinterAttributes()
     return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
 }
 
+PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::getPrinterStatus()
+{
+    return ElegooLink::getInstance()->getPrinterStatus(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+}
+
 PrinterNetworkResult<PrinterPrintFileResponse> ElegooNetwork::getFileList(int pageNumber, int pageSize)
 {
     return ElegooLink::getInstance()->getFileList(mPrinterNetworkInfo.printerId, pageNumber, pageSize);

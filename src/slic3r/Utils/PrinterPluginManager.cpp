@@ -10,7 +10,7 @@ PrinterPluginManager::~PrinterPluginManager() { }
 
 
 bool PrinterPluginManager::init() {
-
+    IPluginNetwork::init();
     std::vector<std::string> hostTypeList = getPluginList();
     for(const std::string& hostType : hostTypeList) {
        installPlugin(hostType);
@@ -20,6 +20,7 @@ bool PrinterPluginManager::init() {
 }
 
 bool PrinterPluginManager::uninit() {
+    IPluginNetwork::uninit();
     std::vector<std::string> hostTypeList = getPluginList();
     for(const std::string& hostType : hostTypeList) {
         uninstallPlugin(hostType);

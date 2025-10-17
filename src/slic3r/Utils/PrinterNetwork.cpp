@@ -26,7 +26,10 @@ std::shared_ptr<IUserNetwork> NetworkFactory::createUserNetwork(const UserNetwor
     case PrintHostType::htElegooLink: {
         return std::make_shared<ElegooUserNetwork>(userNetworkInfo);
     }
-    default: {wxLogWarning("Unsupported network type: %s", userNetworkInfo.hostType.c_str()); return nullptr;}
+    default: {
+        wxLogWarning("Unsupported network type: %s", userNetworkInfo.hostType.c_str());
+        return nullptr;
+    }
     }
     return nullptr;
 }
@@ -37,23 +40,23 @@ std::shared_ptr<IPluginNetwork> NetworkFactory::createPluginNetwork(const Plugin
     case PrintHostType::htElegooLink: {
         return std::make_shared<ElegooPluginNetwork>(pluginNetworkInfo);
     }
-    default: {wxLogWarning("Unsupported network type: %s", pluginNetworkInfo.hostType.c_str()); return nullptr;}
+    default: {
+        wxLogWarning("Unsupported network type: %s", pluginNetworkInfo.hostType.c_str());
+        return nullptr;
+    }
     }
     return nullptr;
 }
 
-void NetworkFactory::initNetwork()
-{
-    ElegooNetwork::init();
-    ElegooUserNetwork::init();
-    ElegooPluginNetwork::init();
-}
+void IPrinterNetwork::init() { ElegooNetwork::init(); }
 
-void NetworkFactory::uninitNetwork()
-{
-    ElegooNetwork::uninit();
-    ElegooUserNetwork::uninit();
-    ElegooPluginNetwork::uninit();
-}
+void IPrinterNetwork::uninit() { ElegooNetwork::uninit(); }
 
+void IUserNetwork::init() { ElegooUserNetwork::init(); }
+
+void IUserNetwork::uninit() { ElegooUserNetwork::uninit(); }
+
+void IPluginNetwork::init() { ElegooPluginNetwork::init(); }
+
+void IPluginNetwork::uninit() { ElegooPluginNetwork::uninit(); }
 } // namespace Slic3r

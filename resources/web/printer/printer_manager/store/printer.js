@@ -311,6 +311,13 @@ const usePrinterStore = defineStore('printer', {
     },
 
     updatePrinterListStatus(printers) {
+      // Get list of printer IDs from server
+      const serverPrinterIds = new Set(printers.map(p => p.printerId));
+      
+      // Remove printers that no longer exist on the server
+      this.printers = this.printers.filter(p => serverPrinterIds.has(p.printerId));
+      
+      // Update existing printers and add new ones
       printers.forEach((statusPrinter) => {
         const printerIndex = this.printers.findIndex(p => p.printerId === statusPrinter.printerId);
         if (printerIndex !== -1) {
@@ -319,6 +326,9 @@ const usePrinterStore = defineStore('printer', {
             ...this.printers[printerIndex],
             ...statusPrinter
           };
+        } else {
+          // Add new printer if it doesn't exist
+          this.printers.push(statusPrinter);
         }
       });
     },

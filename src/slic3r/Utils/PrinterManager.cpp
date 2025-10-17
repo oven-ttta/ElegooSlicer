@@ -23,6 +23,7 @@
 #include "PrinterNetworkEvent.hpp"
 #include "slic3r/GUI/I18N.hpp"
 #include "slic3r/Utils/PrinterPluginManager.hpp"
+#include "UserNetworkManager.hpp"
 namespace Slic3r {
 
 namespace fs = boost::filesystem;
@@ -226,16 +227,15 @@ void PrinterManager::init()
         PrinterCache::getInstance()->updatePrinterAttributesByNotify(event.printerId, event.printerInfo);
     });
 
-    PrinterCache::getInstance()->loadPrinterList();
-    syncOldPresetPrinters();
-
-    // Load user info from config
-    loadUserInfo();
-
+    // init user network
+    UserNetworkManager::getInstance()->init();
     // Initialize network
-    NetworkFactory::initNetwork();
+    IPrinterNetwork::init();
 
     PrinterPluginManager::getInstance()->init();
+   
+    PrinterCache::getInstance()->loadPrinterList();
+    syncOldPresetPrinters();
 
     mIsInitialized = true;
     mConnectionThread = std::thread([this]() { monitorPrinterConnections(); });
@@ -265,13 +265,12 @@ void PrinterManager::close()
     mPrinterNetworkConnections.clear();
 
     PrinterCache::getInstance()->savePrinterList();
-    
-    clearUserData();
-    
 
-    
+    UserNetworkManager::getInstance()->uninit();
+    PrinterPluginManager::getInstance()->uninit();
     // Uninitialize network
-    NetworkFactory::uninitNetwork();
+    IPrinterNetwork::uninit();
+
 }
 void PrinterManager::checkInitialized()
 {
@@ -632,146 +631,26 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
                                                  PrinterMmsGroup());
 }
 
-UserNetworkInfo PrinterManager::getUserInfo() const
-{
-    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
-    return mUserInfo;
-}
-
-void PrinterManager::setUserInfo(const UserNetworkInfo& userInfo)
-{
-    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
-    mUserInfo = userInfo;
-}
-
-bool PrinterManager::updateUserInfo(const UserNetworkInfo& userInfo)
-{
-    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
-    // if the user id is the same, update the user info
-    if (mUserInfo.userId == userInfo.userId) {
-        mUserInfo = userInfo;
-        return true;
-    }
-    // user id is different
-    return false;
-}
-
-std::shared_ptr<IUserNetwork> PrinterManager::getUserNetwork() const
-{
-    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
-    return mUserNetwork;
-}
-
-void PrinterManager::setUserNetwork(std::shared_ptr<IUserNetwork> network)
-{
-    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
-    mUserNetwork = network;
-}
-
-void PrinterManager::clearUserData()
-{
-    std::lock_guard<std::mutex> lock(mUserNetworkMutex);
-    mUserInfo = UserNetworkInfo();
-    mUserNetwork = nullptr;
-}
-
-void PrinterManager::setIotUserInfo(const UserNetworkInfo& userInfo)
-{
-    UserNetworkInfo updatedInfo = userInfo;
-    updatedInfo.connectedToIot = false;
-    setUserInfo(updatedInfo);
-    saveUserInfo(updatedInfo);
-}
-
-void PrinterManager::clearIotUserInfo()
-{
-    clearUserData();
-    saveUserInfo(UserNetworkInfo());
-}
-
-UserNetworkInfo PrinterManager::getIotUserInfo()
-{
-    checkInitialized();
-    return getUserInfo();
-}
-
-void PrinterManager::saveUserInfo(const UserNetworkInfo& userInfo)
-{
-    try {
-        fs::path userInfoPath = fs::path(Slic3r::data_dir()) / "user" / "user_info.json";
-
-        // Create user directory if not exists
-        fs::path userDir = userInfoPath.parent_path();
-        if (!fs::exists(userDir)) {
-            fs::create_directories(userDir);
-        }
-
-        // Convert user info to JSON
-        nlohmann::json jsonData = convertUserNetworkInfoToJson(userInfo);
-
-        // Write to file
-        std::ofstream ofs(userInfoPath.string());
-        if (!ofs.is_open()) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to open user info file for writing: " << userInfoPath.string();
-            return;
-        }
-
-        ofs << jsonData.dump(4);
-        ofs.close();
-
-        BOOST_LOG_TRIVIAL(info) << "User info saved to file: " << userInfoPath.string();
-    } catch (const std::exception& e) {
-        BOOST_LOG_TRIVIAL(error) << "Failed to save user info: " << e.what();
-    }
-}
-
-void PrinterManager::loadUserInfo()
-{
-    try {
-        fs::path userInfoPath = fs::path(Slic3r::data_dir()) / "user" / "user_info.json";
-
-        // Check if file exists
-        if (!fs::exists(userInfoPath)) {
-            BOOST_LOG_TRIVIAL(info) << "User info file not found: " << userInfoPath.string();
-            return;
-        }
-
-        // Read from file
-        std::ifstream ifs(userInfoPath.string());
-        if (!ifs.is_open()) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to open user info file for reading: " << userInfoPath.string();
-            return;
-        }
-
-        // Parse JSON
-        nlohmann::json jsonData;
-        ifs >> jsonData;
-        ifs.close();
-
-        // Convert JSON to UserNetworkInfo
-        UserNetworkInfo userInfo = convertJsonToUserNetworkInfo(jsonData);
-
-        // Only set user info if userId is not empty
-        if (!userInfo.userId.empty()) {
-            UserNetworkInfo loadedInfo = userInfo;
-            loadedInfo.loginStatus = LOGIN_STATUS_NOT_LOGIN;
-            loadedInfo.connectedToIot = false;
-            setUserInfo(loadedInfo);
-            BOOST_LOG_TRIVIAL(info) << "User info loaded from file: " << userInfo.userId;
-        }
-    } catch (const std::exception& e) {
-        BOOST_LOG_TRIVIAL(error) << "Failed to load user info: " << e.what();
-    }
-}
-
 void PrinterManager::monitorPrinterConnections()
 {
+    mLastConnectionLoopTime = std::chrono::steady_clock::now() - std::chrono::seconds(3);
+    
     while (mIsInitialized) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - mLastConnectionLoopTime).count();
+        
+        if (elapsed < 3) {
+            continue;
+        }
+        
+        mLastConnectionLoopTime = now;
+        
+        getUserBoundPrinters();
+
         auto printerList = PrinterCache::getInstance()->getPrinters();
         std::vector<std::future<void>> connectionFutures;
-
-        connectToIot();
-
         for (const auto& printer : printerList) {
             std::string printerId = printer.printerId;
             auto        future    = std::async(std::launch::async, [this, printerId]() {
@@ -841,6 +720,7 @@ void PrinterManager::monitorPrinterConnections()
                             deletePrinterNetwork(printerId);
                             return;
                         }
+                        network->getPrinterStatus(); // only get printer status, not update printer attributes
                         PrinterCache::getInstance()->updatePrinterAttributes(printerId, printerAttributes);
                         addPrinterNetwork(network);
                         PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_CONNECTED);
@@ -887,120 +767,63 @@ void PrinterManager::monitorPrinterConnections()
             PrinterLock lock(printerId);
             deletePrinterNetwork(printerId);
         }
-        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
 
-void PrinterManager::connectToIot()
+void PrinterManager::getUserBoundPrinters()
 {
-    UserNetworkInfo currentInfo    = getUserInfo();
-    auto            currentNetwork = getUserNetwork();
-
-    // Check if has valid login credentials
-    if (currentInfo.userId.empty() || currentInfo.token.empty() || currentInfo.refreshToken.empty()) {
-        if (currentNetwork) {
-            setUserNetwork(nullptr);
-            PrinterCache::getInstance()->removeWanPrinters();
-            wxLogMessage("User login info not valid, remove WAN printers");
-        }
-        return;
-    }
-
-    // Check if user has changed
-    bool userChanged = false;
-    if (currentNetwork != nullptr) {
-        UserNetworkInfo networkUser = currentNetwork->getUserNetworkInfo();
-        if (networkUser.userId != currentInfo.userId) {
-            currentNetwork = nullptr;
-            setUserNetwork(nullptr);
-            userChanged = true;
-            wxLogMessage("User changed, remove WAN printers");
-        }
-    }
-
-    do {
-        // if already connected, skip
-        if (currentNetwork != nullptr && currentInfo.connectedToIot && currentInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-            break;
-        }
-        bool isAlreadyLoggedIn = currentInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS;
-        currentNetwork = NetworkFactory::createUserNetwork(currentInfo);
-        if (!currentNetwork) {
-            currentNetwork = nullptr;
-            setUserNetwork(nullptr);
-            break;
-        }
-
-        auto loginResult = currentNetwork->connectToIot(currentInfo);
-        if (!loginResult.isSuccess() || !loginResult.hasData()) {
-            currentNetwork = nullptr;
-            setUserNetwork(nullptr);
-            break;
-        }
-        const auto& loginUser = loginResult.data.value();
-        if (!loginUser.connectedToIot || loginUser.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
-            currentNetwork = nullptr;
-            setUserNetwork(nullptr);
-            break;
-        }
-        if (!updateUserInfo(loginUser)) {
-            // user id changed during connection, abandon this connection
-            currentNetwork = nullptr;
-            setUserNetwork(nullptr);
-            break;
-        }
-        setUserNetwork(currentNetwork);
-        if (!isAlreadyLoggedIn || userChanged) {
-            // user is logged in for the first time or user changed, send event to update the user info
-            auto evt = new wxCommandEvent(EVT_USER_INFO_UPDATED);
-            wxQueueEvent(wxGetApp().mainframe, evt);
-        }
-    } while (false);
-
-    if (!currentNetwork) {
-        PrinterCache::getInstance()->removeWanPrinters();
-        return;
-    }
-    // Get WAN printers every 10 seconds
     static std::chrono::steady_clock::time_point lastGetPrintersTime{};
 
     auto now = std::chrono::steady_clock::now();
-    if (now - lastGetPrintersTime < std::chrono::seconds(10)) {
+    if (now - lastGetPrintersTime < std::chrono::seconds(5)) {
         return;
     }
     lastGetPrintersTime = now;
 
-    auto printersResult = currentNetwork->getPrinters();
-    if (!printersResult.isSuccess() || !printersResult.hasData()) {
-        return;
+    auto printersResult = UserNetworkManager::getInstance()->getUserBoundPrinters();
+    std::vector<PrinterNetworkInfo> boundPrinters;
+    if (printersResult.isSuccess() && printersResult.hasData()) {
+        for (const auto& printer : printersResult.data.value()) {
+            boundPrinters.push_back(printer);
+        }
     }
 
-    std::vector<PrinterNetworkInfo> serverPrinters;
-    for (const auto& printer : printersResult.data.value()) {
+    std::vector<PrinterNetworkInfo> printerList = PrinterCache::getInstance()->getPrinters();
+
+    for (const auto& printer : boundPrinters) {
         // Check if printer already exists by serial number
-        PrinterNetworkInfo wanPrinter = printer; 
-        bool isExisting = false;
-        for (const auto& p : PrinterCache::getInstance()->getPrinters()) {
-            if (!p.serialNumber.empty() && p.serialNumber == printer.serialNumber && p.networkType == NETWORK_TYPE_WAN) {
+        PrinterNetworkInfo boundPrinter = printer;
+        bool               isExisting   = false;
+        for (const auto& p : printerList) {
+            if (!p.serialNumber.empty() && p.serialNumber == boundPrinter.serialNumber && p.networkType == NETWORK_TYPE_WAN) {
                 isExisting = true;
-                wanPrinter.printerId = p.printerId;
                 break;
             }
-        }    
-   
-        if (!isExisting) {             
-            wanPrinter.networkType = NETWORK_TYPE_WAN;
-            wanPrinter.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
-            wanPrinter.printerId = boost::uuids::to_string(boost::uuids::random_generator{}());          
+        }
+
+        if (!isExisting) {
+            boundPrinter.networkType   = NETWORK_TYPE_WAN;
+            boundPrinter.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
+            boundPrinter.printerId     = boost::uuids::to_string(boost::uuids::random_generator{}());
             // Validate and complete printer info
-            validateAndCompletePrinterInfo(wanPrinter);
-            PrinterCache::getInstance()->addPrinter(wanPrinter);       
-        }     
-        serverPrinters.push_back(wanPrinter);
-     
+            validateAndCompletePrinterInfo(boundPrinter);
+            PrinterCache::getInstance()->addPrinter(boundPrinter);
+        }
     }
 
-    PrinterCache::getInstance()->removeWanPrintersNotInList(serverPrinters);
+    // Build set of valid serial numbers for O(1) lookup
+    std::set<std::string> validSerialNumbers;
+    for (const auto& printer : boundPrinters) {
+        if (!printer.serialNumber.empty()) {
+            validSerialNumbers.insert(printer.serialNumber);
+        }
+    }
+
+    for (const auto& printer : printerList) {
+        if (printer.networkType == NETWORK_TYPE_WAN && validSerialNumbers.find(printer.serialNumber) == validSerialNumbers.end()) {
+            PrinterCache::getInstance()->deletePrinter(printer.printerId);
+        }
+    }
 }
 // first get selected printer by modelName and printerId
 // if not found, get selected printer by modelName
@@ -1259,14 +1082,7 @@ PrinterNetworkResult<bool> PrinterManager::deletePrintTasks(const std::string& p
     return network->deletePrintTasks(taskIds);
 }
 
-PrinterNetworkResult<UserNetworkInfo> PrinterManager::getRtcToken()
-{
-    auto network = getUserNetwork();
-    if (!network) {
-        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, UserNetworkInfo());
-    }
-    return network->getRtcToken();
-}
+
 PrinterNetworkResult<bool> PrinterManager::sendRtmMessage(const std::string& printerId, const std::string& message)
 {
     auto printer = PrinterCache::getInstance()->getPrinter(printerId);

@@ -10,7 +10,7 @@
 #include "libslic3r/Utils.hpp"
 #include <boost/filesystem.hpp>
 #include "MainFrame.hpp"
-#include "slic3r/Utils/PrinterManager.hpp"
+#include "slic3r/Utils/UserNetworkManager.hpp"
 #include "slic3r/Utils/JsonUtils.hpp"
 namespace Slic3r { namespace GUI {
 
@@ -56,50 +56,54 @@ void UserLoginView::initUI()
     std::string language = wxGetApp().app_config->get_language_code();
     language = boost::to_upper_copy(language);
     if (language == "ZH-CN") {
-        url += "language=zh-CN";
+        mLanguage = "zh-CN";
     } else if (language == "ZH-TW") {
-        url += "language=zh-TW";
+        mLanguage = "zh-TW";
     } else if (language == "EN") {
-        url += "language=en";
+        mLanguage = "en";
     } else if (language == "ES") {
-        url += "language=es";
+        mLanguage = "es";
     } else if (language == "FR") {
-        url += "language=fr";
+        mLanguage = "fr";
     } else if (language == "DE") {
-        url += "language=de";
+        mLanguage = "de";
     } else if (language == "JA") {
-        url += "language=ja";
+        mLanguage = "ja";
     } else if (language == "KO") {
-        url += "language=ko";
+        mLanguage = "ko";
     } else if (language == "RU") {
-        url += "language=ru";
+        mLanguage = "ru";
     } else if (language == "PT") {
-        url += "language=pt";
+        mLanguage = "pt";
     } else if (language == "IT") {
-        url += "language=it";
+        mLanguage = "it";
     } else if (language == "NL") {
-        url += "language=nl";
+        mLanguage = "nl";
     } else if (language == "TR") {
-        url += "language=tr";
+        mLanguage = "tr";
     } else if (language == "CS") {
-        url += "language=cs";
+        mLanguage = "cs";
     } else {
-        url += "language=en";
+        mLanguage = "en";
     }
+
+    url += "language=" + mLanguage;
 
     std::string region = wxGetApp().app_config->get_region();
     region = boost::to_upper_copy(region);
     if (region == "CHN" || region == "CHINA") {
-        url += "&region=CN";
+        mRegion = "CN";
     } else if (region == "USA" || region == "NORTH AMERICA") {
-        url += "&region=US";
+        mRegion = "US";
     } else if (region == "EUROPE") {
-        url += "&region=GB";
+        mRegion = "GB";
     } else if (region == "ASIA-PACIFIC") {
-        url += "&region=JP";
+        mRegion = "JP";
     } else {
-        url += "&region=other";
+        mRegion = "other";
     }
+
+    url += "&region=" + mRegion;
 
     mBrowser->LoadURL(url);
 
@@ -148,14 +152,20 @@ void UserLoginView::setupIPCHandlers()
         userNetworkInfo.email = JsonUtils::safeGetString(data, "email", "");
         userNetworkInfo.nickname = JsonUtils::safeGetString(data, "nickname", "");
         userNetworkInfo.hostType = PrintHost::get_print_host_type_str(PrintHostType::htElegooLink);
+        
+        userNetworkInfo.region = mRegion;
+        userNetworkInfo.language = mLanguage;
 
+        auto now = std::chrono::steady_clock::now();
+        userNetworkInfo.lastTokenRefreshTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count());
+        userNetworkInfo.loginTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count());
         if(!userNetworkInfo.userId.empty() && !userNetworkInfo.token.empty()) {
             userNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
         } else {
             return webviewIpc::IPCResult::error();
         }
    
-        PrinterManager::getInstance()->setIotUserInfo(userNetworkInfo);
+        UserNetworkManager::getInstance()->setIotUserInfo(userNetworkInfo);
 
         auto evt = new wxCommandEvent(EVT_USER_INFO_UPDATED);
         wxQueueEvent(wxGetApp().mainframe, evt);

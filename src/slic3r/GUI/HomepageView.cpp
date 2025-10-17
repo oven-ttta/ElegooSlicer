@@ -10,7 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <slic3r/Utils/PrinterManager.hpp>
+#include <slic3r/Utils/UserNetworkManager.hpp>
 
 namespace Slic3r { namespace GUI {
 
@@ -287,25 +287,36 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         return;
 
     mIpc->onRequest("report.getClientUserInfo", [this](const webviewIpc::IPCRequest& request) {
-        UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getIotUserInfo();
+        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();
         nlohmann::json  data;
         data["userId"]       = userNetworkInfo.userId;
         data["accessToken"]  = userNetworkInfo.token;
         data["refreshToken"] = userNetworkInfo.refreshToken;
         data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
-        //if (userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
-        //    return webviewIpc::IPCResult::error(data);
-        //}
+        data["loginStatus"]  = userNetworkInfo.loginStatus;
+
+        if(userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+            return webviewIpc::IPCResult::error();
+        } 
         return webviewIpc::IPCResult::success(data);
+        
     });
 
     mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) { 
-        //UserNetworkInfo userNetworkInfo = PrinterManager::getInstance()->getIotUserInfo();
-        //if(userNetworkInfo.loginStatus != LOGIN_STATUS_LOGIN_SUCCESS) {
-        //    auto evt = new wxCommandEvent(EVT_USER_LOGIN);
-        //    wxQueueEvent(wxGetApp().mainframe, evt);
-        //}
-        return webviewIpc::IPCResult::success(); 
+        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();
+        nlohmann::json  data;
+        data["userId"]       = userNetworkInfo.userId;
+        data["accessToken"]  = userNetworkInfo.token;
+        data["refreshToken"] = userNetworkInfo.refreshToken;
+        data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
+        data["loginStatus"]  = userNetworkInfo.loginStatus;
+
+        if(userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+            auto evt = new wxCommandEvent(EVT_USER_LOGIN);
+            wxQueueEvent(wxGetApp().mainframe, evt);
+            return webviewIpc::IPCResult::error();
+        }
+        return webviewIpc::IPCResult::success(data); 
     });
 
     mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) { return handleReady(); });

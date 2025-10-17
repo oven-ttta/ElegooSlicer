@@ -378,13 +378,14 @@ nlohmann::json convertUserNetworkInfoToJson(const UserNetworkInfo& userNetworkIn
     json["avatar"]                 = userNetworkInfo.avatar;
     json["openid"]                 = userNetworkInfo.openid;
     json["phone"]                  = userNetworkInfo.phone;
-    json["country"]                = userNetworkInfo.country;
+    json["region"]                = userNetworkInfo.region;
     json["language"]               = userNetworkInfo.language;
-    json["timezone"]               = userNetworkInfo.timezone;
     json["createTime"]             = userNetworkInfo.createTime;
-    json["lastLoginTime"]          = userNetworkInfo.lastLoginTime;
+    json["loginTime"]              = userNetworkInfo.loginTime;
+    json["connnectToIotTime"]      = userNetworkInfo.connnectToIotTime;
     json["loginStatus"]            = userNetworkInfo.loginStatus;
     json["connectedToIot"]         = userNetworkInfo.connectedToIot;
+    json["lastTokenRefreshTime"]   = userNetworkInfo.lastTokenRefreshTime;
     return json;
 }
 UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json)
@@ -435,26 +436,29 @@ UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json)
     if (json.contains("phone")) {
         userNetworkInfo.phone = json["phone"];
     }
-    if (json.contains("country")) {
-        userNetworkInfo.country = json["country"];
+    if (json.contains("region")) {
+        userNetworkInfo.region = json["region"];
     }
     if (json.contains("language")) {
         userNetworkInfo.language = json["language"];
     }
-    if (json.contains("timezone")) {
-        userNetworkInfo.timezone = json["timezone"];
-    }
     if (json.contains("createTime")) {
         userNetworkInfo.createTime = json["createTime"];
     }
-    if (json.contains("lastLoginTime")) {
-        userNetworkInfo.lastLoginTime = json["lastLoginTime"];
+    if (json.contains("loginTime")) {
+        userNetworkInfo.loginTime = json["loginTime"];
+    }
+    if (json.contains("connnectToIotTime")) {
+        userNetworkInfo.connnectToIotTime = json["connnectToIotTime"];
     }
     if (json.contains("loginStatus")) {
         userNetworkInfo.loginStatus = json["loginStatus"];
     }
     if (json.contains("connectedToIot")) {
         userNetworkInfo.connectedToIot = json["connectedToIot"];
+    }
+    if (json.contains("lastTokenRefreshTime")) {
+        userNetworkInfo.lastTokenRefreshTime = json["lastTokenRefreshTime"];
     }
     return userNetworkInfo;
 }
