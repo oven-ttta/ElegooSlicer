@@ -644,7 +644,7 @@ void PrinterManager::monitorPrinterConnections()
         
         mLastConnectionLoopTime = now;
         
-        getUserBoundPrinters();
+        refreshOnlinePrinters();
 
         auto printerList = PrinterCache::getInstance()->getPrinters();
         std::vector<std::future<void>> connectionFutures;

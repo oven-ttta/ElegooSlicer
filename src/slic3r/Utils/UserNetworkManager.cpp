@@ -160,6 +160,9 @@ std::shared_ptr<IUserNetwork> UserNetworkManager::getNetwork() const
 void UserNetworkManager::setNetwork(std::shared_ptr<IUserNetwork> network)
 {
     std::lock_guard<std::mutex> lock(mUserInfoMutex);
+    if(mNetwork) {
+        mNetwork->disconnectFromIot();
+    }
     mNetwork = network;
 }
 

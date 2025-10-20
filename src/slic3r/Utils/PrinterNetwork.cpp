@@ -1,5 +1,5 @@
 #include "PrinterNetwork.hpp"
-#include "ElegooNetwork.hpp"
+#include "ElegooPrinterNetwork.hpp"
 #include "ElegooUserNetwork.hpp"
 #include "ElegooPluginNetwork.hpp"
 #include <wx/log.h>
@@ -10,7 +10,7 @@ std::shared_ptr<IPrinterNetwork> NetworkFactory::createPrinterNetwork(const Prin
 {
     switch (PrintHost::get_print_host_type(printerNetworkInfo.hostType)) {
     case PrintHostType::htElegooLink: {
-        return std::make_shared<ElegooNetwork>(printerNetworkInfo);
+        return std::make_shared<ElegooPrinterNetwork>(printerNetworkInfo);
     }
     default: {
         wxLogWarning("Unsupported network type: %s", printerNetworkInfo.hostType.c_str());
@@ -48,9 +48,9 @@ std::shared_ptr<IPluginNetwork> NetworkFactory::createPluginNetwork(const Plugin
     return nullptr;
 }
 
-void IPrinterNetwork::init() { ElegooNetwork::init(); }
+void IPrinterNetwork::init() { ElegooPrinterNetwork::init(); }
 
-void IPrinterNetwork::uninit() { ElegooNetwork::uninit(); }
+void IPrinterNetwork::uninit() { ElegooPrinterNetwork::uninit(); }
 
 void IUserNetwork::init() { ElegooUserNetwork::init(); }
 

@@ -63,6 +63,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_NOT_SELECTED = 10006,                // Printer not selected
     PRINTER_MMS_FILAMENT_NOT_MAPPED = 10007,     // Printer MMS filament not mapped
     PRINTER_HOST_NOT_MATCH = 10008,      // host not match with the local printer
+    PRINTER_PLUGIN_NOT_INSTALLED = 10009, // Printer plugin not installed
 };
 
 

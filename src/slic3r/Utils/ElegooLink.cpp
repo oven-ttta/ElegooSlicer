@@ -174,7 +174,11 @@ void ElegooLink::init()
     if(mIsInitialized) {
         return;
     }
+    doInit();
+}
 
+void ElegooLink::doInit()
+{
     elink::ElegooLink::Config cfg;
 
     cfg.logLevel         = 2; // Log level 0 - TRACE, 1 - DEBUG, 2 - INFO, 3 - WARN, 4 - ERROR, 5 - CRITICAL, 6 - OFF
@@ -227,40 +231,6 @@ void ElegooLink::init()
         PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.printerId, info, NETWORK_TYPE_LAN));
     });
 
-
-    // WAN
-    elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterConnectionEvent>(
-        [&](const std::shared_ptr<elink::PrinterConnectionEvent>& event) {
-        PrinterConnectStatus status = (event->connectionStatus.status == elink::ConnectionStatus::CONNECTED) ?
-                                              PRINTER_CONNECT_STATUS_CONNECTED :
-                                              PRINTER_CONNECT_STATUS_DISCONNECTED;
-        PrinterNetworkEvent::getInstance()->connectStatusChanged.emit(PrinterConnectStatusEvent(event->connectionStatus.printerId, status, NETWORK_TYPE_WAN));
-    });
-    elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterStatusEvent>([&](const std::shared_ptr<elink::PrinterStatusEvent>& event) {
-        PrinterStatus status = parseElegooStatus(event->status.printerStatus.state, event->status.printerStatus.subState);
-        PrinterNetworkEvent::getInstance()->statusChanged.emit(PrinterStatusEvent(event->status.printerId, status, NETWORK_TYPE_WAN));
-    });
-    elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterAttributesEvent>([&](const std::shared_ptr<elink::PrinterAttributesEvent>& event) {
-        PrinterNetworkInfo info = convertFromElegooPrinterAttributes(event->attributes);
-        PrinterNetworkEvent::getInstance()->attributesChanged.emit(PrinterAttributesEvent(event->attributes.printerId, info, NETWORK_TYPE_WAN));
-    });
-
-    elink::ElegooNetwork::getInstance().subscribeEvent<elink::RtmMessageEvent>([&](const std::shared_ptr<elink::RtmMessageEvent>& event) {
-        PrinterNetworkEvent::getInstance()->rtmMessageChanged.emit(PrinterRtmMessageEvent(event->message.printerId, event->message.message, NETWORK_TYPE_WAN));
-    });
-    elink::ElegooNetwork::getInstance().subscribeEvent<elink::RtcTokenEvent>([&](const std::shared_ptr<elink::RtcTokenEvent>& event) {
-		UserNetworkInfo userInfo;
-        userInfo.userId = event->token.userId;
-        userInfo.rtcToken = event->token.rtcToken;
-        userInfo.rtcTokenExpireTime = event->token.rtcTokenExpireTime;
-        PrinterNetworkEvent::getInstance()->rtcTokenChanged.emit(PrinterRtcTokenEvent(userInfo, NETWORK_TYPE_WAN));
-    });
-    elink::ElegooNetwork::getInstance().subscribeEvent<elink::LoggedInElsewhereEvent>([&](const std::shared_ptr<elink::LoggedInElsewhereEvent>& event) {
-        PrinterNetworkEvent::getInstance()->loggedInElsewhereChanged.emit(LoggedInElsewhereEvent(NETWORK_TYPE_WAN));
-    });
-    elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterEventRawEvent>([&](const std::shared_ptr<elink::PrinterEventRawEvent>& event) {
-        PrinterNetworkEvent::getInstance()->eventRawChanged.emit(PrinterEventRawEvent(event->rawData.printerId, event->rawData.rawData, NETWORK_TYPE_WAN));
-    });
     mIsInitialized = true;
 }
 
@@ -270,10 +240,12 @@ void ElegooLink::uninit()
     if(!mIsInitialized) {
         return;
     }
+    // Unsubscribe LAN events
+
+    elink::ElegooLink::getInstance().clearAllEventSubscriptions();
+    // Cleanup LAN link
     elink::ElegooLink::getInstance().cleanup();
-    if(elink::ElegooNetwork::getInstance().isInitialized()) {
-        elink::ElegooNetwork::getInstance().cleanup();
-    }
+
     mIsInitialized = false;    
 }
 
@@ -289,6 +261,10 @@ std::string parseUnknownErrorMsg(PrinterNetworkErrorCode resultCode, const std::
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo)
 {
+    checkInitialized();
+    if(printerNetworkInfo.networkType == NETWORK_TYPE_WAN && !isPluginInitialized()) {
+        return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, printerNetworkInfo);
+    }
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::ConnectPrinterResult elinkResult;
     try {
@@ -343,6 +319,10 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
 }
 PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo)
 {
+    checkInitialized();
+    if(printerNetworkInfo.networkType == NETWORK_TYPE_WAN && !isPluginInitialized()) {
+        return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, printerNetworkInfo);
+    }
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::BindPrinterResult elinkResult;
     try {
@@ -383,6 +363,10 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::bindWANPrinter(const Printe
 
 PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& printerId, bool isWan)
 {
+    checkInitialized();
+    if(isWan && !isPluginInitialized()) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, false);
+    }
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::VoidResult elinkResult;
     try {
@@ -403,6 +387,10 @@ PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& 
 
 PrinterNetworkResult<bool> ElegooLink::unbindWANPrinter(const std::string& serialNumber)
 {
+    checkInitialized();
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, false);
+    }
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::VoidResult elinkResult;
     elink::UnbindPrinterParams params;
@@ -414,6 +402,7 @@ PrinterNetworkResult<bool> ElegooLink::unbindWANPrinter(const std::string& seria
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinters()
 {
+    checkInitialized();
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     std::vector<PrinterNetworkInfo> discoverPrinters;
     elink::PrinterDiscoveryResult elinkResult;
@@ -466,6 +455,10 @@ bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus &status, int
 
 PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams& params, bool isWan)
 {
+    checkInitialized();
+    if(isWan && !isPluginInitialized()) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, false);
+    }
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::StartPrintResult elinkResult;
     try {
@@ -543,6 +536,10 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
 
 PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams& params, bool isWan)
 {
+    checkInitialized();
+    if(isWan && !isPluginInitialized()) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, false);
+    }
     PrinterNetworkErrorCode           resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::FileUploadCompletionResult elinkResult;
     try {
@@ -594,9 +591,13 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
 
 PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::string& printerId, bool isWan)
 {
+    checkInitialized();
+    PrinterMmsGroup mmsGroup;
+    if(isWan && !isPluginInitialized()) {
+        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, mmsGroup);
+    }
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::GetCanvasStatusResult elinkResult;
-    PrinterMmsGroup mmsGroup;
     mmsGroup.mmsSystemName = "CANVAS";
     try {
         if(isWan) {
@@ -671,9 +672,13 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const std::string& printerId, bool isWan)
 {
+    checkInitialized();
+    PrinterNetworkInfo printerNetworkInfo;
+    if(isWan && !isPluginInitialized()) {
+        return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, printerNetworkInfo);
+    }
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::PrinterAttributesResult elinkResult;
-    PrinterNetworkInfo printerNetworkInfo;
     elink::PrinterAttributesParams params;
     params.printerId = printerId;
     try {
@@ -700,9 +705,13 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterStatus(const std::string& printerId, bool isWan)
 {
+    checkInitialized();
+    PrinterNetworkInfo printerNetworkInfo;
+    if(isWan && !isPluginInitialized()) {
+        return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, printerNetworkInfo);
+    }
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::PrinterStatusResult elinkResult;
-    PrinterNetworkInfo printerNetworkInfo;
     elink::PrinterStatusParams params;
     params.printerId = printerId;
     try {
@@ -739,6 +748,8 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterStatus(const std:
 }
 PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileList(const std::string& printerId, int pageNumber, int pageSize)
 {
+    checkInitialized();
+
     std::vector<PrinterPrintFile> printFiles;
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     PrinterPrintFileResponse printFileResponse;
@@ -748,6 +759,11 @@ PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileList(const std
     params.printerId = printerId;
     params.pageNumber = pageNumber;
     params.pageSize = pageSize;
+
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, printFileResponse);
+    }
+
     auto elinkResult = elink::ElegooNetwork::getInstance().getFileList(params);
     resultCode        = parseElegooResult(elinkResult.code);
     if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
@@ -775,12 +791,17 @@ PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileList(const std
 
 PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileDetail(const std::string& printerId, const std::string& fileName)
 {
+    checkInitialized();
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     PrinterPrintFileResponse printFileResponse;
     printFileResponse.fileList.clear();
     elink::GetFileDetailParams params;
     params.printerId = printerId;
     params.fileName = fileName;
+
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, printFileResponse);
+    }
     auto elinkResult = elink::ElegooNetwork::getInstance().getFileDetail(params);
     resultCode = parseElegooResult(elinkResult.code);
 
@@ -816,9 +837,15 @@ PrinterNetworkResult<PrinterPrintFileResponse> ElegooLink::getFileDetail(const s
 }
 PrinterNetworkResult<PrinterPrintTaskResponse> ElegooLink::getPrintTaskList(const std::string& printerId, int pageNumber, int pageSize)
 {
+    checkInitialized();
     PrinterPrintTaskResponse   printTaskResponse;
     printTaskResponse.totalTasks = 0;
     printTaskResponse.taskList.clear();
+
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, printTaskResponse);
+    }
+
     PrinterNetworkErrorCode    resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::PrintTaskListParams params;
     params.printerId  = printerId;
@@ -847,10 +874,18 @@ PrinterNetworkResult<PrinterPrintTaskResponse> ElegooLink::getPrintTaskList(cons
 PrinterNetworkResult<bool> ElegooLink::deletePrintTasks(const std::string& printerId, const std::vector<std::string>& taskIds)
 {
     //return elink::ElegooNetwork::getInstance().deletePrintTasks(elink::DeletePrintTasksParams{printerId, taskIds});
+    checkInitialized();
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, false);
+    }
     return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetworkInfo& userInfo)
 {
+    checkInitialized();
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, userInfo);
+    }
     elink::HttpCredential params;
     params.userId = userInfo.userId;
     params.accessToken = userInfo.token;
@@ -898,10 +933,25 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetwork
     return PrinterNetworkResult<UserNetworkInfo>(resultCode, userInfoRet);
 }
 
+PrinterNetworkResult<bool> ElegooLink::disconnectFromIot()
+{
+    checkInitialized();
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, false);
+    }
+    elink::ElegooNetwork::getInstance().clearHttpCredential();
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+
+}
+
 PrinterNetworkResult<UserNetworkInfo> ElegooLink::getRtcToken()
 {
-    elink::GetRtcTokenResult result = elink::ElegooNetwork::getInstance().getRtcToken();
+    checkInitialized();
     UserNetworkInfo userInfo;
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, userInfo);
+    }
+    elink::GetRtcTokenResult result = elink::ElegooNetwork::getInstance().getRtcToken();
     PrinterNetworkErrorCode resultCode = parseElegooResult(result.code);
     if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
         if(result.hasData()) {
@@ -917,6 +967,11 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::getRtcToken()
 PrinterNetworkResult<UserNetworkInfo> ElegooLink::refreshToken(const UserNetworkInfo& userInfo)
 {
     UserNetworkInfo userInfoRet = userInfo;
+    
+    checkInitialized();
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, userInfoRet);
+    }
     //BizResult<HttpCredential> getHttpCredential() const;
     elink::BizResult<elink::HttpCredential> httpCredentialResult = elink::ElegooNetwork::getInstance().getHttpCredential();
     PrinterNetworkErrorCode resultCode = parseElegooResult(httpCredentialResult.code);
@@ -936,6 +991,10 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::refreshToken(const UserNetwork
 
 PrinterNetworkResult<bool> ElegooLink::sendRtmMessage(const std::string& printerId, const std::string& message)
 {
+    checkInitialized();
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, false);
+    }
     elink::SendRtmMessageParams params;
     params.printerId = printerId;
     params.message = message;
@@ -948,6 +1007,12 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::getUserBoundPr
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     std::vector<PrinterNetworkInfo> printers;
+    
+    checkInitialized();
+    if(!isPluginInitialized()) {
+        return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, printers);
+    }
+
     elink::GetPrinterListResult elinkResult;
     elinkResult = elink::ElegooNetwork::getInstance().getPrinters();
     resultCode = parseElegooResult(elinkResult.code);
@@ -961,31 +1026,36 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::getUserBoundPr
     return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, printers, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
-
-
 PrinterNetworkResult<std::string> ElegooLink::hasInstalledPlugin()
 {
+    std::lock_guard<std::mutex> lock(mPluginMutex);
+
     std::string version = "";
     if(elink::ElegooNetwork::getInstance().isInitialized()) {
         version = elink::ElegooNetwork::getInstance().version();
+        return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::SUCCESS, version);
     }
-    return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::SUCCESS, version);
+    return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, version);
 }
 
 PrinterNetworkResult<bool> ElegooLink::installPlugin(const std::string& pluginPath)
 {
-     std::string libraryPath;
- #if defined(_MSC_VER) || defined(_WIN32)
-     libraryPath = pluginPath + "\\" + std::string(ELEGOO_NETWORK_LIBRARY) + ".dll";
- #else
-     #if defined(__WXMAC__)
-     libraryPath = pluginPath + "/" + std::string("lib") + std::string(ELEGOO_NETWORK_LIBRARY) + ".dylib";
-     #else
-     libraryPath = pluginPath + "/" + std::string("lib") + std::string(ELEGOO_NETWORK_LIBRARY) + ".so";
-     #endif
- #endif
+    std::lock_guard<std::mutex> lock(mPluginMutex);
+    
+    if(elink::ElegooNetwork::getInstance().isInitialized()) {
+        doUninstallPlugin();
+    }
 
-    uninstallPlugin();
+    std::string libraryPath;
+#if defined(_MSC_VER) || defined(_WIN32)
+    libraryPath = pluginPath + "\\" + std::string(ELEGOO_NETWORK_LIBRARY) + ".dll";
+#else
+    #if defined(__WXMAC__)
+    libraryPath = pluginPath + "/" + std::string("lib") + std::string(ELEGOO_NETWORK_LIBRARY) + ".dylib";
+    #else
+    libraryPath = pluginPath + "/" + std::string("lib") + std::string(ELEGOO_NETWORK_LIBRARY) + ".so";
+    #endif
+#endif
 
     elink::ElegooNetwork::NetworkConfig config;
     config.logLevel         = 1;
@@ -994,25 +1064,86 @@ PrinterNetworkResult<bool> ElegooLink::installPlugin(const std::string& pluginPa
     config.logFileName      = data_dir() + "/log/elegoonetwork.log";
     config.logMaxFileSize   = 10 * 1024 * 1024;
 
-
     auto loadResult = elink::ElegooNetwork::getInstance().loadLibrary(libraryPath);
     if (loadResult != elink::LoaderResult::SUCCESS) {
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION, false, "Failed to load ElegooNetwork library");
     }
 
-    elink::ElegooNetwork::getInstance().initialize(config);
+    // WAN
+    elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterConnectionEvent>(
+        [&](const std::shared_ptr<elink::PrinterConnectionEvent>& event) {
+            PrinterConnectStatus status = (event->connectionStatus.status == elink::ConnectionStatus::CONNECTED) ?
+                                              PRINTER_CONNECT_STATUS_CONNECTED :
+                                              PRINTER_CONNECT_STATUS_DISCONNECTED;
+            PrinterNetworkEvent::getInstance()->connectStatusChanged.emit(
+                PrinterConnectStatusEvent(event->connectionStatus.printerId, status, NETWORK_TYPE_WAN));
+        });
+    elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterStatusEvent>(
+        [&](const std::shared_ptr<elink::PrinterStatusEvent>& event) {
+            PrinterStatus status = parseElegooStatus(event->status.printerStatus.state, event->status.printerStatus.subState);
+            PrinterNetworkEvent::getInstance()->statusChanged.emit(PrinterStatusEvent(event->status.printerId, status, NETWORK_TYPE_WAN));
+        });
+    elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterAttributesEvent>(
+        [&](const std::shared_ptr<elink::PrinterAttributesEvent>& event) {
+            PrinterNetworkInfo info = convertFromElegooPrinterAttributes(event->attributes);
+            PrinterNetworkEvent::getInstance()->attributesChanged.emit(
+                PrinterAttributesEvent(event->attributes.printerId, info, NETWORK_TYPE_WAN));
+        });
 
+    elink::ElegooNetwork::getInstance().subscribeEvent<elink::RtmMessageEvent>([&](const std::shared_ptr<elink::RtmMessageEvent>& event) {
+        PrinterNetworkEvent::getInstance()->rtmMessageChanged.emit(
+            PrinterRtmMessageEvent(event->message.printerId, event->message.message, NETWORK_TYPE_WAN));
+    });
+    elink::ElegooNetwork::getInstance().subscribeEvent<elink::RtcTokenEvent>([&](const std::shared_ptr<elink::RtcTokenEvent>& event) {
+        UserNetworkInfo userInfo;
+        userInfo.userId             = event->token.userId;
+        userInfo.rtcToken           = event->token.rtcToken;
+        userInfo.rtcTokenExpireTime = event->token.rtcTokenExpireTime;
+        PrinterNetworkEvent::getInstance()->rtcTokenChanged.emit(PrinterRtcTokenEvent(userInfo, NETWORK_TYPE_WAN));
+    });
+    elink::ElegooNetwork::getInstance().subscribeEvent<elink::LoggedInElsewhereEvent>(
+        [&](const std::shared_ptr<elink::LoggedInElsewhereEvent>& event) {
+            PrinterNetworkEvent::getInstance()->loggedInElsewhereChanged.emit(LoggedInElsewhereEvent(NETWORK_TYPE_WAN));
+        });
+    elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterEventRawEvent>(
+        [&](const std::shared_ptr<elink::PrinterEventRawEvent>& event) {
+            PrinterNetworkEvent::getInstance()->eventRawChanged.emit(
+                PrinterEventRawEvent(event->rawData.printerId, event->rawData.rawData, NETWORK_TYPE_WAN));
+        });
+
+    elink::ElegooNetwork::getInstance().initialize(config);
+    mIsInstalledNetwokrPlugin = true;
     return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 
 PrinterNetworkResult<bool> ElegooLink::uninstallPlugin()
 {
+    std::lock_guard<std::mutex> lock(mPluginMutex);
+    doUninstallPlugin();
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+}
+
+void ElegooLink::doUninstallPlugin()
+{
     if(elink::ElegooNetwork::getInstance().isInitialized()) {
         elink::ElegooNetwork::getInstance().cleanup();
         elink::ElegooNetwork::getInstance().unloadLibrary();
     }
-    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 
+void ElegooLink::checkInitialized()
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    if(!mIsInitialized) {
+        doInit();
+        mIsInitialized = true;
+    }
+}
+
+bool ElegooLink::isPluginInitialized()
+{
+    std::lock_guard<std::mutex> lock(mPluginMutex);
+    return elink::ElegooNetwork::getInstance().isInitialized();
+}
 
 } // namespace Slic3r

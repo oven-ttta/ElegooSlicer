@@ -15,6 +15,7 @@ public:
     virtual ~ElegooUserNetwork();
 
     virtual PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo) override;
+    virtual PrinterNetworkResult<bool> disconnectFromIot() override;
     virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken() override;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters() override;
     virtual PrinterNetworkResult<UserNetworkInfo> refreshToken(const UserNetworkInfo& userInfo) override;

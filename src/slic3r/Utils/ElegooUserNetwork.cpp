@@ -34,7 +34,11 @@ PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::connectToIot(const User
     }
     return result;
 }
+PrinterNetworkResult<bool> ElegooUserNetwork::disconnectFromIot()
+{
+    return ElegooLink::getInstance()->disconnectFromIot();
 
+}
 PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::getRtcToken()
 {
     return ElegooLink::getInstance()->getRtcToken();

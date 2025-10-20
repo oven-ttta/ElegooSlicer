@@ -656,8 +656,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrinterCache.hpp 
     Utils/PrinterNetwork.cpp
     Utils/PrinterNetwork.hpp
-    Utils/ElegooNetwork.cpp
-    Utils/ElegooNetwork.hpp
+    Utils/ElegooPrinterNetwork.cpp
+    Utils/ElegooPrinterNetwork.hpp
     Utils/ElegooLink.cpp
     Utils/ElegooLink.hpp
     Utils/PrinterNetworkEvent.cpp

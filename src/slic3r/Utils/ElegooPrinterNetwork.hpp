@@ -1,18 +1,18 @@
-#ifndef slic3r_ElegooNetwork_hpp_
-#define slic3r_ElegooNetwork_hpp_
+#ifndef slic3r_ElegooPrinterNetwork_hpp_
+#define slic3r_ElegooPrinterNetwork_hpp_
 
 #include "PrinterNetwork.hpp"
 
 namespace Slic3r {
     
-class ElegooNetwork : public IPrinterNetwork
+class ElegooPrinterNetwork : public IPrinterNetwork
 {
 public:
-    ElegooNetwork(const PrinterNetworkInfo& printerNetworkInfo);
-    ElegooNetwork()=delete;
-    ElegooNetwork(const ElegooNetwork&)=delete;
-    ElegooNetwork& operator=(const ElegooNetwork&)=delete;
-    virtual ~ElegooNetwork();
+    ElegooPrinterNetwork(const PrinterNetworkInfo& printerNetworkInfo);
+    ElegooPrinterNetwork()=delete;
+    ElegooPrinterNetwork(const ElegooPrinterNetwork&)=delete;
+    ElegooPrinterNetwork& operator=(const ElegooPrinterNetwork&)=delete;
+    virtual ~ElegooPrinterNetwork();
     virtual PrinterNetworkResult<PrinterNetworkInfo> connectToPrinter() override;
     virtual PrinterNetworkResult<bool> disconnectFromPrinter() override;
     virtual PrinterNetworkResult<bool> sendPrintTask(const PrinterNetworkParams& params) override;
