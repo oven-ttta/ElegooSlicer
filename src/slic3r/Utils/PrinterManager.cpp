@@ -414,6 +414,8 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
             return PrinterNetworkResult<bool>(bindResult.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : bindResult.code,
                                               false);
         }
+        // refresh online printers to add the new WAN printer
+        refreshOnlinePrinters();
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
     }
 
@@ -764,16 +766,16 @@ void PrinterManager::monitorPrinterConnections()
         }
     }
 }
-
-void PrinterManager::getUserBoundPrinters()
+void PrinterManager::refreshOnlinePrinters(bool force)
 {
-    static std::chrono::steady_clock::time_point lastGetPrintersTime{};
-
+    std::lock_guard<std::mutex> lock(mOnlinePrintersMutex);
     auto now = std::chrono::steady_clock::now();
-    if (now - lastGetPrintersTime < std::chrono::seconds(5)) {
-        return;
+    if (!force) {
+        if (now - mLastRefreshOnlinePrintersTime < std::chrono::seconds(5)) {
+            return;
+        }
     }
-    lastGetPrintersTime = now;
+    mLastRefreshOnlinePrintersTime = now;
 
     auto printersResult = UserNetworkManager::getInstance()->getUserBoundPrinters();
     std::vector<PrinterNetworkInfo> boundPrinters;

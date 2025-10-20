@@ -82,8 +82,10 @@ private:
     // Validate and complete printer info with system preset
     void validateAndCompletePrinterInfo(PrinterNetworkInfo& printerInfo);
 
-    // get user bound printers from user network
-    void getUserBoundPrinters();
+    // refresh online printers from user network
+    std::mutex mOnlinePrintersMutex;
+    std::chrono::steady_clock::time_point mLastRefreshOnlinePrintersTime{};
+    void refreshOnlinePrinters(bool force = false);
 
     std::atomic<bool> mIsInitialized;
     std::mutex mInitializedMutex;
