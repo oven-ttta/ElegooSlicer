@@ -40,7 +40,7 @@ public:
     PrinterNetworkResult<UserNetworkInfo> refreshToken(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
     PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo);
-    PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId);
+    PrinterNetworkResult<bool> unbindWANPrinter(const std::string& serialNumber);
 
 private:
     bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10, bool isWan = false);

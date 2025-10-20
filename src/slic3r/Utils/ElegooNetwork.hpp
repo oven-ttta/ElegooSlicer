@@ -28,7 +28,7 @@ public:
     virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& fileName) override;
     
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
-    virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId) override;
+    virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& serialNumber) override;
 
     static void init();
     static void uninit();

@@ -37,7 +37,7 @@ public:
 
     // WAN
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
-    virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& printerId) = 0;
+    virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& serialNumber) = 0;
 
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
 

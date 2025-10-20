@@ -401,12 +401,12 @@ PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& 
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
-PrinterNetworkResult<bool> ElegooLink::unbindWANPrinter(const std::string& printerId)
+PrinterNetworkResult<bool> ElegooLink::unbindWANPrinter(const std::string& serialNumber)
 {
     PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::VoidResult elinkResult;
     elink::UnbindPrinterParams params;
-    params.serialNumber = printerId;
+    params.serialNumber = serialNumber;
     elinkResult = elink::ElegooNetwork::getInstance().unbindPrinter(params);
     resultCode = parseElegooResult(elinkResult.code);
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, elinkResult.message));

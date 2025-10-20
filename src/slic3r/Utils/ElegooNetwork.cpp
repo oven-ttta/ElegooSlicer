@@ -39,9 +39,9 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooNetwork::bindWANPrinter(const Pri
     return ElegooLink::getInstance()->bindWANPrinter(printerNetworkInfo);
 }
 
-PrinterNetworkResult<bool> ElegooNetwork::unbindWANPrinter(const std::string& printerId)
+PrinterNetworkResult<bool> ElegooNetwork::unbindWANPrinter(const std::string& serialNumber)
 {
-    return ElegooLink::getInstance()->unbindWANPrinter(printerId);
+    return ElegooLink::getInstance()->unbindWANPrinter(serialNumber);
 }
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooNetwork::discoverPrinters()   

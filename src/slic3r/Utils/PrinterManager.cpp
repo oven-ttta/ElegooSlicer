@@ -289,9 +289,12 @@ PrinterNetworkResult<bool> PrinterManager::deletePrinter(const std::string& prin
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
     }
     if (printer.value().networkType == NETWORK_TYPE_WAN) {
-        auto unbindResult = getPrinterNetwork(printerId)->unbindWANPrinter(printerId);
+        auto unbindResult = getPrinterNetwork(printerId)->unbindWANPrinter(printer.value().serialNumber);
         if (!unbindResult.isSuccess()) {
             return unbindResult;
+        } else {
+            wxLogMessage("Unbind WAN printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
+            return PrinterNetworkResult<bool>(unbindResult.code, false, "unbind WAN printer failed");
         }
     }
     PrinterCache::getInstance()->deletePrinter(printerId);
@@ -405,20 +408,12 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     // bind the printer if it is a WAN printer
     if (printerNetworkInfo.networkType == NETWORK_TYPE_WAN) {
         auto bindResult = network->bindWANPrinter(printerNetworkInfo);
-        if (bindResult.isSuccess() && bindResult.data.has_value()) {
-            printerNetworkInfo = bindResult.data.value();
-        } else {
+        if (!bindResult.isSuccess()) {
             wxLogWarning("Failed to bind printer %s %s %s: %s", printerNetworkInfo.host, printerNetworkInfo.printerName,
                          printerNetworkInfo.printerModel, bindResult.message.c_str());
             return PrinterNetworkResult<bool>(bindResult.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : bindResult.code,
                                               false);
         }
-
-        printerNetworkInfo.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
-        addPrinterNetwork(network);
-        PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
-        PrinterCache::getInstance()->savePrinterList();
-
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
     }
 
