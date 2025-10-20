@@ -86,7 +86,9 @@ private:
     std::mutex mOnlinePrintersMutex;
     std::chrono::steady_clock::time_point mLastRefreshOnlinePrintersTime{};
     void refreshOnlinePrinters(bool force = false);
+    std::string generatePrinterId();
 
+    
     std::atomic<bool> mIsInitialized;
     std::mutex mInitializedMutex;
     void checkInitialized();

@@ -386,7 +386,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     std::vector<PrinterNetworkInfo> printers = PrinterCache::getInstance()->getPrinters();
     for (const auto& p : printers) {
         if (p.host == printerNetworkInfo.host || (!p.serialNumber.empty() && p.serialNumber == printerNetworkInfo.serialNumber) ||
-            (!p.mainboardId.empty() && p.mainboardId == printerNetworkInfo.mainboardId)) {
+            (!p.mainboardId.empty() && p.mainboardId == printerNetworkInfo.mainboardId) || (!p.printerId.empty() && p.printerId == printerNetworkInfo.printerId)) {
             wxLogWarning("Printer already exists, host: %s, serialNumber: %s, mainboardId: %s", printerNetworkInfo.host.c_str(),
                          printerNetworkInfo.serialNumber.c_str(), printerNetworkInfo.mainboardId.c_str());
             return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_ALREADY_EXISTS, false);
@@ -397,7 +397,9 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     printerNetworkInfo.addTime        = now;
     printerNetworkInfo.modifyTime     = now;
     printerNetworkInfo.lastActiveTime = now;
-    printerNetworkInfo.printerId      = boost::uuids::to_string(boost::uuids::random_generator{}());
+    if(printerNetworkInfo.printerId.empty()) {
+        printerNetworkInfo.printerId = generatePrinterId();
+    }
 
     std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printerNetworkInfo);
     if (!network) {
@@ -503,12 +505,12 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPr
             continue;
         }
         PrinterNetworkInfo printerNetworkInfo = discoveredPrinter;
-        printerNetworkInfo.printerId = "";
+        if(printerNetworkInfo.printerId.empty()) {
+            printerNetworkInfo.printerId = boost::uuids::to_string(boost::uuids::random_generator()());
+        }
         printerNetworkInfo.isPhysicalPrinter = false;
-        
         // Validate and complete printer info
         validateAndCompletePrinterInfo(printerNetworkInfo);
-        
         printersToAdd.push_back(printerNetworkInfo);
     }
     return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::SUCCESS, printersToAdd);
@@ -792,7 +794,8 @@ void PrinterManager::refreshOnlinePrinters(bool force)
         PrinterNetworkInfo boundPrinter = printer;
         bool               isExisting   = false;
         for (const auto& p : printerList) {
-            if (!p.serialNumber.empty() && p.serialNumber == boundPrinter.serialNumber && p.networkType == NETWORK_TYPE_WAN) {
+            if ((!p.serialNumber.empty() && p.serialNumber == boundPrinter.serialNumber && p.networkType == NETWORK_TYPE_WAN) ||
+                (!p.printerId.empty() && p.printerId == boundPrinter.printerId)) {
                 isExisting = true;
                 break;
             }
@@ -801,7 +804,9 @@ void PrinterManager::refreshOnlinePrinters(bool force)
         if (!isExisting) {
             boundPrinter.networkType   = NETWORK_TYPE_WAN;
             boundPrinter.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
-            boundPrinter.printerId     = boost::uuids::to_string(boost::uuids::random_generator{}());
+            if (boundPrinter.printerId.empty()) {
+                boundPrinter.printerId = generatePrinterId();
+            }
             // Validate and complete printer info
             validateAndCompletePrinterInfo(boundPrinter);
             PrinterCache::getInstance()->addPrinter(boundPrinter);
@@ -974,8 +979,7 @@ void PrinterManager::syncOldPresetPrinters()
                 continue;
             }
             // Generate unique printerId
-            boost::uuids::uuid uuid = boost::uuids::random_generator()();
-            printerInfo.printerId   = boost::uuids::to_string(uuid);
+            printerInfo.printerId   = generatePrinterId();
 
             // Set timestamps
             auto now                   = std::chrono::system_clock::now();
@@ -1127,6 +1131,11 @@ std::shared_ptr<IPrinterNetwork> PrinterManager::getPrinterNetwork(const std::st
         return it->second;
     }
     return nullptr;
+}
+
+std::string PrinterManager::generatePrinterId()
+{
+    return boost::uuids::to_string(boost::uuids::random_generator{}());
 }
 
 } // namespace Slic3r

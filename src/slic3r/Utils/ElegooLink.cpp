@@ -1089,7 +1089,8 @@ PrinterNetworkResult<bool> ElegooLink::installPlugin(const std::string& pluginPa
             PrinterNetworkEvent::getInstance()->attributesChanged.emit(
                 PrinterAttributesEvent(event->attributes.printerId, info, NETWORK_TYPE_WAN));
         });
-
+     
+    // raw event
     elink::ElegooNetwork::getInstance().subscribeEvent<elink::RtmMessageEvent>([&](const std::shared_ptr<elink::RtmMessageEvent>& event) {
         PrinterNetworkEvent::getInstance()->rtmMessageChanged.emit(
             PrinterRtmMessageEvent(event->message.printerId, event->message.message, NETWORK_TYPE_WAN));

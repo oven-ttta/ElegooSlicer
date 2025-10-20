@@ -396,8 +396,23 @@ void PrinterWebView::setupIPCHandlers()
             sendResponse(webviewIpc::IPCResult::error("Upload initialization failed"));
         }
     });
-
-
+    mIpc->onRequestAsyncWithEvents("getConnectStatus", [this](const webviewIpc::IPCRequest& request, std::function<void(const webviewIpc::IPCResult&)> sendResponse, std::function<void(const std::string&, const nlohmann::json&)> sendEvent) mutable {
+        auto params = request.params;
+        std::string printerId = params.value("printerId", "");
+        auto printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
+        nlohmann::json data;
+        data["printerId"] = printerId;
+        if(printerNetworkInfo.printerId.empty()) {    
+            data["connectStatus"] = PRINTER_CONNECT_STATUS_DISCONNECTED;           
+        } else {
+            data["connectStatus"] = printerNetworkInfo.connectStatus;
+        }
+        webviewIpc::IPCResult result;
+        result.data = data;
+        result.message = "success";
+        result.code = 0;
+        return result;
+    });
     mIpc->onRequest("getRtcToken", [this](const webviewIpc::IPCRequest& request){
         auto rtcToken = UserNetworkManager::getInstance()->getRtcToken();
         webviewIpc::IPCResult result;
@@ -418,6 +433,7 @@ void PrinterWebView::setupIPCHandlers()
     mIpc->onRequest("sendRtmMessage", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
+        std::string p = params.dump();
         std::string message = params.value("message", "");
         auto sendRtmMessage = PrinterManager::getInstance()->sendRtmMessage(printerId, message);
         webviewIpc::IPCResult result;
