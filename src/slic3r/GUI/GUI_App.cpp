@@ -3585,9 +3585,7 @@ void GUI_App::ShowUserLogin(bool show)
     //         login_dlg->EndModal(wxID_OK);
     // }
 
-    UserLoginView* userLoginView = new UserLoginView(wxGetApp().mainframe);
-    userLoginView->ShowModal();
-    delete userLoginView;
+    UserLoginView::ShowLoginDialog();
 }
 
 

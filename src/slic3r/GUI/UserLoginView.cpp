@@ -14,11 +14,27 @@
 #include "slic3r/Utils/JsonUtils.hpp"
 namespace Slic3r { namespace GUI {
 
+std::atomic<bool> UserLoginView::s_isShown{false};
+
 wxBEGIN_EVENT_TABLE(UserLoginView, MsgDialog) EVT_CLOSE(UserLoginView::onClose) wxEND_EVENT_TABLE()
 
-    UserLoginView::UserLoginView(wxWindow* parent)
+void UserLoginView::ShowLoginDialog()
+{
+    bool expected = false;
+    if (!s_isShown.compare_exchange_strong(expected, true)) {
+        wxLogMessage("UserLoginView already shown, ignore duplicate request");
+        return;
+    }
+    
+    UserLoginView* dialog = new UserLoginView(wxGetApp().mainframe);
+    dialog->ShowModal();
+    delete dialog;
+}
+
+UserLoginView::UserLoginView(wxWindow* parent)
     : MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Login"), _L(""), 0)
 {
+    
     // Bind close event to handle async operations
     Bind(wxEVT_CLOSE_WINDOW, &UserLoginView::onClose, this);
 
@@ -36,7 +52,11 @@ wxBEGIN_EVENT_TABLE(UserLoginView, MsgDialog) EVT_CLOSE(UserLoginView::onClose) 
     initUI();
 }
 
-UserLoginView::~UserLoginView() { cleanupIPC(); }
+UserLoginView::~UserLoginView()
+{
+    s_isShown = false;
+    cleanupIPC();
+}
 
 void UserLoginView::initUI()
 {

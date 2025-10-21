@@ -294,6 +294,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         data["refreshToken"] = userNetworkInfo.refreshToken;
         data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
         data["loginStatus"]  = userNetworkInfo.loginStatus;
+   
 
         if(userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
             return webviewIpc::IPCResult::error();
@@ -352,6 +353,9 @@ void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetw
     nlohmann::json data;
     data["userId"]      = userNetworkInfo.userId;
     data["accessToken"] = userNetworkInfo.token;
+    data["refreshToken"] = userNetworkInfo.refreshToken;
+    data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
+    data["loginStatus"]  = userNetworkInfo.loginStatus;
     data["avatar"]      = userNetworkInfo.avatar;
     data["email"]       = userNetworkInfo.email;
     data["nickname"]    = userNetworkInfo.nickname;
@@ -371,6 +375,9 @@ webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
         nlohmann::json data;
         data["userId"]      = mRefreshUserInfo.userId;
         data["accessToken"] = mRefreshUserInfo.token;
+        data["refreshToken"] = mRefreshUserInfo.refreshToken;
+        data["expiresTime"]  = mRefreshUserInfo.accessTokenExpireTime;
+        data["loginStatus"]  = mRefreshUserInfo.loginStatus;
         data["avatar"]      = mRefreshUserInfo.avatar;
         data["email"]       = mRefreshUserInfo.email;
         data["nickname"]    = mRefreshUserInfo.nickname;

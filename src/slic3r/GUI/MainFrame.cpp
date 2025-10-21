@@ -82,6 +82,7 @@ wxDEFINE_EVENT(EVT_HTTP_ERROR, wxCommandEvent);
 wxDEFINE_EVENT(EVT_USER_LOGIN, wxCommandEvent);
 wxDEFINE_EVENT(EVT_USER_LOGIN_HANDLE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_USER_INFO_UPDATED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_USER_LOGOUT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_CHECK_PRIVACY_VER, wxCommandEvent);
 wxDEFINE_EVENT(EVT_CHECK_PRIVACY_SHOW, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SHOW_IP_DIALOG, wxCommandEvent);
@@ -376,6 +377,13 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
         wxGetApp().ShowUserLogin(true);
     });
     Bind(EVT_USER_INFO_UPDATED, [this](wxCommandEvent&) {
+        wxGetApp().CallAfter([this]() {
+            if (m_home_view) {
+                m_home_view->refreshUserInfo();
+            }
+        });
+    });
+    Bind(EVT_USER_LOGOUT, [this](wxCommandEvent&) {
         wxGetApp().CallAfter([this]() {
             if (m_home_view) {
                 m_home_view->refreshUserInfo();

@@ -75,6 +75,10 @@ void UserNetworkManager::clearIotUserInfo()
 {
     setUserInfo(UserNetworkInfo());
     setNetwork(nullptr);
+
+    auto evt = new wxCommandEvent(EVT_USER_LOGOUT);
+    wxQueueEvent(wxGetApp().mainframe, evt);
+
     saveUserInfo(UserNetworkInfo());
 }
 

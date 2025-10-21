@@ -4,6 +4,7 @@
 #include <wx/wx.h>
 #include <wx/webview.h>
 #include <memory>
+#include <atomic>
 #include "slic3r/Utils/WebviewIPCManager.h"
 #include "MsgDialog.hpp"
 
@@ -14,6 +15,8 @@ class UserLoginView : public GUI::MsgDialog
 public:
     UserLoginView(wxWindow *parent);
     ~UserLoginView();
+    
+    static void ShowLoginDialog();
 
 private:
     void initUI();
@@ -31,6 +34,8 @@ private:
     
     std::string mLanguage;
     std::string mRegion;
+    
+    static std::atomic<bool> s_isShown;
     
     DECLARE_EVENT_TABLE()
 };
