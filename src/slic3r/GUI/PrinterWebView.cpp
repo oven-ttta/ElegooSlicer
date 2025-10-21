@@ -396,7 +396,8 @@ void PrinterWebView::setupIPCHandlers()
             sendResponse(webviewIpc::IPCResult::error("Upload initialization failed"));
         }
     });
-    mIpc->onRequestAsyncWithEvents("getConnectStatus", [this](const webviewIpc::IPCRequest& request, std::function<void(const webviewIpc::IPCResult&)> sendResponse, std::function<void(const std::string&, const nlohmann::json&)> sendEvent) mutable {
+    
+     mIpc->onRequest("getConnectStatus", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         auto printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
