@@ -25,6 +25,7 @@ enum class PrinterNetworkErrorCode
     OPERATION_IN_PROGRESS     = 6, // Operation in progress
     OPERATION_NOT_IMPLEMENTED = 7, // Operation not implemented
     NETWORK_ERROR             = 8, // Network error
+    INSUFFICIENT_MEMORY       = 9, // Insufficient memory
 
     // Authentication-related errors (200-299)
     INVALID_USERNAME_OR_PASSWORD = 201, // Username or password invalid
@@ -51,6 +52,16 @@ enum class PrinterNetworkErrorCode
     PRINTER_ACCESS_DENIED             = 1009, // Printer access denied
     PRINTER_MISSING_BED_LEVELING_DATA = 1010, // Printer missing bed leveling data
     PRINTER_PRINT_FILE_NOT_FOUND = 1011,       // Printer print file not found
+    PRINTER_OFFLINE = 1012,                    // Printer offline
+
+    // 2000-2999 Server business errors
+    SERVER_UNKNOWN_ERROR = 2000,     // Server error
+    SERVER_INVALID_RESPONSE = 2001,  // Server response invalid data
+    SERVER_TOO_MANY_REQUESTS = 2002, // Too many requests
+    SERVER_RTM_NOT_CONNECTED = 2049, // RTM client not connected or not logged in
+  
+    SERVER_UNAUTHORIZED = 2050, // Unauthorized access
+    SERVER_FORBIDDEN = 2051,    // Forbidden access
 
     HOST_TYPE_NOT_SUPPORTED = 9998,          // Host type not supported
     PRINTER_NETWORK_EXCEPTION = 9999,          // External error
@@ -65,6 +76,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_HOST_NOT_MATCH = 10008,      // host not match with the local printer
     PRINTER_NETWORK_NOT_INITIALIZED = 10009, // Printer network not initialized
     PRINTER_PLUGIN_NOT_INSTALLED = 10010, // Printer plugin not installed
+    
 };
 
 

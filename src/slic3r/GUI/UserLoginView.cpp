@@ -141,18 +141,27 @@ void UserLoginView::setupIPCHandlers()
 
     mIpc->onRequest("report.userInfo", [this](const webviewIpc::IPCRequest& request) {
         auto        data     = request.params;
-
+        std::string     xxx  = data.dump();
         UserNetworkInfo userNetworkInfo;
         userNetworkInfo.userId = JsonUtils::safeGetString(data, "userId", "");
         userNetworkInfo.token = JsonUtils::safeGetString(data, "accessToken", "");
+        userNetworkInfo.accessTokenExpireTime = JsonUtils::safeGetInt64(data, "accessTokenExpireTime", 0);
         userNetworkInfo.refreshToken = JsonUtils::safeGetString(data, "refreshToken", "");
-        userNetworkInfo.accessTokenExpireTime = JsonUtils::safeGetInt(data, "expiresTime", 0);
+        userNetworkInfo.refreshTokenExpireTime = JsonUtils::safeGetInt64(data, "refreshTokenExpireTime", 0);
         userNetworkInfo.openid = JsonUtils::safeGetString(data, "openid", "");
         userNetworkInfo.avatar = JsonUtils::safeGetString(data, "avatar", "");
         userNetworkInfo.email = JsonUtils::safeGetString(data, "email", "");
         userNetworkInfo.nickname = JsonUtils::safeGetString(data, "nickname", "");
         userNetworkInfo.hostType = PrintHost::get_print_host_type_str(PrintHostType::htElegooLink);
-        
+        userNetworkInfo.phone = JsonUtils::safeGetString(data, "phone", "");
+
+        std::string bakId = std::to_string(JsonUtils::safeGetInt64(data, "bakId", -1));
+        std::string avatarPath = JsonUtils::safeGetString(data, "avatarPath", "");
+        nlohmann::json extraInfoJson=nlohmann::json::object();
+        extraInfoJson["bakId"] = bakId;
+        extraInfoJson["avatarPath"] = avatarPath;
+        userNetworkInfo.extraInfo = extraInfoJson.dump();
+
         userNetworkInfo.region = mRegion;
         userNetworkInfo.language = mLanguage;
 

@@ -34,7 +34,10 @@ private:
     ~UserNetworkManager();
     
     void monitorLoop();
-    
+    bool refreshToken(UserNetworkInfo& userInfo, std::shared_ptr<IUserNetwork>& network);
+    bool isValidToken(const UserNetworkInfo& userInfo);
+    bool needReLogin(const UserNetworkInfo& userInfo);
+
     UserNetworkInfo getUserInfo() const;
     void setUserInfo(const UserNetworkInfo& userInfo);
     std::shared_ptr<IUserNetwork> getNetwork() const;

@@ -37,6 +37,7 @@ PrinterNetworkErrorCode parseElegooResult(elink::ELINK_ERROR_CODE code)
     case elink::ELINK_ERROR_CODE::OPERATION_IN_PROGRESS: return PrinterNetworkErrorCode::OPERATION_IN_PROGRESS;
     case elink::ELINK_ERROR_CODE::OPERATION_NOT_IMPLEMENTED: return PrinterNetworkErrorCode::OPERATION_NOT_IMPLEMENTED;
     case elink::ELINK_ERROR_CODE::NETWORK_ERROR: return PrinterNetworkErrorCode::NETWORK_ERROR;
+    case elink::ELINK_ERROR_CODE::INSUFFICIENT_MEMORY: return PrinterNetworkErrorCode::INSUFFICIENT_MEMORY;
     case elink::ELINK_ERROR_CODE::INVALID_USERNAME_OR_PASSWORD: return PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD;
     case elink::ELINK_ERROR_CODE::INVALID_TOKEN: return PrinterNetworkErrorCode::INVALID_TOKEN;
     case elink::ELINK_ERROR_CODE::INVALID_ACCESS_CODE: return PrinterNetworkErrorCode::INVALID_ACCESS_CODE;
@@ -57,6 +58,13 @@ PrinterNetworkErrorCode parseElegooResult(elink::ELINK_ERROR_CODE code)
     case elink::ELINK_ERROR_CODE::PRINTER_ACCESS_DENIED: return PrinterNetworkErrorCode::PRINTER_ACCESS_DENIED;
     case elink::ELINK_ERROR_CODE::PRINTER_PRINT_FILE_NOT_FOUND: return PrinterNetworkErrorCode::PRINTER_PRINT_FILE_NOT_FOUND;   
     case elink::ELINK_ERROR_CODE::PRINTER_MISSING_BED_LEVELING_DATA: return PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA;
+    case elink::ELINK_ERROR_CODE::PRINTER_OFFLINE: return PrinterNetworkErrorCode::PRINTER_OFFLINE;
+    case elink::ELINK_ERROR_CODE::SERVER_UNKNOWN_ERROR: return PrinterNetworkErrorCode::SERVER_UNKNOWN_ERROR;
+    case elink::ELINK_ERROR_CODE::SERVER_INVALID_RESPONSE: return PrinterNetworkErrorCode::SERVER_INVALID_RESPONSE;
+    case elink::ELINK_ERROR_CODE::SERVER_TOO_MANY_REQUESTS: return PrinterNetworkErrorCode::SERVER_TOO_MANY_REQUESTS;
+    case elink::ELINK_ERROR_CODE::SERVER_RTM_NOT_CONNECTED: return PrinterNetworkErrorCode::SERVER_RTM_NOT_CONNECTED;
+    case elink::ELINK_ERROR_CODE::SERVER_UNAUTHORIZED: return PrinterNetworkErrorCode::SERVER_UNAUTHORIZED;
+    case elink::ELINK_ERROR_CODE::SERVER_FORBIDDEN: return PrinterNetworkErrorCode::SERVER_FORBIDDEN;
     default: return PrinterNetworkErrorCode::UNKNOWN_ERROR;
     }
 }
@@ -856,50 +864,33 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetwork
 {
     CHECK_INITIALIZED(true, userInfo);
     elink::HttpCredential params;
-    params.userId = userInfo.userId;
-    params.accessToken = userInfo.token;
-    params.refreshToken = userInfo.refreshToken;
-    params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
+    params.userId                 = userInfo.userId;
+    params.accessToken            = userInfo.token;
+    params.refreshToken           = userInfo.refreshToken;
+    params.accessTokenExpireTime  = userInfo.accessTokenExpireTime;
     params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
 
     UserNetworkInfo userInfoRet = userInfo;
 
-    elink::VoidResult setHttpCredentialResult = elink::ElegooNetwork::getInstance().setHttpCredential(params);
-    PrinterNetworkErrorCode resultCode = parseElegooResult(setHttpCredentialResult.code);
-    
-    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
-    elink::GetUserInfoResult userInfoResult = elink::ElegooNetwork::getInstance().getUserInfo();    
-    resultCode = parseElegooResult(userInfoResult.code);
-        if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
-            if(userInfoResult.hasData()) {
+    elink::VoidResult       setHttpCredentialResult = elink::ElegooNetwork::getInstance().setHttpCredential(params);
+    PrinterNetworkErrorCode resultCode              = parseElegooResult(setHttpCredentialResult.code);
+
+    if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
+        elink::GetUserInfoResult userInfoResult = elink::ElegooNetwork::getInstance().getUserInfo();
+        resultCode                              = parseElegooResult(userInfoResult.code);
+        if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
+            if (userInfoResult.hasData()) {
                 const auto& userInfoData = userInfoResult.value();
-                userInfoRet.userId = userInfoData.userId;
-                userInfoRet.phone = userInfoData.phone;
-                userInfoRet.email = userInfoData.email;
-                userInfoRet.nickname = userInfoData.nickName;
-                userInfoRet.avatar = userInfoData.avatar;
-            } else {
-                resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
-            }
+                userInfoRet.userId       = userInfoData.userId;
+                userInfoRet.phone        = userInfoData.phone;
+                userInfoRet.email        = userInfoData.email;
+                userInfoRet.nickname     = userInfoData.nickName;
+                userInfoRet.avatar       = userInfoData.avatar;
+            } 
         }
     }
-    userInfoRet.connectedToIot = false;
-    switch (resultCode) {
-    case PrinterNetworkErrorCode::SUCCESS:
-        userInfoRet.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
-        break;
-    case PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD:
-        userInfoRet.loginStatus = LOGIN_STATUS_OFFLINE_INVALID_USER;
-        break;
-    case PrinterNetworkErrorCode::INVALID_TOKEN:
-        userInfoRet.loginStatus = LOGIN_STATUS_OFFLINE_INVALID_TOKEN;
-        break;
-    default:
-        userInfoRet.loginStatus = LOGIN_STATUS_OFFLINE_NETWORK_ERROR;
-        break;
-    }
-
-    return PrinterNetworkResult<UserNetworkInfo>(resultCode, userInfoRet);
+    return PrinterNetworkResult<UserNetworkInfo>(resultCode, userInfoRet,
+        parseUnknownErrorMsg(resultCode, setHttpCredentialResult.message));
 }
 
 PrinterNetworkResult<bool> ElegooLink::disconnectFromIot()
@@ -931,7 +922,13 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::refreshToken(const UserNetwork
 {
     CHECK_INITIALIZED(true, userInfo);
     UserNetworkInfo userInfoRet = userInfo;
-    elink::BizResult<elink::HttpCredential> httpCredentialResult = elink::ElegooNetwork::getInstance().getHttpCredential();
+    elink::HttpCredential params;
+    params.userId = userInfo.userId;
+    params.refreshToken = userInfo.refreshToken;
+    params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
+    params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
+
+    elink::BizResult<elink::HttpCredential> httpCredentialResult = elink::ElegooNetwork::getInstance().refreshHttpCredential(params);
     PrinterNetworkErrorCode resultCode = parseElegooResult(httpCredentialResult.code);
     if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
         if(httpCredentialResult.hasData() && userInfo.userId == httpCredentialResult.value().userId) {
@@ -944,6 +941,7 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::refreshToken(const UserNetwork
             resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA;
         }
     }
+
     return PrinterNetworkResult<UserNetworkInfo>(resultCode, userInfoRet, parseUnknownErrorMsg(resultCode, httpCredentialResult.message));
 }
 

@@ -26,12 +26,6 @@ PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::connectToIot(const User
 {
     UserNetworkInfo userNetworkInfo = userInfo;
     auto result = ElegooLink::getInstance()->connectToIot(userInfo);
-    if(result.isSuccess() && result.hasData()) {
-        mUserNetworkInfo = result.data.value();
-    } else {
-        mUserNetworkInfo.loginStatus = LOGIN_STATUS_OFFLINE_INVALID_USER;
-        mUserNetworkInfo.connectedToIot = false;
-    }
     return result;
 }
 PrinterNetworkResult<bool> ElegooUserNetwork::disconnectFromIot()
@@ -46,15 +40,9 @@ PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::getRtcToken()
 
 PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::refreshToken(const UserNetworkInfo& userInfo)
 {
+    mUserNetworkInfo = userInfo;
     auto result = ElegooLink::getInstance()->refreshToken(userInfo);
-    if(result.isSuccess() && result.hasData()) {
-        UserNetworkInfo userNetworkInfo = result.data.value();
-        mUserNetworkInfo.token = userNetworkInfo.token;
-        mUserNetworkInfo.refreshToken = userNetworkInfo.refreshToken;
-        mUserNetworkInfo.accessTokenExpireTime = userNetworkInfo.accessTokenExpireTime;
-        mUserNetworkInfo.refreshTokenExpireTime = userNetworkInfo.refreshTokenExpireTime;
-    }
-    return result;
+    return PrinterNetworkResult<UserNetworkInfo>(result.code, mUserNetworkInfo, result.message);
 }
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooUserNetwork::getUserBoundPrinters()

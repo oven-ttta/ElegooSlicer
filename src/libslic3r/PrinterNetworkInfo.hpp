@@ -227,14 +227,18 @@ struct PrinterNetworkInfo
     PrinterStatus        printerStatus{PRINTER_STATUS_IDLE};
 };
 
-
 enum LoginStatus {
-    LOGIN_STATUS_NOT_LOGIN = 0,              // User not logged in
-    LOGIN_STATUS_LOGIN_SUCCESS = 1,          // Login success and online
-    LOGIN_STATUS_CONNECTING = 2,             // Attempting to connect to IoT
-    LOGIN_STATUS_OFFLINE_NETWORK_ERROR = 3,  // Offline due to network error (can retry)
-    LOGIN_STATUS_OFFLINE_INVALID_TOKEN = 4,  // Offline due to token invalid (need re-login)
-    LOGIN_STATUS_OFFLINE_INVALID_USER = 5    // Offline due to invalid user info (need re-login)
+    LOGIN_STATUS_NOT_LOGIN                                 = 0, // Not login
+    LOGIN_STATUS_LOGIN_SUCCESS                             = 1, // Login success and online
+    LOGIN_STATUS_CONNECTING                                = 2, // Connecting to IoT
+    LOGIN_STATUS_OFFLINE                                   = 3, // Offline due to network error
+    LOGIN_STATUS_OFFLINE_INVALID_TOKEN                     = 4, // Offline due to invalid token
+    LOGIN_STATUS_OFFLINE_INVALID_USER                      = 5, // Offline due to invalid user info
+    LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED_REFRESH        = 6, // Offline due to token expired and need to refresh
+    LOGIN_STATUS_OFFLINE_TOKEN_NOT_EXPIRED_RELOGIN    = 7, // Offline due to token not expired and need to re-login
+    LOGIN_STATUS_OFFLINE_TOKEN_REFRESH_FAILED_RELOGIN = 8, // Offline due to token refresh failed and need to re-login
+    LOGIN_STATUS_OFFLINE_TOKEN_REFRESH_FAILED_RETRY        = 9, // Offline due to token refresh failed and need to retry
+    LOGIN_STATUS_OTHER_NETWORK_ERROR                       = 10, // Other network error
 };
 
 struct UserNetworkInfo
@@ -260,6 +264,7 @@ struct UserNetworkInfo
     uint64_t    loginTime{0}; //  login time
     uint64_t    connnectToIotTime{0}; // connnect to iot time
     uint64_t    lastTokenRefreshTime{0}; // Last token refresh time
+    std::string extraInfo{"{}"}; // json string
     bool connectedToIot{false}; // connected to iot
 
 };
@@ -308,6 +313,8 @@ nlohmann::json convertPrintFilamentMmsMappingToJson(const PrintFilamentMmsMappin
 PrintFilamentMmsMapping convertJsonToPrintFilamentMmsMapping(const nlohmann::json& json);
 nlohmann::json convertUserNetworkInfoToJson(const UserNetworkInfo& userNetworkInfo);
 UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json);
+
+LoginStatus parseLoginStatusByErrorCode(PrinterNetworkErrorCode resultCode);
 
 } // namespace Slic3r
 

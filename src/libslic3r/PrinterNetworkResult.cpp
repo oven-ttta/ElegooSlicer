@@ -18,6 +18,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Operation timed out. Please try again.");
         case PrinterNetworkErrorCode::OPERATION_CANCELLED:
             return _u8L("Operation cancelled");
+        case PrinterNetworkErrorCode::OPERATION_IN_PROGRESS:
+            return _u8L("operation is in progress. Please wait.");
         case PrinterNetworkErrorCode::PRINTER_ACCESS_DENIED:
             return _u8L("Access denied. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA:
@@ -41,7 +43,11 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::FILE_TRANSFER_FAILED:
             return _u8L("File upload failed. Please try again later.");
         case PrinterNetworkErrorCode::FILE_NOT_FOUND:
-            return _u8L("File not found. Please troubleshoot.");        
+            return _u8L("File not found. Please troubleshoot.");
+        case PrinterNetworkErrorCode::FILE_ALREADY_EXISTS:
+            return _u8L("file already exists. Please check and try again.");
+        case PrinterNetworkErrorCode::FILE_ACCESS_DENIED:
+            return _u8L("file access denied. Please check permissions and try again.");
         case PrinterNetworkErrorCode::PRINTER_BUSY:
             return _u8L("Printer is busy. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_COMMAND_FAILED:
@@ -50,6 +56,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Printer already connected");
         case PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR:
             return _u8L("An unknown error occurred. Please try again later.");
+        case PrinterNetworkErrorCode::PRINTER_INVALID_PARAMETER:
+            return _u8L("invalid printer parameter. Please check and try again.");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION:
             return _u8L("Printer network error. Please try again later or restart the printer.");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_INVALID_DATA:
@@ -72,6 +80,27 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Unmapped filament detected, printing cannot be started.");
         case PrinterNetworkErrorCode::PRINTER_HOST_NOT_MATCH:
             return _u8L("The IP address does not match the printer's information. Please remove the printer and add it again.");
+        case PrinterNetworkErrorCode::PRINTER_OFFLINE:
+            return _u8L("Printer is offline. Please try again later.");
+        case PrinterNetworkErrorCode::PRINTER_NETWORK_NOT_INITIALIZED:
+            return _u8L("printer network not initialized. Please try again later.");
+        case PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED:
+            return _u8L("printer plugin not installed. Please install the plugin and try again.");
+        case PrinterNetworkErrorCode::SERVER_UNKNOWN_ERROR:
+            return _u8L("Server error. Please try again later.");
+        case PrinterNetworkErrorCode::SERVER_INVALID_RESPONSE:
+            return _u8L("Server response invalid data. Please try again later.");
+        case PrinterNetworkErrorCode::SERVER_TOO_MANY_REQUESTS:
+            return _u8L("Too many requests. Please try again later.");
+        case PrinterNetworkErrorCode::SERVER_RTM_NOT_CONNECTED:
+            return _u8L("RTM client not connected or not logged in. Please try again later.");
+        case PrinterNetworkErrorCode::SERVER_UNAUTHORIZED:
+            return _u8L("Unauthorized access. Please try again later.");
+        case PrinterNetworkErrorCode::SERVER_FORBIDDEN:
+            return _u8L("Forbidden access. Please try again later.");
+        case PrinterNetworkErrorCode::INSUFFICIENT_MEMORY:
+            return _u8L("Insufficient memory. Please try again later.");
+        case PrinterNetworkErrorCode::OPERATION_NOT_IMPLEMENTED:
         default:
             return _u8L("An unknown error occurred. Please try again later.");
     }

@@ -386,6 +386,7 @@ nlohmann::json convertUserNetworkInfoToJson(const UserNetworkInfo& userNetworkIn
     json["loginStatus"]            = userNetworkInfo.loginStatus;
     json["connectedToIot"]         = userNetworkInfo.connectedToIot;
     json["lastTokenRefreshTime"]   = userNetworkInfo.lastTokenRefreshTime;
+    json["extraInfo"]              = userNetworkInfo.extraInfo;
     return json;
 }
 UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json)
@@ -460,7 +461,28 @@ UserNetworkInfo convertJsonToUserNetworkInfo(const nlohmann::json& json)
     if (json.contains("lastTokenRefreshTime")) {
         userNetworkInfo.lastTokenRefreshTime = json["lastTokenRefreshTime"];
     }
+    if (json.contains("extraInfo")) {
+        userNetworkInfo.extraInfo = json["extraInfo"];
+    }
     return userNetworkInfo;
+}
+
+LoginStatus parseLoginStatusByErrorCode(PrinterNetworkErrorCode resultCode)
+{
+    switch (resultCode) {
+    case PrinterNetworkErrorCode::SUCCESS:
+        return LOGIN_STATUS_LOGIN_SUCCESS;   
+    case PrinterNetworkErrorCode::INVALID_TOKEN:
+    case PrinterNetworkErrorCode::SERVER_UNAUTHORIZED:
+        return LOGIN_STATUS_OFFLINE_INVALID_TOKEN;
+    case PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD:
+    case PrinterNetworkErrorCode::NOT_INITIALIZED:
+        return LOGIN_STATUS_OFFLINE_INVALID_USER;
+    case PrinterNetworkErrorCode::SERVER_FORBIDDEN:
+        return LOGIN_STATUS_OFFLINE;
+    default:
+        return LOGIN_STATUS_OTHER_NETWORK_ERROR;
+    }
 }
 
 } // namespace Slic3r

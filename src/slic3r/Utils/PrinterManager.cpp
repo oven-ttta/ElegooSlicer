@@ -473,10 +473,10 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPr
         // check if the device is already bound, if it is, check if the ip, firmware version, etc. have changed and update them
         bool isSamePrinter = false;
         for (auto& p : PrinterCache::getInstance()->getPrinters()) {
-            if (!p.mainboardId.empty() && (discoveredPrinter.mainboardId == p.mainboardId)) {
+            if (!p.mainboardId.empty() && (discoveredPrinter.mainboardId == p.mainboardId) && (discoveredPrinter.networkType == p.networkType)) {
                 isSamePrinter = true;
             }
-            if (!p.serialNumber.empty() && (discoveredPrinter.serialNumber == p.serialNumber)) {
+            if (!p.serialNumber.empty() && (discoveredPrinter.serialNumber == p.serialNumber) && (discoveredPrinter.networkType == p.networkType)) {
                 isSamePrinter = true;
             }
             if (isSamePrinter) {
