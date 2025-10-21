@@ -53,31 +53,16 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
     setupIPCHandlers();
     // mBrowser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &PrinterMmsSyncView::onScriptMessage, this);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
-    // wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/filament_sync/index.html").make_preferred().string());
-    // TargetUrl          = "file://" + TargetUrl;
-    // wxString strlang = wxGetApp().current_language_code_safe();
-    // if (strlang != "")
-    //     TargetUrl = wxString::Format("%s?lang=%s", TargetUrl, strlang);
-    // if(wxGetApp().app_config->get_bool("developer_mode")){
-    //         TargetUrl = TargetUrl + "&dev=true";
-    // }
-    // mBrowser->LoadURL(TargetUrl);
-
-
-    wxString url = wxString::Format("https://np-sit.elegoo.com.cn/account/slicer-login?");
-
-    if (wxGetApp().app_config->get_language_code() == "zh-cn") {
-        url += "language=zh-CN";
-    } else {
-        url += "language=en";
+    wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/filament_sync/index.html").make_preferred().string());
+    TargetUrl          = "file://" + TargetUrl;
+    wxString strlang = wxGetApp().current_language_code_safe();
+    if (strlang != "")
+        TargetUrl = wxString::Format("%s?lang=%s", TargetUrl, strlang);
+    if(wxGetApp().app_config->get_bool("developer_mode")){
+            TargetUrl = TargetUrl + "&dev=true";
     }
 
-    if (wxGetApp().app_config->get_country_code() == "CN") {
-        url += "&region=CN";
-    } else {
-        url += "&region=US";
-    }
-    mBrowser->LoadURL(url);
+    mBrowser->LoadURL(TargetUrl);
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
     topsizer->Add(mBrowser, wxSizerFlags().Expand().Proportion(1));

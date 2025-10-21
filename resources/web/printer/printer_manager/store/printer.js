@@ -8,14 +8,47 @@ const usePrinterStore = defineStore('printer', {
     printers: [],
     printerModelList: null,
     statusUpdateInterval: null,
+    userInfo: {
+      userId: null,
+      nickname: null,
+      email: null,
+      phone: null,
+      avatar: null,
+      //login status, 0: no-login, 1: logged in, 2: logging in
+      loginStatus: 0,
+    }
   }),
+  getters: {
+    localPrinters: (state) => state.printers.filter(printer => printer.networkType === 0),
+    networkPrinters: (state) => state.printers.filter(printer => printer.networkType === 1),
+    userAvatar: (state) => {
+      if (state.userInfo && state.userInfo.avatar) {
+        return state.userInfo.avatar;
+      } else {
+        return "./img/default-avatar.svg";
+      }
+    },
+    userName: (state) => {
+      const loginStatus = state.userInfo ? state.userInfo.loginStatus : 0;
+      if (loginStatus === 0) {
+        return "未登录";
+      } else if (loginStatus === 2) {
+        return "登录中...";
+      } else {
+        return state.userInfo.nickname || state.userInfo.email.split('@')[0] || state.userInfo.phone;
+      }
+    },
+    isLoggedIn: (state) => {
+      return state.userInfo && state.userInfo.loginStatus === 1;
+    }
+  },
   actions: {
     validateHost(rule, value, callback) {
       if (!value || value.trim().length === 0) {
         callback(new Error(i18n.global.t('printerSetting.pleaseEnterHostNameIpUrl')));
         return;
       }
-      
+
       const trimmedValue = value.trim();
 
       // Helper function to validate IPv4 address
@@ -147,6 +180,7 @@ const usePrinterStore = defineStore('printer', {
 
       this.statusUpdateInterval = setInterval(async () => {
         try {
+          await this.requestUserInfo();
           const response = await this.ipcRequest('request_printer_list_status', {});
           this.updatePrinterListStatus(response || []);
         } catch (error) {
@@ -238,7 +272,6 @@ const usePrinterStore = defineStore('printer', {
       }
     },
 
-
     async requestUpdatePrinterNameAndHost(printerId, printerName, host) {
       // const loading = ElLoading.service({
       //   lock: true,
@@ -313,10 +346,10 @@ const usePrinterStore = defineStore('printer', {
     updatePrinterListStatus(printers) {
       // Get list of printer IDs from server
       const serverPrinterIds = new Set(printers.map(p => p.printerId));
-      
+
       // Remove printers that no longer exist on the server
       this.printers = this.printers.filter(p => serverPrinterIds.has(p.printerId));
-      
+
       // Update existing printers and add new ones
       printers.forEach((statusPrinter) => {
         const printerIndex = this.printers.findIndex(p => p.printerId === statusPrinter.printerId);
@@ -339,5 +372,31 @@ const usePrinterStore = defineStore('printer', {
       // to handle modal closing logic
       console.log('closeModals called - should be handled by UI components');
     },
+
+    // Handle user info click (e.g., to open login modal)
+    async handleUserInfoClick() {
+      // Logic to handle user info click, e.g., open login modal
+      console.log('User info clicked - implement login modal logic here');
+      if (this.userInfo.loginStatus === 0) {
+        this.ipcRequest('login');
+      }
+    },
+
+    async requestUserInfo() {
+      try {
+        const response = await this.ipcRequest('request_user_info', {});
+        this.userInfo = response || {
+          userId: null,
+          userName: null,
+          email: null,
+          phone: null,
+          avatarUrl: null,
+          loginStatus: 0,
+        };
+      } catch (error) {
+        console.error('Failed to request user info:', error);
+      }
+    }
   }
+
 });

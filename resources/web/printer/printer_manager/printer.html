@@ -12,12 +12,12 @@
     <script type="text/javascript" src="../../include/json2.js"></script>
     <script type="text/javascript" src="../../include/globalapi.js"></script>
     <script type="text/javascript" src="../../data/text.js"></script>
-    <script type="text/javascript" src="../../vue/thirdparty/vue/vue.global.prod.min.js"></script>
-    <script type="text/javascript" src="../../vue/thirdparty/vue/pinia.iife.prod.js"></script>
-    <script type="text/javascript" src="../../vue/thirdparty/vue/vue-i18n.global.prod.js"></script>
-    <script type="text/javascript" src="../../vue/thirdparty/element-plus/index.full.min.js"></script>
-    <script type="text/javascript" src="../../vue/utils/util.js"></script>
-    <script type="text/javascript" src="../../vue/utils/ipc.js"></script>
+    <script type="text/javascript" src="../../thirdparty/vue/vue.global.prod.min.js"></script>
+    <script type="text/javascript" src="../../thirdparty/vue/pinia.iife.prod.js"></script>
+    <script type="text/javascript" src="../../thirdparty/vue/vue-i18n.global.prod.js"></script>
+    <script type="text/javascript" src="../../thirdparty/element-plus/index.full.min.js"></script>
+    <script type="text/javascript" src="../../utils/util.js"></script>
+    <script type="text/javascript" src="../../utils/ipc.js"></script>
     <script type="text/javascript" src="../../locales/index.js"></script>
 
     <script type="text/javascript" src="./store/printer.js"></script>
@@ -31,7 +31,7 @@
 </head>
 
 <body>
-    <div id="app" >
+    <div id="app">
         <div class="printer-manager-header">
             <div class="left-actions">
                 <span>{{ $t("printerManager.connectedPrinters") }}</span>
@@ -49,18 +49,34 @@
             </div>
         </div>
         <div class="printer-container">
-            <div class="printer-category">{{ $t("printerManager.localPrinters") }}
+            <div class="printer-category">
+                <span>
+                    我的打印机
+                </span>
+
+                <div class="user-info" @click="printerStore.handleUserInfoClick">
+                    <img :src="printerStore.userAvatar" style="border-radius: 50%;" width="32" alt="No Login" />
+                    <span>{{ printerStore.userName }}</span>
+                </div>
                 <!-- <span class="printer-local-icon">
                     <img src="./img/printer-local.svg" alt="Local Printer" /> 
                 </span> -->
             </div>
-            <div v-if="printerStore.printers.length === 0" class="no-printer">
-                <img src="../img/printer-empty.png" width="224"/>
-                <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
+
+            <div v-if="printerStore.networkPrinters.length === 0 || !printerStore.isLoggedIn">
+                <div v-if="!printerStore.isLoggedIn" class="no-login">
+                    <img src="./img/login-preview.svg" width="121" />
+                    <div>登陆后查看</div>
+                </div>
+                <div v-else-if="printerStore.networkPrinters.length === 0" class="no-printer">
+                    <img src="../img/printer-empty.png" width="180" />
+                    <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
+                </div>
             </div>
             <div class="printer-list" v-else>
-                <div v-for="(printer, index) in printerStore.printers" :key="printer.printerId" class="printer-card"
-                    :id="`printer-card-${printer.printerId}`" @dblclick="printerStore.showPrinterDetail(printer.printerId)">
+                <div v-for="(printer, index) in printerStore.networkPrinters" :key="printer.printerId"
+                    class="printer-card" :id="`printer-card-${printer.printerId}`"
+                    @dblclick="printerStore.showPrinterDetail(printer.printerId)">
                     <div class="printer-card-header">
                         <div class="printer-img">
                             <img :src="printer.printerImg || ''" alt="Printer" />
@@ -69,26 +85,86 @@
                             <div class="printer-title" :title="printer.printerName">{{ printer.printerName }}</div>
                             <div class="printer-host">{{ printer.host || '' }}</div>
                             <button class="printer-detail-btn"
-                                @click="printerStore.showPrinterDetail(printer.printerId)">{{ $t("printerManager.details") }}</button>
+                                @click="printerStore.showPrinterDetail(printer.printerId)">{{
+                                $t("printerManager.details") }}</button>
                         </div>
-                        <div class="card-menu icon-button" :title="$t('printerManager.more')" @click="showPrinterSettingsByIndex(index)">
+                        <div class="card-menu icon-button" :title="$t('printerManager.more')"
+                            @click="showPrinterSettingsByIndex(index)">
                             &#8942;
                         </div>
                     </div>
                     <div class="progress-bar-container">
-                        <span class="progress-label" v-show="canShowProgressText(printer.printerStatus, printer.connectStatus)">{{ getPrinterProgress(printer) }}%</span>
+                        <span class="progress-label"
+                            v-show="canShowProgressText(printer.printerStatus, printer.connectStatus)">{{
+                            getPrinterProgress(printer) }}%</span>
                         <div class="progress-bar-bg">
                             <div class="progress-bar" :style="`width:${getPrinterProgress(printer)}%`"></div>
                         </div>
                     </div>
                     <div class="printer-status-row">
-                        <span class="printer-status" :style="getPrinterStatusStyle(printer.printerStatus, printer.connectStatus)">{{ getPrinterStatus(printer.printerStatus,
+                        <span class="printer-status"
+                            :style="getPrinterStatusStyle(printer.printerStatus, printer.connectStatus)">{{
+                            getPrinterStatus(printer.printerStatus,
                             printer.connectStatus)
                             }}</span>
-                        <span v-show="canShowProgressText(printer.printerStatus, printer.connectStatus)" class="remaining-time">{{ getPrinterRemainingTime(printer) }}</span>
-                        <div v-if="shouldShowWarningIcon(printer.printerStatus, printer.connectStatus)" 
-                             class="warning-icon" 
-                             :title="getWarningTooltip(printer.printerStatus)">
+                        <span v-show="canShowProgressText(printer.printerStatus, printer.connectStatus)"
+                            class="remaining-time">{{ getPrinterRemainingTime(printer) }}</span>
+                        <div v-if="shouldShowWarningIcon(printer.printerStatus, printer.connectStatus)"
+                            class="warning-icon" :title="getWarningTooltip(printer.printerStatus)">
+                            <img src="./img/warning.svg" alt="Warning" width="16" height="16" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="printer-container">
+            <div class="printer-category">{{ $t("printerManager.localPrinters") }}
+                <!-- <span class="printer-local-icon">
+                    <img src="./img/printer-local.svg" alt="Local Printer" /> 
+                </span> -->
+            </div>
+            <div v-if="printerStore.localPrinters.length === 0" class="no-printer">
+                <img src="../img/printer-empty.png" width="224" />
+                <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
+            </div>
+            <div class="printer-list" v-else>
+                <div v-for="(printer, index) in printerStore.localPrinters" :key="printer.printerId"
+                    class="printer-card" :id="`printer-card-${printer.printerId}`"
+                    @dblclick="printerStore.showPrinterDetail(printer.printerId)">
+                    <div class="printer-card-header">
+                        <div class="printer-img">
+                            <img :src="printer.printerImg || ''" alt="Printer" />
+                        </div>
+                        <div class="printer-header-info">
+                            <div class="printer-title" :title="printer.printerName">{{ printer.printerName }}</div>
+                            <div class="printer-host">{{ printer.host || '' }}</div>
+                            <button class="printer-detail-btn"
+                                @click="printerStore.showPrinterDetail(printer.printerId)">{{
+                                $t("printerManager.details") }}</button>
+                        </div>
+                        <div class="card-menu icon-button" :title="$t('printerManager.more')"
+                            @click="showPrinterSettingsByIndex(index)">
+                            &#8942;
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <span class="progress-label"
+                            v-show="canShowProgressText(printer.printerStatus, printer.connectStatus)">{{
+                            getPrinterProgress(printer) }}%</span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar" :style="`width:${getPrinterProgress(printer)}%`"></div>
+                        </div>
+                    </div>
+                    <div class="printer-status-row">
+                        <span class="printer-status"
+                            :style="getPrinterStatusStyle(printer.printerStatus, printer.connectStatus)">{{
+                            getPrinterStatus(printer.printerStatus,
+                            printer.connectStatus)
+                            }}</span>
+                        <span v-show="canShowProgressText(printer.printerStatus, printer.connectStatus)"
+                            class="remaining-time">{{ getPrinterRemainingTime(printer) }}</span>
+                        <div v-if="shouldShowWarningIcon(printer.printerStatus, printer.connectStatus)"
+                            class="warning-icon" :title="getWarningTooltip(printer.printerStatus)">
                             <img src="./img/warning.svg" alt="Warning" width="16" height="16" />
                         </div>
                     </div>
@@ -96,22 +172,24 @@
             </div>
         </div>
 
-        <el-drawer v-model="showAddPrinter" :title="$t('addPrinterDialog.addPrinter')" :direction="direction" :size="600">
-            <add-printer-component ref="addPrinterComponent" @close-modal="closeModals"
-                ></add-printer-component>
+        <el-drawer v-model="showAddPrinter" :title="$t('addPrinterDialog.addPrinter')" :direction="direction"
+            :size="600">
+            <add-printer-component ref="addPrinterComponent" @close-modal="closeModals"></add-printer-component>
         </el-drawer>
 
 
 
-        <el-dialog v-model="showPrinterAdvancedSettings" :title="$t('printerManager.printerSettings')" width="700" center>
+        <el-dialog v-model="showPrinterAdvancedSettings" :title="$t('printerManager.printerSettings')" width="700"
+            center>
             <printer-setting-component :printer="currentPrinter" @close-modal="closeModals">
             </printer-setting-component>
         </el-dialog>
 
 
 
-        <el-drawer v-model="showPrinterSimpleSettings" :title="$t('printerManager.physicalPrinter')"  :direction="direction" :size="600">
-            <printer-setting-physical-component :printer="currentPrinter"  @close-modal="closeModals">
+        <el-drawer v-model="showPrinterSimpleSettings" :title="$t('printerManager.physicalPrinter')"
+            :direction="direction" :size="600">
+            <printer-setting-physical-component :printer="currentPrinter" @close-modal="closeModals">
             </printer-setting-physical-component>
         </el-drawer>
 
@@ -121,7 +199,7 @@
     <script type="text/javascript" src="printer.js"></script>
     <script>
         const { createApp } = Vue;
-        const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOption, ElForm, ElFormItem, ElLoading,ElMessageBox,ElPopconfirm } = ElementPlus;
+        const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOption, ElForm, ElFormItem, ElLoading, ElMessageBox, ElPopconfirm } = ElementPlus;
 
         // Create Vue app
         const app = createApp(PrinterManager);

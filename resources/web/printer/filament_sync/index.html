@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="./css/dark.css">
 
     <script src="../../include/jquery-3.6.0.min.js"></script>
-    <script src="../../vue/thirdparty/vue/vue.global.prod.min.js"></script>
-    <script src="../../vue/thirdparty/vue/vue-i18n.global.prod.js"></script>
-    <script src="../../vue/thirdparty/element-plus/index.full.min.js"></script>
+    <script src="../../thirdparty/vue/vue.global.prod.min.js"></script>
+    <script src="../../thirdparty/vue/vue-i18n.global.prod.js"></script>
+    <script src="../../thirdparty/element-plus/index.full.min.js"></script>
     <script src="../../include/json2.js"></script>
     <script src="../../include/globalapi.js"></script>
     <script src="../../data/text.js"></script>
     <script src="../../locales/index.js"></script>
-    <script type="text/javascript" src="../../vue/utils/util.js"></script>
-    <script src="../../vue/utils/ipc.js"></script>
+    <script type="text/javascript" src="../../utils/util.js"></script>
+    <script src="../../utils/ipc.js"></script>
     <script src="./img/filament.js"></script>
 </head>
 
@@ -35,7 +35,7 @@
                                 <img :src="value.printerImg" class="model-image" alt="model" />
                                 <div class="model-info">
                                     <span class="model-title">{{ value.printerName }}</span>
-                                    <span class="model-description">{{ value.host }}</span>
+                                    <span class="model-description">{{value.networkType===0 ? value.host : value.serialNumber }}</span>
                                 </div>
                             </div>
                         </template>
@@ -45,7 +45,7 @@
                                 <img :src="item.printerImg" class="model-image" alt="model" />
                                 <div class="model-info">
                                     <span class="model-title">{{ item.printerName }}</span>
-                                    <span class="model-description">{{ item.host }}</span>
+                                    <span class="model-description">{{ item.networkType===0 ? item.host : item.serialNumber }}</span>
                                 </div>
                             </div>
                         </el-option>

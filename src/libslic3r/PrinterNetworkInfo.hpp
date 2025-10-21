@@ -143,8 +143,8 @@ enum PrinterAuthMode {
 };
 
 enum NetworkType {
-    NETWORK_TYPE_WAN = 0,
-    NETWORK_TYPE_LAN = 1,
+    NETWORK_TYPE_LAN = 0,
+    NETWORK_TYPE_WAN = 1,
 };
 
 
