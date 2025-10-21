@@ -441,13 +441,14 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
         return;
     }
     PrinterWebView* view = new PrinterWebView(mTabBar);
-    //wxString url = from_u8(printerInfo.webUrl);
+    wxString url = from_u8(printerInfo.webUrl);
     
-
-    auto _dir = resources_dir();
-    std::replace(_dir.begin(), _dir.end(), '\\', '/');
-    wxString url = from_u8((boost::filesystem::path(resources_dir()) / "web/elegoo-fdm-web/index.html").make_preferred().string());
-    url          = "file://" + url;
+    if(url.IsEmpty()) {
+        auto _dir = resources_dir();
+        std::replace(_dir.begin(), _dir.end(), '\\', '/');
+        url = from_u8((boost::filesystem::path(resources_dir()) / "web/elegoo-fdm-web/index.html").make_preferred().string());
+        url          = "file://" + url;
+    }
 
     if(PrintHost::get_print_host_type(printerInfo.hostType) == htElegooLink && (printerInfo.printerModel == "Elegoo Centauri Carbon 2")) 
     {

@@ -44,8 +44,8 @@ PrinterNetworkResult<bool> PrinterPluginManager::installPlugin(const std::string
     std::string library;
     std::string dataDirStr = data_dir();
     boost::filesystem::path dataDirPath(dataDirStr);
-    // auto pluginFolderPath = dataDirPath / "plugins" / hostTypeStr;
-    boost::filesystem::path pluginFolderPath("C:/ElegooProject/elegoo-network/build/bin/RelWithDebInfo");
+    auto pluginFolderPath = dataDirPath / "plugins" / hostTypeStr;
+    //boost::filesystem::path pluginFolderPath("C:/ElegooProject/elegoo-network/build/bin/RelWithDebInfo");
    
     // boost::filesystem::path pluginFolderPath("./plugins/");
 

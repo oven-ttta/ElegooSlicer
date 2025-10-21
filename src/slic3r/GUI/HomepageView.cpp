@@ -302,7 +302,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         
     });
 
-    mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) { 
+    mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) {
         UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();
         nlohmann::json  data;
         data["userId"]       = userNetworkInfo.userId;
@@ -311,12 +311,16 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
         data["loginStatus"]  = userNetworkInfo.loginStatus;
 
-        if(userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+        if (userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() ||
+            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN ||
+            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER ||
+            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_NOT_EXPIRED_RELOGIN ||
+            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_REFRESH_FAILED_RELOGIN) {
             auto evt = new wxCommandEvent(EVT_USER_LOGIN);
             wxQueueEvent(wxGetApp().mainframe, evt);
             return webviewIpc::IPCResult::error();
         }
-        return webviewIpc::IPCResult::success(data); 
+        return webviewIpc::IPCResult::success(data);
     });
 
     mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) { return handleReady(); });

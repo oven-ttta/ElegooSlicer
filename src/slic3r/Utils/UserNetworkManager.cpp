@@ -12,6 +12,15 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
+#define CHECK_INITIALIZED(returnVal) \
+    do { \
+        std::lock_guard<std::mutex> lock(mInitMutex); \
+        if(!mInitialized) { \
+            return returnVal; \
+        } \
+    } while(0)
+
+
 namespace Slic3r {
 
 namespace fs = boost::filesystem;
@@ -56,7 +65,11 @@ void UserNetworkManager::setIotUserInfo(const UserNetworkInfo& userInfo)
     saveUserInfo(userNetworkInfo);
 }
 
-UserNetworkInfo UserNetworkManager::getIotUserInfo() { return getUserInfo(); }
+UserNetworkInfo UserNetworkManager::getIotUserInfo()
+{
+    CHECK_INITIALIZED(UserNetworkInfo());
+    return getUserInfo();
+}
 
 void UserNetworkManager::clearIotUserInfo()
 {
@@ -67,6 +80,7 @@ void UserNetworkManager::clearIotUserInfo()
 
 PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
 {
+    CHECK_INITIALIZED(PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::NOT_INITIALIZED, UserNetworkInfo()));
     std::shared_ptr<IUserNetwork> network = getNetwork();
     if (!network) {
         return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, UserNetworkInfo());
@@ -76,6 +90,7 @@ PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> UserNetworkManager::getUserBoundPrinters()
 {
+    CHECK_INITIALIZED(PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::NOT_INITIALIZED, std::vector<PrinterNetworkInfo>()));
     std::shared_ptr<IUserNetwork> network = getNetwork();
     if (!network) {
         return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::SUCCESS, std::vector<PrinterNetworkInfo>());
