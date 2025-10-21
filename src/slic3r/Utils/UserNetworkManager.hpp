@@ -44,8 +44,7 @@ private:
     void loadUserInfo();
     bool updateUserInfo(const UserNetworkInfo& userInfo);
     bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId);
-    
-    void checkInitialized();
+
 private:
     mutable std::mutex mUserInfoMutex;
     UserNetworkInfo mUserInfo;

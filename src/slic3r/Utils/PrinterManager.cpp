@@ -227,13 +227,14 @@ void PrinterManager::init()
         PrinterCache::getInstance()->updatePrinterAttributesByNotify(event.printerId, event.printerInfo);
     });
 
-    // init user network
+    // wan network depends on plugin, wan printer depends on user information
+    // firstinit plugin manager
+    PrinterPluginManager::getInstance()->init();
+    // then init user network
     UserNetworkManager::getInstance()->init();
-    // Initialize network
+    // finally initialize printer network
     IPrinterNetwork::init();
 
-    PrinterPluginManager::getInstance()->init();
-   
     PrinterCache::getInstance()->loadPrinterList();
     syncOldPresetPrinters();
 
@@ -266,21 +267,11 @@ void PrinterManager::close()
 
     PrinterCache::getInstance()->savePrinterList();
 
-    UserNetworkManager::getInstance()->uninit();
-    PrinterPluginManager::getInstance()->uninit();
     // Uninitialize network
     IPrinterNetwork::uninit();
+    UserNetworkManager::getInstance()->uninit();
+    PrinterPluginManager::getInstance()->uninit();
 
-}
-void PrinterManager::checkInitialized()
-{
-    {
-        std::lock_guard<std::mutex> lock(mInitializedMutex);
-        if (mIsInitialized) {
-            return;
-        }
-    }
-    init();
 }
 PrinterNetworkResult<bool> PrinterManager::deletePrinter(const std::string& printerId)
 {
@@ -518,7 +509,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPr
 
 std::vector<PrinterNetworkInfo> PrinterManager::getPrinterList()
 {
-    checkInitialized();
+
     auto printers = PrinterCache::getInstance()->getPrinters();
     std::sort(printers.begin(), printers.end(),
               [](const PrinterNetworkInfo& a, const PrinterNetworkInfo& b) { return a.addTime < b.addTime; });
@@ -1024,7 +1015,7 @@ PrinterNetworkResult<PrinterPrintFileResponse> PrinterManager::getFileList(const
 }
 
 PrinterNetworkResult<PrinterPrintFileResponse> PrinterManager::getFileDetail(const std::string& printerId, const std::string& fileName)
-{    
+{
     auto printer = PrinterCache::getInstance()->getPrinter(printerId);
     if (!printer.has_value()) {
         wxLogError("Printer not found, printerId: %s", printerId.c_str());

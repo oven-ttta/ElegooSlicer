@@ -48,15 +48,9 @@ public:
 private:
     bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10, bool isWan = false);
     void doUninstallPlugin();
-    void doInit();
-    void checkInitialized();
-    bool isPluginInitialized();
-
 
     std::mutex mMutex;
     bool mIsInitialized{false};
-    std::mutex mPluginMutex;
-    bool mIsInstalledNetwokrPlugin{false};
 };
 
 } // namespace Slic3r
