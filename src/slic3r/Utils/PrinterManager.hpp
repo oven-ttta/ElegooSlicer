@@ -91,7 +91,7 @@ private:
     
     std::atomic<bool> mIsInitialized;
     std::mutex mInitializedMutex;
-    void checkInitialized();
+
     // thread to monitor printer connections
     std::thread mConnectionThread;
     std::chrono::steady_clock::time_point mLastConnectionLoopTime;

@@ -51,19 +51,8 @@ void UserNetworkManager::uninit()
     setNetwork(nullptr);
     mInitialized = false;
 }
-void UserNetworkManager::checkInitialized()
-{
-    {
-        std::lock_guard<std::mutex> lock(mInitMutex);
-        if (mInitialized) {
-            return;
-        }
-    }
-    init();
-}
 void UserNetworkManager::setIotUserInfo(const UserNetworkInfo& userInfo)
 {
-    checkInitialized();
     UserNetworkInfo userNetworkInfo = userInfo;
     userNetworkInfo.connectedToIot = false;
     setUserInfo(userNetworkInfo);
@@ -72,13 +61,11 @@ void UserNetworkManager::setIotUserInfo(const UserNetworkInfo& userInfo)
 
 UserNetworkInfo UserNetworkManager::getIotUserInfo()
 {
-    checkInitialized();
     return getUserInfo();
 }
 
 void UserNetworkManager::clearIotUserInfo()
 {
-    checkInitialized();
     setUserInfo(UserNetworkInfo());
     setNetwork(nullptr);
     saveUserInfo(UserNetworkInfo());
@@ -86,7 +73,6 @@ void UserNetworkManager::clearIotUserInfo()
 
 PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
 {
-    checkInitialized();
     std::shared_ptr<IUserNetwork> network = getNetwork();
     if (!network) {
         return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, UserNetworkInfo());
@@ -97,7 +83,6 @@ PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> UserNetworkManager::getUserBoundPrinters()
 {
-    checkInitialized();
     std::shared_ptr<IUserNetwork> network = getNetwork();
     if (!network) {
         return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::SUCCESS, std::vector<PrinterNetworkInfo>());

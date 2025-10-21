@@ -270,6 +270,9 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
     // Load the icon either from the exe, or from the ico file.
     SetIcon(main_frame_icon(wxGetApp().get_app_mode()));
 
+    // Initialize printer manager before initializing webview
+    PrinterManager::getInstance()->init();
+
     // initialize tabpanel and menubar
     init_tabpanel();
     if (wxGetApp().is_gcode_viewer())
@@ -630,8 +633,6 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
     // bind events from DiffDlg
 
     bind_diff_dialog();
-
-    PrinterManager::getInstance()->init();
 }
 
 void MainFrame::bind_diff_dialog()
