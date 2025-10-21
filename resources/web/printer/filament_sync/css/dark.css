@@ -1,4 +1,4 @@
-@import url("../../../vue/styles/dark.css");
+@import url("../../../styles/dark.css");
 
 /* Dark theme specific overrides for filament sync */
 html.dark .filament-sync-container {

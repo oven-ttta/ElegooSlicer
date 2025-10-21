@@ -1,4 +1,4 @@
-@import url("../../../vue/styles/light.css");
+@import url("../../../styles/light.css");
 
 /* ===================== Base Styles ===================== */
 html,
@@ -140,6 +140,7 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 16px 18px 18px 18px;
+  margin-bottom: 16px;
 }
 
 .printer-category {
@@ -150,6 +151,7 @@ body {
   margin-bottom: 16px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .printer-local-icon {
@@ -496,7 +498,9 @@ body {
   justify-content: center;
   height: 80%;
   color: var(--text-primary);
-  margin: 16px 0 32px 0;
+}
+.no-printer{
+  margin-top: -60px;
 }
 /* ===================== Form Styles (Shared) ===================== */
 .form-group {
@@ -777,4 +781,27 @@ body {
   max-width: 100%;
   display: block;
   clear: both;
+}
+
+
+.user-info {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: var(--text-secondary);
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.no-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  gap: 20px;
+  margin-top: -16px;
+  margin-bottom: 20px;
 }

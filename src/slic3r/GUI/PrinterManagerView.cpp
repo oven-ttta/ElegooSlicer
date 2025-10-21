@@ -29,6 +29,7 @@
 #include <fstream>
 #include <mutex>
 #include "slic3r/Utils/PrinterNetworkEvent.hpp"
+#include <slic3r/Utils/UserNetworkManager.hpp>
 
 #define FIRST_TAB_NAME _L("Connected Printer")
 #define TAB_MAX_WIDTH 200
@@ -375,7 +376,6 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     if(wxGetApp().app_config->get_bool("developer_mode")){
         TargetUrl = TargetUrl + "&dev=true";
     }  
-    //TargetUrl = "https://np-sit.elegoo.com.cn//elegooSlicer";
     mBrowser->LoadURL(TargetUrl);
     
     // 设置 ElegooSlicer UserAgent
@@ -747,6 +747,18 @@ void PrinterManagerView::setupIPCHandlers()
     mIpc->onRequest("request_connect_physical_printer", [this](const webviewIpc::IPCRequest& request){
         // Implementation for connect physical printer
         return webviewIpc::IPCResult::success();
+    });
+
+    mIpc->onRequest("login", [this](const webviewIpc::IPCRequest& request){
+        auto evt = new wxCommandEvent(EVT_USER_LOGIN);
+        wxQueueEvent(wxGetApp().mainframe, evt);
+        return webviewIpc::IPCResult::success();
+    });
+
+    mIpc->onRequest("request_user_info", [this](const webviewIpc::IPCRequest& request){
+        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();   
+        nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
+        return webviewIpc::IPCResult::success(data);
     });
 
     
