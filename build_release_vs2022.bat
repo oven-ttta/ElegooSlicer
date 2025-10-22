@@ -66,20 +66,20 @@ if "%1"=="deps" exit /b 0
 
 :slicer
 
-set ELEGOO_TEST=0
+set ELEGOO_INTERNAL_TESTING=0
 for %%a in (%*) do (
     if "%%a"=="test" (
-        set ELEGOO_TEST=1
+        set ELEGOO_INTERNAL_TESTING=1
     )
 )
 
-echo "building ElegooSlicer...ELEGOO_TEST=%ELEGOO_TEST%"
+echo "building ElegooSlicer...ELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%"
 cd %WP%
 mkdir %build_dir%
 cd %build_dir%
 
 echo on
-cmake .. -G "Visual Studio 17 2022" -A x64 -DELEGOO_TEST=%ELEGOO_TEST%  -DBBL_RELEASE_TO_PUBLIC=1 -DCMAKE_PREFIX_PATH="%DEPS%/usr/local" -DCMAKE_INSTALL_PREFIX="./ElegooSlicer" -DCMAKE_BUILD_TYPE=%build_type% -DWIN10SDK_PATH="%WindowsSdkDir%Include\%WindowsSDKVersion%\"
+cmake .. -G "Visual Studio 17 2022" -A x64 -DELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%  -DBBL_RELEASE_TO_PUBLIC=1 -DCMAKE_PREFIX_PATH="%DEPS%/usr/local" -DCMAKE_INSTALL_PREFIX="./ElegooSlicer" -DCMAKE_BUILD_TYPE=%build_type% -DWIN10SDK_PATH="%WindowsSdkDir%Include\%WindowsSDKVersion%\"
 cmake --build . --config %build_type% --target ALL_BUILD -- -m
 @echo off
 cd ..

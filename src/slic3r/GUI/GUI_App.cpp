@@ -4812,7 +4812,6 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
     AppConfig* app_config = wxGetApp().app_config;
     auto       version_check_url = app_config->version_check_url();
     // std::string locale_name = app_config->getSystemLocale();
-    const auto language = app_config->get("language");
     Http::get(version_check_url)
         .on_error([&](std::string body, std::string error, unsigned http_status) {
           (void)body;
@@ -4820,16 +4819,26 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
                                              error);
         })
         .timeout_connect(1)
-        .on_complete([this,by_user,language](std::string body, unsigned http_status) {
+        .on_complete([this,by_user](std::string body, unsigned http_status) {
           // Http response OK
           if (http_status != 200)
             return;
           try {
-            boost::trim(body);
-            // Elegoo: parse github release, inspired by SS
-            boost::property_tree::ptree root;
-            std::stringstream json_stream(body);
-            boost::property_tree::read_json(json_stream, root);
+
+            nlohmann::json j = nlohmann::json::parse(body);
+            if(j.contains("code")&& j["code"].is_number_integer())
+            {
+                int code = j["code"].get<int>();
+                if(code != 200)
+                {
+                    return;
+                }
+            }
+            if(!j.contains("data")||!j["data"].is_object())
+            {
+                return;
+            }
+            nlohmann::json root = j["data"];
 
             // at least two number, use '.' as separator. can be followed by -Az23 for prereleased and +Az42 for
             // metadata
@@ -4841,7 +4850,7 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
             std::string best_release_url;
             
             const std::regex reg_num("([0-9]+)");
-            std::string version_str = root.get<std::string>("version");
+            std::string version_str = root["version"].get<std::string>();
             if (version_str[0] == 'v')
                 version_str.erase(0, 1);
             for (std::regex_iterator it = std::sregex_iterator(version_str.begin(), version_str.end(), reg_num); it != std::sregex_iterator(); ++it) {}
@@ -4849,30 +4858,8 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
 
             if (best_release < new_version) {
                 best_release         = new_version;
-                auto description = root.get_child("description");
-                
-                BOOST_LOG_TRIVIAL(warning) << "language: " << language;
-                printf("language: %s\n", language.c_str());
-                if (language.find("zh") != std::string::npos)
-                {
-                    best_release_content = description.get<std::string>("zh");
-                }else {
-                    best_release_content = description.get<std::string>("en");
-                }
-                
-                auto download_urls = root.get_child("download_urls");
-
-                std::string _url;
-                #ifdef WIN32
-                _url = download_urls.get<std::string>("windows");
-                #elif __APPLE__
-                #ifdef __x86_64__
-                _url = download_urls.get<std::string>("mac_x64");
-                #elif __aarch64__
-                _url = download_urls.get<std::string>("mac_arm64");
-                #endif // __x86_64__
-                #endif //  WIN32
-                best_release_url = _url;
+                best_release_content = root["info"].get<std::string>();
+                best_release_url = root["downloadUrl"].get<std::string>();
             }
 
             // if we're the most recent, don't do anything
@@ -4889,183 +4876,6 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
 
             wxCommandEvent* evt = new wxCommandEvent(EVT_SLIC3R_VERSION_ONLINE);
             evt->SetString((best_release).to_string());
-            GUI::wxGetApp().QueueEvent(evt);
-          } catch (...) {}
-        })
-        .perform();
-#endif
-
-#if 0 // Elegoo: disable version check，use github release
-    AppConfig* app_config = wxGetApp().app_config;
-    bool       check_stable_only = app_config->get_bool("check_stable_update_only");
-    auto version_check_url = app_config->version_check_url();
-
-    UpdaterQuery query{
-        detect_updater_iid(app_config),
-        detect_updater_version(),
-        detect_updater_os(),
-        detect_updater_arch(),
-        detect_updater_os_info()
-    };
-
-    const std::string query_string = build_updater_query(query);
-    if (!query_string.empty()) {
-        const bool has_query = version_check_url.find('?') != std::string::npos;
-        if (!has_query)
-            version_check_url.push_back('?');
-        else if (!version_check_url.empty() && version_check_url.back() != '&' && version_check_url.back() != '?')
-            version_check_url.push_back('&');
-        version_check_url += query_string;
-    }
-
-    auto http = Http::get(version_check_url);
-    maybe_attach_updater_signature(http, query_string, version_check_url);
-
-    http.header("accept", "application/vnd.github.v3+json")
-        .timeout_connect(5)
-        .timeout_max(10)
-        .on_error([&](std::string body, std::string error, unsigned http_status) {
-          (void)body;
-          BOOST_LOG_TRIVIAL(error) << format("Error getting: `%1%`: HTTP %2%, %3%", "check_new_version_sf", http_status,
-                                             error);
-        })
-        .on_complete([this, by_user, check_stable_only](std::string body, unsigned http_status) {
-          if (http_status != 200)
-            return;
-          try {
-            boost::trim(body);
-            // Elegoo: parse github release, inspired by SS
-            boost::property_tree::ptree root;
-            std::stringstream json_stream(body);
-            boost::property_tree::read_json(json_stream, root);
-
-            // at least two number, use '.' as separator. can be followed by -Az23 for prereleased and +Az42 for
-            // metadata
-            std::regex matcher("[0-9]+\\.[0-9]+(\\.[0-9]+)*(-[A-Za-z0-9]+)?(\\+[A-Za-z0-9]+)?");
-
-            Semver           current_version = get_version(ELEGOOSLICER_VERSION, matcher);
-            Semver best_pre(1, 0, 0);
-            Semver best_release(1, 0, 0);
-            std::string best_pre_url;
-            std::string best_release_url;
-            std::string best_release_content;
-            std::string best_pre_content;
-            std::string pre_install_url;
-            std::string release_install_url;
-            
-            const std::regex reg_num("([0-9]+)");
-            if (check_stable_only) {
-                std::string tag = root.get<std::string>("tag_name");
-                if (tag[0] == 'v')
-                    tag.erase(0, 1);
-                for (std::regex_iterator it = std::sregex_iterator(tag.begin(), tag.end(), reg_num); it != std::sregex_iterator(); ++it) {}
-                Semver tag_version = get_version(tag, matcher);
-                if (root.get<bool>("prerelease")) {
-                    if (best_pre < tag_version) {
-                        best_pre         = tag_version;
-                        best_pre_url     = root.get<std::string>("html_url");
-                        best_pre_content = root.get<std::string>("body");
-                        best_pre.set_prerelease("Preview");
-                        //get the installer url
-                        auto assets = root.get_child("assets");
-                        for (auto asset : assets) {
-                            std::string asset_name = asset.second.get<std::string>("name");
-                            if (isValidInstaller(asset_name)) {
-                                pre_install_url = asset.second.get<std::string>("browser_download_url");
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    if (best_release < tag_version) {
-                        best_release         = tag_version;
-                        best_release_url     = root.get<std::string>("html_url");
-                        best_release_content = root.get<std::string>("body");
-                        //get the installer url
-                        auto assets = root.get_child("assets");
-                        for (auto asset : assets) {
-                            std::string asset_name = asset.second.get<std::string>("name");
-                            if (isValidInstaller(asset_name)) {
-                                release_install_url = asset.second.get<std::string>("browser_download_url");
-                                break;
-                            }
-                        }
-                    }
-                }
-
- 
-            } else {
-                for (auto json_version : root) {
-                    std::string tag = json_version.second.get<std::string>("tag_name");
-                    if (tag[0] == 'v')
-                        tag.erase(0, 1);
-                    for (std::regex_iterator it = std::sregex_iterator(tag.begin(), tag.end(), reg_num); it != std::sregex_iterator();
-                         ++it) {}
-                    Semver tag_version = get_version(tag, matcher);
-                    if (json_version.second.get<bool>("prerelease")) {
-                        if (best_pre < tag_version) {
-                            best_pre         = tag_version;
-                            best_pre_url     = json_version.second.get<std::string>("html_url");
-                            best_pre_content = json_version.second.get<std::string>("body");
-                            best_pre.set_prerelease("Preview");
-                            //get the installer url
-                            auto assets = json_version.second.get_child("assets");
-                            for (auto asset : assets) {
-                                std::string asset_name = asset.second.get<std::string>("name");
-                                if (isValidInstaller(asset_name)) {
-                                    pre_install_url = asset.second.get<std::string>("browser_download_url");
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        if (best_release < tag_version) {
-                            best_release         = tag_version;
-                            best_release_url     = json_version.second.get<std::string>("html_url");
-                            best_release_content = json_version.second.get<std::string>("body");
-                            //get the installer url
-                            auto assets = json_version.second.get_child("assets");
-                            for (auto asset : assets) {
-                                std::string asset_name = asset.second.get<std::string>("name");
-                                if (isValidInstaller(asset_name)) {
-                                    release_install_url = asset.second.get<std::string>("browser_download_url");
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // if release is more recent than beta, use release anyway
-            if (best_pre < best_release) {
-                best_pre         = best_release;
-                best_pre_url     = best_release_url;
-                best_pre_content = best_release_content;
-                pre_install_url  = release_install_url;
-            }
-
-            //if we don't have a valid installer, use the best pre url
-            if(release_install_url.empty()) {
-                release_install_url = best_release_url;
-            }
-            if(pre_install_url.empty()) {
-                pre_install_url = best_pre_url;
-            }
-            // if we're the most recent, don't do anything
-            if ((check_stable_only ? best_release : best_pre) <= current_version) {
-                if (by_user != 0)
-                    this->no_new_version();
-                return;
-            }
-
-            version_info.url           = check_stable_only ? release_install_url : pre_install_url;
-            version_info.version_str   = check_stable_only ? best_release.to_string_sf() : best_pre.to_string_sf();
-            version_info.description   = check_stable_only ? best_release_content : best_pre_content;
-            version_info.force_upgrade = false;
-
-            wxCommandEvent* evt = new wxCommandEvent(EVT_SLIC3R_VERSION_ONLINE);
-            evt->SetString((check_stable_only ? best_release : best_pre).to_string_sf());
             GUI::wxGetApp().QueueEvent(evt);
           } catch (...) {}
         })

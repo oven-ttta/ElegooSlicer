@@ -22,6 +22,7 @@ const usePrinterStore = defineStore('printer', {
     localPrinters: (state) => state.printers.filter(printer => printer.networkType === 0),
     networkPrinters: (state) => state.printers.filter(printer => printer.networkType === 1),
     userAvatar: (state) => {
+      const loginStatus = state.userInfo ? state.userInfo.loginStatus : 0;
       if (state.userInfo && state.userInfo.avatar) {
         return state.userInfo.avatar;
       } else {
@@ -32,10 +33,15 @@ const usePrinterStore = defineStore('printer', {
       const loginStatus = state.userInfo ? state.userInfo.loginStatus : 0;
       if (loginStatus === 0) {
         return "未登录";
-      } else if (loginStatus === 2) {
-        return "登录中...";
-      } else {
+      } else if (loginStatus === 1) {
         return state.userInfo.nickname || state.userInfo.email.split('@')[0] || state.userInfo.phone;
+      }
+      else if (loginStatus === 2) {
+        return "登录中...";
+      }
+      else {
+        const text = state.userInfo.nickname || state.userInfo.email.split('@')[0] || state.userInfo.phone;
+        return text + " (离线)";
       }
     },
     isLoggedIn: (state) => {
@@ -377,7 +383,7 @@ const usePrinterStore = defineStore('printer', {
     async handleUserInfoClick() {
       // Logic to handle user info click, e.g., open login modal
       console.log('User info clicked - implement login modal logic here');
-      if (this.userInfo.loginStatus === 0) {
+      if (this.userInfo.loginStatus === 0 || this.userInfo.loginStatus > 2) {
         this.ipcRequest('login');
       }
     },

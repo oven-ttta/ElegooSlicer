@@ -1,5 +1,39 @@
 cmake_minimum_required(VERSION 3.13)
 
+function(parse_dotenv path)
+    if(EXISTS "${path}")
+        file(READ "${path}" _dotenv_content)
+        string(REPLACE "\r\n" "\n" _dotenv_content "${_dotenv_content}")
+        string(REPLACE "\r" "\n" _dotenv_content "${_dotenv_content}")
+        string(REGEX MATCHALL "[^\n]+" _lines "${_dotenv_content}")
+        foreach(_line IN LISTS _lines)
+            string(REGEX REPLACE "^\\s*#.*" "" _trimmed "${_line}") 
+            string(STRIP "${_trimmed}" _trimmed)
+            if(_trimmed STREQUAL "") 
+                continue()
+            endif()
+            string(REGEX MATCH "^([A-Za-z_][A-Za-z0-9_]*)=(.*)$" _m "${_trimmed}")
+            if(_m)
+                set(_key "${CMAKE_MATCH_1}")
+                set(_val "${CMAKE_MATCH_2}")
+                string(REGEX REPLACE "^\"(.*)\"$" "\\1" _val "${_val}")
+                string(REGEX REPLACE "^'(.*)'$" "\\1" _val "${_val}")
+                set("${_key}" "${_val}" PARENT_SCOPE)
+            endif()
+        endforeach()
+    endif()
+endfunction()
+
+
+
+if(DEFINED ELEGOO_INTERNAL_TESTING AND ELEGOO_INTERNAL_TESTING STREQUAL "1")
+    parse_dotenv("${CMAKE_SOURCE_DIR}/.env.testing")
+else()
+    parse_dotenv("${CMAKE_SOURCE_DIR}/.env")
+endif()
+
+
+
 # Verify that your CMake version is exactly 3.31.x series or lower on windows
 if ( ((MSVC) OR (WIN32)) AND (${CMAKE_VERSION} VERSION_GREATER_EQUAL "4.0") )
     message(FATAL_ERROR "Only cmake versions between 3.13.x and 3.31.x is supported on windows. Detected version: ${CMAKE_VERSION}")

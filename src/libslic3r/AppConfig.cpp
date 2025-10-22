@@ -50,7 +50,7 @@ static const std::string VERSION_CHECK_URL_STABLE = "https://api.github.com/repo
 static const std::string VERSION_CHECK_URL = "https://api.github.com/repos/ELEGOO-3D/ElegooSlicer/releases";
 
 //DEV TEST PROD
-#if ELEGOO_TEST
+#if ELEGOO_INTERNAL_TESTING
 static const std::string PROFILE_UPDATE_URL = "";
 static const std::string ELEGOO_UPDATE_URL_STABLE = "";
 static const std::string MESSAGE_CHECK_URL = "";
@@ -1293,7 +1293,7 @@ void AppConfig::update_last_backup_dir(const std::string& dir)
     this->save();
 }
 
-std::string AppConfig::get_region()
+std::string AppConfig::get_region() const
 {
 // #if BBL_RELEASE_TO_PUBLIC
     return this->get("region");
@@ -1312,7 +1312,7 @@ std::string AppConfig::get_region()
 // #endif
 }
 
-std::string AppConfig::get_country_code()
+std::string AppConfig::get_country_code() const
 {
     std::string region = get_region();
 // #if !BBL_RELEASE_TO_PUBLIC
@@ -1408,8 +1408,32 @@ std::string AppConfig::config_path()
 
 std::string AppConfig::version_check_url() const
 {
-    auto from_settings = get("version_check_url");
-    return from_settings.empty() ? ELEGOO_UPDATE_URL_STABLE : from_settings; //stable_only ? VERSION_CHECK_URL_STABLE : VERSION_CHECK_URL : from_settings;
+    const std::string from_settings = get("version_check_url");
+    const std::string country_code = get_country_code();
+    const std::string language = get("language");
+
+    std::string url;
+    if(country_code == "CN") {
+        url = ELEGOO_CHINA_UPDATE_URL;
+    } else {
+        url = ELEGOO_GLOBAL_UPDATE_URL;
+    }
+    url = from_settings.empty() ? url : from_settings;
+    // Build query parameters
+    std::string query_params = std::string("?country=") + (country_code == "CN" ? "china" : "other");
+    query_params += std::string("&language=") + (language.find("zh") != std::string::npos ? "zh" : "en");
+    
+#ifdef WIN32
+    query_params += "&platform=win64";
+#elif __APPLE__
+#ifdef __x86_64__
+    query_params += "&platform=mac64";
+#elif __aarch64__
+    query_params += "&platform=mac_arm64";
+#endif // __x86_64__
+#endif //  WIN32
+
+    return url + query_params;
 }
 
 std::string AppConfig::profile_update_url() const
@@ -1432,7 +1456,7 @@ std::string AppConfig::profile_update_url() const
     auto from_settings = get("profile_update_url");
     profile_update_url = from_settings.empty() ? PROFILE_UPDATE_URL : from_settings;
 
-    #if ELEGOO_TEST
+    #if ELEGOO_INTERNAL_TESTING
         profile_update_url = profile_update_url + "/elegoo.ota.profiles." + version_str + ".test.json";
     #else   
         profile_update_url = profile_update_url + "/elegoo.ota.profiles." + version_str + ".json";

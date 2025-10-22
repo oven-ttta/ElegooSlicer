@@ -4,7 +4,7 @@ const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOp
 const Navigation = {
     data() {
         return {
-            
+
             userInfo: {
                 userId: '',
                 nickname: '',
@@ -31,15 +31,15 @@ const Navigation = {
         async navigateToPage(pageName) {
             console.log('Navigate to page method called:', pageName);
             this.currentPage = pageName;
-            
+
             await this.ipcRequest('navigateToPage', { page: pageName });
         },
-        
+
         async beginDownloadNetworkPlugin() {
             console.log('Download network plugin clicked');
             await this.ipcRequest('downloadNetworkPlugin', {});
         },
-        
+
         // IPC Communication methods
         async ipcRequest(method, params = {}, timeout = 10000) {
             try {
@@ -64,7 +64,7 @@ const Navigation = {
             this.showUserMenu = !this.showUserMenu;
             console.log('User menu toggled:', this.showUserMenu);
         },
-        
+
         async onLogout() {
             console.log('Logout clicked');
             try {
@@ -90,14 +90,32 @@ const Navigation = {
             event.target.onerror = null; // 防止无限循环
         },
     },
-    
+
+    computed: {
+        userName(){
+            const loginStatus = this.userInfo ? this.userInfo.loginStatus : 0;
+            if (loginStatus === 0) {
+                return "未登录";
+            } else if (loginStatus === 1) {
+                return this.userInfo.nickname || this.userInfo.email.split('@')[0] || this.userInfo.phone;
+            }
+            else if (loginStatus === 2) {
+                return "登录中...";
+            }
+            else {
+                const text = this.userInfo.nickname || this.userInfo.email.split('@')[0] || this.userInfo.phone;
+                return text + " (离线)";
+            }
+        }
+    },
+
     async mounted() {
         await this.init();
         nativeIpc.on('onUserInfoUpdated', (data) => {
             console.log('Received user info update event from backend:', data);
             this.userInfo = data;
         });
-        
+
         await this.ipcRequest('ready', {});
     }
 };

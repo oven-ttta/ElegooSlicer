@@ -244,7 +244,7 @@ AboutDialog::AboutDialog()
     {
         vesizer->Add(0, FromDIP(165), 1, wxEXPAND, FromDIP(5));
         auto version_string = _L("ElegooSlicer ") + " " + std::string(SLIC3R_BUILD_ID);
-        #if ELEGOO_TEST
+        #if ELEGOO_INTERNAL_TESTING
         version_string += " (Test)";
         #endif
         wxStaticText* version = new wxStaticText(this, wxID_ANY, version_string.c_str(), wxDefaultPosition, wxDefaultSize);
