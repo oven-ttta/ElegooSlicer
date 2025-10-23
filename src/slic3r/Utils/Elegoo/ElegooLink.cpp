@@ -976,16 +976,18 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::getUserBoundPr
     return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(resultCode, printers, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
-PrinterNetworkResult<std::string> ElegooLink::hasInstalledPlugin()
+PrinterNetworkResult<PluginNetworkInfo> ElegooLink::hasInstalledPlugin()
 {
     std::lock_guard<std::mutex> lock(mMutex);
 
-    std::string version = "";
+    PluginNetworkInfo info;
+
     if(elink::ElegooNetwork::getInstance().isInitialized()) {
-        version = elink::ElegooNetwork::getInstance().version();
-        return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::SUCCESS, version);
+        std::string version = elink::ElegooNetwork::getInstance().version();
+        info.version = version;
+        return PrinterNetworkResult<PluginNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, info);
     }
-    return PrinterNetworkResult<std::string>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, version);
+    return PrinterNetworkResult<PluginNetworkInfo>(PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED, info);
 }
 
 PrinterNetworkResult<bool> ElegooLink::installPlugin(const std::string& pluginPath)
@@ -1032,6 +1034,16 @@ PrinterNetworkResult<bool> ElegooLink::installPlugin(const std::string& pluginPa
         [&](const std::shared_ptr<elink::PrinterStatusEvent>& event) {
             PrinterStatus status = parseElegooStatus(event->status.printerStatus.state, event->status.printerStatus.subState);
             PrinterNetworkEvent::getInstance()->statusChanged.emit(PrinterStatusEvent(event->status.printerId, status, NETWORK_TYPE_WAN));
+
+            PrinterPrintTask task;
+            task.taskId        = event->status.printStatus.taskId;
+            task.fileName      = event->status.printStatus.fileName;
+            task.totalTime     = event->status.printStatus.totalTime;
+            task.currentTime   = event->status.printStatus.currentTime;
+            task.estimatedTime = event->status.printStatus.estimatedTime;
+            task.progress      = event->status.printStatus.progress;
+
+            PrinterNetworkEvent::getInstance()->printTaskChanged.emit(PrinterPrintTaskEvent(event->status.printerId, task, NETWORK_TYPE_LAN));
         });
     elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterAttributesEvent>(
         [&](const std::shared_ptr<elink::PrinterAttributesEvent>& event) {

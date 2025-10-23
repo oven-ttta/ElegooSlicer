@@ -14,12 +14,12 @@ public:
     ElegooPluginNetwork& operator=(const ElegooPluginNetwork&) = delete;
     virtual ~ElegooPluginNetwork();
 
-    virtual PrinterNetworkResult<std::string> hasInstalledPlugin() override;
+    virtual PrinterNetworkResult<PluginNetworkInfo> hasInstalledPlugin() override;
     virtual PrinterNetworkResult<bool>        installPlugin(const std::string& pluginPath) override;
     virtual PrinterNetworkResult<bool>        uninstallPlugin() override;
-
-
-    
+    virtual PrinterNetworkResult<PluginNetworkInfo> getPluginLastestVersion() override;
+    virtual PrinterNetworkResult<std::vector<PluginNetworkInfo>> getPluginOldVersions() override;
+  
     static void init();
     static void uninit();
 };

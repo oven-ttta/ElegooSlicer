@@ -26,8 +26,8 @@
 #include "Obico.hpp"
 #include "Flashforge.hpp"
 #include "SimplyPrint.hpp"
-#include "PrinterManager.hpp"
-#include "PrinterMmsManager.hpp"
+#include "Elegoo/PrinterManager.hpp"
+#include "Elegoo/PrinterMmsManager.hpp"
 #include "libslic3r/PrinterNetworkInfo.hpp"
 
 namespace fs = boost::filesystem;

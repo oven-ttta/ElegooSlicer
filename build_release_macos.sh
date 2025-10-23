@@ -38,7 +38,7 @@ while getopts ":dpa:snt:xbc:1eh" opt; do
         export CMAKE_BUILD_PARALLEL_LEVEL=1
         ;;
     e )
-        export ELEGOO_TEST="1"
+        export ELEGOO_INTERNAL_TESTING="1"
         ;;
     h ) echo "Usage: ./build_release_macos.sh [-d]"
         echo "   -d: Build deps only"
@@ -89,8 +89,8 @@ if [ -z "$OSX_DEPLOYMENT_TARGET" ]; then
   export OSX_DEPLOYMENT_TARGET="11.3"
 fi
 
-if [ -z "$ELEGOO_TEST" ]; then
-  export ELEGOO_TEST="0"
+if [ -z "$ELEGOO_INTERNAL_TESTING" ]; then
+  export ELEGOO_INTERNAL_TESTING="0"
 fi
 echo "Build params:"
 echo " - ARCH: $ARCH"
@@ -98,7 +98,7 @@ echo " - BUILD_CONFIG: $BUILD_CONFIG"
 echo " - BUILD_TARGET: $BUILD_TARGET"
 echo " - CMAKE_GENERATOR: $SLICER_CMAKE_GENERATOR for Slicer, $DEPS_CMAKE_GENERATOR for deps"
 echo " - OSX_DEPLOYMENT_TARGET: $OSX_DEPLOYMENT_TARGET"
-echo " - ELEGOO_TEST: $ELEGOO_TEST"
+echo " - ELEGOO_INTERNAL_TESTING: $ELEGOO_INTERNAL_TESTING"
 echo
 
 # if which -s brew; then
@@ -190,7 +190,7 @@ function build_slicer() {
                     -DCMAKE_MACOSX_BUNDLE=ON \
                     -DCMAKE_OSX_ARCHITECTURES="${_ARCH}" \
                     -DCMAKE_OSX_DEPLOYMENT_TARGET="${OSX_DEPLOYMENT_TARGET}" \
-                    -DELEGOO_TEST="${ELEGOO_TEST}"
+                    -DELEGOO_INTERNAL_TESTING="${ELEGOO_INTERNAL_TESTING}"
             fi
             cmake --build . --config "$BUILD_CONFIG" --target "$SLICER_BUILD_TARGET"
         )

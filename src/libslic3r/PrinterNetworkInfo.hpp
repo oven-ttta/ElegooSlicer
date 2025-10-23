@@ -274,6 +274,8 @@ struct PluginNetworkInfo
     std::string pluginPath;
     std::string hostType;
     std::string version;
+    std::string latestVersion;
+    std::string downloadUrl;
     bool        installed{false};
 };
 

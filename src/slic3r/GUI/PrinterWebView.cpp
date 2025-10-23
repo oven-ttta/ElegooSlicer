@@ -15,8 +15,8 @@
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <wx/webview.h>
 #include "slic3r/GUI/PhysicalPrinterDialog.hpp"
-#include "slic3r/Utils/PrinterManager.hpp"
-#include "slic3r/Utils/UserNetworkManager.hpp"
+#include "slic3r/Utils/Elegoo/PrinterManager.hpp"
+#include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
 #include <nlohmann/json.hpp>
 #include <thread>
 #include <mutex>

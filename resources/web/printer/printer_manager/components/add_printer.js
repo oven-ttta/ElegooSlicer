@@ -32,7 +32,7 @@ const AddPrinterTemplate = /*html*/`
                                     <span class="add-printer-host">{{ printer.host }}</span>
                                 </span>
                                 <span>
-                                    <span class="add-printer-status">{{ $t('addPrinterDialog.connectable') }}</span>
+                                    <span class="add-printer-status">{{ printer.networkType === 1 ? $t('addPrinterDialog.bindable') : $t('addPrinterDialog.connectable') }}</span>
                                 </span>
                             </div>
                         </div>
@@ -170,7 +170,7 @@ const AddPrinterComponent = {
                         return;
                     }
                     const printer = this.printers[this.selectedPrinterIdx];
-                    
+
                     // authMode === 2: requires access code
                     if (printer.authMode === 2 && (printer.accessCode === '' || printer.accessCode === null)) {
                         this.pendingAccessAuthPrinter = printer;
@@ -183,7 +183,7 @@ const AddPrinterComponent = {
                         });
                         return;
                     }
-                    
+
                     // authMode === 3: requires pin code
                     if (printer.authMode === 3 && (printer.pinCode === '' || printer.pinCode === null)) {
                         this.pendingPinAuthPrinter = printer;
@@ -196,7 +196,7 @@ const AddPrinterComponent = {
                         });
                         return;
                     }
-                    
+
                     // no auth required or auth already provided
                     await this.printerStore.requestAddPrinter(printer);
                     return;

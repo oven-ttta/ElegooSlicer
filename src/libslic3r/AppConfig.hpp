@@ -274,8 +274,8 @@ public:
 	std::string 		get_last_backup_dir() const;
 	void                update_last_backup_dir(const std::string &dir);
 
-	std::string         get_region();
-	std::string         get_country_code();
+	std::string         get_region() const;
+	std::string         get_country_code() const;
     bool				is_engineering_region();
 
     void                save_custom_color_to_config(const std::vector<std::string> &colors);

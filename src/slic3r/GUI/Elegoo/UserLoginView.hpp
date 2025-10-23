@@ -6,7 +6,7 @@
 #include <memory>
 #include <atomic>
 #include "slic3r/Utils/WebviewIPCManager.h"
-#include "MsgDialog.hpp"
+#include "slic3r/GUI/MsgDialog.hpp"
 
 namespace Slic3r { namespace GUI {
 

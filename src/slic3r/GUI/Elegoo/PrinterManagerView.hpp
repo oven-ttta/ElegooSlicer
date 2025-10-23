@@ -8,7 +8,7 @@
 #include <wx/aui/aui.h>
 #include <wx/colour.h>
 #include <nlohmann/json.hpp>
-#include "Plater.hpp"
+#include "slic3r/GUI/Plater.hpp"
 #if wxUSE_WEBVIEW_IE
 #include "wx/msw/webview_ie.h"
 #endif

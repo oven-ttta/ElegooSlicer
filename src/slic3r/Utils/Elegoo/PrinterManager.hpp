@@ -1,8 +1,8 @@
 #pragma once
 #include <map>
-#include "slic3r/Utils/PrinterNetwork.hpp"
+#include "slic3r/Utils/Elegoo/PrinterNetwork.hpp"
 #include "slic3r/Utils/Singleton.hpp"
-#include "slic3r/Utils/PrinterNetwork.hpp"
+#include "slic3r/Utils/Elegoo/PrinterNetwork.hpp"
 
 namespace Slic3r { 
 

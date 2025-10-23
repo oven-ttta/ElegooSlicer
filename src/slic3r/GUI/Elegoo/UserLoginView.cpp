@@ -5,13 +5,14 @@
 #include <slic3r/Utils/WebviewIPCManager.h>
 #include <slic3r/GUI/GUI_App.hpp>
 #include <slic3r/GUI/Widgets/WebView.hpp>
-#include "I18N.hpp"
+#include "slic3r/GUI/I18N.hpp"
 #include "libslic3r/AppConfig.hpp"
 #include "libslic3r/Utils.hpp"
 #include <boost/filesystem.hpp>
-#include "MainFrame.hpp"
-#include "slic3r/Utils/UserNetworkManager.hpp"
+#include "slic3r/GUI/MainFrame.hpp"
 #include "slic3r/Utils/JsonUtils.hpp"
+#include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
+#include "slic3r/Utils/Elegoo/ElegooNetworkHelper.hpp"
 namespace Slic3r { namespace GUI {
 
 std::atomic<bool> UserLoginView::s_isShown{false};
@@ -71,74 +72,16 @@ void UserLoginView::initUI()
     setupIPCHandlers();
 
     // Load login page - online URL
-    wxString url = wxString::Format("https://np-sit.elegoo.com.cn/account/slicer-login?");
-
-    std::string language = wxGetApp().app_config->get_language_code();
-    language = boost::to_upper_copy(language);
-    if (language == "ZH-CN") {
-        mLanguage = "zh-CN";
-    } else if (language == "ZH-TW") {
-        mLanguage = "zh-TW";
-    } else if (language == "EN") {
-        mLanguage = "en";
-    } else if (language == "ES") {
-        mLanguage = "es";
-    } else if (language == "FR") {
-        mLanguage = "fr";
-    } else if (language == "DE") {
-        mLanguage = "de";
-    } else if (language == "JA") {
-        mLanguage = "ja";
-    } else if (language == "KO") {
-        mLanguage = "ko";
-    } else if (language == "RU") {
-        mLanguage = "ru";
-    } else if (language == "PT") {
-        mLanguage = "pt";
-    } else if (language == "IT") {
-        mLanguage = "it";
-    } else if (language == "NL") {
-        mLanguage = "nl";
-    } else if (language == "TR") {
-        mLanguage = "tr";
-    } else if (language == "CS") {
-        mLanguage = "cs";
-    } else {
-        mLanguage = "en";
-    }
-
-    url += "language=" + mLanguage;
-
-    std::string region = wxGetApp().app_config->get_region();
-    region = boost::to_upper_copy(region);
-    if (region == "CHN" || region == "CHINA") {
-        mRegion = "CN";
-    } else if (region == "USA" || region == "NORTH AMERICA") {
-        mRegion = "US";
-    } else if (region == "EUROPE") {
-        mRegion = "GB";
-    } else if (region == "ASIA-PACIFIC") {
-        mRegion = "JP";
-    } else {
-        mRegion = "other";
-    }
-
-    url += "&region=" + mRegion;
-
+    std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
+    if (!networkHelper) {
+        wxLogError("Could not create network helper");
+        return;
+    } 
+    std::string url = networkHelper->getLoginUrl();
+    mLanguage = networkHelper->getLanguage();
+    mRegion = networkHelper->getRegion();
+    mBrowser->SetUserAgent(networkHelper->getUserAgent());
     mBrowser->LoadURL(url);
-
-    // 设置 ElegooSlicer UserAgent
-    wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
-    #ifdef __WIN32__
-        mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", SLIC3R_VERSION, theme));
-    #elif defined(__WXMAC__)
-        mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", SLIC3R_VERSION, theme));
-    #elif defined(__linux__)
-        mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (X11; Linux x86_64)", SLIC3R_VERSION, theme));
-    #else
-        mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (compatible; ElegooSlicer)", SLIC3R_VERSION, theme));
-    #endif 
-     
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
 
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);

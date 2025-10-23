@@ -11,6 +11,7 @@ const langMessages = {
       "title": "Home",
       "login": "Login",
       "register": "Register",
+      "relogin": "Re-login",
       "logout": "Logout",
       "recent": "Recent",
       "newProject": "New Project",
@@ -31,6 +32,7 @@ const langMessages = {
       "connectedPrinters": "Connected Printers",
       "addPrinter": "Add Printer",
       "localPrinters": "Local Printers",
+      "networkPrinters": "My Printers",
       "noPrintersAvailable": "No Printers Available",
       "details": "Details",
       "more": "More",
@@ -64,7 +66,9 @@ const langMessages = {
       "printerSettings": "Printer Settings",
       "physicalPrinter": "Physical Printer",
       "addPrinterSuccess": "Printer added successfully.",
-      "modifySuccess": "Modified successfully."
+      "modifySuccess": "Modified successfully.",
+      "loginToView": "Please {0} to view",
+      "login": "login",
     },
     "addPrinterDialog": {
       "addPrinter": "Add Printer",
@@ -75,6 +79,7 @@ const langMessages = {
       "status": "Status",
       "noDevicesFound": "No Devices Found",
       "connectable": "Connectable",
+      "bindable": "Bindable",
       "connectToPrinter": "Connect to Printer",
       "bindPrinter": "Bind Printer",
       "refresh": "Refresh",
@@ -145,7 +150,8 @@ const langMessages = {
       "lengthShouldBe1To50": "Length should be 1 to 50 characters",
       "pleaseEnterHostNameIpUrl": "Please enter hostname, IP or URL",
       "confirmDeletePrinter": "Are you sure you want to delete this printer?",
-      "pleaseEnterValidHostNameIpUrl": "Please enter a valid hostname, IP or URL."
+      "pleaseEnterValidHostNameIpUrl": "Please enter a valid hostname, IP or URL.",
+      "serialNumber": "Serial Number"
     },
     "printerSettingPhysical": {
     },
@@ -194,9 +200,10 @@ const langMessages = {
     "homepage": {
       "title": "首页",
       "login": "登录",
+      "relogin": "重新登录",
       "register": "注册",
-      "logout": "退出",
-      "recent": "最近",
+      "logout": "退出登录",
+      "recent": "最近文件",
       "newProject": "新项目",
       "createNewProject": "创建新项目",
       "openProject": "打开项目",
@@ -213,6 +220,7 @@ const langMessages = {
     },
     "printerManager": {
       "localPrinters": "本地打印机",
+      "networkPrinters": "我的打印机",
       "connectedPrinters": "已连接的打印机",
       "addPrinter": "添加打印机",
       "noPrintersAvailable": "无可用打印机",
@@ -248,7 +256,9 @@ const langMessages = {
       "printerSettings": "打印机设置",
       "physicalPrinter": "物理打印机",
       "addPrinterSuccess": "添加打印机成功",
-      "modifySuccess": "修改成功"
+      "modifySuccess": "修改成功",
+      "loginToView": "请{0}账号后查看",
+      "login": "登录",
     },
     "addPrinterDialog": {
       "addPrinter": "添加打印机",
@@ -259,6 +269,7 @@ const langMessages = {
       "status": "状态",
       "noDevicesFound": "未找到设备",
       "connectable": "可连接",
+      "bindable": "可绑定",
       "connectToPrinter": "连接到打印机",
       "bindPrinter": "绑定打印机",
       "refresh": "刷新",
@@ -330,7 +341,8 @@ const langMessages = {
       "lengthShouldBe1To50": "长度应为1到50个字符",
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
       "confirmDeletePrinter": "您确定要删除此打印机吗？",
-      "pleaseEnterValidHostNameIpUrl": "请输入有效的主机名、IP地址或URL。"
+      "pleaseEnterValidHostNameIpUrl": "请输入有效的主机名、IP地址或URL。",
+      "serialNumber": "序列号"
     },
     "printerSettingPhysical": {
 
