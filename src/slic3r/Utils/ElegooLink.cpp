@@ -1032,6 +1032,16 @@ PrinterNetworkResult<bool> ElegooLink::installPlugin(const std::string& pluginPa
         [&](const std::shared_ptr<elink::PrinterStatusEvent>& event) {
             PrinterStatus status = parseElegooStatus(event->status.printerStatus.state, event->status.printerStatus.subState);
             PrinterNetworkEvent::getInstance()->statusChanged.emit(PrinterStatusEvent(event->status.printerId, status, NETWORK_TYPE_WAN));
+
+            PrinterPrintTask task;
+            task.taskId        = event->status.printStatus.taskId;
+            task.fileName      = event->status.printStatus.fileName;
+            task.totalTime     = event->status.printStatus.totalTime;
+            task.currentTime   = event->status.printStatus.currentTime;
+            task.estimatedTime = event->status.printStatus.estimatedTime;
+            task.progress      = event->status.printStatus.progress;
+
+            PrinterNetworkEvent::getInstance()->printTaskChanged.emit(PrinterPrintTaskEvent(event->status.printerId, task, NETWORK_TYPE_LAN));
         });
     elink::ElegooNetwork::getInstance().subscribeEvent<elink::PrinterAttributesEvent>(
         [&](const std::shared_ptr<elink::PrinterAttributesEvent>& event) {

@@ -1,3 +1,4 @@
+@import url("../../styles/dark.css");
 body
 {
 	background-color:#242428;
@@ -35,55 +36,6 @@ body
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 	border-radius: 6px;
 	min-width: 100px;
-}
-
-.logout-item {
-	color: #999999;
-	padding: 8px 12px;
-	height: auto !important;
-	width: auto !important;
-	border: none !important;
-	border-radius: 6px !important;
-	margin-right: 0 !important;
-	min-height: 32px;
-	min-width: 80px;
-}
-
-.logout-item:hover {
-	background-color: #404040;
-}
-
-.btn-item
-{
-	color:#B3B3B5;
-}
-
-.btn-item:hover
-{
-	color: #efeff0;
-	background-color: #0066dd;
-}
-
-.btn-item:hover .left-icon
-{
-	filter: brightness(300%);
-}
-
-.btn-item-selected
-{
-	color: #efeff0;
-	background-color: #0066dd;
-}
-
-.btn-item-selected .left-icon
-{
-	filter: brightness(300%);
-}
-
-.menu-item:hover
-{
-	border-color: #4066b6;
-	background-color: #0066dd;
 }
 
 #recent-clear-all-btn:hover

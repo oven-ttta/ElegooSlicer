@@ -51,22 +51,36 @@
         <div class="printer-container">
             <div class="printer-category">
                 <span>
-                    我的打印机
+                    {{ $t("printerManager.networkPrinters") }}
                 </span>
 
-                <div class="user-info" @click="printerStore.handleUserInfoClick">
-                    <img :src="printerStore.userAvatar" style="border-radius: 50%;" width="32" alt="No Login" />
-                    <span>{{ printerStore.userName }}</span>
-                </div>
+                <el-tooltip :content="printerStore.userName" placement="bottom">
+                    <div class="user-info" @click="printerStore.handleUserInfoClick">
+                        <span style="position: relative; height: 32px;">
+                            <el-image :src="printerStore.userAvatar"
+                                style="border-radius: 50%; width: 32px; height: 32px;">
+                                <template #error>
+                                    <div>
+                                        <img src="img/default-avatar.svg" alt="Default Avatar" width="32" />
+
+                                    </div>
+                                </template>
+                            </el-image>
+                            <span v-show="printerStore.isLoggedIn" class="user-status"
+                                :style="printerStore.loginStatusStyle"></span>
+                        </span>
+                        <span v-show="!printerStore.isLoggedIn">{{ printerStore.userName }}</span>
+                    </div>
+                </el-tooltip>
+
                 <!-- <span class="printer-local-icon">
                     <img src="./img/printer-local.svg" alt="Local Printer" /> 
                 </span> -->
             </div>
 
             <div v-if="printerStore.networkPrinters.length === 0 || !printerStore.isLoggedIn">
-                <div v-if="!printerStore.isLoggedIn" class="no-login">
-                    <img src="./img/login-preview.svg" width="121" />
-                    <div>登陆后查看</div>
+                <div v-if="printerStore.userInfo.loginStatus !== 1" class="no-login">
+                    <div v-html="getLoginToViewHtml()"></div>
                 </div>
                 <div v-else-if="printerStore.networkPrinters.length === 0" class="no-printer">
                     <img src="../img/printer-empty.png" width="180" />
@@ -83,13 +97,14 @@
                         </div>
                         <div class="printer-header-info">
                             <div class="printer-title" :title="printer.printerName">{{ printer.printerName }}</div>
-                            <div class="printer-host">{{ printer.host || '' }}</div>
+                            <div class="printer-host" v-show="printer.serialNumber">{{"SN: " + printer.serialNumber ||
+                                '' }}</div>
                             <button class="printer-detail-btn"
                                 @click="printerStore.showPrinterDetail(printer.printerId)">{{
                                 $t("printerManager.details") }}</button>
                         </div>
                         <div class="card-menu icon-button" :title="$t('printerManager.more')"
-                            @click="showPrinterSettingsByIndex(index)">
+                            @click="showPrinterSettings(printer)">
                             &#8942;
                         </div>
                     </div>
@@ -124,7 +139,7 @@
                 </span> -->
             </div>
             <div v-if="printerStore.localPrinters.length === 0" class="no-printer">
-                <img src="../img/printer-empty.png" width="224" />
+                <img src="../img/printer-empty.png" width="180" />
                 <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
             </div>
             <div class="printer-list" v-else>
@@ -143,7 +158,7 @@
                                 $t("printerManager.details") }}</button>
                         </div>
                         <div class="card-menu icon-button" :title="$t('printerManager.more')"
-                            @click="showPrinterSettingsByIndex(index)">
+                            @click="showPrinterSettings(printer)">
                             &#8942;
                         </div>
                     </div>

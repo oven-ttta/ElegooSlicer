@@ -51,7 +51,7 @@ const PrinterSettingTemplate = /*html*/
                             <span class="printer-setting-info-value">{{ (printer && printer.printerModel) || '' }}</span>
                         </div>
 
-                        <div class="printer-setting-info-item">
+                        <div class="printer-setting-info-item" v-if="printer && printer.networkType === 0">
                             <span class="printer-setting-info-label">{{ $t('printerSetting.host') }}</span>
                             <div class="printer-setting-info-value">
                                 <el-form-item  prop="host" class="printer-setting-form-item">
@@ -69,6 +69,15 @@ const PrinterSettingTemplate = /*html*/
                                     </el-input>
                                 </el-form-item>
                             </div>
+                        </div>
+
+                        <div class="printer-setting-info-item" v-if="printer && printer.networkType === 1">
+                            <span class="printer-setting-info-label">{{ $t('printerSetting.serialNumber') }}</span>
+                            <span class="printer-setting-info-value">
+                                <span class="printer-setting-info-text">
+                                    <span class="printer-setting-firmware-version">{{ (printer && printer.serialNumber) || '' }}</span>
+                                </span>
+                            </span>
                         </div>
 
                         <div class="printer-setting-info-item">

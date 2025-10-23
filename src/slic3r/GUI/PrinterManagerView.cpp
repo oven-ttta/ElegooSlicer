@@ -457,8 +457,13 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
     }
 
     view->load_url(url);
-
-    mTabBar->AddPage(view, from_u8(printerInfo.host));
+    // Local network shows IP address, cloud printing shows printer name
+    if(printerInfo.networkType==0)
+    {
+        mTabBar->AddPage(view, from_u8(printerInfo.host));
+    }else {
+        mTabBar->AddPage(view, from_u8(printerInfo.printerName));
+    }
     mTabBar->SetSelection(mTabBar->GetPageCount() - 1);
     mPrinterViews[printerId] = view;
     Layout();

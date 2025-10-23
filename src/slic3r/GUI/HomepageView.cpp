@@ -392,7 +392,7 @@ void OnlineModelsHomepageView::onWebViewLoaded(wxWebViewEvent& event) {}
 void OnlineModelsHomepageView::onWebViewError(wxWebViewEvent& event)
 {
     wxString error = event.GetString();
-    wxMessageBox("WebView Error: " + error, "Error", wxOK | wxICON_ERROR);
+    // wxMessageBox("WebView Error: " + error, "Error", wxOK | wxICON_ERROR);
 }
 
 }} // namespace Slic3r::GUI

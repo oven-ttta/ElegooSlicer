@@ -35,7 +35,7 @@
                                 <img :src="value.printerImg" class="model-image" alt="model" />
                                 <div class="model-info">
                                     <span class="model-title">{{ value.printerName }}</span>
-                                    <span class="model-description">{{value.networkType===0 ? value.host : value.serialNumber }}</span>
+                                    <span class="model-description">{{value.networkType===0 ? value.host : "SN: " + value.serialNumber }}</span>
                                 </div>
                             </div>
                         </template>
@@ -45,7 +45,7 @@
                                 <img :src="item.printerImg" class="model-image" alt="model" />
                                 <div class="model-info">
                                     <span class="model-title">{{ item.printerName }}</span>
-                                    <span class="model-description">{{ item.networkType===0 ? item.host : item.serialNumber }}</span>
+                                    <span class="model-description">{{ item.networkType===0 ? item.host : "SN: " + item.serialNumber }}</span>
                                 </div>
                             </div>
                         </el-option>

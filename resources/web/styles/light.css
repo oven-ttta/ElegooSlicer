@@ -60,6 +60,9 @@
   --button-text-color-primary: white;
   --button-text-color-secondary: var(--text-secondary);
 
+  --menu-item-background-hover: rgba(22, 119, 255, 0.1);
+  --menu-item-background-active: rgba(22, 119, 255, 0.1);
+
   /* Component Specific */
   --toggle-bg-off: #ccc;
   --toggle-bg-on: var(--color-primary);

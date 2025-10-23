@@ -68,7 +68,7 @@
                                         <div class="dropdown-content">
                                             <div class="dropdown-title">{{ (curPrinter && curPrinter.printerName) ||
                                                 $t('printSend.noPrinter') }}</div>
-                                            <div class="dropdown-subtitle">{{ (curPrinter && (curPrinter.networkType===0 ? curPrinter.host : curPrinter.serialNumber)) ||
+                                            <div class="dropdown-subtitle">{{ (curPrinter && (curPrinter.networkType===0 ? curPrinter.host : "SN: " +  curPrinter.serialNumber)) ||
                                                 $t('printSend.pleaseConnectPrinter') }}</div>
                                         </div>
                                     </div>
@@ -80,7 +80,7 @@
                                             <img :src="printer.printerImg" alt="" class="dropdown-item-icon" />
                                             <div class="dropdown-item-content">
                                                 <div class="dropdown-item-title">{{ printer.printerName }}</div>
-                                                <div v-if="printer.host" class="dropdown-item-subtitle">{{ printer.networkType===0 ? printer.host : printer.serialNumber }}</div>
+                                                <div v-if="printer.host" class="dropdown-item-subtitle">{{ printer.networkType===0 ? printer.host : "SN: " +  printer.serialNumber }}</div>
                                             </div>
                                         </li>
                                     </ul>

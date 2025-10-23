@@ -54,6 +54,9 @@ html.dark {
   --shadow-hover: rgba(255, 255, 255, 0.05);
   --shadow-active: rgba(255, 255, 255, 0.1);
   
+  --menu-item-background-hover: rgba(22, 119, 255, 0.1);
+  --menu-item-background-active: rgba(22, 119, 255, 0.1);
+
   /* Component Specific */
   --toggle-bg-off: #666666;
   --toggle-bg-on: var(--color-primary);
@@ -67,6 +70,7 @@ html.dark {
   --el-dialog-bg-color: var(--el-bg-color);
   --el-drawer-bg-color: var(--el-dialog-bg-color, var(--el-bg-color));
   --el-mask-color: rgba(0, 0, 0, 0.4);
+  
 }
 
 /* ===== DARK THEME SPECIFIC ADJUSTMENTS ===== */
