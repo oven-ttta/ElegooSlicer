@@ -30,7 +30,7 @@ PrinterWebView::PrinterWebView(wxWindow* parent) : wxPanel(parent, wxID_ANY, wxD
 {
     m_uploadInProgress = false;
     m_shouldStop       = false;
-
+    
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 
     // Create the webview
@@ -311,30 +311,38 @@ void PrinterWebView::setupIPCHandlers()
         return webviewIpc::IPCResult::success();
     });
 
-    // handle file dialog request
-    mIpc->onRequest("open_file_dialog", [this](const webviewIpc::IPCRequest& request) {
-        auto params = request.params;
-        try {
-            auto         filter = params.value("filter", "All files (*.*)|*.*");
-            wxFileDialog openFileDialog(this, _L("Open File"), "", "", filter, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-            if (openFileDialog.ShowModal() != wxID_CANCEL) {
-                nlohmann::json data;
-                data["files"] = {openFileDialog.GetPath().ToUTF8().data()};
-                return webviewIpc::IPCResult::success(data);
-            } else {
-                nlohmann::json data;
-                data["files"] = nlohmann::json::array();
-                return webviewIpc::IPCResult::success(data);
-            }
-        } catch (const std::exception& e) {
-            return webviewIpc::IPCResult::error("No file selected");
-        }
-    });
+    mIpc->onRequestAsync("open_file_dialog",
+                         [this](const webviewIpc::IPCRequest& request, std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+                             auto params = request.params;
+                             auto filter = params.value("filter", "All files (*.*)|*.*");
+
+                             wxTheApp->CallAfter([this, filter, sendResponse]() {
+                                 try {
+                                     wxWindow* parent = this->GetParent();
+                                     if (!parent) {
+                                         parent = wxGetApp().GetTopWindow();
+                                     }
+
+                                     wxFileDialog openFileDialog(parent, _L("Open File"), "", "", filter, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+                                     nlohmann::json data;
+                                     if (openFileDialog.ShowModal() != wxID_CANCEL) {
+                                         data["files"] = {openFileDialog.GetPath().ToUTF8().data()};
+                                     } else {
+                                         data["files"] = nlohmann::json::array();
+                                     }
+                                     sendResponse(webviewIpc::IPCResult::success(data));
+
+                                 } catch (const std::exception& e) {
+                                     sendResponse(webviewIpc::IPCResult::error("Failed to open file dialog"));
+                                 }
+                             });
+                         });
 
     // handle file upload request (using asynchronous event handler)
-    mIpc->onRequestAsyncWithEvents("upload_file", [this](const webviewIpc::IPCRequest&                     request,
-                                                          std::function<void(const webviewIpc::IPCResult&)> sendResponse,
-                                                          std::function<void(const std::string&, const nlohmann::json&)> sendEvent) mutable {
+    mIpc->onRequestAsyncWithEvents("upload_file", [this](const webviewIpc::IPCRequest&                                  request,
+                                                         std::function<void(const webviewIpc::IPCResult&)>              sendResponse,
+                                                         std::function<void(const std::string&, const nlohmann::json&)> sendEvent) mutable {
         auto params = request.params;
 
         // check if there is an upload in progress
@@ -396,7 +404,7 @@ void PrinterWebView::setupIPCHandlers()
             sendResponse(webviewIpc::IPCResult::error("Upload initialization failed"));
         }
     });
-    
+
      mIpc->onRequest("getConnectStatus", [this](const webviewIpc::IPCRequest& request){
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
@@ -404,7 +412,7 @@ void PrinterWebView::setupIPCHandlers()
         nlohmann::json data;
         data["printerId"] = printerId;
         if(printerNetworkInfo.printerId.empty()) {    
-            data["connectStatus"] = PRINTER_CONNECT_STATUS_DISCONNECTED;           
+            data["connectStatus"] = PRINTER_CONNECT_STATUS_DISCONNECTED;
         } else {
             data["connectStatus"] = printerNetworkInfo.connectStatus;
         }
