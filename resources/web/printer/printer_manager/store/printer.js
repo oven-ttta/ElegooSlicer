@@ -15,14 +15,13 @@ const usePrinterStore = defineStore('printer', {
       phone: null,
       avatar: null,
       //login status, 0: no-login, 1: logged in, 2: logging in
-      loginStatus: 0,
+      loginStatus: -1,
     }
   }),
   getters: {
     localPrinters: (state) => state.printers.filter(printer => printer.networkType === 0),
     networkPrinters: (state) => state.printers.filter(printer => printer.networkType === 1),
     userAvatar: (state) => {
-      const loginStatus = state.userInfo ? state.userInfo.loginStatus : 0;
       if (state.userInfo && state.userInfo.avatar) {
         return state.userInfo.avatar;
       } else {
@@ -30,22 +29,27 @@ const usePrinterStore = defineStore('printer', {
       }
     },
     userName: (state) => {
-      const loginStatus = state.userInfo ? state.userInfo.loginStatus : 0;
-      if (loginStatus === 0) {
-        return "未登录";
+      const loginStatus = state.userInfo ? state.userInfo.loginStatus : -1;
+      if (loginStatus <= 0) {
+        return i18n.global.t('homepage.login');
       } else if (loginStatus === 1) {
         return state.userInfo.nickname || state.userInfo.email.split('@')[0] || state.userInfo.phone;
       }
-      else if (loginStatus === 2) {
-        return "登录中...";
-      }
       else {
-        const text = state.userInfo.nickname || state.userInfo.email.split('@')[0] || state.userInfo.phone;
-        return text + " (离线)";
+        const text = state.userInfo.nickname || (state.userInfo.email && state.userInfo.email.split('@')[0]) || state.userInfo.phone;
+        return text;
+      }
+    },
+    loginStatusStyle(state) {
+      const status = state.userInfo ? state.userInfo.loginStatus : -1;
+      if (status === 1) {
+        return { color: '#4FD22A' };
+      } else {
+        return { color: '#BBBBBB' };
       }
     },
     isLoggedIn: (state) => {
-      return state.userInfo && state.userInfo.loginStatus === 1;
+      return state.userInfo && state.userInfo.loginStatus > 0;
     }
   },
   actions: {
@@ -383,7 +387,7 @@ const usePrinterStore = defineStore('printer', {
     async handleUserInfoClick() {
       // Logic to handle user info click, e.g., open login modal
       console.log('User info clicked - implement login modal logic here');
-      if (this.userInfo.loginStatus === 0 || this.userInfo.loginStatus > 2) {
+      if (this.userInfo.loginStatus === 0) {
         this.ipcRequest('login');
       }
     },
@@ -397,7 +401,7 @@ const usePrinterStore = defineStore('printer', {
           email: null,
           phone: null,
           avatarUrl: null,
-          loginStatus: 0,
+          loginStatus: -1,
         };
       } catch (error) {
         console.error('Failed to request user info:', error);

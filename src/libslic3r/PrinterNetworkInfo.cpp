@@ -479,7 +479,8 @@ LoginStatus parseLoginStatusByErrorCode(PrinterNetworkErrorCode resultCode)
     case PrinterNetworkErrorCode::NOT_INITIALIZED:
         return LOGIN_STATUS_OFFLINE_INVALID_USER;
     case PrinterNetworkErrorCode::SERVER_FORBIDDEN:
-        return LOGIN_STATUS_OFFLINE;
+    case PrinterNetworkErrorCode::NETWORK_ERROR:
+         return LOGIN_STATUS_OFFLINE;
     default:
         return LOGIN_STATUS_OTHER_NETWORK_ERROR;
     }

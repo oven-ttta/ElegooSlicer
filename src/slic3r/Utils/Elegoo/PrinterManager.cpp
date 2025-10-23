@@ -282,10 +282,11 @@ PrinterNetworkResult<bool> PrinterManager::deletePrinter(const std::string& prin
     if (printer.value().networkType == NETWORK_TYPE_WAN) {
         auto unbindResult = getPrinterNetwork(printerId)->unbindWANPrinter(printer.value().serialNumber);
         if (!unbindResult.isSuccess()) {
-            return unbindResult;
-        } else {
             wxLogMessage("Unbind WAN printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
             return PrinterNetworkResult<bool>(unbindResult.code, false, "unbind WAN printer failed");
+        } else {
+            wxLogMessage("Unbind WAN printer succeeded: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);  
+            refreshOnlinePrinters(true);  
         }
     }
     PrinterCache::getInstance()->deletePrinter(printerId);
@@ -408,7 +409,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
                                               false);
         }
         // refresh online printers to add the new WAN printer
-        refreshOnlinePrinters();
+        refreshOnlinePrinters(true);
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
     }
 

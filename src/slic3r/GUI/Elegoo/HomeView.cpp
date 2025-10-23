@@ -76,7 +76,7 @@ void HomeView::initUI()
     mMainSizer->Add(mContentPanel, 1, wxEXPAND, 0);
 
     // Set minimum size for navigation browser
-    mNavigationBrowser->SetMinSize(wxSize(280, -1));
+    mNavigationBrowser->SetMinSize(wxSize(240, -1));
     SetSizer(mMainSizer);
 
     // Initialize IPC for navigation

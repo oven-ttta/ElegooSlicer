@@ -49,6 +49,14 @@ const PrinterManager = {
             this.printerStore.init();
         },
 
+        // Returns HTML with the login keyword highlighted in primary blue
+        getLoginToViewHtml() {
+            const loginWord = `<span class="login-link" onclick="loginLinkClickHandler()">${this.$t("printerManager.login")}</span>`;
+            // loginToView is expected to contain a {0} placeholder for the login word
+            const raw = this.$t("printerManager.loginToView", [loginWord]);
+            return raw;
+        },
+
 
         canShowProgressText(printerStatus, connectStatus) {
             return printerStatus === 1 || printerStatus === 2 || printerStatus === 3;
@@ -174,12 +182,16 @@ const PrinterManager = {
         },
 
         showPrinterSettingsByIndex(index) {
-            console.log("Showing", this.printerStore);
             if (index >= 0 && index < this.printerStore.printers.length) {
                 this.currentPrinter = this.printerStore.printers[index];
                 this.showPrinterAdvancedSettings = (this.currentPrinter && this.currentPrinter.isPhysicalPrinter) !== true;
                 this.showPrinterSimpleSettings = !this.showPrinterAdvancedSettings;
             }
+        },
+        showPrinterSettings(printer) {
+            this.currentPrinter = printer;
+            this.showPrinterAdvancedSettings = (this.currentPrinter && this.currentPrinter.isPhysicalPrinter) !== true;
+            this.showPrinterSimpleSettings = !this.showPrinterAdvancedSettings;
         },
 
         closeModals() {
@@ -192,6 +204,10 @@ const PrinterManager = {
 };
 
 
-
+window.loginLinkClickHandler = function() {
+    // Implement the login logic here
+    console.log("Login link clicked");
+    nativeIpc.request("login", {});
+};
 
 
