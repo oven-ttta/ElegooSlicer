@@ -22,8 +22,8 @@
 #include "PrinterCache.hpp"
 #include "PrinterNetworkEvent.hpp"
 #include "slic3r/GUI/I18N.hpp"
-#include "slic3r/Utils/PrinterPluginManager.hpp"
-#include "UserNetworkManager.hpp"
+#include "slic3r/Utils/Elegoo/PrinterPluginManager.hpp"
+#include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
 namespace Slic3r {
 
 namespace fs = boost::filesystem;

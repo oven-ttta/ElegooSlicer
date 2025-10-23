@@ -7,7 +7,7 @@
 #include <wx/aui/aui.h>
 #include <wx/colour.h>
 #include <nlohmann/json.hpp>
-#include "MsgDialog.hpp"
+#include "slic3r/GUI/MsgDialog.hpp"
 #include "libslic3r/PrinterNetworkInfo.hpp"
 #include <slic3r/Utils/WebviewIPCManager.h>
 #if wxUSE_WEBVIEW_IE

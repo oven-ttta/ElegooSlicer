@@ -1,5 +1,5 @@
 #include "PrinterMmsManager.hpp"
-#include "slic3r/Utils/PrinterManager.hpp"
+#include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 #include <nlohmann/json.hpp>
 #include <wx/colour.h>
 #include "slic3r/GUI/MainFrame.hpp"

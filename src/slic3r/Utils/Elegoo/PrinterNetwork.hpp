@@ -83,9 +83,11 @@ public:
     IPluginNetwork& operator=(const IPluginNetwork&) = delete;
     virtual ~IPluginNetwork()                        = default;
 
-    virtual PrinterNetworkResult<std::string> hasInstalledPlugin()                         = 0;
-    virtual PrinterNetworkResult<bool>        installPlugin(const std::string& pluginPath) = 0;
-    virtual PrinterNetworkResult<bool>        uninstallPlugin()                            = 0;
+    virtual PrinterNetworkResult<PluginNetworkInfo>              hasInstalledPlugin()                         = 0;
+    virtual PrinterNetworkResult<bool>                     installPlugin(const std::string& pluginPath) = 0;
+    virtual PrinterNetworkResult<bool>                     uninstallPlugin()                            = 0;
+    virtual PrinterNetworkResult<PluginNetworkInfo>              getPluginLastestVersion()                    = 0;
+    virtual PrinterNetworkResult<std::vector<PluginNetworkInfo>> getPluginOldVersions()                       = 0;
 
     const PluginNetworkInfo& getPluginNetworkInfo() const { return mPluginNetworkInfo; }
 
@@ -96,12 +98,37 @@ protected:
     PluginNetworkInfo mPluginNetworkInfo;
 };
 
+class INetworkHelper
+{
+public:
+    INetworkHelper(PrintHostType hostType) : mHostType(hostType) {}
+    INetworkHelper()                                 = delete;
+    INetworkHelper(const INetworkHelper&)            = delete;
+    INetworkHelper& operator=(const INetworkHelper&) = delete;
+    virtual ~INetworkHelper()                        = default;
+    virtual std::string getLanguage();
+    virtual std::string getRegion();
+
+    virtual std::string getOnlineModelsUrl()  = 0;
+    virtual std::string getLoginUrl()         = 0;
+    virtual std::string getProfileUpdateUrl() = 0;
+    virtual std::string getAppUpdateUrl()     = 0;
+    virtual std::string getPluginUpdateUrl()  = 0;
+    virtual std::string getUserAgent()        = 0;
+
+    PrintHostType getHostType() const { return mHostType; }
+
+protected:
+    PrintHostType mHostType;
+};
+
 class NetworkFactory
 {
 public:
     static std::shared_ptr<IPrinterNetwork> createPrinterNetwork(const PrinterNetworkInfo& printerNetworkInfo);
     static std::shared_ptr<IUserNetwork>    createUserNetwork(const UserNetworkInfo& userNetworkInfo);
     static std::shared_ptr<IPluginNetwork>  createPluginNetwork(const PluginNetworkInfo& pluginNetworkInfo);
+    static std::shared_ptr<INetworkHelper>  createNetworkHelper(PrintHostType hostType);
 };
 
 } // namespace Slic3r

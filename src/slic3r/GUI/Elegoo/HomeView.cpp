@@ -5,13 +5,13 @@
 #include <wx/stdpaths.h>
 #include <slic3r/Utils/WebviewIPCManager.h>
 #include <slic3r/GUI/GUI_App.hpp>
-#include <slic3r/GUI/UserLoginView.hpp>
+#include <slic3r/GUI/Elegoo/UserLoginView.hpp>
 #include <slic3r/GUI/MainFrame.hpp>
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <slic3r/Utils/UserNetworkManager.hpp>
+#include <slic3r/Utils/Elegoo/UserNetworkManager.hpp>
 #include <nlohmann/json.hpp>
 
 namespace Slic3r { namespace GUI {

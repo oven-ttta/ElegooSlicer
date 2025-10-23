@@ -1,5 +1,5 @@
 #include "PrinterManagerView.hpp"
-#include "I18N.hpp"
+#include "slic3r/GUI/I18N.hpp"
 #include "slic3r/GUI/wxExtensions.hpp"
 #include "slic3r/GUI/GUI_App.hpp"
 #include "slic3r/GUI/MainFrame.hpp"
@@ -15,7 +15,6 @@
 #include <wx/aui/auibar.h>
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <wx/webview.h>
-#include "slic3r/Utils/PrinterManager.hpp"
 #include "slic3r/Utils/PrintHost.hpp"
 #include "libslic3r/PrintConfig.hpp"
 #include "libslic3r/PresetBundle.hpp"
@@ -28,8 +27,9 @@
 #include "slic3r/Utils/WebviewIPCManager.h"
 #include <fstream>
 #include <mutex>
-#include "slic3r/Utils/PrinterNetworkEvent.hpp"
-#include <slic3r/Utils/UserNetworkManager.hpp>
+#include "slic3r/Utils/Elegoo/PrinterNetworkEvent.hpp"
+#include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
+#include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 
 #define FIRST_TAB_NAME _L("Connected Printer")
 #define TAB_MAX_WIDTH 200

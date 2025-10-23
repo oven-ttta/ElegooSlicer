@@ -227,10 +227,7 @@ set(SLIC3R_GUI_SOURCES
     GUI/WebViewDialog.hpp
     GUI/PrinterWebView.cpp
     GUI/PrinterWebView.hpp
-    GUI/PrinterManagerView.cpp
-    GUI/PrinterManagerView.hpp
-    GUI/PrinterMmsSyncView.cpp
-    GUI/PrinterMmsSyncView.hpp
+
     GUI/WebDownPluginDlg.hpp
     GUI/WebDownPluginDlg.cpp
     GUI/WebGuideDialog.hpp
@@ -588,8 +585,6 @@ set(SLIC3R_GUI_SOURCES
     Utils/CrealityPrint.hpp
     Utils/Duet.cpp
     Utils/Duet.hpp
-    Utils/ElegooLink.cpp
-    Utils/ElegooLink.hpp
     Utils/EmbossStyleManager.cpp
     Utils/EmbossStyleManager.hpp
     Utils/ESP3D.cpp
@@ -639,41 +634,46 @@ set(SLIC3R_GUI_SOURCES
     Utils/SerialMessage.hpp
     Utils/SerialMessageType.hpp
     Utils/SimplyPrint.cpp
-    Utils/SimplyPrint.hpp
-    
-    GUI/PrintSendDialogEx.cpp
-    GUI/PrintSendDialogEx.hpp
-    GUI/HomeView.cpp
-    GUI/HomeView.hpp
-    GUI/HomepageView.cpp
-    GUI/HomepageView.hpp
-    GUI/UserLoginView.cpp
-    GUI/UserLoginView.hpp
+    Utils/SimplyPrint.hpp 
     Utils/Singleton.hpp
-    Utils/PrinterManager.cpp
-    Utils/PrinterManager.hpp
-    Utils/PrinterCache.cpp
-    Utils/PrinterCache.hpp 
-    Utils/PrinterNetwork.cpp
-    Utils/PrinterNetwork.hpp
-    Utils/ElegooPrinterNetwork.cpp
-    Utils/ElegooPrinterNetwork.hpp
-    Utils/ElegooLink.cpp
-    Utils/ElegooLink.hpp
-    Utils/PrinterNetworkEvent.cpp
-    Utils/PrinterNetworkEvent.hpp
-    Utils/PrinterMmsManager.cpp
-    Utils/PrinterMmsManager.hpp
     Utils/WebviewIPCManager.h
     Utils/WebviewIPCManager.cpp
-    Utils/PrinterPluginManager.cpp
-    Utils/PrinterPluginManager.hpp
-    Utils/ElegooUserNetwork.hpp
-    Utils/ElegooUserNetwork.cpp
-    Utils/ElegooPluginNetwork.hpp
-    Utils/ElegooPluginNetwork.cpp
-    Utils/UserNetworkManager.cpp
-    Utils/UserNetworkManager.hpp
+    Utils/Elegoo/PrinterCache.cpp
+    Utils/Elegoo/PrinterCache.hpp 
+    Utils/Elegoo/PrinterManager.cpp
+    Utils/Elegoo/PrinterManager.hpp
+    Utils/Elegoo/PrinterMmsManager.cpp
+    Utils/Elegoo/PrinterMmsManager.hpp 
+    Utils/Elegoo/PrinterPluginManager.cpp
+    Utils/Elegoo/PrinterPluginManager.hpp
+    Utils/Elegoo/UserNetworkManager.cpp
+    Utils/Elegoo/UserNetworkManager.hpp
+    Utils/Elegoo/PrinterNetwork.cpp
+    Utils/Elegoo/PrinterNetwork.hpp
+    Utils/Elegoo/PrinterNetworkEvent.cpp
+    Utils/Elegoo/PrinterNetworkEvent.hpp
+    Utils/Elegoo/ElegooNetworkHelper.cpp
+    Utils/Elegoo/ElegooNetworkHelper.hpp
+    Utils/Elegoo/ElegooLink.cpp
+    Utils/Elegoo/ElegooLink.hpp
+    Utils/Elegoo/ElegooPrinterNetwork.cpp
+    Utils/Elegoo/ElegooPrinterNetwork.hpp
+    Utils/Elegoo/ElegooUserNetwork.hpp
+    Utils/Elegoo/ElegooUserNetwork.cpp
+    Utils/Elegoo/ElegooPluginNetwork.hpp
+    Utils/Elegoo/ElegooPluginNetwork.cpp
+    GUI/Elegoo/PrintSendDialogEx.cpp
+    GUI/Elegoo/PrintSendDialogEx.hpp
+    GUI/Elegoo/HomeView.cpp
+    GUI/Elegoo/HomeView.hpp
+    GUI/Elegoo/HomepageView.cpp
+    GUI/Elegoo/HomepageView.hpp
+    GUI/Elegoo/UserLoginView.cpp
+    GUI/Elegoo/UserLoginView.hpp
+    GUI/Elegoo/PrinterManagerView.cpp
+    GUI/Elegoo/PrinterManagerView.hpp
+    GUI/Elegoo/PrinterMmsSyncView.cpp
+    GUI/Elegoo/PrinterMmsSyncView.hpp
     Utils/TCPConsole.cpp
     Utils/TCPConsole.hpp
     Utils/UndoRedo.cpp

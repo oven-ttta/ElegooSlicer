@@ -11,10 +11,10 @@
 #include <wx/dialog.h>
 
 #include <nlohmann/json.hpp>
-#include "Plater.hpp"
-#include "GUI_Utils.hpp"
-#include "MsgDialog.hpp"
-#include "../Utils/PrintHost.hpp"
+#include "slic3r/GUI/Plater.hpp"
+#include "slic3r/GUI/GUI_Utils.hpp"
+#include "slic3r/GUI/MsgDialog.hpp"
+#include "slic3r/Utils/PrintHost.hpp"
 #include "libslic3r/PrintConfig.hpp"
 #include "libslic3r/PrinterNetworkInfo.hpp"
 #include <slic3r/Utils/WebviewIPCManager.h>

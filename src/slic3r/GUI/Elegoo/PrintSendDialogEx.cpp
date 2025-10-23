@@ -1,14 +1,14 @@
 #include "PrintSendDialogEx.hpp"
-#include "ConfigWizard.hpp"
+#include "slic3r/GUI/ConfigWizard.hpp"
 #include <string.h>
-#include "I18N.hpp"
+#include "slic3r/GUI/I18N.hpp"
 #include "libslic3r/AppConfig.hpp"
 #include "slic3r/GUI/wxExtensions.hpp"
 #include "slic3r/GUI/GUI_App.hpp"
 #include "libslic3r_version.h"
 #include <boost/cast.hpp>
 #include <boost/lexical_cast.hpp>
-#include "MainFrame.hpp"
+#include "slic3r/GUI/MainFrame.hpp"
 #include <boost/dll.hpp>
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include <slic3r/Utils/Http.hpp>
@@ -26,8 +26,8 @@
 #include <iomanip>
 #include <thread>
 #include <memory>
-#include "PrinterManager.hpp"
-#include "PrinterMmsManager.hpp"
+#include "slic3r/Utils/Elegoo/PrinterManager.hpp"
+#include "slic3r/Utils/Elegoo/PrinterMmsManager.hpp"
 #include <slic3r/Utils/WebviewIPCManager.h>
 
 #define HAS_MMS_HEIGHT 800

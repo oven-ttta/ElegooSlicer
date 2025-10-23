@@ -63,7 +63,7 @@
 #include "Widgets/WebView.hpp"
 #include "DailyTips.hpp"
 #include "PrinterWebView.hpp"
-#include "PrinterManagerView.hpp"
+#include "Elegoo/PrinterManagerView.hpp"
 
 #ifdef _WIN32
 #include <dbt.h>
@@ -71,7 +71,7 @@
 #include <shellapi.h>
 #endif // _WIN32
 #include <slic3r/GUI/CreatePresetsDialog.hpp>
-#include "../Utils/PrinterManager.hpp"
+#include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 
 
 namespace Slic3r {

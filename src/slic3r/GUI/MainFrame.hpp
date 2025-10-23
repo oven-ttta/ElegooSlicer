@@ -32,7 +32,7 @@
 #include "BBLTopbar.hpp"
 #include "calib_dlg.hpp"
 #include "MultiMachinePage.hpp"
-#include "HomeView.hpp"
+#include "Elegoo/HomeView.hpp"
 
 #define ENABEL_PRINT_ALL 0
 

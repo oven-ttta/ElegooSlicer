@@ -157,8 +157,8 @@
 #include "StepMeshDialog.hpp"
 #include "CloneDialog.hpp"
 
-#include "PrintSendDialogEx.hpp"
-#include "PrinterMmsSyncView.hpp"
+#include "Elegoo/PrintSendDialogEx.hpp"
+#include "Elegoo/PrinterMmsSyncView.hpp"
 
 using boost::optional;
 namespace fs = boost::filesystem;
