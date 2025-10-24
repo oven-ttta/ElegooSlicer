@@ -383,7 +383,7 @@ UpdateVersionDialog::UpdateVersionDialog(wxWindow *parent)
     Layout();
     Fit();
 
-    SetMinSize(GetSize());
+    SetMinSize(wxSize(FromDIP(690), FromDIP(580)));
 
     Centre(wxBOTH);
     wxGetApp().UpdateDlgDarkUI(this);
@@ -505,8 +505,8 @@ void UpdateVersionDialog::update_version_info(wxString release_note, wxString ve
         m_text_up_info->SetLabel(wxString::Format(_L("Click to download new version in default browser: %s"), version));
         wxBoxSizer* sizer_text_release_note = new wxBoxSizer(wxVERTICAL);
         auto        m_staticText_release_note = new ::Label(m_scrollwindows_release_note, release_note, LB_AUTO_WRAP);
-        m_staticText_release_note->SetMinSize(wxSize(FromDIP(560), -1));
-        m_staticText_release_note->SetMaxSize(wxSize(FromDIP(560), -1));
+        m_staticText_release_note->SetMinSize(wxSize(FromDIP(550), -1));
+        m_staticText_release_note->SetMaxSize(wxSize(FromDIP(550), -1));
         sizer_text_release_note->Add(m_staticText_release_note, 0, wxALL, 5);
         m_scrollwindows_release_note->SetSizer(sizer_text_release_note);
         m_scrollwindows_release_note->Layout();
