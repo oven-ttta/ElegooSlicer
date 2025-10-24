@@ -872,6 +872,10 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetwork
 
     UserNetworkInfo userInfoRet = userInfo;
 
+    elink::SetRegionParams setRegionParams;
+    setRegionParams.region = userInfo.region;
+    elink::ElegooNetwork::getInstance().setRegion(setRegionParams);
+
     elink::VoidResult       setHttpCredentialResult = elink::ElegooNetwork::getInstance().setHttpCredential(params);
     PrinterNetworkErrorCode resultCode              = parseElegooResult(setHttpCredentialResult.code);
 
@@ -927,6 +931,10 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::refreshToken(const UserNetwork
     params.refreshToken = userInfo.refreshToken;
     params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
     params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
+
+    elink::SetRegionParams setRegionParams;
+    setRegionParams.region = userInfo.region;
+    elink::ElegooNetwork::getInstance().setRegion(setRegionParams);
 
     elink::BizResult<elink::HttpCredential> httpCredentialResult = elink::ElegooNetwork::getInstance().refreshHttpCredential(params);
     PrinterNetworkErrorCode resultCode = parseElegooResult(httpCredentialResult.code);
