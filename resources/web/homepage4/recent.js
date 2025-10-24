@@ -32,17 +32,17 @@ const Recent = {
 
         async onClickNewProject() {
             console.log('New project clicked');
-            await this.ipcRequest('createNewProject', {});
+            await nativeIpc.sendEvent('createNewProject', {});
         },
 
         async onClickOpenProject() {
             console.log('Open project clicked');
-            await this.ipcRequest('openProject', {});
+            await nativeIpc.sendEvent('openProject', {});
         },
 
         async onOpenRecentFile(file) {
             console.log('Open recent file clicked');
-            await this.ipcRequest('openRecentFile', { path: file.path });
+            await nativeIpc.sendEvent('openRecentFile', { path: file.path });
         },
         async onDeleteAllRecentFiles() {
             console.log('Delete all recent files clicked');
@@ -87,7 +87,7 @@ const Recent = {
             }
 
             console.log('Explore recent file clicked:', this.selectedFile);
-            await this.ipcRequest('openFileInExplorer', { path: this.selectedFile.path });
+            await nativeIpc.sendEvent('openFileInExplorer', { path: this.selectedFile.path });
             this.hideContextMenu();
         },
 

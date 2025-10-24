@@ -92,14 +92,14 @@ void RecentHomepageView::setupIPCHandlers()
 
     mIpc->onRequest("clearRecentFiles", [this](const webviewIpc::IPCRequest& request) { return handleClearRecentFiles(request.params); });
 
-    mIpc->onRequest("openRecentFile", [this](const webviewIpc::IPCRequest& request) { return handleOpenFile(request.params); });
+    mIpc->onEvent("openRecentFile", [this](const webviewIpc::IPCEvent& event) { return handleOpenFile(event.data); });
 
-    mIpc->onRequest("createNewProject", [this](const webviewIpc::IPCRequest& request) { return handleCreateNewProject(request.params); });
+    mIpc->onEvent("createNewProject", [this](const webviewIpc::IPCEvent& event) { return handleCreateNewProject(event.data); });
 
-    mIpc->onRequest("openProject", [this](const webviewIpc::IPCRequest& request) { return handleOpenProject(request.params); });
+    mIpc->onEvent("openProject", [this](const webviewIpc::IPCEvent& event) { return handleOpenProject(event.data); });
 
-    mIpc->onRequest("openFileInExplorer",
-                    [this](const webviewIpc::IPCRequest& request) { return handleOpenFileInExplorer(request.params); });
+    mIpc->onEvent("openFileInExplorer",
+                    [this](const webviewIpc::IPCEvent& event) { return handleOpenFileInExplorer(event.data); });
 
     mIpc->onRequest("removeFromRecent", [this](const webviewIpc::IPCRequest& request) { return handleRemoveFromRecent(request.params); });
 }
