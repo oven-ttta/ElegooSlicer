@@ -54,8 +54,8 @@ html.dark {
   --shadow-hover: rgba(255, 255, 255, 0.05);
   --shadow-active: rgba(255, 255, 255, 0.1);
   
-  --menu-item-background-hover: rgba(22, 119, 255, 0.1);
-  --menu-item-background-active: rgba(22, 119, 255, 0.1);
+  --menu-item-background-hover: rgba(22, 119, 255, 0.15);
+  --menu-item-background-active: rgba(22, 119, 255, 0.15);
 
   /* Component Specific */
   --toggle-bg-off: #666666;

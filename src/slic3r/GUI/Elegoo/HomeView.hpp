@@ -45,7 +45,9 @@ private:
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
     void onWebViewError(wxWebViewEvent& event);
-    
+    void OnNavigationRequest(wxWebViewEvent& event);
+    void OnNavigationComplete(wxWebViewEvent& event);
+    void OnNewWindowRequest(wxWebViewEvent& event);
 private:
     // UI Components
     wxBoxSizer* mMainSizer;

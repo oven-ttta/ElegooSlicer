@@ -13,11 +13,15 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <slic3r/Utils/Elegoo/UserNetworkManager.hpp>
 #include <nlohmann/json.hpp>
-
+#include <wx/url.h>
 namespace Slic3r { namespace GUI {
 
 wxBEGIN_EVENT_TABLE(HomeView, wxPanel) EVT_WEBVIEW_LOADED(wxID_ANY, HomeView::onWebViewLoaded)
-    EVT_WEBVIEW_ERROR(wxID_ANY, HomeView::onWebViewError) wxEND_EVENT_TABLE()
+    EVT_WEBVIEW_ERROR(wxID_ANY, HomeView::onWebViewError) 
+    EVT_WEBVIEW_NAVIGATING(wxID_ANY, HomeView::OnNavigationRequest) 
+    EVT_WEBVIEW_NAVIGATED(wxID_ANY, HomeView::OnNavigationComplete) 
+    EVT_WEBVIEW_NEWWINDOW(wxID_ANY, HomeView::OnNewWindowRequest)
+    wxEND_EVENT_TABLE()
 
         HomeView::HomeView(wxWindow* parent, wxWindowID id, const wxString& title)
     : wxPanel(parent, id, wxDefaultPosition, wxDefaultSize)
@@ -59,12 +63,6 @@ void HomeView::initUI()
     // Remove WebView border completely
     mNavigationBrowser->SetWindowStyleFlag(wxNO_BORDER);
 
-    // Create vertical divider line
-    mDividerLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL);
-
-    // Set lighter color for the divider line
-    mDividerLine->SetForegroundColour(wxColour(230, 230, 230)); // Light gray color
-
     // Create content panel (right side) - this will contain different HomepageViews
     mContentPanel = new wxPanel(this, wxID_ANY);
     mContentSizer = new wxBoxSizer(wxVERTICAL);
@@ -72,7 +70,6 @@ void HomeView::initUI()
 
     // Add to main sizer with divider line
     mMainSizer->Add(mNavigationBrowser, 0, wxEXPAND | wxALL, 0);
-    mMainSizer->Add(mDividerLine, 0, wxEXPAND | wxTOP | wxBOTTOM, 0);
     mMainSizer->Add(mContentPanel, 1, wxEXPAND, 0);
 
     // Set minimum size for navigation browser
@@ -218,6 +215,47 @@ void HomeView::onWebViewError(wxWebViewEvent& event)
     wxMessageBox("WebView Error: " + error, "Error", wxOK | wxICON_ERROR);
 }
 
+void HomeView::OnNavigationRequest(wxWebViewEvent& evt){
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
+    const wxString &url = evt.GetURL();
+    if (url.StartsWith("File://") || url.StartsWith("file://")) {
+        if (!url.Contains("resources/web/")) {
+            auto file = wxURL::Unescape(wxURL(url).GetPath());
+#ifdef _WIN32
+            if (file.StartsWith('/'))
+                file = file.Mid(1);
+            else
+                file = "//" + file; // When file from network location
+#endif
+            wxGetApp().plater()->load_files(wxArrayString{1, &file});
+            evt.Veto();
+            return;
+        }
+    }
+}
+void HomeView::OnNavigationComplete(wxWebViewEvent& evt){
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
+}
+
+void HomeView::OnNewWindowRequest(wxWebViewEvent& event){
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << event.GetTarget().ToUTF8().data();
+    const wxString &url = event.GetURL();
+    if (url.StartsWith("File://") || url.StartsWith("file://")) {
+        if (!url.Contains("resources/web/")) {
+            auto file = wxURL::Unescape(wxURL(url).GetPath());
+#ifdef _WIN32
+            if (file.StartsWith('/'))
+                file = file.Mid(1);
+            else
+                file = "//" + file; // When file from network location
+#endif
+            wxGetApp().plater()->load_files(wxArrayString{1, &file});
+            event.Veto();
+            return;
+        }
+    }
+}
+
 void HomeView::sendRecentList(int images)
 {
     //     boost::property_tree::wptree req;
@@ -230,6 +268,12 @@ void HomeView::sendRecentList(int images)
     //     boost::property_tree::write_json(oss, req, false);
     //     RunScript(wxString::Format("window.postMessage(%s)", oss.str()));
     // }
+    if( mHomepageViews.find("recent") != mHomepageViews.end() ) {
+        RecentHomepageView* recentView = dynamic_cast<RecentHomepageView*>(mHomepageViews["recent"]);
+        if (recentView) {
+            recentView->showRecentFiles(images);
+        }
+    }
 }
 
 webviewIpc::IPCResult HomeView::handleShowLoginDialog()

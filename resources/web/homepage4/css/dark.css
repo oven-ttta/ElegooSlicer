@@ -46,12 +46,17 @@ body
 #recent-context-menu
 {
 	color: #efeff0;
-	background-color:#242428;
-	border: 0px;
-	box-shadow: 0px 0px 3px #DCDCDC;
+	background-color: #2d2d2d;
+	border: 1px solid #404040;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .ct-item:hover
 {
-	background-color:#00675b;
+	background-color: #00675b;
+	color: #fff;
+}
+
+html.dark #ct-folder-bar .ct-explore {
+  background-image: url("../img/open_folder2.svg");
 }

@@ -99,7 +99,7 @@ const Navigation = {
         userName(){
             const loginStatus = this.userInfo ? this.userInfo.loginStatus : 0;
             if (loginStatus === 0) {
-                return "未登录";
+                return "";//this.$t('homepage.login')+' / '+this.$t('homepage.register');
             } else if (loginStatus === 1) {
                 return this.userInfo.nickname || this.userInfo.email.split('@')[0] || this.userInfo.phone;
             }

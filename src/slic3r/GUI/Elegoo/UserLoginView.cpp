@@ -83,7 +83,7 @@ void UserLoginView::initUI()
     mBrowser->SetUserAgent(networkHelper->getUserAgent());
     mBrowser->LoadURL(url);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
-
+    mBrowser->Bind(wxEVT_WEBVIEW_ERROR, &UserLoginView::onWebViewError, this);
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
     topsizer->Add(mBrowser, wxSizerFlags().Expand().Proportion(1));
@@ -153,6 +153,15 @@ void UserLoginView::setupIPCHandlers()
         wxLaunchDefaultBrowser(url);
         return webviewIpc::IPCResult::success();
     });
+
+    mIpc->onRequest("reload", [this](const webviewIpc::IPCRequest& request) {
+        std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
+        if (networkHelper) {
+            std::string url = networkHelper->getLoginUrl();
+            mBrowser->LoadURL(url);
+        }
+        return webviewIpc::IPCResult::success();
+    });
 }
 
 void UserLoginView::cleanupIPC()
@@ -165,18 +174,39 @@ void UserLoginView::onWebViewLoaded(wxWebViewEvent& event)
         mIpc->initialize();
     }
 }
-
-void UserLoginView::onWebViewError(wxWebViewEvent& event)
+#define FAILED_URL_SUFFIX "/web/error-page/connection-failed.html"
+void UserLoginView::onWebViewError(wxWebViewEvent& evt)
 {
-    wxString error = event.GetString();
-    wxString url   = event.GetURL();
+    auto e = "unknown error";
+    switch (evt.GetInt()) {
+    case wxWEBVIEW_NAV_ERR_CONNECTION: e = "wxWEBVIEW_NAV_ERR_CONNECTION"; break;
+    case wxWEBVIEW_NAV_ERR_CERTIFICATE: e = "wxWEBVIEW_NAV_ERR_CERTIFICATE"; break;
+    case wxWEBVIEW_NAV_ERR_AUTH: e = "wxWEBVIEW_NAV_ERR_AUTH"; break;
+    case wxWEBVIEW_NAV_ERR_SECURITY: e = "wxWEBVIEW_NAV_ERR_SECURITY"; break;
+    case wxWEBVIEW_NAV_ERR_NOT_FOUND: e = "wxWEBVIEW_NAV_ERR_NOT_FOUND"; break;
+    case wxWEBVIEW_NAV_ERR_REQUEST: e = "wxWEBVIEW_NAV_ERR_REQUEST"; break;
+    case wxWEBVIEW_NAV_ERR_USER_CANCELLED: e = "wxWEBVIEW_NAV_ERR_USER_CANCELLED"; break;
+    case wxWEBVIEW_NAV_ERR_OTHER: e = "wxWEBVIEW_NAV_ERR_OTHER"; break;
+    }
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                            << boost::format(": error loading page %1% %2% %3% %4%") % evt.GetURL() % evt.GetTarget() % e % evt.GetString();
 
-    // Provide more detailed error information
-    wxString errorMsg = wxString::Format("WebView Error:\n\nError: %s\nURL: %s\n\nThis might be due to:\n- Network connectivity issues\n- "
-                                         "WebView2 runtime problems\n- Invalid URL format",
-                                         error, url);
+    std::string url     = evt.GetURL().ToStdString();
+    std::string target  = evt.GetTarget().ToStdString();
+    std::string error   = e;
+    std::string message = evt.GetString().ToStdString();
 
-    wxMessageBox(errorMsg, "WebView Error", wxOK | wxICON_ERROR);
+    auto path = resources_dir() + FAILED_URL_SUFFIX;
+    #if WIN32
+        std::replace(path.begin(), path.end(), '/', '\\');
+    #endif
+
+    auto code = evt.GetInt();
+    if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST) {
+
+        auto failedUrl = wxString::Format("file:///%s", from_u8(path));
+        mBrowser->LoadURL(failedUrl);
+    }
 }
 
 void UserLoginView::onClose(wxCloseEvent& event)

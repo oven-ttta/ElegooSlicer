@@ -37,6 +37,7 @@ public:
     void initialize() override;
     void updateMode() override;
 
+    void showRecentFiles(int images);
 private:
     void initUI();
     void setupIPCHandlers();
@@ -54,7 +55,8 @@ private:
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
     void onWebViewError(wxWebViewEvent& event);
-    
+    void OnNavigationRequest(wxWebViewEvent& event);
+    void OnNavigationComplete(wxWebViewEvent& event);
 private:
     wxWebView* mBrowser;
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
@@ -83,6 +85,7 @@ private:
     void onWebViewError(wxWebViewEvent& event);
     webviewIpc::IPCResult handleReady();
 
+    void loadFailedPage();
 private:
     wxWebView* mBrowser;
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
