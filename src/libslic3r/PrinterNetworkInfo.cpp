@@ -472,13 +472,9 @@ LoginStatus parseLoginStatusByErrorCode(PrinterNetworkErrorCode resultCode)
     switch (resultCode) {
     case PrinterNetworkErrorCode::SUCCESS:
         return LOGIN_STATUS_LOGIN_SUCCESS;   
-    case PrinterNetworkErrorCode::INVALID_TOKEN:
     case PrinterNetworkErrorCode::SERVER_UNAUTHORIZED:
-        return LOGIN_STATUS_OFFLINE_INVALID_TOKEN;
-    case PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD:
-    case PrinterNetworkErrorCode::NOT_INITIALIZED:
-        return LOGIN_STATUS_OFFLINE_INVALID_USER;
-    case PrinterNetworkErrorCode::SERVER_FORBIDDEN:
+        // token expired, need to refresh, if refresh failed, need to re-login
+        return LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED;
     case PrinterNetworkErrorCode::NETWORK_ERROR:
          return LOGIN_STATUS_OFFLINE;
     default:

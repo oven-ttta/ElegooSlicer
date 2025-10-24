@@ -22,10 +22,13 @@ public:
     void init();
     void uninit();
     
-    void setIotUserInfo(const UserNetworkInfo& userInfo);
-    UserNetworkInfo getIotUserInfo();
-    void clearIotUserInfo();
-    
+    UserNetworkInfo getUserInfo() const;
+    // only can be called by login or logout
+    void setUserInfo(const UserNetworkInfo& userInfo);
+    bool needReLogin(const UserNetworkInfo& userInfo);
+    // only connect to iot and login success is online
+    bool isOnline(const UserNetworkInfo& userInfo) const;
+
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
     
@@ -35,11 +38,7 @@ private:
     
     void monitorLoop();
     bool refreshToken(UserNetworkInfo& userInfo, std::shared_ptr<IUserNetwork>& network);
-    bool isValidToken(const UserNetworkInfo& userInfo);
-    bool needReLogin(const UserNetworkInfo& userInfo);
 
-    UserNetworkInfo getUserInfo() const;
-    void setUserInfo(const UserNetworkInfo& userInfo);
     std::shared_ptr<IUserNetwork> getNetwork() const;
     void setNetwork(std::shared_ptr<IUserNetwork> network);
         
@@ -48,8 +47,9 @@ private:
     bool updateUserInfo(const UserNetworkInfo& userInfo);
     bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId);
 
+    void notifyUserInfoUpdated();
 private:
-    mutable std::mutex mUserInfoMutex;
+    mutable std::mutex mNetworkMutex;
     UserNetworkInfo mUserInfo;
     std::shared_ptr<IUserNetwork> mNetwork;
     

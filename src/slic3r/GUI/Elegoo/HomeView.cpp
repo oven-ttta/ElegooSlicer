@@ -177,13 +177,13 @@ webviewIpc::IPCResult HomeView::handleNavigateToPage(const nlohmann::json& data)
 webviewIpc::IPCResult HomeView::handleGetUserInfo()
 {
     // Get user network info
-    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();   
+    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();   
     nlohmann::json data; 
     data = convertUserNetworkInfoToJson(userNetworkInfo);
     return webviewIpc::IPCResult::success(data);
 }
 webviewIpc::IPCResult HomeView::handleLogout() { 
-    UserNetworkManager::getInstance()->clearIotUserInfo();
+    UserNetworkManager::getInstance()->setUserInfo(UserNetworkInfo());
     return webviewIpc::IPCResult::success(); 
 }
 
@@ -194,6 +194,11 @@ webviewIpc::IPCResult HomeView::handleReady()
     // Send any pending user info with delay to ensure frontend is ready
     if(!mRefreshUserInfo.userId.empty() && mIpc) {
         nlohmann::json data = convertUserNetworkInfoToJson(mRefreshUserInfo);
+        if(UserNetworkManager::getInstance()->isOnline(mRefreshUserInfo)) {
+            data["online"] = true;
+        } else {
+            data["online"] = false;
+        }
         mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
         mRefreshUserInfo = UserNetworkInfo();
         wxLogMessage("HomeView: Sent pending user info to WebView");
@@ -252,10 +257,15 @@ void HomeView::updateMode()
 void HomeView::refreshUserInfo()
 {
     lock_guard<mutex> lock(mUserInfoMutex);
-    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();
+    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
     if (mIpc && mIsReady) {
     // Send refresh signal to navigation webview via IPC
         nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
+        if(UserNetworkManager::getInstance()->isOnline(userNetworkInfo)) {
+            data["online"] = true;
+        } else {
+            data["online"] = false;
+        }
         mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
     } else {
         mRefreshUserInfo = userNetworkInfo;

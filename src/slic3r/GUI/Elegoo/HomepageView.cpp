@@ -231,7 +231,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         return;
 
     mIpc->onRequest("report.getClientUserInfo", [this](const webviewIpc::IPCRequest& request) {
-        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();
+        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
         nlohmann::json  data;
         data["userId"]       = userNetworkInfo.userId;
         data["accessToken"]  = userNetworkInfo.token;
@@ -248,7 +248,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
     });
 
     mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) {
-        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();
+        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
         nlohmann::json  data;
         data["userId"]       = userNetworkInfo.userId;
         data["accessToken"]  = userNetworkInfo.token;
@@ -256,11 +256,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
         data["loginStatus"]  = userNetworkInfo.loginStatus;
 
-        if (userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() ||
-            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN ||
-            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER ||
-            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_NOT_EXPIRED_RELOGIN ||
-            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_REFRESH_FAILED_RELOGIN) {
+        if (UserNetworkManager::getInstance()->needReLogin(userNetworkInfo)) {
             auto evt = new wxCommandEvent(EVT_USER_LOGIN);
             wxQueueEvent(wxGetApp().mainframe, evt);
             return webviewIpc::IPCResult::error();
@@ -303,6 +299,11 @@ void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetw
     data["avatar"]      = userNetworkInfo.avatar;
     data["email"]       = userNetworkInfo.email;
     data["nickname"]    = userNetworkInfo.nickname;
+    if(UserNetworkManager::getInstance()->isOnline(userNetworkInfo)) {
+        data["online"] = true;
+    } else {
+        data["online"] = false;
+    }
     mIpc->sendEvent("client.onUserInfoUpdated", data, mIpc->generateRequestId());
     wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
 }
@@ -325,6 +326,11 @@ webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
         data["avatar"]      = mRefreshUserInfo.avatar;
         data["email"]       = mRefreshUserInfo.email;
         data["nickname"]    = mRefreshUserInfo.nickname;
+        if(UserNetworkManager::getInstance()->isOnline(mRefreshUserInfo)) {
+            data["online"] = true;
+        } else {
+            data["online"] = false;
+        }
         mIpc->sendEvent("client.onUserInfoUpdated", data, mIpc->generateRequestId());
         wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
         mRefreshUserInfo = UserNetworkInfo();

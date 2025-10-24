@@ -137,13 +137,10 @@ void UserLoginView::setupIPCHandlers()
             return webviewIpc::IPCResult::error();
         }
    
-        UserNetworkManager::getInstance()->setIotUserInfo(userNetworkInfo);
+        UserNetworkManager::getInstance()->setUserInfo(userNetworkInfo);
 
-        auto evt = new wxCommandEvent(EVT_USER_INFO_UPDATED);
-        wxQueueEvent(wxGetApp().mainframe, evt);
-      
         CallAfter([this]() {
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             EndModal(wxID_OK);
         });
       

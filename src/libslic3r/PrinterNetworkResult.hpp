@@ -18,7 +18,7 @@ enum class PrinterNetworkErrorCode
 
     // General errors (1-99)
     UNKNOWN_ERROR             = 1, // Unknown error
-    NOT_INITIALIZED            = 2, // Not initialized
+    NOT_INITIALIZED           = 2, // Not initialized
     INVALID_PARAMETER         = 3, // Invalid parameter (value error, type error, etc.)
     OPERATION_TIMEOUT         = 4, // Operation timeout (including connection, file transfer, etc.)
     OPERATION_CANCELLED       = 5, // Operation canceled

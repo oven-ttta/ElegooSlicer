@@ -762,7 +762,7 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     mIpc->onRequest("request_user_info", [this](const webviewIpc::IPCRequest& request){
-        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getIotUserInfo();   
+        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();   
         nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
         return webviewIpc::IPCResult::success(data);
     });

@@ -228,17 +228,13 @@ struct PrinterNetworkInfo
 };
 
 enum LoginStatus {
-    LOGIN_STATUS_NOT_LOGIN                                 = 0, // Not login
-    LOGIN_STATUS_LOGIN_SUCCESS                             = 1, // Login success and online
-    LOGIN_STATUS_CONNECTING                                = 2, // Connecting to IoT
-    LOGIN_STATUS_OFFLINE                                   = 3, // Offline due to network error
-    LOGIN_STATUS_OFFLINE_INVALID_TOKEN                     = 4, // Offline due to invalid token
-    LOGIN_STATUS_OFFLINE_INVALID_USER                      = 5, // Offline due to invalid user info
-    LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED_REFRESH        = 6, // Offline due to token expired and need to refresh
-    LOGIN_STATUS_OFFLINE_TOKEN_NOT_EXPIRED_RELOGIN    = 7, // Offline due to token not expired and need to re-login
-    LOGIN_STATUS_OFFLINE_TOKEN_REFRESH_FAILED_RELOGIN = 8, // Offline due to token refresh failed and need to re-login
-    LOGIN_STATUS_OFFLINE_TOKEN_REFRESH_FAILED_RETRY        = 9, // Offline due to token refresh failed and need to retry
-    LOGIN_STATUS_OTHER_NETWORK_ERROR                       = 10, // Other network error
+    LOGIN_STATUS_NOT_LOGIN                            = 0,  // Not login
+    LOGIN_STATUS_LOGIN_SUCCESS                        = 1,  // Login success and online
+    LOGIN_STATUS_OFFLINE                              = 2,  // Offline due to network error
+    LOGIN_STATUS_OFFLINE_INVALID_TOKEN                = 3,  // Offline due to invalid token and need to re-login
+    LOGIN_STATUS_OFFLINE_INVALID_USER                 = 4,  // Offline due to invalid user info
+    LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED                = 5,  // Offline due to token expired and need to refresh
+    LOGIN_STATUS_OTHER_NETWORK_ERROR                  = 100, // Other network error
 };
 
 struct UserNetworkInfo
