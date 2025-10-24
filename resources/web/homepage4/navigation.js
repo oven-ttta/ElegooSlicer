@@ -108,9 +108,10 @@ const Navigation = {
 
     computed: {
         userName(){
+
             const loginStatus = this.userInfo ? this.userInfo.loginStatus : -1;
             if (loginStatus === -1) {
-                return "未登录";
+                return "";//this.$t('homepage.login')+' / '+this.$t('homepage.register');
             } else if (loginStatus === 1) {
                 return this.userInfo.nickname || this.userInfo.email.split('@')[0] || this.userInfo.phone;
             }

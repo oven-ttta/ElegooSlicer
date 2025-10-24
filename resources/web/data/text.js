@@ -131,6 +131,8 @@ var LangText = {
     smooth_build_plate: "Smooth Build Plate(Side B)",
     auto_refill: "Auto Refill",
     filament_note: "Please select the CANVAS slot for the filament",
+    web_load_failed: "Web content load failed, please try again.",
+    reload_web_page: "Retry",
   },
     ca_ES: {
     t1: "Benvingut a ElegooSlicer",
@@ -938,6 +940,8 @@ var LangText = {
     smooth_build_plate: "光滑打印板(B面)",
     auto_refill: "自动续料",
     filament_note: "请选择耗材对应的CANVAS槽位",
+    web_load_failed: "网络异常，请检查并稍后重试",
+    reload_web_page: "重试",
   },
   zh_TW: {
     t1: "歡迎使用 ElegooSlicer",

@@ -27,6 +27,8 @@ const langMessages = {
       "onlineModels": "Online Models",
       "myProjects": "My Projects",
       "allCategories": "All Categories",
+      "noRecentFiles": "No recent files available",
+      "remove": "Remove",
     },
     "printerManager": {
       "connectedPrinters": "Connected Printers",
@@ -216,7 +218,9 @@ const langMessages = {
       "toInstallIt": "安装。",
       "onlineModels": "在线模型",
       "myProjects": "我的项目",
-      "allCategories": "所有分类"
+      "allCategories": "所有分类",
+      "noRecentFiles": "暂无最近文件",
+      "remove": "移除",
     },
     "printerManager": {
       "localPrinters": "本地打印机",
