@@ -51,11 +51,6 @@ body
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-.ct-item:hover
-{
-	background-color: #00675b;
-	color: #fff;
-}
 
 html.dark #ct-folder-bar .ct-explore {
   background-image: url("../img/open_folder2.svg");
