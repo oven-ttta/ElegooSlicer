@@ -80,6 +80,7 @@ namespace GUI {
 wxDEFINE_EVENT(EVT_SELECT_TAB, wxCommandEvent);
 wxDEFINE_EVENT(EVT_HTTP_ERROR, wxCommandEvent);
 wxDEFINE_EVENT(EVT_USER_LOGIN, wxCommandEvent);
+wxDEFINE_EVENT(EVT_REGION_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_USER_LOGIN_HANDLE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_USER_INFO_UPDATED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_USER_LOGOUT, wxCommandEvent);
@@ -376,10 +377,20 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
     Bind(EVT_USER_LOGIN, [this](wxCommandEvent&) {
         wxGetApp().ShowUserLogin(true);
     });
+    Bind(EVT_REGION_CHANGED, [this](wxCommandEvent&) {
+        wxGetApp().CallAfter([this]() {
+            if (m_home_view) {
+                m_home_view->onRegionChanged();
+            }
+        });
+    });
     Bind(EVT_USER_INFO_UPDATED, [this](wxCommandEvent&) {
         wxGetApp().CallAfter([this]() {
             if (m_home_view) {
                 m_home_view->refreshUserInfo();
+            }
+            if (m_printer_manager_view) {
+                m_printer_manager_view->refreshUserInfo();
             }
         });
     });
@@ -387,6 +398,9 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
         wxGetApp().CallAfter([this]() {
             if (m_home_view) {
                 m_home_view->refreshUserInfo();
+            }
+            if (m_printer_manager_view) {
+                m_printer_manager_view->refreshUserInfo();
             }
         });
     });

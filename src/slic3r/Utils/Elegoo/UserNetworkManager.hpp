@@ -25,13 +25,13 @@ public:
     UserNetworkInfo getUserInfo() const;
     // only can be called by login or logout
     void setUserInfo(const UserNetworkInfo& userInfo);
-    bool needReLogin(const UserNetworkInfo& userInfo);
-    // only connect to iot and login success is online
-    bool isOnline(const UserNetworkInfo& userInfo) const;
-
+    // for frontend click avatar, check user need re-login
+    PrinterNetworkResult<bool> checkUserNeedReLogin();
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
     
+    bool refreshToken(const UserNetworkInfo& userInfo);
+
 private:
     UserNetworkManager();
     ~UserNetworkManager();
@@ -46,7 +46,9 @@ private:
     void loadUserInfo();
     bool updateUserInfo(const UserNetworkInfo& userInfo);
     bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId);
+    bool needReLogin(const UserNetworkInfo& userInfo);
 
+    std::string getLoginErrorMessage(const UserNetworkInfo& userInfo);
     void notifyUserInfoUpdated();
 private:
     mutable std::mutex mNetworkMutex;
@@ -59,6 +61,8 @@ private:
     bool mInitialized{false};
     
     std::chrono::steady_clock::time_point mLastLoopTime;
+
+    std::mutex mMonitorMutex;
 };
 
 } // namespace Slic3r

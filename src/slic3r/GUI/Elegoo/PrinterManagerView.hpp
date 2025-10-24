@@ -17,6 +17,8 @@
 #endif
 
 #include "slic3r/Utils/WebviewIPCManager.h"
+#include "libslic3r/PrinterNetworkInfo.hpp"
+
 namespace Slic3r { namespace GUI {
 
 class PrinterManagerView : public wxPanel
@@ -26,6 +28,7 @@ public:
     virtual ~PrinterManagerView();
     void onClose(wxCloseEvent& evt);
     void openPrinterTab(const std::string& printerId, bool saveState = true);
+    void refreshUserInfo();
 
 private:
     void setupIPCHandlers();
@@ -34,7 +37,6 @@ private:
     void onTabDragMotion(wxAuiNotebookEvent& event);
     void onTabEndDrag(wxAuiNotebookEvent& event);
     void onTabChanged(wxAuiNotebookEvent& event);
-    bool mFirstTabClicked{false};
 
     webviewIpc::IPCResult getPrinterList();
     webviewIpc::IPCResult getPrinterListStatus();
@@ -46,19 +48,23 @@ private:
     webviewIpc::IPCResult updatePrinterHost(const std::string& printerId, const std::string& host);
     webviewIpc::IPCResult deletePrinter(const std::string& printerId);
     webviewIpc::IPCResult browseCAFile();
+    webviewIpc::IPCResult handleReady();
+    webviewIpc::IPCResult handleCheckLoginStatus();
 
     // Tab persistence methods
     void saveTabState();
     void loadTabState();
     
+private:
     wxAuiNotebook* mTabBar;
     wxWebView* mBrowser;
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     std::map<std::string, PrinterWebView*> mPrinterViews;
     std::atomic<bool> m_isDestroying;
     std::shared_ptr<bool> m_lifeTracker;
-
-    bool mIsLogin{false};
-   
+    bool mFirstTabClicked{false};
+    std::mutex mUserInfoMutex; // Mutex to protect user info
+    UserNetworkInfo mRefreshUserInfo; // User info
+    std::atomic<bool> mIsReady{false};
 };
 }} // namespace Slic3r::GUI 

@@ -14,8 +14,9 @@ const usePrinterStore = defineStore('printer', {
       email: null,
       phone: null,
       avatar: null,
-      //login status, 0: no-login, 1: logged in, 2: logging in
+      //login status, -1: no-user, 0: no-login, 1: logged in, other: offline
       loginStatus: -1,
+      loginErrorMessage: null,
     }
   }),
   getters: {
@@ -30,7 +31,7 @@ const usePrinterStore = defineStore('printer', {
     },
     userName: (state) => {
       const loginStatus = state.userInfo ? state.userInfo.loginStatus : -1;
-      if (loginStatus <= 0) {
+      if (loginStatus === -1) {
         return i18n.global.t('homepage.login');
       } else if (loginStatus === 1) {
         return state.userInfo.nickname || state.userInfo.email.split('@')[0] || state.userInfo.phone;
@@ -49,7 +50,7 @@ const usePrinterStore = defineStore('printer', {
       }
     },
     isLoggedIn: (state) => {
-      return state.userInfo && state.userInfo.loginStatus > 0;
+      return state.userInfo && state.userInfo.loginStatus !== -1;
     }
   },
   actions: {
@@ -126,7 +127,7 @@ const usePrinterStore = defineStore('printer', {
         lock: true,
       });
       await new Promise(resolve => setTimeout(resolve, 500));
-      // Load printer models and printer list
+      await this.requestUserInfo();
       await this.requestPrinterModelList();
       await this.requestPrinterList();
       await this.startStatusUpdates();
@@ -190,7 +191,6 @@ const usePrinterStore = defineStore('printer', {
 
       this.statusUpdateInterval = setInterval(async () => {
         try {
-          await this.requestUserInfo();
           const response = await this.ipcRequest('request_printer_list_status', {});
           this.updatePrinterListStatus(response || []);
         } catch (error) {
@@ -383,12 +383,12 @@ const usePrinterStore = defineStore('printer', {
       console.log('closeModals called - should be handled by UI components');
     },
 
-    // Handle user info click (e.g., to open login modal)
     async handleUserInfoClick() {
-      // Logic to handle user info click, e.g., open login modal
       console.log('User info clicked - implement login modal logic here');
-      if (this.userInfo.loginStatus === 0) {
-        this.ipcRequest('login');
+      try {
+        await this.ipcRequest('checkLoginStatus', {});
+      } catch (error) {
+        console.error('Check login status failed:', error);
       }
     },
 
@@ -402,6 +402,7 @@ const usePrinterStore = defineStore('printer', {
           phone: null,
           avatarUrl: null,
           loginStatus: -1,
+          loginErrorMessage: null,
         };
       } catch (error) {
         console.error('Failed to request user info:', error);

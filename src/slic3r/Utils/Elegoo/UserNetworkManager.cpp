@@ -163,6 +163,7 @@ bool UserNetworkManager::updateUserInfo(const UserNetworkInfo& userInfo)
                          userInfo.userId.c_str(), userInfo.nickname.c_str());
         }
         mUserInfo = userInfo;
+        mUserInfo.loginErrorMessage = getLoginErrorMessage(userInfo);
         if (needNotify) {
             notifyUserInfoUpdated();
         }
@@ -181,12 +182,12 @@ bool UserNetworkManager::updateUserInfoLoginStatus(const LoginStatus& loginStatu
     }
     if(mUserInfo.loginStatus != loginStatus) {
         mUserInfo.loginStatus = loginStatus;
+        mUserInfo.loginErrorMessage = getLoginErrorMessage(mUserInfo);
         notifyUserInfoUpdated();
         saveUserInfo(mUserInfo);       
     }
     return true;
 }
- 
 void UserNetworkManager::notifyUserInfoUpdated()
 {
     if (wxGetApp().mainframe && wxGetApp().mainframe->is_loaded()) {
@@ -200,11 +201,39 @@ void UserNetworkManager::notifyUserInfoUpdated()
     }
 }
 
+PrinterNetworkResult<bool> UserNetworkManager::checkUserNeedReLogin()
+{
+    CHECK_INITIALIZED(PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NOT_INITIALIZED, false));
+    UserNetworkInfo currentUserInfo = getUserInfo();
+    if (needReLogin(currentUserInfo)) {
+        //need re-login
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+    } else if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE || 
+        currentUserInfo.loginStatus == LOGIN_STATUS_OTHER_NETWORK_ERROR ||
+        currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
+        //network error or token expired, don't need to re-login, return network error message
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
+    } 
+    //don't need to re-login
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, false);
+}
+std::string UserNetworkManager::getLoginErrorMessage(const UserNetworkInfo& userInfo)
+{
+    if(userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN) {
+        return getErrorMessage(PrinterNetworkErrorCode::INVALID_TOKEN);
+    } else if(userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+        return getErrorMessage(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD);
+    } else if(userInfo.loginStatus == LOGIN_STATUS_OFFLINE) {
+        return getErrorMessage(PrinterNetworkErrorCode::NETWORK_ERROR);
+    }
+    return "";
+}
 
 bool UserNetworkManager::needReLogin(const UserNetworkInfo& userInfo)
 {
     return userInfo.userId.empty() || 
         userInfo.token.empty() || 
+        userInfo.loginStatus == LOGIN_STATUS_NO_USER ||
         userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN ||
         userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER;
 }
@@ -221,7 +250,7 @@ void UserNetworkManager::monitorLoop()
         if (elapsed < 10) {
             continue;
         }
-
+        std::lock_guard<std::mutex> lock(mMonitorMutex);
         mLastLoopTime = now;
         UserNetworkInfo               userInfo        = getUserInfo();
         std::shared_ptr<IUserNetwork> network         = getNetwork();
@@ -229,9 +258,11 @@ void UserNetworkManager::monitorLoop()
 
         // if user id is empty or token is empty or login status is invalid, need to re-login
         if (needReLogin(userInfo)) {
-            setNetwork(nullptr);
-            wxLogMessage("User info or token invalid, need to re-login, user id: %s, login status: %d",
-                         userInfo.userId.c_str(), userInfo.loginStatus);
+            if(network) {
+                setNetwork(nullptr);
+                wxLogMessage("User info or token invalid, need to re-login, user id: %s, login status: %d",
+                             userInfo.userId.c_str(), userInfo.loginStatus);
+            }
             continue;
         }
 
@@ -327,10 +358,78 @@ void UserNetworkManager::monitorLoop()
     }
 }
 
-bool UserNetworkManager::isOnline(const UserNetworkInfo& userInfo) const
+bool UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo)
 {
-    return userInfo.connectedToIot && userInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS;
+    CHECK_INITIALIZED(false);
+
+    lock_guard<std::mutex> lock(mMonitorMutex);
+
+    wxLogMessage("UserNetworkManager::refreshToken start refresh token, user id: %s, user token: %s, user refresh token: %s, user login "
+                 "refresh time: %d, user access token expire time: %d, user refresh token expire time: %d",
+                 userInfo.userId.c_str(), userInfo.token.c_str(), userInfo.refreshToken.c_str(), userInfo.lastTokenRefreshTime,
+                 userInfo.accessTokenExpireTime, userInfo.refreshTokenExpireTime);
+
+    if(userInfo.userId.empty()) {
+        wxLogMessage("UserNetworkManager::refreshToken request user id is empty, skip refresh token, user id: %s", userInfo.userId.c_str());
+        return false;
+    }
+    UserNetworkInfo currentUserInfo = getUserInfo();
+    std::shared_ptr<IUserNetwork> network = getNetwork();
+
+    if(network && userInfo.userId != currentUserInfo.userId) {
+        wxLogMessage("UserNetworkManager::refreshToken network is not null and user id changed, skip refresh token, user id: %s", userInfo.userId.c_str());
+        return false;
+    }
+
+    if(currentUserInfo.userId.empty()) {
+        wxLogMessage("UserNetworkManager::refreshToken current user id is empty, skip refresh token, user id: %s", userInfo.userId.c_str());
+        return false;
+    }
+
+    if (currentUserInfo.userId != userInfo.userId) {
+        // user id changed, return success
+        wxLogMessage("UserNetworkManager::refreshToken user id changed, skip refresh token, user id: %s", userInfo.userId.c_str());
+        return false;
+    }
+    
+    if( currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || 
+        currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+        wxLogMessage("UserNetworkManager::refreshToken user login status is invalid token or invalid user or token expired, skip refresh token, user id: %s", userInfo.userId.c_str());
+        return false;
+    }
+    
+    if(currentUserInfo.lastTokenRefreshTime > userInfo.lastTokenRefreshTime) {
+        // already refreshed token
+        wxLogMessage("already refreshed token, skip refresh token, user id: %s", userInfo.userId.c_str());
+        return true;
+    }
+    
+    // if(currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+    //     wxLogMessage("UserNetworkManager::refreshToken user login status is login success, skip refresh token, user id: %s", userInfo.userId.c_str());
+    //     return false;
+    // }
+
+    if(currentUserInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_TOKEN || 
+        currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+        wxLogMessage("UserNetworkManager::refreshToken user login status is not invalid token or invalid user, skip refresh token, user id: %s", userInfo.userId.c_str());
+        return false;
+    }
+    
+    if(refreshToken(currentUserInfo, network)) {
+        wxLogMessage("UserNetworkManager::refreshToken refresh token success, user id: %s", userInfo.userId.c_str());
+        updateUserInfo(currentUserInfo);
+        setNetwork(network);
+        return true;
+    } else if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN) {
+        updateUserInfo(currentUserInfo);
+        setNetwork(nullptr);
+        wxLogMessage("UserNetworkManager::refreshToken refresh token failed, need to re-login, user id: %s", userInfo.userId.c_str());
+        return false;
+    }
+
+    return false;
 }
+
 
 bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr<IUserNetwork>& network)
 {
@@ -344,7 +443,7 @@ bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr
         return false;
     }
     
-    bool needRefresh = false;
+    bool needRefresh = userInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED;
     if (userInfo.accessTokenExpireTime < nowTime) {
         needRefresh = true;
         userInfo.loginStatus   = LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED;

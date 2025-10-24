@@ -4,7 +4,6 @@ const { ElInput, ElButton, ElPopover, ElDialog, ElTab, ElTabPane, ElSelect, ElOp
 const Navigation = {
     data() {
         return {
-
             userInfo: {
                 userId: '',
                 nickname: '',
@@ -12,6 +11,7 @@ const Navigation = {
                 loginStatus: 0
             },
             currentPage: 'recent',
+            region: '',
         }
     },
     methods: {
@@ -21,10 +21,19 @@ const Navigation = {
                 console.log('getUserInfo response:', response);
                 if (response) {
                     this.userInfo = response;
+                    this.region = response.region || '';
                 }
             } catch (error) {
                 console.error('Failed to get user info:', error);
-                // Don't show error message for getUserInfo - user might just be not logged in
+            }
+            
+            try {
+                const regionResponse = await this.ipcRequest('getRegion', {});
+                this.region = regionResponse || '';
+                console.log('Region:', this.region);
+            } catch (error) {
+                console.error('Failed to get region:', error);
+                this.region = '';
             }
         },
         async navigateToPage(pageName) {
@@ -49,16 +58,17 @@ const Navigation = {
                 throw error;
             }
         },
-        async onLoginOrRegister() {
-            console.log('Login or Register clicked');
+
+
+        async onClickUserAvatar() {
+            console.log('User avatar clicked');
             try {
-                await this.ipcRequest('showLoginDialog', {});
-                await this.init(); // Refresh user info after login dialog closes
+                await this.ipcRequest('checkLoginStatus', {});
             } catch (error) {
-                console.error('Login dialog failed:', error);
+                console.error('Check login status failed:', error);
+                throw error;
             }
         },
-
 
         async onLogout() {
             console.log('Logout clicked');
@@ -82,7 +92,8 @@ const Navigation = {
                 this.userInfo.nickname = '';
                 this.userInfo.avatar = '';
                 this.userInfo.userId = '';
-                this.onLoginOrRegister();
+                await this.ipcRequest('showLoginDialog', {});
+                await this.init();
             } catch (error) {
                 console.error('Re-login dialog failed:', error);
             }
@@ -97,8 +108,8 @@ const Navigation = {
 
     computed: {
         userName(){
-            const loginStatus = this.userInfo ? this.userInfo.loginStatus : 0;
-            if (loginStatus === 0) {
+            const loginStatus = this.userInfo ? this.userInfo.loginStatus : -1;
+            if (loginStatus === -1) {
                 return "未登录";
             } else if (loginStatus === 1) {
                 return this.userInfo.nickname || this.userInfo.email.split('@')[0] || this.userInfo.phone;
@@ -119,10 +130,31 @@ const Navigation = {
     },
 
     async mounted() {
+
         await this.init();
+      
         nativeIpc.on('onUserInfoUpdated', (data) => {
             console.log('Received user info update event from backend:', data);
             this.userInfo = data;
+            this.region = data.region || '';
+        });
+        
+        nativeIpc.on('onRegionChanged', async () => {
+            console.log('Region changed event received');
+            try {
+                const regionResponse = await this.ipcRequest('getRegion', {});
+                this.region = regionResponse || '';
+                console.log('Region changed to:', this.region);
+                
+                // If switched to CN and currently on online-models, navigate to recent
+                if (this.region === 'CN' && this.currentPage === 'online-models') {
+                    console.log('Switched to CN region, navigating from online-models to recent');
+                    await this.navigateToPage('recent');
+                }
+            } catch (error) {
+                console.error('Failed to get region:', error);
+                this.region = '';
+            }
         });
 
         await this.ipcRequest('ready', {});

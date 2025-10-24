@@ -228,13 +228,14 @@ struct PrinterNetworkInfo
 };
 
 enum LoginStatus {
+    LOGIN_STATUS_NO_USER                              = -1, // No user
     LOGIN_STATUS_NOT_LOGIN                            = 0,  // Not login
     LOGIN_STATUS_LOGIN_SUCCESS                        = 1,  // Login success and online
-    LOGIN_STATUS_OFFLINE                              = 2,  // Offline due to network error
-    LOGIN_STATUS_OFFLINE_INVALID_TOKEN                = 3,  // Offline due to invalid token and need to re-login
-    LOGIN_STATUS_OFFLINE_INVALID_USER                 = 4,  // Offline due to invalid user info
-    LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED                = 5,  // Offline due to token expired and need to refresh
-    LOGIN_STATUS_OTHER_NETWORK_ERROR                  = 100, // Other network error
+    LOGIN_STATUS_OFFLINE                              = 2,  // Network error, user is offline , don't need to re-login and refresh token
+    LOGIN_STATUS_OFFLINE_INVALID_TOKEN                = 3,  // Invalid token and need to re-login
+    LOGIN_STATUS_OFFLINE_INVALID_USER                 = 4,  // Invalid user  and need to re-login
+    LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED                = 5,  // Token expired and need to refresh
+    LOGIN_STATUS_OTHER_NETWORK_ERROR                  = 100, // Other network error, user is online but network error, don't need to re-login and refresh token, don't need to update user info and notify frontend
 };
 
 struct UserNetworkInfo
@@ -248,7 +249,7 @@ struct UserNetworkInfo
     uint64_t    refreshTokenExpireTime{0};
     std::string rtcToken; // video rtc token
     uint64_t    rtcTokenExpireTime{0};
-    LoginStatus loginStatus{LOGIN_STATUS_NOT_LOGIN};
+    LoginStatus loginStatus{LOGIN_STATUS_NO_USER};
     std::string nickname;     // User display name
     std::string email;        // User email
     std::string avatar;       // User avatar URL
@@ -262,6 +263,7 @@ struct UserNetworkInfo
     uint64_t    lastTokenRefreshTime{0}; // Last token refresh time
     std::string extraInfo{"{}"}; // json string
     bool connectedToIot{false}; // connected to iot
+    std::string loginErrorMessage; // login error message
 
 };
 

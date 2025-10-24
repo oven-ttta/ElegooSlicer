@@ -17,8 +17,16 @@ const PrinterManager = {
         };
     },
 
-    mounted() {
+    async mounted() {
         this.init();
+
+        nativeIpc.on('onUserInfoUpdated', (data) => {
+            console.log('Received user info update event from backend:', data);
+            this.printerStore.userInfo = data;
+            console.log('loginErrorMessage:', this.printerStore.userInfo.loginErrorMessage);
+        });
+        await nativeIpc.request('ready', {});
+
         disableRightClickMenu();
     },
 
@@ -207,7 +215,11 @@ const PrinterManager = {
 window.loginLinkClickHandler = function() {
     // Implement the login logic here
     console.log("Login link clicked");
-    nativeIpc.request("login", {});
+    try {
+        nativeIpc.request("checkLoginStatus", {});
+    } catch (error) {
+        console.error('Check login status failed:', error);
+    }
 };
 
 

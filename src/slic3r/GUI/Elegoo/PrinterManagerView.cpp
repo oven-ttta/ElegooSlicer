@@ -473,6 +473,20 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
         saveTabState();
 }
 
+void PrinterManagerView::refreshUserInfo()
+{
+    lock_guard<mutex> lock(mUserInfoMutex);
+    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
+    if (mIpc && mIsReady) {
+    // Send refresh signal to navigation webview via IPC
+        nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
+        mRefreshUserInfo = UserNetworkInfo();
+        mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
+    } else {
+        mRefreshUserInfo = userNetworkInfo;
+    }
+}
+
 void PrinterManagerView::onClose(wxCloseEvent& evt)
 {
     this->Hide();
@@ -755,10 +769,12 @@ void PrinterManagerView::setupIPCHandlers()
         return webviewIpc::IPCResult::success();
     });
 
-    mIpc->onRequest("login", [this](const webviewIpc::IPCRequest& request){
-        auto evt = new wxCommandEvent(EVT_USER_LOGIN);
-        wxQueueEvent(wxGetApp().mainframe, evt);
-        return webviewIpc::IPCResult::success();
+    mIpc->onRequest("checkLoginStatus", [this](const webviewIpc::IPCRequest& request){
+        return handleCheckLoginStatus();
+    });
+
+    mIpc->onRequest("ready", [this](const webviewIpc::IPCRequest& request){
+        return handleReady();
     });
 
     mIpc->onRequest("request_user_info", [this](const webviewIpc::IPCRequest& request){
@@ -766,7 +782,6 @@ void PrinterManagerView::setupIPCHandlers()
         nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
         return webviewIpc::IPCResult::success(data);
     });
-
     
     PrinterNetworkEvent::getInstance()->connectStatusChanged.connect([this](const PrinterConnectStatusEvent& event) {
         // RTC token change handled by network layer
@@ -991,6 +1006,39 @@ webviewIpc::IPCResult PrinterManagerView::browseCAFile()
     result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
     result.message = getErrorMessage(errorCode);
     return result;
+}
+webviewIpc::IPCResult PrinterManagerView::handleReady()
+{
+    lock_guard<mutex> lock(mUserInfoMutex);
+    mIsReady = true;
+    // Send any pending user info with delay to ensure frontend is ready
+    if(!mRefreshUserInfo.userId.empty() && mIpc) {
+        nlohmann::json data = convertUserNetworkInfoToJson(mRefreshUserInfo);
+        mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
+        mRefreshUserInfo = UserNetworkInfo();
+        wxLogMessage("PrinterManagerView: Sent pending user info to WebView");
+    }
+    wxLogMessage("PrinterManagerView: Ready");  
+    return webviewIpc::IPCResult::success();
+}
+webviewIpc::IPCResult PrinterManagerView::handleCheckLoginStatus()
+{
+    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
+    auto            result          = UserNetworkManager::getInstance()->checkUserNeedReLogin();
+    if (result.isSuccess()) {
+        bool needReLogin = result.data.value();
+        if (needReLogin) {
+            // need re-login
+            auto evt = new wxCommandEvent(EVT_USER_LOGIN);
+            wxQueueEvent(wxGetApp().mainframe, evt);
+            return webviewIpc::IPCResult::success();
+        }
+    } else {
+        return webviewIpc::IPCResult::error(result.message);
+    }
+    // don't need to re-login, return user info
+    nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
+    return webviewIpc::IPCResult::success(data);
 }
 webviewIpc::IPCResult PrinterManagerView::getPrinterModelList()
 {

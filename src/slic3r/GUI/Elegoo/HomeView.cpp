@@ -148,6 +148,12 @@ void HomeView::setupIPCHandlers()
     mIpc->onRequest("getUserInfo", [this](const webviewIpc::IPCRequest& request) { return handleGetUserInfo(); });
     mIpc->onRequest("logout", [this](const webviewIpc::IPCRequest& request) { return handleLogout(); });
     mIpc->onRequest("showLoginDialog", [this](const webviewIpc::IPCRequest& request) { return handleShowLoginDialog(); });
+    mIpc->onRequest("checkLoginStatus", [this](const webviewIpc::IPCRequest& request) { return handleCheckLoginStatus(); });
+    mIpc->onRequest("getRegion", [this](const webviewIpc::IPCRequest& request) {
+        std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
+        std::string region = networkHelper ? networkHelper->getRegion() : "";
+        return webviewIpc::IPCResult::success(region);
+    });
     mIpc->onRequest("ready", [this](const webviewIpc::IPCRequest& request) { return handleReady(); });
 }
 
@@ -183,7 +189,9 @@ webviewIpc::IPCResult HomeView::handleGetUserInfo()
     return webviewIpc::IPCResult::success(data);
 }
 webviewIpc::IPCResult HomeView::handleLogout() { 
-    UserNetworkManager::getInstance()->setUserInfo(UserNetworkInfo());
+    UserNetworkInfo userNetworkInfo = UserNetworkInfo();
+    userNetworkInfo.loginStatus = LOGIN_STATUS_NO_USER;
+    UserNetworkManager::getInstance()->setUserInfo(userNetworkInfo);
     return webviewIpc::IPCResult::success(); 
 }
 
@@ -194,11 +202,6 @@ webviewIpc::IPCResult HomeView::handleReady()
     // Send any pending user info with delay to ensure frontend is ready
     if(!mRefreshUserInfo.userId.empty() && mIpc) {
         nlohmann::json data = convertUserNetworkInfoToJson(mRefreshUserInfo);
-        if(UserNetworkManager::getInstance()->isOnline(mRefreshUserInfo)) {
-            data["online"] = true;
-        } else {
-            data["online"] = false;
-        }
         mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
         mRefreshUserInfo = UserNetworkInfo();
         wxLogMessage("HomeView: Sent pending user info to WebView");
@@ -241,7 +244,26 @@ webviewIpc::IPCResult HomeView::handleShowLoginDialog()
     return webviewIpc::IPCResult::success();
 }
 
-
+webviewIpc::IPCResult HomeView::handleCheckLoginStatus()
+{
+    UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
+    auto result = UserNetworkManager::getInstance()->checkUserNeedReLogin();
+    if(result.isSuccess()) {
+        bool needReLogin = result.data.value();
+        if(needReLogin) {
+            //need re-login
+            auto evt = new wxCommandEvent(EVT_USER_LOGIN);
+            wxQueueEvent(wxGetApp().mainframe, evt);
+            return webviewIpc::IPCResult::error();
+        } 
+    } else {
+        show_error(wxGetApp().mainframe, result.message);
+        return webviewIpc::IPCResult::error(result.message);
+    }
+    //don't need to re-login, return user info
+    nlohmann::json  data = convertUserNetworkInfoToJson(userNetworkInfo);
+    return webviewIpc::IPCResult::success(data);
+}
 void HomeView::updateMode()
 {
     // Update mode if needed
@@ -261,12 +283,8 @@ void HomeView::refreshUserInfo()
     if (mIpc && mIsReady) {
     // Send refresh signal to navigation webview via IPC
         nlohmann::json data = convertUserNetworkInfoToJson(userNetworkInfo);
-        if(UserNetworkManager::getInstance()->isOnline(userNetworkInfo)) {
-            data["online"] = true;
-        } else {
-            data["online"] = false;
-        }
         mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
+        mRefreshUserInfo = UserNetworkInfo();
     } else {
         mRefreshUserInfo = userNetworkInfo;
     }
@@ -274,6 +292,21 @@ void HomeView::refreshUserInfo()
     for (auto& pair : mHomepageViews) {
         pair.second->onUserInfoUpdated(userNetworkInfo);
     }
+}
+
+void HomeView::onRegionChanged()
+{
+    //logout user
+    UserNetworkManager::getInstance()->setUserInfo(UserNetworkInfo());
+    if (mIpc && mIsReady) {
+        mIpc->sendEvent("onRegionChanged", nlohmann::json::object(), mIpc->generateRequestId());
+    }
+    
+    for (auto& pair : mHomepageViews) {
+        pair.second->onRegionChanged();
+    }
+    
+    refreshUserInfo();
 }
 
 }} // namespace Slic3r::GUI

@@ -6,6 +6,7 @@
 #include "MsgDialog.hpp"
 #include "I18N.hpp"
 #include "libslic3r/AppConfig.hpp"
+#include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
 #include <wx/language.h>
 #include <wx/notebook.h>
 #include "Notebook.hpp"
@@ -349,25 +350,32 @@ wxBoxSizer *PreferencesDialog::create_item_region_combobox(wxString title, wxWin
         else
             area = "Others";*/
         combobox->SetSelection(region_index);
-        NetworkAgent* agent = wxGetApp().getAgent();
+        //NetworkAgent* agent = wxGetApp().getAgent();
+        UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
+
         AppConfig* config = GUI::wxGetApp().app_config;
-        if (agent) {
+        if (!userNetworkInfo.userId.empty()) {
             MessageDialog msg_wingow(this, _L("Changing the region will log out your account.\n") + "\n" + _L("Do you want to continue?"), L("Region selection"),
                                      wxICON_QUESTION | wxOK | wxCANCEL);
             if (msg_wingow.ShowModal() == wxID_CANCEL) {
                 combobox->SetSelection(current_region);
                 return;
             } else {
-                wxGetApp().request_user_logout();
+                //wxGetApp().request_user_logout();
                 config->set("region", region.ToStdString());
                 auto area = config->get_country_code();
-                if (agent) {
-                    agent->set_country_code(area);
-                }
+                // if (agent) {
+                //     agent->set_country_code(area);
+                // }
+                //sent event to mainframe to refresh user info
+                auto evt = new wxCommandEvent(EVT_REGION_CHANGED);
+                wxQueueEvent(wxGetApp().mainframe, evt);
                 EndModal(wxID_CANCEL);
             }
         } else {
             config->set("region", region.ToStdString());
+            auto evt = new wxCommandEvent(EVT_REGION_CHANGED);
+            wxQueueEvent(wxGetApp().mainframe, evt);
         }
 
         wxGetApp().update_publish_status();

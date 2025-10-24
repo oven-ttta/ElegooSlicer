@@ -995,7 +995,7 @@ void GUI_App::post_init()
             this->check_new_version_sf();
             if (is_user_login() && !app_config->get_stealth_mode()) {
               // this->check_privacy_version(0);
-              request_user_handle(0);
+              //request_user_handle(0);
             }
         });
     }
@@ -2593,8 +2593,6 @@ bool GUI_App::on_init_inner()
 
     Bind(EVT_SET_SELECTED_MACHINE, &GUI_App::on_set_selected_machine, this);
     Bind(EVT_UPDATE_MACHINE_LIST, &GUI_App::on_update_machine_list, this);
-    Bind(EVT_USER_LOGIN, &GUI_App::on_user_login, this);
-    Bind(EVT_USER_LOGIN_HANDLE, &GUI_App::on_user_login_handle, this);
     Bind(EVT_CHECK_PRIVACY_VER, &GUI_App::on_check_privacy_update, this);
     Bind(EVT_CHECK_PRIVACY_SHOW, &GUI_App::show_check_privacy_dlg, this);
 
@@ -3840,20 +3838,6 @@ bool GUI_App::check_login()
     return result;
 }
 
-void GUI_App::request_user_handle(int online_login)
-{
-    auto evt = new wxCommandEvent(EVT_USER_LOGIN_HANDLE);
-    evt->SetInt(online_login);
-    wxQueueEvent(this, evt);
-}
-
-void GUI_App::request_user_login(int online_login)
-{
-    auto evt = new wxCommandEvent(EVT_USER_LOGIN);
-    evt->SetInt(online_login);
-    wxQueueEvent(this, evt);
-}
-
 void GUI_App::request_user_logout()
 {
     if (m_agent && m_agent->is_user_login()) {
@@ -4097,7 +4081,7 @@ void GUI_App::handle_script_message(std::string msg)
                 if (m_agent) {
                     m_agent->change_user(j.dump());
                     if (m_agent->is_user_login()) {
-                        request_user_login(1);
+                        //request_user_login(1);
                     }
                 }
             }
@@ -4922,7 +4906,7 @@ void GUI_App::show_check_privacy_dlg(wxCommandEvent& evt)
     privacy_dlg.Bind(EVT_PRIVACY_UPDATE_CONFIRM, [this, online_login](wxCommandEvent &e) {
         app_config->set("privacy_version", privacy_version_info.version_str);
         app_config->set_bool("privacy_update_checked", true);
-        request_user_handle(online_login);
+       // request_user_handle(online_login);
         });
     privacy_dlg.Bind(EVT_PRIVACY_UPDATE_CANCEL, [this](wxCommandEvent &e) {
             app_config->set_bool("privacy_update_checked", false);
@@ -4962,12 +4946,12 @@ bool GUI_App::check_privacy_update()
 
 void GUI_App::on_check_privacy_update(wxCommandEvent& evt)
 {
-    int online_login = evt.GetInt();
-    bool result = check_privacy_update();
-    if (result)
-        on_show_check_privacy_dlg(online_login);
-    else
-        request_user_handle(online_login);
+    // int online_login = evt.GetInt();
+    // bool result = check_privacy_update();
+    // if (result)
+    //     on_show_check_privacy_dlg(online_login);
+    // else
+    //     request_user_handle(online_login);
 }
 
 void GUI_App::check_privacy_version(int online_login)
@@ -5011,11 +4995,11 @@ void GUI_App::check_privacy_version(int online_login)
                 }
             }
             catch (...) {
-                request_user_handle(online_login);
+                //request_user_handle(online_login);
             }
         })
         .on_error([this, online_login](std::string body, std::string error, unsigned int status) {
-            request_user_handle(online_login);
+            //request_user_handle(online_login);
             BOOST_LOG_TRIVIAL(error) << "check privacy version error" << body;
     }).perform();
 }

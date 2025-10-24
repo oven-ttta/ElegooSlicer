@@ -12,6 +12,7 @@
 #include <slic3r/GUI/Elegoo/UserLoginView.hpp>
 #include <slic3r/Utils/Elegoo/UserNetworkManager.hpp>
 #include <slic3r/Utils/Elegoo/ElegooNetworkHelper.hpp>
+#include "slic3r/Utils/JsonUtils.hpp"
 namespace Slic3r { namespace GUI {
 
 // ============================================================================
@@ -208,7 +209,14 @@ void OnlineModelsHomepageView::initUI()
     if (!networkHelper) {
         wxLogError("Could not create network helper");
         return;
-    } 
+    }
+    
+    std::string region = networkHelper->getRegion();
+    if (region == "CN") {
+        wxLogMessage("China region detected, online models page will not be loaded");
+        return;
+    }
+
     std::string url = networkHelper->getOnlineModelsUrl();
     mBrowser->SetUserAgent(networkHelper->getUserAgent());
     mBrowser->LoadURL(url);
@@ -225,6 +233,37 @@ void OnlineModelsHomepageView::updateMode()
     // Update mode if needed
 }
 
+nlohmann::json generateUserInfoData(const UserNetworkInfo& userNetworkInfo)
+{
+    nlohmann::json data;
+    data["userId"]       = userNetworkInfo.userId;
+    data["accessToken"]  = userNetworkInfo.token;
+    data["refreshToken"] = userNetworkInfo.refreshToken;
+    data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
+    data["refreshTokenExpireTime"] = userNetworkInfo.refreshTokenExpireTime;
+    data["avatar"] = userNetworkInfo.avatar;
+    data["email"] = userNetworkInfo.email;
+    data["nickname"] = userNetworkInfo.nickname;
+    data["loginStatus"]  = userNetworkInfo.loginStatus;
+    data["lastTokenRefreshTime"] = userNetworkInfo.lastTokenRefreshTime;
+    return data;
+}
+
+UserNetworkInfo parseUserInfoData(const nlohmann::json& data)
+{
+    UserNetworkInfo userNetworkInfo;
+    userNetworkInfo.userId = JsonUtils::safeGetString(data, "userId", "");
+    userNetworkInfo.refreshToken = JsonUtils::safeGetString(data, "refreshToken", "");
+    userNetworkInfo.token = JsonUtils::safeGetString(data, "accessToken", "");
+    userNetworkInfo.accessTokenExpireTime = JsonUtils::safeGetInt64(data, "expiresTime", 0);
+    userNetworkInfo.refreshTokenExpireTime = JsonUtils::safeGetInt64(data, "refreshTokenExpireTime", 0);
+    userNetworkInfo.lastTokenRefreshTime = JsonUtils::safeGetInt64(data, "lastTokenRefreshTime", 0);
+    userNetworkInfo.loginStatus = LoginStatus(JsonUtils::safeGetInt(data, "loginStatus", static_cast<int>(LOGIN_STATUS_NO_USER)));
+    userNetworkInfo.avatar = JsonUtils::safeGetString(data, "avatar", "");
+    userNetworkInfo.email = JsonUtils::safeGetString(data, "email", "");
+    userNetworkInfo.nickname = JsonUtils::safeGetString(data, "nickname", "");
+    return userNetworkInfo;
+}
 void OnlineModelsHomepageView::setupIPCHandlers()
 {
     if (!mIpc)
@@ -232,38 +271,48 @@ void OnlineModelsHomepageView::setupIPCHandlers()
 
     mIpc->onRequest("report.getClientUserInfo", [this](const webviewIpc::IPCRequest& request) {
         UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
-        nlohmann::json  data;
-        data["userId"]       = userNetworkInfo.userId;
-        data["accessToken"]  = userNetworkInfo.token;
-        data["refreshToken"] = userNetworkInfo.refreshToken;
-        data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
-        data["loginStatus"]  = userNetworkInfo.loginStatus;
-   
-
-        if(userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+        if (userNetworkInfo.userId.empty() || 
+            userNetworkInfo.token.empty() ||
+            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN ||
+            userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
             return webviewIpc::IPCResult::error();
-        } 
+        }
+        nlohmann::json  data = generateUserInfoData(userNetworkInfo);
         return webviewIpc::IPCResult::success(data);
         
     });
 
     mIpc->onRequest("report.notLogged", [this](const webviewIpc::IPCRequest& request) {
         UserNetworkInfo userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
-        nlohmann::json  data;
-        data["userId"]       = userNetworkInfo.userId;
-        data["accessToken"]  = userNetworkInfo.token;
-        data["refreshToken"] = userNetworkInfo.refreshToken;
-        data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
-        data["loginStatus"]  = userNetworkInfo.loginStatus;
-
-        if (UserNetworkManager::getInstance()->needReLogin(userNetworkInfo)) {
-            auto evt = new wxCommandEvent(EVT_USER_LOGIN);
-            wxQueueEvent(wxGetApp().mainframe, evt);
-            return webviewIpc::IPCResult::error();
+        auto result = UserNetworkManager::getInstance()->checkUserNeedReLogin();
+        if(result.isSuccess()) {
+            bool needReLogin = result.data.value();
+            if(needReLogin) {
+                //need re-login
+                auto evt = new wxCommandEvent(EVT_USER_LOGIN);
+                wxQueueEvent(wxGetApp().mainframe, evt);
+                return webviewIpc::IPCResult::error();
+            } 
+        } else {
+            //show_error(wxGetApp().mainframe, result.message);
+            return webviewIpc::IPCResult::error(result.message);
         }
+        //don't need to re-login, return user info
+        nlohmann::json  data = generateUserInfoData(userNetworkInfo);
         return webviewIpc::IPCResult::success(data);
     });
 
+    mIpc->onRequest("report.refreshToken", [this](const webviewIpc::IPCRequest& request) { 
+        auto        data     = request.params;
+        UserNetworkInfo userNetworkInfo = parseUserInfoData(data);
+        bool result = UserNetworkManager::getInstance()->refreshToken(userNetworkInfo);
+        userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
+        nlohmann::json userData = generateUserInfoData(userNetworkInfo);
+        if(result) {
+            return webviewIpc::IPCResult::success(userData);
+        } 
+        return webviewIpc::IPCResult::error(userData);
+    });
     mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) { return handleReady(); });
 
     mIpc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request) {
@@ -289,24 +338,18 @@ void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetw
         mRefreshUserInfo = userNetworkInfo;
         return;
     }
-
-    nlohmann::json data;
-    data["userId"]      = userNetworkInfo.userId;
-    data["accessToken"] = userNetworkInfo.token;
-    data["refreshToken"] = userNetworkInfo.refreshToken;
-    data["expiresTime"]  = userNetworkInfo.accessTokenExpireTime;
-    data["loginStatus"]  = userNetworkInfo.loginStatus;
-    data["avatar"]      = userNetworkInfo.avatar;
-    data["email"]       = userNetworkInfo.email;
-    data["nickname"]    = userNetworkInfo.nickname;
-    if(UserNetworkManager::getInstance()->isOnline(userNetworkInfo)) {
-        data["online"] = true;
-    } else {
-        data["online"] = false;
-    }
+    mRefreshUserInfo = UserNetworkInfo();
+    nlohmann::json data = generateUserInfoData(userNetworkInfo);
     mIpc->sendEvent("client.onUserInfoUpdated", data, mIpc->generateRequestId());
     wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
 }
+
+void OnlineModelsHomepageView::onRegionChanged()
+{
+    //reload online models page
+    initUI();
+}
+
 void OnlineModelsHomepageView::cleanupIPC()
 {
 
@@ -317,23 +360,10 @@ webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
     lock_guard<mutex> lock(mUserInfoMutex);
     mIsReady = true;
     if (mIpc && !mRefreshUserInfo.userId.empty()) {
-        nlohmann::json data;
-        data["userId"]      = mRefreshUserInfo.userId;
-        data["accessToken"] = mRefreshUserInfo.token;
-        data["refreshToken"] = mRefreshUserInfo.refreshToken;
-        data["expiresTime"]  = mRefreshUserInfo.accessTokenExpireTime;
-        data["loginStatus"]  = mRefreshUserInfo.loginStatus;
-        data["avatar"]      = mRefreshUserInfo.avatar;
-        data["email"]       = mRefreshUserInfo.email;
-        data["nickname"]    = mRefreshUserInfo.nickname;
-        if(UserNetworkManager::getInstance()->isOnline(mRefreshUserInfo)) {
-            data["online"] = true;
-        } else {
-            data["online"] = false;
-        }
+        nlohmann::json data = generateUserInfoData(mRefreshUserInfo);
         mIpc->sendEvent("client.onUserInfoUpdated", data, mIpc->generateRequestId());
-        wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
         mRefreshUserInfo = UserNetworkInfo();
+        wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
     }
     return webviewIpc::IPCResult::success();
 }
