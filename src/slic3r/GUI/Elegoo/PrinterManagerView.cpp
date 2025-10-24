@@ -48,7 +48,7 @@ namespace GUI {
 // Static mutex for tab state file operations
 static std::mutex s_tabStateMutex;
 
-class TabArt : public wxAuiDefaultTabArt
+class TabArt : public wxAuiSimpleTabArt
 {
 private:
     bool isDarkMode() const {
@@ -235,8 +235,9 @@ public:
         int tabWidth = calculateTabWidth(wnd, isFirstTab);
   
         wxRect tab_rect = in_rect;
+        tab_rect.y = in_rect.y + TAB_BORDER_WIDTH;
         tab_rect.width = tabWidth - TAB_SEPARATOR_WIDTH;   
-        tab_rect.height = tab_rect.height - TAB_BORDER_WIDTH;
+        tab_rect.height = tab_rect.height - 1 - TAB_BORDER_WIDTH;
         // Get icon and text
         wxBitmap icon = getTabIcon(page.caption);
         wxString text = page.caption;
@@ -290,9 +291,10 @@ public:
 
         // Draw header background
         auto headerRect = rect;
+        headerRect.y = rect.y + TAB_BORDER_WIDTH;
         dc.SetPen(wxPen(tabHeaderBackground, 0));
         dc.SetBrush(wxBrush(tabHeaderBackground));
-        dc.DrawRectangle(rect);
+        dc.DrawRectangle(headerRect);
 
         // Draw header bottom border
         dc.SetPen(wxPen(border, TAB_BORDER_WIDTH));
@@ -305,7 +307,7 @@ public:
 
     wxSize GetTabSize(wxDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmap& bitmap, bool active, int close_button_state, int* x_extent) override {
         // Get the default tab size
-        wxSize default_size = wxAuiDefaultTabArt::GetTabSize(dc, wnd, caption, bitmap, active, close_button_state, x_extent);  
+        wxSize default_size = wxAuiSimpleTabArt::GetTabSize(dc, wnd, caption, bitmap, active, close_button_state, x_extent);  
         // Return custom size with modified height
         return wxSize(default_size.x, TAB_HEIGHT);
     }
@@ -320,7 +322,7 @@ public:
         dc.DrawRectangle(rect);
 
         auto headerRect = rect;
-        headerRect.height = TAB_HEIGHT + TAB_BORDER_WIDTH + 2;
+        headerRect.height = TAB_HEIGHT + TAB_BORDER_WIDTH;
         if(headerRect.height <= rect.height) {
             dc.SetPen(wxPen(tabHeaderBackground, 0));
             dc.SetBrush(wxBrush(tabHeaderBackground));
@@ -354,6 +356,8 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     mTabBar->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
     mainSizer->Add(mTabBar, 1, wxEXPAND);
     SetSizer(mainSizer);
+    wxAuiManager *m = (wxAuiManager*)&mTabBar->GetAuiManager();
+    m->GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
 
     mBrowser = WebView::CreateWebView(mTabBar, "");
     if (mBrowser == nullptr) {
