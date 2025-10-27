@@ -929,6 +929,7 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::refreshToken(const UserNetwork
     elink::HttpCredential params;
     params.userId = userInfo.userId;
     params.refreshToken = userInfo.refreshToken;
+    params.accessToken            = userInfo.token;
     params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
     params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
 

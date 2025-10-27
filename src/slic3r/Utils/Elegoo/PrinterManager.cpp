@@ -769,15 +769,25 @@ void PrinterManager::refreshOnlinePrinters(bool force)
             return;
         }
     }
-    mLastRefreshOnlinePrintersTime = now;
+    
 
     auto printersResult = UserNetworkManager::getInstance()->getUserBoundPrinters();
+
+    if (printersResult.isError()) {
+        // if login monitor in progress, skip refresh online printers
+        if (printersResult.code == PrinterNetworkErrorCode::LOGIN_MONITOR_IN_PROGRESS) {
+            return;
+        }
+    }
+
     std::vector<PrinterNetworkInfo> boundPrinters;
     if (printersResult.isSuccess() && printersResult.hasData()) {
         for (const auto& printer : printersResult.data.value()) {
             boundPrinters.push_back(printer);
         }
     }
+
+    mLastRefreshOnlinePrintersTime = now;
 
     std::vector<PrinterNetworkInfo> printerList = PrinterCache::getInstance()->getPrinters();
 

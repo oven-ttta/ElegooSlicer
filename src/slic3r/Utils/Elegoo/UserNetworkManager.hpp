@@ -28,8 +28,9 @@ public:
     // for frontend click avatar, check user need re-login
     PrinterNetworkResult<bool> checkUserNeedReLogin();
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
+    // printermanager get user bound printers
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
-    
+    // for frontend refresh token
     UserNetworkInfo refreshToken(const UserNetworkInfo& userInfo);
 
 private:
@@ -45,24 +46,23 @@ private:
     void saveUserInfo(const UserNetworkInfo& userInfo);
     void loadUserInfo();
     bool updateUserInfo(const UserNetworkInfo& userInfo);
-    bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId);
+    bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId, const std::string& token);
     bool needReLogin(const UserNetworkInfo& userInfo);
 
     std::string getLoginErrorMessage(const UserNetworkInfo& userInfo);
     void notifyUserInfoUpdated();
 private:
-    mutable std::mutex mNetworkMutex;
-    UserNetworkInfo mUserInfo;
-    std::shared_ptr<IUserNetwork> mNetwork;
+    mutable std::recursive_mutex mInitMutex;
+    std::atomic<bool> mIsInitialized{false};
     
-    mutable std::mutex mInitMutex;
+    mutable std::mutex mUserMutex;
+    UserNetworkInfo mUserInfo;
+    std::shared_ptr<IUserNetwork> mUserNetwork;
+    
+    std::mutex mMonitorMutex;
     std::atomic<bool> mRunning{false};
     std::thread mMonitorThread;
-    bool mInitialized{false};
-    
     std::chrono::steady_clock::time_point mLastLoopTime;
-
-    std::mutex mMonitorMutex;
 };
 
 } // namespace Slic3r

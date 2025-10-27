@@ -128,9 +128,9 @@ void UserLoginView::setupIPCHandlers()
         userNetworkInfo.region = mRegion;
         userNetworkInfo.language = mLanguage;
 
-        auto now = std::chrono::steady_clock::now();
-        userNetworkInfo.lastTokenRefreshTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count());
-        userNetworkInfo.loginTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count());
+        auto now = std::chrono::system_clock::now();
+        userNetworkInfo.lastTokenRefreshTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
+        userNetworkInfo.loginTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
         if(!userNetworkInfo.userId.empty() && !userNetworkInfo.token.empty()) {
             userNetworkInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
         } else {
