@@ -30,7 +30,7 @@ public:
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
     
-    bool refreshToken(const UserNetworkInfo& userInfo);
+    UserNetworkInfo refreshToken(const UserNetworkInfo& userInfo);
 
 private:
     UserNetworkManager();

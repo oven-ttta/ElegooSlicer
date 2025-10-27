@@ -356,13 +356,9 @@ void OnlineModelsHomepageView::setupIPCHandlers()
     mIpc->onRequest("report.refreshToken", [this](const webviewIpc::IPCRequest& request) { 
         auto        data     = request.params;
         UserNetworkInfo userNetworkInfo = parseUserInfoData(data);
-        bool result = UserNetworkManager::getInstance()->refreshToken(userNetworkInfo);
-        userNetworkInfo = UserNetworkManager::getInstance()->getUserInfo();
-        nlohmann::json userData = generateUserInfoData(userNetworkInfo);
-        if(result) {
-            return webviewIpc::IPCResult::success(userData);
-        } 
-        return webviewIpc::IPCResult::error(userData);
+        UserNetworkInfo refreshResult = UserNetworkManager::getInstance()->refreshToken(userNetworkInfo);
+        return webviewIpc::IPCResult::success(generateUserInfoData(refreshResult));       
+
     });
     mIpc->onRequest("report.ready", [this](const webviewIpc::IPCRequest& request) { return handleReady(); });
 
@@ -409,6 +405,9 @@ void OnlineModelsHomepageView::onRegionChanged()
 {
     //reload online models page
     initUI();
+    if(mBrowser) {
+        mBrowser->Reload();
+    }
 }
 
 void OnlineModelsHomepageView::cleanupIPC()

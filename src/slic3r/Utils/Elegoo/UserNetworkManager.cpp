@@ -358,9 +358,9 @@ void UserNetworkManager::monitorLoop()
     }
 }
 
-bool UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo)
+UserNetworkInfo UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo)
 {
-    CHECK_INITIALIZED(false);
+    CHECK_INITIALIZED(UserNetworkInfo());
 
     lock_guard<std::mutex> lock(mMonitorMutex);
 
@@ -369,65 +369,60 @@ bool UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo)
                  userInfo.userId.c_str(), userInfo.token.c_str(), userInfo.refreshToken.c_str(), userInfo.lastTokenRefreshTime,
                  userInfo.accessTokenExpireTime, userInfo.refreshTokenExpireTime);
 
-    if(userInfo.userId.empty()) {
-        wxLogMessage("UserNetworkManager::refreshToken request user id is empty, skip refresh token, user id: %s", userInfo.userId.c_str());
-        return false;
-    }
     UserNetworkInfo currentUserInfo = getUserInfo();
-    std::shared_ptr<IUserNetwork> network = getNetwork();
+    std::shared_ptr<IUserNetwork> network = getNetwork();            
 
-    if(network && userInfo.userId != currentUserInfo.userId) {
-        wxLogMessage("UserNetworkManager::refreshToken network is not null and user id changed, skip refresh token, user id: %s", userInfo.userId.c_str());
-        return false;
-    }
-
-    if(currentUserInfo.userId.empty()) {
-        wxLogMessage("UserNetworkManager::refreshToken current user id is empty, skip refresh token, user id: %s", userInfo.userId.c_str());
-        return false;
-    }
-
-    if (currentUserInfo.userId != userInfo.userId) {
-        // user id changed, return success
-        wxLogMessage("UserNetworkManager::refreshToken user id changed, skip refresh token, user id: %s", userInfo.userId.c_str());
-        return false;
-    }
-    
-    if( currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || 
+    // if user login status is invalid token or invalid user, skip refresh token
+    if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || 
         currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
-        wxLogMessage("UserNetworkManager::refreshToken user login status is invalid token or invalid user or token expired, skip refresh token, user id: %s", userInfo.userId.c_str());
-        return false;
+        wxLogMessage("UserNetworkManager::refreshToken user login status is invalid token or invalid user, skip refresh token, user id: %s", userInfo.userId.c_str());
+        return UserNetworkInfo();
     }
-    
-    if(currentUserInfo.lastTokenRefreshTime > userInfo.lastTokenRefreshTime) {
-        // already refreshed token
+    if(userInfo.userId != currentUserInfo.userId) {
+        if(currentUserInfo.userId.empty()) {
+            wxLogMessage("UserNetworkManager::refreshToken user id changed, current user id is empty, return empty user info, user id: %s", userInfo.userId.c_str());
+            return UserNetworkInfo();
+        }
+        if(currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+            wxLogMessage("UserNetworkManager::refreshToken user id changed, current user id is not empty and user already logged in, return current user info, user id: %s", userInfo.userId.c_str());
+            return currentUserInfo;
+        }
+    }
+    if(userInfo.userId.empty() && currentUserInfo.userId.empty()) {
+        wxLogMessage("UserNetworkManager::refreshToken user id is empty and current user id is empty, return empty user info, user id: %s", userInfo.userId.c_str());
+        return UserNetworkInfo();
+    }
+
+    if(userInfo.userId.empty() && !currentUserInfo.userId.empty() && currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+        wxLogMessage("UserNetworkManager::refreshToken user id is empty and current user id is not empty and user already logged in, return current user info");
+        return currentUserInfo;
+    }
+
+    // if already refreshed token, skip refresh token
+    if(currentUserInfo.lastTokenRefreshTime > userInfo.lastTokenRefreshTime && currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
         wxLogMessage("already refreshed token, skip refresh token, user id: %s", userInfo.userId.c_str());
-        return true;
+        return currentUserInfo;
     }
-    
-    // if(currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-    //     wxLogMessage("UserNetworkManager::refreshToken user login status is login success, skip refresh token, user id: %s", userInfo.userId.c_str());
-    //     return false;
-    // }
 
-    if(currentUserInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_TOKEN || 
-        currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
-        wxLogMessage("UserNetworkManager::refreshToken user login status is not invalid token or invalid user, skip refresh token, user id: %s", userInfo.userId.c_str());
-        return false;
+    if(network && currentUserInfo.userId != network->getUserNetworkInfo().userId) {
+        // user id changed
+        network = nullptr;
+        wxLogMessage("UserNetworkManager::refreshToken user id changed, set network to nullptr, user id: %s", userInfo.userId.c_str());
     }
-    
+
     if(refreshToken(currentUserInfo, network)) {
         wxLogMessage("UserNetworkManager::refreshToken refresh token success, user id: %s", userInfo.userId.c_str());
         updateUserInfo(currentUserInfo);
         setNetwork(network);
-        return true;
     } else if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN) {
         updateUserInfo(currentUserInfo);
         setNetwork(nullptr);
         wxLogMessage("UserNetworkManager::refreshToken refresh token failed, need to re-login, user id: %s", userInfo.userId.c_str());
-        return false;
+        return UserNetworkInfo();
     }
-
-    return false;
+    wxLogMessage("UserNetworkManager::refreshToken refresh token failed, user id: %s, login status: %d",
+                 userInfo.userId.c_str(), userInfo.loginStatus);
+    return currentUserInfo;
 }
 
 
