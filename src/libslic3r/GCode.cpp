@@ -85,14 +85,8 @@ using namespace std::literals::string_view_literals;
  * When used on single color printers for multi-color models,
  * the G-code between these two tags will be skipped.
  */
-#define ELEGOO_CC_TOOL_CHANGE_START_TAG(config, next_extruder) \
-    (config.printer_model.value.find("Elegoo Centauri") != std::string::npos ? \
-         "SET_CONDITION A=WIPE_TOWER\n" : \
-         "")
-#define ELEGOO_CC_TOOL_CHANGE_END_TAG(config, next_extruder) \
-    (config.printer_model.value.find("Elegoo Centauri") != std::string::npos ? \
-         "SET_CONDITION_END A=WIPE_TOWER\n" : \
-         "")
+#define ELEGOO_CC_TOOL_CHANGE_START_TAG "SET_CONDITION A=WIPE_TOWER\n"
+#define ELEGOO_CC_TOOL_CHANGE_END_TAG "SET_CONDITION_END A=WIPE_TOWER\n"
 
 namespace Slic3r {
 
@@ -765,6 +759,7 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
             // FIXME: It would be better if the wipe tower set the force_travel flag for all toolchanges,
             // then we could simplify the condition and make it more readable.
             gcode += gcodegen.retract();
+            gcode += ELEGOO_CC_TOOL_CHANGE_START_TAG;
             gcodegen.m_avoid_crossing_perimeters.use_external_mp_once();
             gcode += gcodegen.travel_to(wipe_tower_point_to_object_point(gcodegen, start_pos + plate_origin_2d), erMixed, "Travel to a Wipe Tower");
             gcode += gcodegen.unretract();
@@ -772,8 +767,9 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
             // When this is multiextruder printer without any ramming, we can just change
             // the tool without travelling to the tower.
             gcode += gcodegen.retract();
+            gcode += ELEGOO_CC_TOOL_CHANGE_START_TAG;
         }
-        gcode += ELEGOO_CC_TOOL_CHANGE_START_TAG(gcodegen.config(), new_extruder_id);
+        
 
         if (will_go_down) {
             gcode += gcodegen.writer().retract();
@@ -838,7 +834,7 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
 
         // Let the planner know we are traveling between objects.
         gcodegen.m_avoid_crossing_perimeters.use_external_mp_once();
-        gcode += ELEGOO_CC_TOOL_CHANGE_END_TAG(gcodegen.config(),new_extruder_id);
+        gcode += ELEGOO_CC_TOOL_CHANGE_END_TAG;
         return gcode;
     }
 
