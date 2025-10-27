@@ -774,8 +774,8 @@ void PrinterManager::refreshOnlinePrinters(bool force)
     auto printersResult = UserNetworkManager::getInstance()->getUserBoundPrinters();
 
     if (printersResult.isError()) {
-        // if login monitor in progress, skip refresh online printers
-        if (printersResult.code == PrinterNetworkErrorCode::LOGIN_MONITOR_IN_PROGRESS) {
+        // if user network busy, skip refresh online printers
+        if (printersResult.code == PrinterNetworkErrorCode::USER_NETWORK_BUSY) {
             return;
         }
     }

@@ -75,6 +75,11 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> UserNetworkManager::getUse
 {
     CHECK_INITIALIZED(PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::NOT_INITIALIZED, std::vector<PrinterNetworkInfo>()));
 
+    std::unique_lock<std::mutex> monitorLock(mMonitorMutex, std::try_to_lock);
+    if (!monitorLock.owns_lock()) {
+        return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::USER_NETWORK_BUSY, std::vector<PrinterNetworkInfo>());
+    }
+
     std::shared_ptr<IUserNetwork> network = getNetwork();
     if (!network) {
         return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, std::vector<PrinterNetworkInfo>());

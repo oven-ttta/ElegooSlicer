@@ -76,7 +76,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_HOST_NOT_MATCH = 10008,      // host not match with the local printer
     PRINTER_NETWORK_NOT_INITIALIZED = 10009, // Printer network not initialized
     PRINTER_PLUGIN_NOT_INSTALLED = 10010, // Printer plugin not installed
-    LOGIN_MONITOR_IN_PROGRESS = 10011, // Login monitor in progress
+    USER_NETWORK_BUSY                   = 10011, // Network busy
 };
 
 

@@ -42,7 +42,7 @@ PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::refreshToken(const User
 {
     mUserNetworkInfo = userInfo;
     auto result = ElegooLink::getInstance()->refreshToken(userInfo);
-    return PrinterNetworkResult<UserNetworkInfo>(result.code, mUserNetworkInfo, result.message);
+    return result;
 }
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooUserNetwork::getUserBoundPrinters()
