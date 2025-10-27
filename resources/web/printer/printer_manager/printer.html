@@ -79,12 +79,15 @@
             </div>
 
             <div v-if="printerStore.networkPrinters.length === 0 || !printerStore.isLoggedIn">
-                <div v-if="printerStore.userInfo.loginStatus !== 1" class="no-login">
+                <div v-if="printerStore.userInfo.loginStatus === -1" class="no-login">
                     <div v-html="getLoginToViewHtml()"></div>
                 </div>
                 <div v-else-if="printerStore.networkPrinters.length === 0" class="no-printer">
-                    <img src="../img/printer-empty.png" width="180" />
-                    <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
+                    <div v-if="printerStore.userInfo.loginErrorMessage && printerStore.userInfo.loginErrorMessage !== ''" class="login-error">{{ printerStore.userInfo.loginErrorMessage }}</div>
+                    <template v-else>
+                        <img src="../img/printer-empty.png" width="180" />
+                        <div>{{ $t("printerManager.noPrintersAvailable") }}</div>
+                    </template>
                 </div>
             </div>
             <div class="printer-list" v-else>

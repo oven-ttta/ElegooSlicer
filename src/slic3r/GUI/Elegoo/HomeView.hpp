@@ -27,7 +27,8 @@ public:
     void updateMode();
     void switchToPage(const wxString& pageName);
     void refreshUserInfo();
-
+    void onRegionChanged();
+    
 private:
     void initUI();
     void setupIPCHandlers();
@@ -40,12 +41,15 @@ private:
     webviewIpc::IPCResult handleLogout();
     webviewIpc::IPCResult handleNavigateToPage(const nlohmann::json& data);
     webviewIpc::IPCResult handleShowLoginDialog();
+    webviewIpc::IPCResult handleCheckLoginStatus();
     webviewIpc::IPCResult handleReady();
     
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
     void onWebViewError(wxWebViewEvent& event);
-    
+    void OnNavigationRequest(wxWebViewEvent& event);
+    void OnNavigationComplete(wxWebViewEvent& event);
+    void OnNewWindowRequest(wxWebViewEvent& event);
 private:
     // UI Components
     wxBoxSizer* mMainSizer;
@@ -61,7 +65,7 @@ private:
     HomepageView* mCurrentView;
     
 
-    std::atomic<bool> mIsReady = false;
+    std::atomic<bool> mIsReady{false};
     std::mutex mUserInfoMutex; // Mutex to protect user info
     UserNetworkInfo mRefreshUserInfo; // User info
     DECLARE_EVENT_TABLE()

@@ -18,6 +18,7 @@ public:
     virtual void initialize() {}
     virtual void updateMode() {}
     virtual void onUserInfoUpdated(const UserNetworkInfo& userNetworkInfo) {}
+    virtual void onRegionChanged() {}
 
     const wxString& getName() const { return mName; }
     const bool isReady() const { return mIsReady; }
@@ -37,6 +38,7 @@ public:
     void initialize() override;
     void updateMode() override;
 
+    void showRecentFiles(int images);
 private:
     void initUI();
     void setupIPCHandlers();
@@ -54,7 +56,8 @@ private:
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
     void onWebViewError(wxWebViewEvent& event);
-    
+    void OnNavigationRequest(wxWebViewEvent& event);
+    void OnNavigationComplete(wxWebViewEvent& event);
 private:
     wxWebView* mBrowser;
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
@@ -72,6 +75,7 @@ public:
     void initialize() override;
     void updateMode() override;
     void onUserInfoUpdated(const UserNetworkInfo& userNetworkInfo) override;
+    void onRegionChanged() override;
  
 private:
     void initUI();
@@ -83,6 +87,7 @@ private:
     void onWebViewError(wxWebViewEvent& event);
     webviewIpc::IPCResult handleReady();
 
+    void loadFailedPage();
 private:
     wxWebView* mBrowser;
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;

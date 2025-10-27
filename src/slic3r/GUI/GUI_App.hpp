@@ -448,8 +448,6 @@ public:
     void            get_login_info();
     bool            is_user_login();
 
-    void            request_user_login(int online_login = 0);
-    void            request_user_handle(int online_login = 0);
     void            request_user_logout();
     int             request_user_unbind(std::string dev_id);
     std::string     handle_web_request(std::string cmd);

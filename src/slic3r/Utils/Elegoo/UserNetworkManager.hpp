@@ -22,24 +22,23 @@ public:
     void init();
     void uninit();
     
-    void setIotUserInfo(const UserNetworkInfo& userInfo);
-    UserNetworkInfo getIotUserInfo();
-    void clearIotUserInfo();
-    
+    UserNetworkInfo getUserInfo() const;
+    // only can be called by login or logout
+    void setUserInfo(const UserNetworkInfo& userInfo);
+    // for frontend click avatar, check user need re-login
+    PrinterNetworkResult<bool> checkUserNeedReLogin();
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
     
+    UserNetworkInfo refreshToken(const UserNetworkInfo& userInfo);
+
 private:
     UserNetworkManager();
     ~UserNetworkManager();
     
     void monitorLoop();
     bool refreshToken(UserNetworkInfo& userInfo, std::shared_ptr<IUserNetwork>& network);
-    bool isValidToken(const UserNetworkInfo& userInfo);
-    bool needReLogin(const UserNetworkInfo& userInfo);
 
-    UserNetworkInfo getUserInfo() const;
-    void setUserInfo(const UserNetworkInfo& userInfo);
     std::shared_ptr<IUserNetwork> getNetwork() const;
     void setNetwork(std::shared_ptr<IUserNetwork> network);
         
@@ -47,9 +46,12 @@ private:
     void loadUserInfo();
     bool updateUserInfo(const UserNetworkInfo& userInfo);
     bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId);
+    bool needReLogin(const UserNetworkInfo& userInfo);
 
+    std::string getLoginErrorMessage(const UserNetworkInfo& userInfo);
+    void notifyUserInfoUpdated();
 private:
-    mutable std::mutex mUserInfoMutex;
+    mutable std::mutex mNetworkMutex;
     UserNetworkInfo mUserInfo;
     std::shared_ptr<IUserNetwork> mNetwork;
     
@@ -59,6 +61,8 @@ private:
     bool mInitialized{false};
     
     std::chrono::steady_clock::time_point mLastLoopTime;
+
+    std::mutex mMonitorMutex;
 };
 
 } // namespace Slic3r

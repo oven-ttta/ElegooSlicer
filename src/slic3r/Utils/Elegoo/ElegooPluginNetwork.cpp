@@ -39,21 +39,12 @@ PrinterNetworkResult<bool> ElegooPluginNetwork::uninstallPlugin()
 
 PrinterNetworkResult<PluginNetworkInfo> ElegooPluginNetwork::getPluginLastestVersion()
 {
-    PluginNetworkInfo pluginNetworkInfo;
-    pluginNetworkInfo.version = "1.0.0";
-    pluginNetworkInfo.downloadUrl = "https://www.elegoo.com/download/plugin/1.0.0";
-    pluginNetworkInfo.hostType = "elegoo";
-    return PrinterNetworkResult<PluginNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, pluginNetworkInfo);
+    return PrinterNetworkResult<PluginNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, PluginNetworkInfo());
 }
 
 PrinterNetworkResult<std::vector<PluginNetworkInfo>> ElegooPluginNetwork::getPluginOldVersions()
 {
     std::vector<PluginNetworkInfo> pluginNetworkInfos;
-    PluginNetworkInfo pluginNetworkInfo;
-    pluginNetworkInfo.version = "1.0.0";
-    pluginNetworkInfo.downloadUrl = "https://www.elegoo.com/download/plugin/1.0.0";
-    pluginNetworkInfo.hostType = "elegoo";
-    pluginNetworkInfos.push_back(pluginNetworkInfo);
     return PrinterNetworkResult<std::vector<PluginNetworkInfo>>(PrinterNetworkErrorCode::SUCCESS, pluginNetworkInfos);
 }
 

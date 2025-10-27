@@ -30,7 +30,7 @@
 			<!-- User area - show different content based on login status -->
 			<div id="user-area">
 				<!-- Not logged in state -->
-				<div v-if="userInfo.userId == ''" id="login-state" @click="onLoginOrRegister()">
+				<div v-if="userInfo.userId == ''" id="login-state" @click="onClickUserAvatar()">
 					<div id="empty-avatar">
 						<img src="img/default-avatar.svg" alt="Empty Avatar" />
 					</div>
@@ -39,10 +39,11 @@
 
 				<!-- Logged in state -->
 				<div v-if="userInfo.userId != ''" id="user-state" @click.stop>
+
 					<el-popover placement="bottom" :width="200" trigger="click" :show-arrow="false" offset="-4">
 						<template #reference>
-							<div id="user-info" @click="toggleUserMenu()">
-								<div id="user-avatar">
+							<div id="user-info">
+								<div id="user-avatar" @click.stop="onClickUserAvatar()">
 									<img :src="userInfo.avatar || 'img/default-avatar.svg'" @error="handleImageError"
 										alt="User Avatar" width="106" />
 									<span class="user-status" :style="loginStatusStyle"></span>
@@ -132,7 +133,7 @@
 					<div class="btn-icon"><img class="left-icon" src="img/recent-icon.svg" /></div>
 					<div>{{ $t("homepage.recent") }}</div>
 				</div>
-				<div menu="online-models"
+				<div v-if="region !== 'CN' && region !== ''" menu="online-models"
 					:class="['btn-item', { 'btn-item-selected': currentPage === 'online-models' }]"
 					@click="navigateToPage('online-models')">
 					<div class="btn-icon"><img class="left-icon" src="img/online-models-icon.png" /></div>

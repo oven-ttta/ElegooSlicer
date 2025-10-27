@@ -819,6 +819,17 @@ body {
   text-decoration: underline;
 }
 
+/* Login error message styling */
+.login-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  gap: 20px;
+  margin-top: 80px;
+}
+
 .user-status {
   position: absolute;
   bottom: 0;
