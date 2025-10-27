@@ -525,6 +525,11 @@ void PrinterWebView::setupIPCHandlers()
         webviewIpc::IPCResult result;
         result.message = deletePrintTasks.message;
         result.code = deletePrintTasks.isSuccess() ? 0 : static_cast<int>(deletePrintTasks.code);
+        //package the result data
+        nlohmann::json data;
+        data["error_code"] =  result.code;
+        data["error_message"] = result.message;
+        result.data = data;
         return result;
     });
 

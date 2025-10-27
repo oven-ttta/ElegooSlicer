@@ -78,12 +78,12 @@ const PrinterPinAuthComponent = {
     },
 
     beforeUnmount() {
-  
+
     },
 
     computed: {
         connectGuideImg() {
-            return "./img/connect-guide-"+ defaultLanguage() +".png";
+            return "./img/pincode-connect-guide-" + defaultLanguage() + ".png";
         },
     },
 
