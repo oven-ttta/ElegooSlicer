@@ -280,7 +280,11 @@ PrinterNetworkResult<bool> PrinterManager::deletePrinter(const std::string& prin
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
     }
     if (printer.value().networkType == NETWORK_TYPE_WAN) {
-        auto unbindResult = getPrinterNetwork(printerId)->unbindWANPrinter(printer.value().serialNumber);
+        std::shared_ptr<IPrinterNetwork> printerNetwork = getPrinterNetwork(printerId);
+        if (!printerNetwork) {
+            return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+        }
+        auto unbindResult = printerNetwork->unbindWANPrinter(printer.value().serialNumber);
         if (!unbindResult.isSuccess()) {
             wxLogMessage("Unbind WAN printer: %s %s %s", printer.value().host, printer.value().printerName, printer.value().printerModel);
             return PrinterNetworkResult<bool>(unbindResult.code, false, "unbind WAN printer failed");
@@ -304,6 +308,19 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterName(const std::string& 
     if (!printer.has_value()) {
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
     }
+
+    if(printer.value().networkType == NETWORK_TYPE_WAN) {
+        std::shared_ptr<IPrinterNetwork> printerNetwork = getPrinterNetwork(printerId);
+        if (!printerNetwork) {
+            return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+        }
+        auto updateNameResult = printerNetwork->updatePrinterName(printerName);
+        if (!updateNameResult.isSuccess()) {
+            return PrinterNetworkResult<bool>(updateNameResult.code, false);
+        }
+        refreshOnlinePrinters(true);
+    }
+
     PrinterCache::getInstance()->updatePrinterName(printerId, printerName);
     PrinterCache::getInstance()->savePrinterList();
     wxLogMessage("Update printer name: %s %s %s to %s", printer.value().host, printer.value().printerName, printer.value().printerModel,

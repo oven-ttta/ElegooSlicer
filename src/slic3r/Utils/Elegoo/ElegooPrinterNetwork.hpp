@@ -26,6 +26,7 @@ public:
     virtual PrinterNetworkResult<bool> deletePrintTasks(const std::vector<std::string>& taskIds) override;
     virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& message) override;
     virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& fileName) override;
+    virtual PrinterNetworkResult<bool> updatePrinterName(const std::string& printerName) override;
     
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
     virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& serialNumber) override;

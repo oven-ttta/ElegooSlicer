@@ -34,6 +34,7 @@ public:
     virtual PrinterNetworkResult<bool>                            deletePrintTasks(const std::vector<std::string>& taskIds) = 0;
     virtual PrinterNetworkResult<bool>                            sendRtmMessage(const std::string& message)                = 0;
     virtual PrinterNetworkResult<PrinterPrintFileResponse>        getFileDetail(const std::string& fileName)                = 0;
+    virtual PrinterNetworkResult<bool>                            updatePrinterName(const std::string& printerName)         = 0;
 
     // WAN
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;

@@ -903,6 +903,21 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetwork
         parseUnknownErrorMsg(resultCode, setHttpCredentialResult.message));
 }
 
+
+PrinterNetworkResult<bool> ElegooLink::updatePrinterName(const std::string& printerId, const std::string& printerName, bool isWan)
+{
+    CHECK_INITIALIZED(true, false);
+    elink::VoidResult result;
+    elink::UpdatePrinterNameParams params;
+    params.printerId = printerId;
+    params.printerName = printerName;
+    if(isWan) {
+        result = elink::ElegooNetwork::getInstance().updatePrinterName(params);
+    } 
+    PrinterNetworkErrorCode resultCode = parseElegooResult(result.code);
+    return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, result.message));
+}
+
 PrinterNetworkResult<bool> ElegooLink::disconnectFromIot()
 {
     CHECK_INITIALIZED(true, false);

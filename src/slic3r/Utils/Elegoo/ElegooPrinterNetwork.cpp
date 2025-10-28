@@ -62,6 +62,10 @@ PrinterNetworkResult<PrinterPrintFileResponse> ElegooPrinterNetwork::getFileDeta
     return ElegooLink::getInstance()->getFileDetail(mPrinterNetworkInfo.printerId, fileName);
 }
 
+PrinterNetworkResult<bool> ElegooPrinterNetwork::updatePrinterName(const std::string& printerName)
+{
+    return ElegooLink::getInstance()->updatePrinterName(mPrinterNetworkInfo.printerId, printerName, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+}
 PrinterNetworkResult<PrinterMmsGroup> ElegooPrinterNetwork::getPrinterMmsInfo()
 {
     return ElegooLink::getInstance()->getPrinterMmsInfo(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
