@@ -31,6 +31,12 @@ const Navigation = {
                 const regionResponse = await this.ipcRequest('getRegion', {});
                 this.region = regionResponse || '';
                 console.log('Region:', this.region);
+                
+                if (this.region && this.region !== 'CN') {
+                    this.currentPage = 'online-models';
+                    await this.ipcRequest('navigateToPage', { page: 'online-models' });
+                    console.log('Navigated to online-models for region:', this.region);
+                }
             } catch (error) {
                 console.error('Failed to get region:', error);
                 this.region = '';
@@ -156,6 +162,11 @@ const Navigation = {
                 console.error('Failed to get region:', error);
                 this.region = '';
             }
+        });
+        
+        window.addEventListener('blur', () => {
+            console.log('Window lost focus, closing all popovers');
+            document.body.click();
         });
 
         await this.ipcRequest('ready', {});
