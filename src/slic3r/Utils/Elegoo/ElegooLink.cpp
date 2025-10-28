@@ -403,6 +403,16 @@ PrinterNetworkResult<bool> ElegooLink::unbindWANPrinter(const std::string& seria
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
+PrinterNetworkResult<bool> ElegooLink::setRegion(const std::string& region)
+{
+    CHECK_INITIALIZED(true, false);
+    elink::SetRegionParams params;
+    params.region = region;
+    elink::VoidResult elinkResult = elink::ElegooNetwork::getInstance().setRegion(params);
+    PrinterNetworkErrorCode resultCode = parseElegooResult(elinkResult.code);
+    return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, elinkResult.message));
+}
+
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinters()
 {
     CHECK_INITIALIZED(false, std::vector<PrinterNetworkInfo>());
@@ -872,10 +882,6 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetwork
 
     UserNetworkInfo userInfoRet = userInfo;
 
-    elink::SetRegionParams setRegionParams;
-    setRegionParams.region = userInfo.region;
-    elink::ElegooNetwork::getInstance().setRegion(setRegionParams);
-
     elink::VoidResult       setHttpCredentialResult = elink::ElegooNetwork::getInstance().setHttpCredential(params);
     PrinterNetworkErrorCode resultCode              = parseElegooResult(setHttpCredentialResult.code);
 
@@ -932,10 +938,6 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::refreshToken(const UserNetwork
     params.accessToken = userInfo.token;
     params.accessTokenExpireTime = userInfo.accessTokenExpireTime;
     params.refreshTokenExpireTime = userInfo.refreshTokenExpireTime;
-
-    elink::SetRegionParams setRegionParams;
-    setRegionParams.region = userInfo.region;
-    elink::ElegooNetwork::getInstance().setRegion(setRegionParams);
 
     elink::BizResult<elink::HttpCredential> httpCredentialResult = elink::ElegooNetwork::getInstance().refreshHttpCredential(params);
     PrinterNetworkErrorCode resultCode = parseElegooResult(httpCredentialResult.code);

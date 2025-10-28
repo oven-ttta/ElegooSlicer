@@ -4,6 +4,7 @@
 #include <mutex>
 #include <vector>
 #include <optional>
+#include <functional>
 #include "libslic3r/PrinterNetworkInfo.hpp"
 #include "slic3r/Utils/Singleton.hpp"
 
@@ -88,6 +89,14 @@ public:
      * @brief Update printer print task
      */
     void updatePrinterPrintTask(const std::string& printerId, const PrinterPrintTask& task);
+
+    /**
+     * @brief Update printer field by custom updater function
+     * @param printerId: printer id
+     * @param updater: function to update printer info
+     * @return true if printer found and updated
+     */
+    bool updatePrinterField(const std::string& printerId, std::function<void(PrinterNetworkInfo&)> updater);
 
 private:
     PrinterCache();

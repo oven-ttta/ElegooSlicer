@@ -19,7 +19,8 @@ public:
     virtual PrinterNetworkResult<UserNetworkInfo> getRtcToken() override;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters() override;
     virtual PrinterNetworkResult<UserNetworkInfo> refreshToken(const UserNetworkInfo& userInfo) override;
-
+    virtual PrinterNetworkResult<bool> setRegion(const std::string& region) override;
+    
     static void init();
     static void uninit();
 };

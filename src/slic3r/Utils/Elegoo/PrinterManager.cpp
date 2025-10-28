@@ -799,6 +799,12 @@ void PrinterManager::refreshOnlinePrinters(bool force)
             if ((!p.serialNumber.empty() && p.serialNumber == boundPrinter.serialNumber && p.networkType == NETWORK_TYPE_WAN) ||
                 (!p.printerId.empty() && p.printerId == boundPrinter.printerId)) {
                 isExisting = true;
+                // // update the printer info if the printer is already exists
+                PrinterCache::getInstance()->updatePrinterField(p.printerId, [boundPrinter](PrinterNetworkInfo& cachedPrinter) {
+                    if(cachedPrinter.printerName != boundPrinter.printerName) {
+                        cachedPrinter.printerName = boundPrinter.printerName;
+                    }
+                });
                 break;
             }
         }

@@ -215,6 +215,19 @@ void PrinterCache::updatePrinterAttributesByNotify(const std::string& printerId,
         it->second.lastActiveTime = now;
         it->second.firmwareVersion = printerInfo.firmwareVersion;
     }
-}   
+}
+
+bool PrinterCache::updatePrinterField(const std::string& printerId, std::function<void(PrinterNetworkInfo&)> updater) {
+    std::lock_guard<std::mutex> lock(mCacheMutex);
+    auto it = mPrinters.find(printerId);
+    if (it != mPrinters.end()) {
+        updater(it->second);
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        it->second.modifyTime = now;
+        it->second.lastActiveTime = now;
+        return true;
+    }
+    return false;
+}
 
 } // namespace Slic3r

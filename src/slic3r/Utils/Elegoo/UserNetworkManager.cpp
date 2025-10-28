@@ -56,6 +56,7 @@ void UserNetworkManager::uninit()
     {
         std::lock_guard<std::recursive_mutex> lock(mInitMutex);
         setNetwork(nullptr);
+        clearBoundPrinters();
         IUserNetwork::uninit();
         mIsInitialized.store(false);
     } 
@@ -64,9 +65,14 @@ void UserNetworkManager::uninit()
 PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
 {
     CHECK_INITIALIZED(PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::NOT_INITIALIZED, UserNetworkInfo()));
+    
     std::shared_ptr<IUserNetwork> network = getNetwork();
     if (!network) {
-        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, UserNetworkInfo());
+        UserNetworkInfo userInfo = getUserInfo();
+        if(userInfo.userId.empty()) {
+            return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, UserNetworkInfo());
+        }
+        return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::NETWORK_ERROR, UserNetworkInfo());
     }
     return network->getRtcToken();
 }
@@ -74,28 +80,10 @@ PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> UserNetworkManager::getUserBoundPrinters()
 {
     CHECK_INITIALIZED(PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::NOT_INITIALIZED, std::vector<PrinterNetworkInfo>()));
-
-    std::unique_lock<std::mutex> monitorLock(mMonitorMutex, std::try_to_lock);
-    if (!monitorLock.owns_lock()) {
-        return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::USER_NETWORK_BUSY, std::vector<PrinterNetworkInfo>());
-    }
-
-    std::shared_ptr<IUserNetwork> network = getNetwork();
-    if (!network) {
-        return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, std::vector<PrinterNetworkInfo>());
-    }
-
-    PrinterNetworkResult<std::vector<PrinterNetworkInfo>> result = network->getUserBoundPrinters();
-    if (!result.isSuccess()) {
-        LoginStatus loginStatus = parseLoginStatusByErrorCode(result.code);
-        if (loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED || loginStatus == LOGIN_STATUS_OFFLINE) {
-            // Token check in updateUserInfoLoginStatus provides additional safety
-            updateUserInfoLoginStatus(loginStatus, network->getUserNetworkInfo().userId, network->getUserNetworkInfo().token);
-        }
-    }
-    return result;
+    
+    auto printers = getBoundPrinters();
+    return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::SUCCESS, printers);
 }
-
 
 UserNetworkInfo UserNetworkManager::getUserInfo() const
 {   
@@ -108,24 +96,18 @@ UserNetworkInfo UserNetworkManager::getUserInfo() const
 void UserNetworkManager::setUserInfo(const UserNetworkInfo& userInfo)
 {
     std::lock_guard<std::mutex> lock(mUserMutex);
-    UserNetworkInfo userNetworkInfo = userInfo;
-    if(userNetworkInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-        // connectedToIot set to true for frontend login success display, but actually not connected to iot yet, still need to connect iot successfully
-        userNetworkInfo.connectedToIot = true;
-    } else {
-        userNetworkInfo.connectedToIot = false;
-    }
-    mUserInfo = userNetworkInfo;
-    
 
-    // set network to nullptr and monitorLoop will reset connect to iot
+    mUserInfo = userInfo; 
+
     if (mUserNetwork) {
         mUserNetwork->disconnectFromIot();
         mUserNetwork = nullptr;
     }
     
+    clearBoundPrinters();
+    
     notifyUserInfoUpdated();
-    saveUserInfo(userNetworkInfo);
+    saveUserInfo(userInfo);
 }
 
 std::shared_ptr<IUserNetwork> UserNetworkManager::getNetwork() const
@@ -138,7 +120,8 @@ void UserNetworkManager::setNetwork(std::shared_ptr<IUserNetwork> network)
 {
     std::lock_guard<std::mutex> lock(mUserMutex);
     if (!network && mUserNetwork) {
-        mUserNetwork->disconnectFromIot();
+        mUserNetwork->disconnectFromIot();    
+        clearBoundPrinters();
     }
     mUserNetwork = network;
 }
@@ -152,11 +135,6 @@ bool UserNetworkManager::updateUserInfo(const UserNetworkInfo& userInfo)
             needNotify = true;
             wxLogMessage("User login status updated, user id: %s, login status: %d",
                          userInfo.userId.c_str(), userInfo.loginStatus);
-        }
-        if (mUserInfo.connectedToIot != userInfo.connectedToIot) {
-            needNotify = true;
-            wxLogMessage("User connected to iot updated, user id: %s, connected to iot: %d",
-                         userInfo.userId.c_str(), userInfo.connectedToIot);
         }
         if (mUserInfo.token != userInfo.token) {
             needNotify = true;
@@ -187,12 +165,12 @@ bool UserNetworkManager::updateUserInfo(const UserNetworkInfo& userInfo)
     return false;
 }
 
-bool UserNetworkManager::updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId, const std::string& token)
+bool UserNetworkManager::updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId)
 {
     std::lock_guard<std::mutex> lock(mUserMutex);
-    if(mUserInfo.userId != userId || mUserInfo.token != token) {
-        wxLogMessage("User id or token is different, skip update login status, user id: %s, token: %s, login status: %d",
-                     userId.c_str(), token.c_str(), loginStatus);
+    if(mUserInfo.userId != userId) {
+        wxLogMessage("User id is different, skip update login status, user id: %s, login status: %d",
+                     userId.c_str(), loginStatus);
         return false;
     }
     if(mUserInfo.loginStatus != loginStatus) {
@@ -248,9 +226,48 @@ bool UserNetworkManager::needReLogin(const UserNetworkInfo& userInfo)
 {
     return userInfo.userId.empty() || 
         userInfo.token.empty() || 
+        userInfo.region.empty() ||
         userInfo.loginStatus == LOGIN_STATUS_NO_USER ||
         userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN ||
         userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER;
+}
+
+std::vector<PrinterNetworkInfo> UserNetworkManager::getBoundPrinters() const
+{
+    std::lock_guard<std::mutex> lock(mBoundPrintersMutex);
+    return mBoundPrintersList;
+}
+
+void UserNetworkManager::setBoundPrinters(const std::vector<PrinterNetworkInfo>& printers)
+{
+    std::lock_guard<std::mutex> lock(mBoundPrintersMutex);
+    mBoundPrintersList = printers;
+}
+
+void UserNetworkManager::clearBoundPrinters()
+{
+    std::lock_guard<std::mutex> lock(mBoundPrintersMutex);
+    mBoundPrintersList.clear();
+}
+
+void UserNetworkManager::syncBoundPrinters(std::shared_ptr<IUserNetwork> network)
+{
+    if (!network) {
+        clearBoundPrinters();
+        return;
+    }   
+    auto printersResult = network->getUserBoundPrinters();
+    if (printersResult.isSuccess() && printersResult.hasData()) {
+        setBoundPrinters(printersResult.data.value());
+    } else if (!printersResult.isSuccess()) {
+        clearBoundPrinters();
+        LoginStatus loginStatus = parseLoginStatusByErrorCode(printersResult.code);
+        if (loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED || 
+            loginStatus == LOGIN_STATUS_OFFLINE ||
+            loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN) {
+            updateUserInfoLoginStatus(loginStatus, network->getUserNetworkInfo().userId);
+        }
+    }
 }
 void UserNetworkManager::monitorLoop()
 {
@@ -272,99 +289,83 @@ void UserNetworkManager::monitorLoop()
         std::shared_ptr<IUserNetwork> network         = getNetwork();
         LoginStatus lastLoginStatus = userInfo.loginStatus;
 
-        // if user id is empty or token is empty or login status is invalid, need to re-login
+        // Step 1: Check if need re-login
         if (needReLogin(userInfo)) {
-            if(network) {
-                setNetwork(nullptr);
-                wxLogMessage("User info or token invalid, need to re-login, user id: %s, login status: %d",
-                             userInfo.userId.c_str(), userInfo.loginStatus);
-            }
+            setNetwork(nullptr);
             continue;
         }
 
-        // check if user id changed
+        // Step 2: Check if user changed
         if (network && network->getUserNetworkInfo().userId != userInfo.userId) {
             setNetwork(nullptr);
-            wxLogMessage("User id changed, need to re-login, user id: %s, login status: %d",
-                         userInfo.userId.c_str(), userInfo.loginStatus);
             continue;
         }
 
-        // if already connected to iot, skip
-        if (network && userInfo.connectedToIot && userInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+        // Step 3: If already logged in, sync printers and skip
+        if (userInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS && network) {
+            syncBoundPrinters(network);
             continue;
         }
 
-        // if token is expired, need to refresh token
+        setNetwork(nullptr);   
+        std::shared_ptr<IUserNetwork> newNetwork = NetworkFactory::createUserNetwork(userInfo);
+        if (!newNetwork) {
+            if (lastLoginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER) {
+                updateUserInfoLoginStatus(LOGIN_STATUS_OFFLINE_INVALID_USER, userInfo.userId);
+            }
+            continue;
+        }
+        // Step 4: set region
+        // different regions need different service addresses
+        newNetwork->setRegion(userInfo.region);
+
+        // Step 5: Handle token expired - try to refresh
         if (userInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
-            // refresh token
-            if (refreshToken(userInfo, network)) {
-                // if refresh token success, is still connected to iot
-                userInfo.connectedToIot = true;
-                userInfo.loginStatus    = LOGIN_STATUS_LOGIN_SUCCESS;
-                if (!updateUserInfo(userInfo)) {
-                    network = nullptr;
-                    wxLogMessage("User id changed during token refresh, abandon this refresh, user id: %s", userInfo.userId.c_str());
+            if (refreshToken(userInfo, newNetwork)) {
+                userInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
+                if (updateUserInfo(userInfo)) {
+                    setNetwork(newNetwork);
+                    syncBoundPrinters(newNetwork);
+                } else {
+                    newNetwork->disconnectFromIot();
+                    newNetwork = nullptr;
                 }
-                setNetwork(network);
-                continue;
             } else {
                 if (lastLoginStatus != userInfo.loginStatus) {
-                    setNetwork(nullptr);
-                    updateUserInfoLoginStatus(userInfo.loginStatus, userInfo.userId, userInfo.token);
+                    updateUserInfoLoginStatus(userInfo.loginStatus, userInfo.userId);
                 }
-                continue;
             }
+            continue;
         }
 
-        if (!network) {
-            // create network
-            network = NetworkFactory::createUserNetwork(userInfo);
-            if (!network) {
-                userInfo.connectedToIot = false;
-                userInfo.loginStatus    = LOGIN_STATUS_OFFLINE_INVALID_USER;
-                if (lastLoginStatus != userInfo.loginStatus) {
-                    setNetwork(nullptr);
-                    updateUserInfoLoginStatus(userInfo.loginStatus, userInfo.userId, userInfo.token);
-                }
-                continue;
-            }
-        }
-        // connect to iot
-        auto loginResult = network->connectToIot(userInfo);
+        // Step 6: Try to connect to IoT        
+        auto loginResult = newNetwork->connectToIot(userInfo);
         if (loginResult.isSuccess() && loginResult.hasData()) {
             UserNetworkInfo loginUserInfo = loginResult.data.value();
-            userInfo.connectedToIot       = true;
-            userInfo.loginStatus          = LOGIN_STATUS_LOGIN_SUCCESS;
             
-            if (!loginUserInfo.avatar.empty() && loginUserInfo.avatar != userInfo.avatar) {
-                userInfo.avatar = loginUserInfo.avatar;
-            }
-            if (!loginUserInfo.nickname.empty() && loginUserInfo.nickname != userInfo.nickname) {
-                userInfo.nickname = loginUserInfo.nickname;
-            }
-            if (!loginUserInfo.email.empty() && loginUserInfo.email != userInfo.email) {
-                userInfo.email = loginUserInfo.email;
-            }
+            if (!loginUserInfo.avatar.empty()) userInfo.avatar = loginUserInfo.avatar;
+            if (!loginUserInfo.nickname.empty()) userInfo.nickname = loginUserInfo.nickname;
+            if (!loginUserInfo.email.empty()) userInfo.email = loginUserInfo.email;
+            
+            userInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
             
             if (updateUserInfo(userInfo)) {
-                setNetwork(network);
+                setNetwork(newNetwork);
+                syncBoundPrinters(newNetwork);
             } else {
-                // user id changed during connection, abandon this connection
-                network = nullptr;
-                setNetwork(nullptr);
-                wxLogMessage("User id changed during connection, abandon this connection, user id: %s", userInfo.userId.c_str());
+                newNetwork->disconnectFromIot();
+                newNetwork = nullptr;
             }
         } else {
-            userInfo.connectedToIot = false;
-            if(loginResult.isSuccess()) {
-                userInfo.loginStatus = LOGIN_STATUS_OFFLINE_INVALID_USER;
-            } else {
-                userInfo.loginStatus = parseLoginStatusByErrorCode(loginResult.code);
-            }
-            if (lastLoginStatus != userInfo.loginStatus) {
-                updateUserInfoLoginStatus(userInfo.loginStatus, userInfo.userId, userInfo.token);
-            }           
+            LoginStatus status = parseLoginStatusByErrorCode(loginResult.code);
+            if (loginResult.isSuccess()) {
+                newNetwork->disconnectFromIot();
+                newNetwork = nullptr;
+                status = LOGIN_STATUS_OFFLINE_INVALID_USER;
+            }                
+            if (lastLoginStatus != status) {
+                updateUserInfoLoginStatus(status, userInfo.userId);
+            }   
         }
     }
 }
@@ -383,29 +384,23 @@ UserNetworkInfo UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo
                  userInfo.userId.c_str(), userInfo.token.c_str(), userInfo.refreshToken.c_str(), userInfo.lastTokenRefreshTime,
                  userInfo.accessTokenExpireTime, userInfo.refreshTokenExpireTime);            
 
-    // if user login status is invalid token or invalid user, skip refresh token
-    if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || 
-        currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
-        wxLogMessage("UserNetworkManager::refreshToken user login status is invalid token or invalid user, skip refresh token, user id: %s", userInfo.userId.c_str());
-        return UserNetworkInfo();
-    }
-    if(userInfo.userId != currentUserInfo.userId) {
-        if(currentUserInfo.userId.empty()) {
-            wxLogMessage("UserNetworkManager::refreshToken user id changed, current user id is empty, return empty user info, user id: %s", userInfo.userId.c_str());
-            return UserNetworkInfo();
-        }
-        if(currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-            wxLogMessage("UserNetworkManager::refreshToken user id changed, current user id is not empty and user already logged in, return current user info, user id: %s", userInfo.userId.c_str());
-            return currentUserInfo;
-        }
-    }
-    if(userInfo.userId.empty() && currentUserInfo.userId.empty()) {
-        wxLogMessage("UserNetworkManager::refreshToken user id is empty and current user id is empty, return empty user info, user id: %s", userInfo.userId.c_str());
+    // if current user id is empty, skip refresh token
+    if(currentUserInfo.userId.empty()) {
+        wxLogMessage("UserNetworkManager::refreshToken current user id is empty, skip refresh token, current user id: %s", currentUserInfo.userId.c_str());
         return UserNetworkInfo();
     }
 
-    if(userInfo.userId.empty() && !currentUserInfo.userId.empty() && currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-        wxLogMessage("UserNetworkManager::refreshToken user id is empty and current user id is not empty and user already logged in, return current user info");
+    // if user login status is invalid token or invalid user, skip refresh token
+    if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || 
+        currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+        wxLogMessage("UserNetworkManager::refreshToken user login status is invalid token or invalid user, skip refresh token, current user id: %s", currentUserInfo.userId.c_str());
+        return UserNetworkInfo();
+    }
+
+
+    // if user id changed and user already logged in, return current user info
+    if(userInfo.userId != currentUserInfo.userId && currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+        wxLogMessage("UserNetworkManager::refreshToken user id changed, current user id is not empty and user already logged in, return current user info, user id: %s", userInfo.userId.c_str());
         return currentUserInfo;
     }
 
@@ -440,14 +435,12 @@ UserNetworkInfo UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo
 bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr<IUserNetwork>& network)
 {  
     if (userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
-        userInfo.connectedToIot = false;
         return false;
     }
 
     if (!network) {
         network = NetworkFactory::createUserNetwork(userInfo);
         if (!network) {
-            userInfo.connectedToIot = false;
             userInfo.loginStatus    = LOGIN_STATUS_OFFLINE_INVALID_USER;
             wxLogMessage("User token refresh failed, network is null, user id: %s", userInfo.userId.c_str());
             return false;
@@ -461,9 +454,8 @@ bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr
         userInfo.refreshToken           = refreshedUser.refreshToken;
         userInfo.accessTokenExpireTime  = refreshedUser.accessTokenExpireTime;
         userInfo.refreshTokenExpireTime = refreshedUser.refreshTokenExpireTime;
-        // set login status to login success and connected to iot
+        // set login status to login success
         userInfo.loginStatus            = LOGIN_STATUS_LOGIN_SUCCESS;
-        userInfo.connectedToIot         = true;
         // set last token refresh time to current time milliseconds(utc)
         userInfo.lastTokenRefreshTime =  static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
         wxLogMessage("User token refreshed successfully, user id: %s", userInfo.userId.c_str());
@@ -471,14 +463,12 @@ bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr
     } 
     if (refreshResult.code != PrinterNetworkErrorCode::NETWORK_ERROR) {
         // if error code is not network error, token is invalid, need to re-login
-        userInfo.connectedToIot = false;
         userInfo.loginStatus    = LOGIN_STATUS_OFFLINE_INVALID_TOKEN;
         wxLogMessage("User token refresh failed, need to re-login, user id: %s, error code: %d",
                      userInfo.userId.c_str(), static_cast<int>(refreshResult.code));
         return false;
     } 
     // if error code is network error, don't need to re-login, just set login status to offline
-    userInfo.connectedToIot = false;
     if(userInfo.loginStatus != LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
         userInfo.loginStatus = LOGIN_STATUS_OFFLINE;
     }
@@ -533,7 +523,6 @@ void UserNetworkManager::loadUserInfo()
                 userInfo.loginStatus != LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
                 userInfo.loginStatus = LOGIN_STATUS_NOT_LOGIN;
             }
-            userInfo.connectedToIot = false;
             mUserInfo               = userInfo;
         }
     } catch (const std::exception& e) {

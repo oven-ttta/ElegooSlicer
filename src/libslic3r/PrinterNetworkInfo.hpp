@@ -262,7 +262,6 @@ struct UserNetworkInfo
     uint64_t    connnectToIotTime{0}; // connnect to iot time
     uint64_t    lastTokenRefreshTime{0}; // Last token refresh time
     std::string extraInfo{"{}"}; // json string
-    bool connectedToIot{false}; // connected to iot
     std::string loginErrorMessage; // login error message
 
 };

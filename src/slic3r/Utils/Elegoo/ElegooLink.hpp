@@ -43,6 +43,7 @@ public:
     PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
     PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> unbindWANPrinter(const std::string& serialNumber);
+    PrinterNetworkResult<bool> setRegion(const std::string& region);
  
 
 private:

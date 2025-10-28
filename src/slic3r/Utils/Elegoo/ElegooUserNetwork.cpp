@@ -50,5 +50,10 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooUserNetwork::getUser
     return ElegooLink::getInstance()->getUserBoundPrinters();
 }
 
+PrinterNetworkResult<bool> ElegooUserNetwork::setRegion(const std::string& region)
+{
+    return ElegooLink::getInstance()->setRegion(region);
+}
+
 } // namespace Slic3r 
 

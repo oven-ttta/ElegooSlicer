@@ -64,6 +64,7 @@ public:
     virtual PrinterNetworkResult<UserNetworkInfo>                 getRtcToken()                                 = 0;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters()                        = 0;
     virtual PrinterNetworkResult<UserNetworkInfo>                 refreshToken(const UserNetworkInfo& userInfo) = 0;
+    virtual PrinterNetworkResult<bool>                            setRegion(const std::string& region)          = 0;
 
     const UserNetworkInfo& getUserNetworkInfo() const { return mUserNetworkInfo; }
 
@@ -84,8 +85,8 @@ public:
     virtual ~IPluginNetwork()                        = default;
 
     virtual PrinterNetworkResult<PluginNetworkInfo>              hasInstalledPlugin()                         = 0;
-    virtual PrinterNetworkResult<bool>                     installPlugin(const std::string& pluginPath) = 0;
-    virtual PrinterNetworkResult<bool>                     uninstallPlugin()                            = 0;
+    virtual PrinterNetworkResult<bool>                           installPlugin(const std::string& pluginPath) = 0;
+    virtual PrinterNetworkResult<bool>                           uninstallPlugin()                            = 0;
     virtual PrinterNetworkResult<PluginNetworkInfo>              getPluginLastestVersion()                    = 0;
     virtual PrinterNetworkResult<std::vector<PluginNetworkInfo>> getPluginOldVersions()                       = 0;
 

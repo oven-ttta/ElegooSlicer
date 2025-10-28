@@ -27,11 +27,12 @@ public:
     void setUserInfo(const UserNetworkInfo& userInfo);
     // for frontend click avatar, check user need re-login
     PrinterNetworkResult<bool> checkUserNeedReLogin();
+    // for frontend refresh token
+    UserNetworkInfo refreshToken(const UserNetworkInfo& userInfo);
+    // for frontend
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     // printermanager get user bound printers
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
-    // for frontend refresh token
-    UserNetworkInfo refreshToken(const UserNetworkInfo& userInfo);
 
 private:
     UserNetworkManager();
@@ -39,6 +40,11 @@ private:
     
     void monitorLoop();
     bool refreshToken(UserNetworkInfo& userInfo, std::shared_ptr<IUserNetwork>& network);
+    
+    void syncBoundPrinters(std::shared_ptr<IUserNetwork> network);
+    std::vector<PrinterNetworkInfo> getBoundPrinters() const;
+    void setBoundPrinters(const std::vector<PrinterNetworkInfo>& printers);
+    void clearBoundPrinters();
 
     std::shared_ptr<IUserNetwork> getNetwork() const;
     void setNetwork(std::shared_ptr<IUserNetwork> network);
@@ -46,7 +52,7 @@ private:
     void saveUserInfo(const UserNetworkInfo& userInfo);
     void loadUserInfo();
     bool updateUserInfo(const UserNetworkInfo& userInfo);
-    bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId, const std::string& token);
+    bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId);
     bool needReLogin(const UserNetworkInfo& userInfo);
 
     std::string getLoginErrorMessage(const UserNetworkInfo& userInfo);
@@ -58,6 +64,9 @@ private:
     mutable std::mutex mUserMutex;
     UserNetworkInfo mUserInfo;
     std::shared_ptr<IUserNetwork> mUserNetwork;
+    
+    mutable std::mutex mBoundPrintersMutex;
+    std::vector<PrinterNetworkInfo> mBoundPrintersList;
     
     std::mutex mMonitorMutex;
     std::atomic<bool> mRunning{false};
