@@ -49,7 +49,7 @@
                 </button>
             </div>
         </div>
-        <printer-card-component class="printer-container">
+        <printer-card-component class="printer-container" :is-open="true">
             <template #title>
                 <div class="printer-category">
                     <span>
@@ -119,7 +119,7 @@
             </div>
         </printer-card-component>
 
-        <printer-card-component class="printer-container">
+        <printer-card-component class="printer-container" :is-open="true">
             <template #title>
                 <div class="printer-category">{{ $t("printerManager.localPrinters") }}
                     <!-- <span class="printer-local-icon">
