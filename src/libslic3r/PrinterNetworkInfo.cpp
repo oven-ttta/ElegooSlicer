@@ -238,24 +238,25 @@ nlohmann::json convertPrinterMmsToJson(const PrinterMms& mms)
 
 nlohmann::json convertPrinterMmsTrayToJson(const PrinterMmsTray& tray)
 {
-    nlohmann::json json      = nlohmann::json::object();
-    json["trayId"]           = tray.trayId;
-    json["mmsId"]            = tray.mmsId;
-    json["trayName"]         = tray.trayName;
-    json["settingId"]        = tray.settingId;
-    json["filamentId"]       = tray.filamentId;
-    json["from"]             = tray.from;
-    json["vendor"]           = tray.vendor;
-    json["serialNumber"]     = tray.serialNumber;
-    json["filamentType"]     = tray.filamentType;
-    json["filamentName"]     = tray.filamentName;
-    json["filamentColor"]    = tray.filamentColor;
-    json["filamentDiameter"] = tray.filamentDiameter;
-    json["minNozzleTemp"]    = tray.minNozzleTemp;
-    json["maxNozzleTemp"]    = tray.maxNozzleTemp;
-    json["minBedTemp"]       = tray.minBedTemp;
-    json["maxBedTemp"]       = tray.maxBedTemp;
-    json["status"]           = tray.status;
+    nlohmann::json json        = nlohmann::json::object();
+    json["trayId"]             = tray.trayId;
+    json["mmsId"]              = tray.mmsId;
+    json["trayName"]           = tray.trayName;
+    json["settingId"]          = tray.settingId;
+    json["filamentId"]         = tray.filamentId;
+    json["from"]               = tray.from;
+    json["vendor"]             = tray.vendor;
+    json["serialNumber"]       = tray.serialNumber;
+    json["filamentType"]       = tray.filamentType;
+    json["filamentName"]       = tray.filamentName;
+    json["filamentColor"]      = tray.filamentColor;
+    json["filamentDiameter"]   = tray.filamentDiameter;
+    json["filamentPresetName"] = tray.filamentPresetName;
+    json["minNozzleTemp"]      = tray.minNozzleTemp;
+    json["maxNozzleTemp"]      = tray.maxNozzleTemp;
+    json["minBedTemp"]         = tray.minBedTemp;
+    json["maxBedTemp"]         = tray.maxBedTemp;
+    json["status"]             = tray.status;
     return json;
 }
 
@@ -275,6 +276,7 @@ PrinterMmsTray convertJsonToPrinterMmsTray(const nlohmann::json& json)
         tray.filamentName     = json["filamentName"];
         tray.filamentColor    = json["filamentColor"];
         tray.filamentDiameter = json["filamentDiameter"];
+        tray.filamentPresetName = json["filamentPresetName"];
         tray.minNozzleTemp    = json["minNozzleTemp"];
         tray.maxNozzleTemp    = json["maxNozzleTemp"];
         tray.minBedTemp       = json["minBedTemp"];

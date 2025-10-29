@@ -41,15 +41,23 @@ private:
         std::string filamentType;
     };
 
+    struct PrinterPresetInfo
+    {
+        std::string printerModel;
+        std::vector<double> nozzleDiameters;
+    };
+
     std::map<std::string, std::vector<PresetFilamentInfo>> buildPresetFilamentMap(
         const PresetBundle& bundle, 
         const PrinterNetworkInfo& printerNetworkInfo,
-        const std::map<std::string, std::string>& printerNameModelMap,
+        const std::map<std::string, PrinterPresetInfo>& printerPresetMap,
+        const std::vector<double>& currentProjectNozzleDiameters,
         bool isGeneric, bool compatible);
     
     bool isFilamentCompatible(const Preset& filament,
                              const PrinterNetworkInfo& printerNetworkInfo,
-                             const std::map<std::string, std::string>& printerNameModelMap);
+                             const std::map<std::string, PrinterPresetInfo>& printerPresetMap,
+                             const std::vector<double>& currentProjectNozzleDiameters);
     
     bool tryMatchFilament(PrinterMmsTray& tray,
                          const std::map<std::string, std::vector<PresetFilamentInfo>>& presetMap,

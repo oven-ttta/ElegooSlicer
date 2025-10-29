@@ -74,6 +74,7 @@ struct PrinterMmsTray
     std::string filamentName;
     std::string filamentColor;
     std::string filamentDiameter;
+    std::string filamentPresetName; // preset filament name
     double      minNozzleTemp;
     double      maxNozzleTemp;
     double      minBedTemp;

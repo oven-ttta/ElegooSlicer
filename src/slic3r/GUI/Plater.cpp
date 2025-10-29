@@ -1803,6 +1803,7 @@ bool Sidebar::load_mms_list()
             filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filamentType });
             filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filamentName });
             filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filamentColor});
+            filament_config.set_key_value("filament_preset_name", new ConfigOptionStrings{ tray.filamentPresetName });
             filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
             filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filamentColor);
             filament_mms_list.emplace(filament_index, std::move(filament_config));
@@ -1889,7 +1890,7 @@ void Sidebar::sync_ams_list()
     if (unknowns > 0) {
         MessageDialog dlg(this,
             _L("There are some unknown filaments mapped to generic preset. Please update ElegooSlicer or restart ElegooSlicer to check if there is an update to system presets."),
-            _L("Sync filaments with AMS"), wxOK);
+            _L("Sync filaments with MMS"), wxOK);
         dlg.ShowModal();
     }
     wxGetApp().plater()->on_filaments_change(n);

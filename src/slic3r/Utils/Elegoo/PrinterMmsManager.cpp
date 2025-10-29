@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <wx/colour.h>
 #include "slic3r/GUI/MainFrame.hpp"
+#include "slic3r/GUI/GUI_App.hpp"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -228,6 +229,18 @@ PrinterMmsManager::~PrinterMmsManager() {}
 
 void PrinterMmsManager::getMmsTrayFilamentId(const PrinterNetworkInfo& printerNetworkInfo, PrinterMmsGroup& mmsGroup)
 {
+    std::vector<double> currentProjectNozzleDiameters = {0.4};
+    try {
+        auto& app = GUI::wxGetApp();
+        if(app.preset_bundle) {
+            auto nozzleDiameterOpt = app.preset_bundle->printers.get_edited_preset().config.option<ConfigOptionFloats>("nozzle_diameter");
+            if(nozzleDiameterOpt && !nozzleDiameterOpt->values.empty()) {
+                currentProjectNozzleDiameters = nozzleDiameterOpt->values;
+            }
+        }
+    } catch(...) {
+    }
+    
     PresetBundle vendorBundle;
     try {
         vendorBundle.load_vendor_configs_from_json((boost::filesystem::path(Slic3r::resources_dir()) / "profiles").string(),
@@ -238,19 +251,26 @@ void PrinterMmsManager::getMmsTrayFilamentId(const PrinterNetworkInfo& printerNe
         BOOST_LOG_TRIVIAL(error) << "PrinterMmsManager::getMmsTrayFilamentId: get vendor configs failed: " << printerNetworkInfo.vendor << " " << e.what();
     }
 
-    std::map<std::string, std::string> printerNameModelMap;
+    std::map<std::string, PrinterPresetInfo> printerPresetMap;
     for(const auto& printer : vendorBundle.printers) {
         if(!printer.is_system) continue;
         
-        const auto &printerModelOption = printer.config.option<ConfigOptionString>("printer_model");
-        if(printerModelOption) {
-            printerNameModelMap[printer.name] = printerModelOption->value;
+        PrinterPresetInfo info;
+        auto printerModelOpt = printer.config.option<ConfigOptionString>("printer_model");
+        if(printerModelOpt) {
+            info.printerModel = printerModelOpt->value;
         }
+        
+        auto nozzleDiameterOpt = printer.config.option<ConfigOptionFloats>("nozzle_diameter");
+        if(nozzleDiameterOpt) {
+            info.nozzleDiameters = nozzleDiameterOpt->values;
+        }
+        
+        printerPresetMap[printer.name] = info;
     }
 
-    // build preset filament info map
-    auto vendorPresetMap = buildPresetFilamentMap(vendorBundle, printerNetworkInfo, printerNameModelMap, false, true);
-    auto genericPresetMap = buildPresetFilamentMap(vendorBundle, printerNetworkInfo, printerNameModelMap, true, true);
+    auto vendorPresetMap = buildPresetFilamentMap(vendorBundle, printerNetworkInfo, printerPresetMap, currentProjectNozzleDiameters, false, true);
+    auto genericPresetMap = buildPresetFilamentMap(vendorBundle, printerNetworkInfo, printerPresetMap, currentProjectNozzleDiameters, true, true);
 
     PresetBundle orcaFilamentLibraryBundle;
     try {
@@ -262,7 +282,7 @@ void PrinterMmsManager::getMmsTrayFilamentId(const PrinterNetworkInfo& printerNe
         BOOST_LOG_TRIVIAL(error) << "PrinterMmsManager::getMmsTrayFilamentId: get orca filament library failed" << e.what();
     }
     
-    auto orcaGenericPresetMap = buildPresetFilamentMap(orcaFilamentLibraryBundle, printerNetworkInfo, printerNameModelMap, true, false);
+    auto orcaGenericPresetMap = buildPresetFilamentMap(orcaFilamentLibraryBundle, printerNetworkInfo, printerPresetMap, currentProjectNozzleDiameters, true, false);
 
     // match filament id in system preset to mms tray
     for(auto& mms : mmsGroup.mmsList) {
@@ -298,17 +318,20 @@ void PrinterMmsManager::getMmsTrayFilamentId(const PrinterNetworkInfo& printerNe
                 if(vendorPresetMap.find(tray.filamentType) != vendorPresetMap.end()) {
                     tray.filamentId = vendorPresetMap.at(tray.filamentType)[0].filamentId;
                     tray.settingId = vendorPresetMap.at(tray.filamentType)[0].settingId;
+                    tray.filamentPresetName = vendorPresetMap.at(tray.filamentType)[0].filamentName;
                     continue;
                 }
             }         
             if(genericPresetMap.find(tray.filamentType) != genericPresetMap.end()) {
                 tray.filamentId = genericPresetMap.at(tray.filamentType)[0].filamentId;
                 tray.settingId = genericPresetMap.at(tray.filamentType)[0].settingId;
+                tray.filamentPresetName = genericPresetMap.at(tray.filamentType)[0].filamentName;
                 continue;
             }
             if(orcaGenericPresetMap.find(tray.filamentType) != orcaGenericPresetMap.end()) {
                 tray.filamentId = orcaGenericPresetMap.at(tray.filamentType)[0].filamentId;
                 tray.settingId = orcaGenericPresetMap.at(tray.filamentType)[0].settingId;
+                tray.filamentPresetName = orcaGenericPresetMap.at(tray.filamentType)[0].filamentName;
                 continue;
             }
         }
@@ -321,7 +344,8 @@ void PrinterMmsManager::getMmsTrayFilamentId(const PrinterNetworkInfo& printerNe
 std::map<std::string, std::vector<PrinterMmsManager::PresetFilamentInfo>> PrinterMmsManager::buildPresetFilamentMap(
     const PresetBundle& bundle, 
     const PrinterNetworkInfo& printerNetworkInfo,
-    const std::map<std::string, std::string>& printerNameModelMap,
+    const std::map<std::string, PrinterPresetInfo>& printerPresetMap,
+    const std::vector<double>& currentProjectNozzleDiameters,
     bool isGeneric, bool compatible)
 {
     std::map<std::string, std::vector<PresetFilamentInfo>> presetMap;
@@ -329,12 +353,10 @@ std::map<std::string, std::vector<PrinterMmsManager::PresetFilamentInfo>> Printe
     for (const auto& filament : bundle.filaments) {
         if (!filament.is_system) continue;
         
-        // ensure filament type
         auto* filament_type_opt = dynamic_cast<const ConfigOptionStrings*>(filament.config.option("filament_type"));
         if(!filament_type_opt || filament_type_opt->values.empty()) continue;
 
-        // check filament compatible
-        if(compatible && !isFilamentCompatible(filament, printerNetworkInfo, printerNameModelMap)) continue;
+        if(compatible && !isFilamentCompatible(filament, printerNetworkInfo, printerPresetMap, currentProjectNozzleDiameters)) continue;
         
         // check if is generic filament
         std::string name = boost::to_upper_copy(filament.name);
@@ -359,16 +381,24 @@ std::map<std::string, std::vector<PrinterMmsManager::PresetFilamentInfo>> Printe
 bool PrinterMmsManager::isFilamentCompatible(
     const Preset& filament,
     const PrinterNetworkInfo& printerNetworkInfo,
-    const std::map<std::string, std::string>& printerNameModelMap)
+    const std::map<std::string, PrinterPresetInfo>& printerPresetMap,
+    const std::vector<double>& currentProjectNozzleDiameters)
 {
     const auto compatiblePrinters = filament.config.option<ConfigOptionStrings>("compatible_printers");
     if(!compatiblePrinters) return false;
     
     for (const std::string& printer_name : compatiblePrinters->values) {
-        auto it = printerNameModelMap.find(printer_name);
-        if (it != printerNameModelMap.end() && it->second == printerNetworkInfo.printerModel) {
-            return true;
+        auto it = printerPresetMap.find(printer_name);
+        if(it == printerPresetMap.end() || it->second.printerModel != printerNetworkInfo.printerModel) continue;
+        
+        if(currentProjectNozzleDiameters.empty()) return true;
+        
+        for(double currentProjectNozzleDiameter : currentProjectNozzleDiameters) {
+            for(double presetNozzle : it->second.nozzleDiameters) {
+                if(std::abs(currentProjectNozzleDiameter - presetNozzle) < 0.01) return true;
+            }
         }
+        return false;
     }
     return false;
 }
@@ -389,6 +419,7 @@ bool PrinterMmsManager::tryMatchFilament(
             // match success, update tray info
             tray.filamentId = filamentInfo.filamentId;
             tray.settingId = filamentInfo.settingId;
+            tray.filamentPresetName = filamentInfo.filamentName;
             return true;
         }
     }
@@ -477,6 +508,7 @@ bool PrinterMmsManager::tryMatchFilamentByFilamentType(
             // match success, update tray info
             tray.filamentId = filamentInfo.filamentId;
             tray.settingId = filamentInfo.settingId;
+            tray.filamentPresetName = filamentInfo.filamentName;
             return true;
         }
     }
@@ -490,6 +522,7 @@ bool PrinterMmsManager::tryMatchFilamentByFilamentType(
         if(isNamesMatch(trayCopy, filamentCopy, printerNetworkInfo, isGeneric)) {
             tray.filamentId = filamentCopy.filamentId;
             tray.settingId = filamentCopy.settingId;
+            tray.filamentPresetName = filamentCopy.filamentName;
             return true;
         }
     }
