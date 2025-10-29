@@ -2,7 +2,7 @@
 var m_ProfileItem;
 
 var FilamentPriority=new Array( "pla","abs","pet","tpu","pc");
-var VendorPriority=new Array("generic");
+var VendorPriority=new Array("elegoo", "generic");
   
 function OnInit()
 {
@@ -77,8 +77,8 @@ function SortUI()
 
 	var TypeHtmlArray={};
     var VendorHtmlArray={};
-	var GenericFilamentHtmlArray={};
-	var NonGenericFilamentHtmlArray={};
+	var FilamentHtmlByVendor={};
+	var SelectedFilaments = [];
 	for( let key in m_ProfileItem['filament'] )
 	{
 		let OneFila=m_ProfileItem['filament'][key];
@@ -158,12 +158,11 @@ function SortUI()
 				/* ORCA use label tag to allow checkbox to toggle when user ckicked to text */
 			    let HtmlFila='<label class="MItem"><input type="checkbox" vendor="'+fVendor+'"  filatype="'+fType+'" filalist="'+fWholeName+';'+'"  model="'+fModel+'" name="'+fShortName+'" />'+fShortName+'</label>';
 			
-			    // Separate generic and non-generic filaments
-			    if(fVendor.toLowerCase() === 'generic') {
-				    GenericFilamentHtmlArray[fShortName] = HtmlFila;
-			    } else {
-				    NonGenericFilamentHtmlArray[fShortName] = HtmlFila;
+			    let lowVendorKey = fVendor.toLowerCase();
+			    if(!FilamentHtmlByVendor.hasOwnProperty(lowVendorKey)) {
+				    FilamentHtmlByVendor[lowVendorKey] = {};
 			    }
+			    FilamentHtmlByVendor[lowVendorKey][fShortName] = HtmlFila;
 		    } 
 			else
 			{
@@ -180,9 +179,11 @@ function SortUI()
 			
 		    if(fSelect*1==1)
 			{
-				//alert( fWholeName+' - '+fShortName+' - '+fVendor+' - '+fType+' - '+fSelect+' - '+fModel );
-					
-				$("#ItemBlockArea input[vendor='"+fVendor+"'][filatype='"+fType+"'][name='"+fShortName+"']").prop("checked",true);
+				SelectedFilaments.push({
+					vendor: fVendor,
+					type: fType,
+					name: fShortName
+				});
 				SelectNumber++;
 			}
 //			else
@@ -190,12 +191,27 @@ function SortUI()
 		}
 	} 
 	
-	// Append filaments in order: generic first, then non-generic
-	for(let key in GenericFilamentHtmlArray) {
-		$("#ItemBlockArea").append(GenericFilamentHtmlArray[key]);
+	// Append filaments in order based on VendorPriority
+	for(let n=0; n<VendorPriority.length; n++) {
+		let priorityVendor = VendorPriority[n].toLowerCase();
+		if(FilamentHtmlByVendor.hasOwnProperty(priorityVendor)) {
+			for(let key in FilamentHtmlByVendor[priorityVendor]) {
+				$("#ItemBlockArea").append(FilamentHtmlByVendor[priorityVendor][key]);
+			}
+			delete FilamentHtmlByVendor[priorityVendor];
+		}
 	}
-	for(let key in NonGenericFilamentHtmlArray) {
-		$("#ItemBlockArea").append(NonGenericFilamentHtmlArray[key]);
+	// Append remaining vendors not in priority list
+	for(let vendor in FilamentHtmlByVendor) {
+		for(let key in FilamentHtmlByVendor[vendor]) {
+			$("#ItemBlockArea").append(FilamentHtmlByVendor[vendor][key]);
+		}
+	}
+	
+	// Now that HTML is in DOM, check the selected filaments
+	for(let i=0; i<SelectedFilaments.length; i++) {
+		let sf = SelectedFilaments[i];
+		$("#ItemBlockArea input[vendor='"+sf.vendor+"'][filatype='"+sf.type+"'][name='"+sf.name+"']").prop("checked",true);
 	}
 
 	//Sort TypeArray
