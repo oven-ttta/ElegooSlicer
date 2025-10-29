@@ -616,7 +616,16 @@ int GuideFrame::SaveProfile()
     // } else
     //     m_MainPtr->app_config->set(std::string(m_SectionName.mb_str()), "privacyuse", "0");
 
+    std::string oldregion = m_MainPtr->app_config->get("region");
+    //set region to app_config
     m_MainPtr->app_config->set("region", m_Region);
+
+    if (oldregion != m_Region) {
+        //send event to mainframe to logout user
+        auto evt = new wxCommandEvent(EVT_REGION_CHANGED);
+        wxQueueEvent(wxGetApp().mainframe, evt);
+    }
+
     m_MainPtr->app_config->set_bool("stealth_mode", StealthMode);
 
     //finish
