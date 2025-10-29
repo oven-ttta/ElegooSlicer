@@ -14,11 +14,11 @@
   "auxiliary_fan": "1",
   "printable_area": [
     "0x0",
-    "257x0",
-    "257x257",
-    "0x257"
+    "256x0",
+    "256x256",
+    "0x256"
   ],
-  "printable_height": "257",
+  "printable_height": "256",
   "retract_lift_below": [
       "255"
   ],
@@ -30,9 +30,9 @@
   ],
   "bed_texture_area": [
     "0x-10",
-    "257x-10",
-    "257x257",
-    "0x257"
+    "256x-10",
+    "256x256",
+    "0x256"
   ],
   "thumbnails": [
   "144x144"

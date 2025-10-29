@@ -117,7 +117,12 @@ function SortUI()
 		//let bCheck=$("#MachineList input:first").prop("checked");
 		if( fModel=='')
 		{
-			bFind=true;
+			//bFind=true;
+			if(fVendor.toLowerCase() === 'generic' || fVendor.toLowerCase() === 'elegoo') {
+				bFind = true;
+			} else {
+				bFind = false;  
+			}
 		}
 		else
 		{

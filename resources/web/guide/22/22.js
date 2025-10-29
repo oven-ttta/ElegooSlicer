@@ -98,7 +98,11 @@ function SortUI()
 		if( fModel=='')
 		{
 			// Orca: hide
-			bFind=true;
+			if(fVendor.toLowerCase() === 'generic' || fVendor.toLowerCase() === 'elegoo') {
+				bFind = true;
+			} else {
+				bFind = false;  
+			}
 		}
 		else
 		{

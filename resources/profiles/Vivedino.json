@@ -1,16 +1,16 @@
 {
     "name": "Vivedino",
-    "version": "01.02.00.14",
+    "version": "01.03.00.02",
     "force_update": "0",
     "description": "Vivedino configurations",
     "machine_model_list": [
         {
-            "name": "Troodon 2.0 - RRF",
-            "sub_path": "machine/Troodon2RRF.json"
-        },
-        {
             "name": "Troodon 2.0 - Klipper",
             "sub_path": "machine/Troodon2Klipper.json"
+        },
+        {
+            "name": "Troodon 2.0 - RRF",
+            "sub_path": "machine/Troodon2RRF.json"
         }
     ],
     "process_list": [
