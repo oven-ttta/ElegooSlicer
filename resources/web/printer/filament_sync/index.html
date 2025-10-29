@@ -70,7 +70,7 @@
                                 :key="tray.trayName" class="filament-item">
                                 <span class="filament-item-id">{{ tray.trayName }}</span>
                                 <span class="filament-item-line"></span>
-                                <div class="filament-item-info">
+                                <div class="filament-item-info" :title="tray.filamentName || tray.filamentType">
                                     <span v-html="getFilamentSvg(tray)"></span>
                                     <div style="flex: 1; display: flex; justify-content: center;">
                                         <span class="filament-item-name">{{ tray.filamentType }}</span>
