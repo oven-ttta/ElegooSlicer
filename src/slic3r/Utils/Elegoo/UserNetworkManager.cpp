@@ -269,6 +269,85 @@ void UserNetworkManager::syncBoundPrinters(std::shared_ptr<IUserNetwork> network
         }
     }
 }
+
+bool UserNetworkManager::checkNeedRefreshToken(const UserNetworkInfo& userInfo)
+{
+    // login status is token expired, need to refresh token
+    if(userInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
+        wxLogMessage("UserNetworkManager::checkNeedRefreshToken user login status is token expired, need to refresh token, user id: %s, user nickname: %s, user login status: %d, access token expire time: %llu, refresh token expire time: %llu",
+                     userInfo.userId.c_str(), userInfo.nickname.c_str(), userInfo.loginStatus,
+                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
+                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        return true;
+    }
+
+    // if user login status is invalid token or invalid user, don't need to refresh token
+    if (userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
+        wxLogMessage("UserNetworkManager::checkNeedRefreshToken user login status is invalid token or invalid user, don't need to refresh "
+                     "token, user id: %s, user nickname: %s, user login status: %d",
+                     userInfo.userId.c_str(), userInfo.nickname.c_str(), userInfo.loginStatus);
+        return false;
+    }
+
+    // use UTC milliseconds to align with backend timestamps
+    uint64_t nowTime = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
+
+    // if refresh token expired, don't need to refresh token
+    if (userInfo.refreshTokenExpireTime <= nowTime) {
+        wxLogMessage("UserNetworkManager::checkNeedRefreshToken refresh token is expired, don't need to refresh token, user id: %s, user "
+                     "nickname: %s, user login status: %d",
+                     userInfo.userId.c_str(), userInfo.nickname.c_str(), userInfo.loginStatus);
+        return false;
+    }
+
+    // last token refresh time is greater than access token expire time, time is abnormal, need to refresh token(maybe system time is modified is abnormal)
+    if (userInfo.lastTokenRefreshTime >= userInfo.accessTokenExpireTime) {
+        wxLogMessage("UserNetworkManager::checkNeedRefreshToken last token refresh time is greater than access token expire time, time is "
+                     "abnormal, need to refresh token, user id: %s, user login status: %d, user nickname: %s, last token refresh "
+                     "time: %llu, access token expire time: %llu, refresh token expire time: %llu",
+                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
+                     static_cast<unsigned long long>(userInfo.lastTokenRefreshTime),
+                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
+                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        return true;
+    }
+    // nowTime is less than last token refresh time, time is abnormal, need to refresh token (maybe system time was modified)
+    if (nowTime < userInfo.lastTokenRefreshTime) {
+        wxLogMessage("UserNetworkManager::checkNeedRefreshToken nowTime is less than last token refresh time, time is abnormal, need to "
+                     "refresh token, user id: %s, user login status: %d, user nickname: %s, last token refresh time: %llu, nowTime: %llu, "
+                     "access token expire time: %llu, refresh token expire time: %llu",
+                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
+                     static_cast<unsigned long long>(userInfo.lastTokenRefreshTime), static_cast<unsigned long long>(nowTime),
+                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
+                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        return true;
+    }
+
+    // token expired
+    if (userInfo.accessTokenExpireTime <= nowTime) {
+        wxLogMessage("UserNetworkManager::checkNeedRefreshToken token expired, user id: %s, user login status: %d, user nickname: %s, "
+                     "access token expire time: %llu, refresh token expire time: %llu",
+                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
+                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
+                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        return true;
+    }
+
+    // Half of the token's validity period has passed since the last refresh
+    uint64_t tokenValidDiffTime = userInfo.accessTokenExpireTime - userInfo.lastTokenRefreshTime;
+    uint64_t elapsedTokenTime   = (nowTime > userInfo.lastTokenRefreshTime) ? (nowTime - userInfo.lastTokenRefreshTime) : 0ULL;
+    if (elapsedTokenTime > tokenValidDiffTime / 2) {
+        wxLogMessage("UserNetworkManager::checkNeedRefreshToken token valid time is not enough, user id: %s, user login status: %d, user nickname: %s, access token expire time: %llu, refresh token expire time: %llu",
+                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
+                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
+                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        return true;
+    }
+    return false;
+}
+
 void UserNetworkManager::monitorLoop()
 {
     mLastLoopTime = std::chrono::steady_clock::now() - std::chrono::seconds(10);
@@ -301,13 +380,31 @@ void UserNetworkManager::monitorLoop()
             continue;
         }
 
-        // Step 3: If already logged in, sync printers and skip
+        // Step 3: Check if need refresh token
+        if (checkNeedRefreshToken(userInfo)) {
+            if (refreshToken(userInfo, network) && updateUserInfo(userInfo)) {
+                setNetwork(network);
+                syncBoundPrinters(network);
+            } else {
+                setNetwork(nullptr);
+                if (lastLoginStatus != userInfo.loginStatus) {
+                    updateUserInfoLoginStatus(userInfo.loginStatus, userInfo.userId);
+                }
+            }         
+            continue;
+        }
+
+        // Step 4: If already logged in, sync printers and skip
         if (userInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS && network) {
             syncBoundPrinters(network);
             continue;
         }
+    
+        // Step 5: Try to connect to IoT 
 
+        // set last network to nullptr to disconnect from IoT and avoid race condition
         setNetwork(nullptr);   
+
         std::shared_ptr<IUserNetwork> newNetwork = NetworkFactory::createUserNetwork(userInfo);
         if (!newNetwork) {
             if (lastLoginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER) {
@@ -315,40 +412,18 @@ void UserNetworkManager::monitorLoop()
             }
             continue;
         }
-        // Step 4: set region
         // different regions need different service addresses
-        newNetwork->setRegion(userInfo.region);
+        newNetwork->setRegion(userInfo.region);    
 
-        // Step 5: Handle token expired - try to refresh
-        if (userInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
-            if (refreshToken(userInfo, newNetwork)) {
-                userInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
-                if (updateUserInfo(userInfo)) {
-                    setNetwork(newNetwork);
-                    syncBoundPrinters(newNetwork);
-                } else {
-                    newNetwork->disconnectFromIot();
-                    newNetwork = nullptr;
-                }
-            } else {
-                if (lastLoginStatus != userInfo.loginStatus) {
-                    updateUserInfoLoginStatus(userInfo.loginStatus, userInfo.userId);
-                }
-            }
-            continue;
-        }
-
-        // Step 6: Try to connect to IoT        
         auto loginResult = newNetwork->connectToIot(userInfo);
         if (loginResult.isSuccess() && loginResult.hasData()) {
-            UserNetworkInfo loginUserInfo = loginResult.data.value();
-            
+            UserNetworkInfo loginUserInfo = loginResult.data.value();         
             if (!loginUserInfo.avatar.empty()) userInfo.avatar = loginUserInfo.avatar;
             if (!loginUserInfo.nickname.empty()) userInfo.nickname = loginUserInfo.nickname;
-            if (!loginUserInfo.email.empty()) userInfo.email = loginUserInfo.email;
-            
-            userInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;
-            
+            if (!loginUserInfo.email.empty()) userInfo.email = loginUserInfo.email;         
+
+            userInfo.loginStatus = LOGIN_STATUS_LOGIN_SUCCESS;    
+
             if (updateUserInfo(userInfo)) {
                 setNetwork(newNetwork);
                 syncBoundPrinters(newNetwork);
@@ -379,10 +454,12 @@ UserNetworkInfo UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo
     UserNetworkInfo currentUserInfo = getUserInfo();
     std::shared_ptr<IUserNetwork> network = getNetwork();
     
-    wxLogMessage("UserNetworkManager::refreshToken start refresh token, user id: %s, user token: %s, user refresh token: %s, user login "
-                 "refresh time: %d, user access token expire time: %d, user refresh token expire time: %d",
-                 userInfo.userId.c_str(), userInfo.token.c_str(), userInfo.refreshToken.c_str(), userInfo.lastTokenRefreshTime,
-                 userInfo.accessTokenExpireTime, userInfo.refreshTokenExpireTime);            
+    // redact sensitive tokens in logs; print timestamp fields with correct specifiers
+    wxLogMessage("UserNetworkManager::refreshToken start refresh token, user id: %s, login refresh time: %llu, access token expire time: %llu, refresh token expire time: %llu",
+                 userInfo.userId.c_str(),
+                 static_cast<unsigned long long>(userInfo.lastTokenRefreshTime),
+                 static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
+                 static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));            
 
     // if current user id is empty, skip refresh token
     if(currentUserInfo.userId.empty()) {
@@ -420,6 +497,7 @@ UserNetworkInfo UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo
         wxLogMessage("UserNetworkManager::refreshToken refresh token success, user id: %s", userInfo.userId.c_str());
         updateUserInfo(currentUserInfo);
         setNetwork(network);
+        return currentUserInfo;
     } else if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN) {
         updateUserInfo(currentUserInfo);
         setNetwork(nullptr);
@@ -445,6 +523,7 @@ bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr
             wxLogMessage("User token refresh failed, network is null, user id: %s", userInfo.userId.c_str());
             return false;
         }
+        network->setRegion(userInfo.region);
     }
     
     auto refreshResult = network->refreshToken(userInfo);
@@ -456,8 +535,10 @@ bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr
         userInfo.refreshTokenExpireTime = refreshedUser.refreshTokenExpireTime;
         // set login status to login success
         userInfo.loginStatus            = LOGIN_STATUS_LOGIN_SUCCESS;
-        // set last token refresh time to current time milliseconds(utc)
-        userInfo.lastTokenRefreshTime =  static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+        // set last token refresh time to current time milliseconds (UTC) to match backend
+        userInfo.lastTokenRefreshTime = static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count());
         wxLogMessage("User token refreshed successfully, user id: %s", userInfo.userId.c_str());
         return true;
     } 

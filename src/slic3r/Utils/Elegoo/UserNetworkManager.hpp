@@ -57,6 +57,8 @@ private:
 
     std::string getLoginErrorMessage(const UserNetworkInfo& userInfo);
     void notifyUserInfoUpdated();
+
+    bool checkNeedRefreshToken(const UserNetworkInfo& userInfo);
 private:
     mutable std::recursive_mutex mInitMutex;
     std::atomic<bool> mIsInitialized{false};
