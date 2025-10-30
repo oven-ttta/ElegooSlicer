@@ -260,7 +260,6 @@ struct UserNetworkInfo
     std::string language;     // User preferred language
     uint64_t    createTime{0}; // Account creation time
     uint64_t    loginTime{0}; //  login time
-    uint64_t    connnectToIotTime{0}; // connnect to iot time
     uint64_t    lastTokenRefreshTime{0}; // Last token refresh time
     std::string extraInfo{"{}"}; // json string
     std::string loginErrorMessage; // login error message

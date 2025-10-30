@@ -55,5 +55,9 @@ PrinterNetworkResult<bool> ElegooUserNetwork::setRegion(const std::string& regio
     return ElegooLink::getInstance()->setRegion(region);
 }
 
+PrinterNetworkResult<bool> ElegooUserNetwork::logout()
+{
+    return ElegooLink::getInstance()->logout(mUserNetworkInfo);
+}
 } // namespace Slic3r 
 

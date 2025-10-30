@@ -38,11 +38,13 @@ private:
     
     // IPC handlers
     webviewIpc::IPCResult handleGetUserInfo();
-    webviewIpc::IPCResult handleLogout();
     webviewIpc::IPCResult handleNavigateToPage(const nlohmann::json& data);
     webviewIpc::IPCResult handleShowLoginDialog();
     webviewIpc::IPCResult handleCheckLoginStatus();
     webviewIpc::IPCResult handleReady();
+    
+    // Async operations
+    webviewIpc::IPCResult handleLogout();
     
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
@@ -68,6 +70,7 @@ private:
     std::atomic<bool> mIsReady{false};
     std::mutex mUserInfoMutex; // Mutex to protect user info
     UserNetworkInfo mRefreshUserInfo; // User info
+    std::shared_ptr<bool> m_lifeTracker; // Lifetime tracker for async operations
     DECLARE_EVENT_TABLE()
 };
 

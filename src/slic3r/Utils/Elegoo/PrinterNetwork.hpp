@@ -60,6 +60,7 @@ public:
     IUserNetwork& operator=(const IUserNetwork&) = delete;
     virtual ~IUserNetwork()                      = default;
 
+    virtual PrinterNetworkResult<bool>                            logout()                                      = 0;
     virtual PrinterNetworkResult<UserNetworkInfo>                 connectToIot(const UserNetworkInfo& userInfo) = 0;
     virtual PrinterNetworkResult<bool>                            disconnectFromIot()                           = 0;
     virtual PrinterNetworkResult<UserNetworkInfo>                 getRtcToken()                                 = 0;

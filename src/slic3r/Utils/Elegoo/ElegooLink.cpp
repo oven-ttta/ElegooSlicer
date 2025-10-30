@@ -870,6 +870,18 @@ PrinterNetworkResult<bool> ElegooLink::deletePrintTasks(const std::string& print
     }
     return PrinterNetworkResult<bool>(resultCode, true);
 }
+
+PrinterNetworkResult<bool> ElegooLink::logout(const UserNetworkInfo& userInfo)
+{
+    CHECK_INITIALIZED(true, false);
+    elink::VoidResult result = elink::ElegooNetwork::getInstance().logout();
+    PrinterNetworkErrorCode resultCode = parseElegooResult(result.code);
+    if(resultCode == PrinterNetworkErrorCode::SUCCESS) {
+        return PrinterNetworkResult<bool>(resultCode, true);
+    }
+    return PrinterNetworkResult<bool>(resultCode, false, parseUnknownErrorMsg(resultCode, result.message));
+}
+
 PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetworkInfo& userInfo)
 {
     CHECK_INITIALIZED(true, userInfo);

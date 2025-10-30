@@ -32,6 +32,7 @@ wxBEGIN_EVENT_TABLE(HomeView, wxPanel) EVT_WEBVIEW_LOADED(wxID_ANY, HomeView::on
     , mContentSizer(nullptr)
     , mIpc(nullptr)
     , mCurrentView(nullptr)
+    , m_lifeTracker(std::make_shared<bool>(true))
 {
     initUI();
 }
@@ -143,7 +144,30 @@ void HomeView::setupIPCHandlers()
     // Navigation handler - this is the key handler for switching pages
     mIpc->onRequest("navigateToPage", [this](const webviewIpc::IPCRequest& request) { return handleNavigateToPage(request.params); });
     mIpc->onRequest("getUserInfo", [this](const webviewIpc::IPCRequest& request) { return handleGetUserInfo(); });
-    mIpc->onRequest("logout", [this](const webviewIpc::IPCRequest& request) { return handleLogout(); });
+    mIpc->onRequestAsync("logout", [this](const webviewIpc::IPCRequest& request,
+                                          std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        std::weak_ptr<bool> life_tracker = m_lifeTracker;
+        
+        std::thread([life_tracker, sendResponse, this]() {
+            try {
+                if (auto tracker = life_tracker.lock()) {
+                    auto result = handleLogout();
+                    
+                    if (life_tracker.lock()) {
+                        sendResponse(result);
+                    }
+                }
+            } catch (const std::exception& e) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error(std::string("Logout failed: ") + e.what()));
+                }
+            } catch (...) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error("Logout failed: Unknown error"));
+                }
+            }
+        }).detach();
+    });
     mIpc->onRequest("showLoginDialog", [this](const webviewIpc::IPCRequest& request) { return handleShowLoginDialog(); });
     mIpc->onRequest("checkLoginStatus", [this](const webviewIpc::IPCRequest& request) { return handleCheckLoginStatus(); });
     mIpc->onRequest("getRegion", [this](const webviewIpc::IPCRequest& request) {
@@ -185,12 +209,6 @@ webviewIpc::IPCResult HomeView::handleGetUserInfo()
     data = convertUserNetworkInfoToJson(userNetworkInfo);
     return webviewIpc::IPCResult::success(data);
 }
-webviewIpc::IPCResult HomeView::handleLogout() { 
-    UserNetworkInfo userNetworkInfo = UserNetworkInfo();
-    userNetworkInfo.loginStatus = LOGIN_STATUS_NO_USER;
-    UserNetworkManager::getInstance()->setUserInfo(userNetworkInfo);
-    return webviewIpc::IPCResult::success(); 
-}
 
 webviewIpc::IPCResult HomeView::handleReady()
 {
@@ -204,6 +222,14 @@ webviewIpc::IPCResult HomeView::handleReady()
         wxLogMessage("HomeView: Sent pending user info to WebView");
     }
     wxLogMessage("HomeView: Ready");  
+    return webviewIpc::IPCResult::success();
+}
+
+webviewIpc::IPCResult HomeView::handleLogout()
+{
+    UserNetworkInfo userNetworkInfo = UserNetworkInfo();
+    userNetworkInfo.loginStatus = LOGIN_STATUS_NO_USER;
+    UserNetworkManager::getInstance()->setUserInfo(userNetworkInfo);
     return webviewIpc::IPCResult::success();
 }
 

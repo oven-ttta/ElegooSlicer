@@ -36,6 +36,7 @@ public:
     PrinterNetworkResult<PluginNetworkInfo> hasInstalledPlugin();
     PrinterNetworkResult<bool> installPlugin(const std::string& pluginPath);
     PrinterNetworkResult<bool> uninstallPlugin();
+    PrinterNetworkResult<bool> logout(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<bool> disconnectFromIot();
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();

@@ -94,20 +94,20 @@ UserNetworkInfo UserNetworkManager::getUserInfo() const
 }
 
 void UserNetworkManager::setUserInfo(const UserNetworkInfo& userInfo)
-{
+{ 
     std::lock_guard<std::mutex> lock(mUserMutex);
 
     mUserInfo = userInfo; 
 
+    clearBoundPrinters();
+    notifyUserInfoUpdated();
+    saveUserInfo(userInfo);
+
     if (mUserNetwork) {
+        mUserNetwork->logout();
         mUserNetwork->disconnectFromIot();
         mUserNetwork = nullptr;
     }
-    
-    clearBoundPrinters();
-    
-    notifyUserInfoUpdated();
-    saveUserInfo(userInfo);
 }
 
 std::shared_ptr<IUserNetwork> UserNetworkManager::getNetwork() const
