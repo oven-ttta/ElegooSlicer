@@ -125,7 +125,7 @@ const PrinterManager = {
                     color: 'var(--printer-status-error-color)',
                     backgroundColor: 'var(--printer-status-error-bg)'
                 };
-            } else if (printerStatus === 1000 || printerStatus === 2 || printerStatus === 3) {
+            } else if (printerStatus === 1000 || printerStatus === 2 || printerStatus === 3 || printerStatus === 20) {
                 return {
                     color: 'var(--printer-status-warning-color)',
                     backgroundColor: 'var(--printer-status-warning-bg)'

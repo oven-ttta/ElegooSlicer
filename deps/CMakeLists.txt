@@ -304,10 +304,6 @@ if(NOT OPENSSL_FOUND)
     set(OPENSSL_PKG dep_OpenSSL)
 endif()
 
-include(ixwebsocket/ixwebsocket.cmake)
-include(PahoMqttCpp/PahoMqttCpp.cmake)
-include(elegoolink/elegoolink.cmake)
-
 # we don't want to load a "wrong" openssl when loading curl
 # so, just don't even bother 
 # ...i think this is how it works? change if wrong
@@ -352,6 +348,10 @@ endif ()
 
 include(OCCT/OCCT.cmake)
 include(OpenCV/OpenCV.cmake)
+
+include(ixwebsocket/ixwebsocket.cmake)
+include(PahoMqttCpp/PahoMqttCpp.cmake)
+include(elegoolink/elegoolink.cmake)
 
 set(_dep_list
     dep_Boost
