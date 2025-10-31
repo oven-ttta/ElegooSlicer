@@ -6,6 +6,7 @@
 - **All code comments MUST be written in English**
 - **All git commit messages MUST be written in English**
 - **All variable and function names MUST be in English**
+- **File encoding MUST be UTF-8**
 - Use clear, descriptive English that explains the "why" behind complex logic
 - Keep comments concise and meaningful
 - Absolutely NO Chinese characters in code, comments, or commit messages
@@ -13,16 +14,43 @@
 ## Naming Conventions
 
 ### C++ (Backend)
-- **Variables**: Use `camelCase` (lower camelCase) for local variables and function parameters
-  - Example: `userInfo`, `crashLogPath`, `exceptionCode`
-- **Functions**: Use `camelCase` for function names
-  - Example: `showExceptionInformation()`, `getLogicalAddress()`, `setLogFolder()`
-- **Classes**: Use `PascalCase` (upper camelCase) for class names
-  - Example: `CBaseException`, `PrintObject`, `BackgroundSlicingProcess`
-- **Constants**: Use `SCREAMING_SNAKE_CASE` for constants
-  - Example: `MAX_PATH`, `ELEGOOSLICER_VERSION`
-- **Member Variables**: Use `camelCase` with optional `m_` prefix for private members
-  - Example: `mPEp`, `gLogFolder`
+
+**Files and Folders:**
+- Project folders and image files: lowercase
+- Code files: PascalCase (e.g., `BaseException.cpp`, `MainFrame.hpp`)
+- File extensions: lowercase
+
+**Classes, Structs, Enums:**
+- Use `PascalCase` (upper camelCase)
+  - Example: `class ElegooClass`, `struct ElegooStruct`, `enum ElegooEnum`
+
+**Macros:**
+- Use `SCREAMING_SNAKE_CASE`
+  - Example: `#define ELEGOO_MACRO 0`
+
+**Namespaces:**
+- Use `PascalCase`
+  - Example: `namespace ElegooSpace {}`
+
+**Variables:**
+- **Local variables**: `camelCase` (lower camelCase)
+  - Example: `int elegooVal{0};`
+- **Global variables**: `g` prefix + `camelCase`
+  - Example: `int gElegoo;`
+- **Static variables**: `s` prefix + `camelCase`
+  - Example: `int sElegoo;`
+- **Member variables**: `m` prefix + `PascalCase`
+  - Example: `std::string mName;`
+- **Constants**: `c` prefix + `PascalCase`
+  - Example: `const int cElegoo = 0;`
+
+**Functions:**
+- **Regular functions**: `camelCase`
+  - Example: `void elegooFunction(){}`
+- **Slot functions**: `slot` prefix + `PascalCase`
+  - Example: `void slotElegoo(){}`
+- **Signal functions**: `signal` prefix + `PascalCase`
+  - Example: `void signalElegoo(){}`
 
 ### JavaScript (Frontend)
 - **Variables**: Use `camelCase` for variables
@@ -36,7 +64,17 @@
 - **Objects**: Use `camelCase` for object names
   - Example: `userInfo`, `navigationData`
 
-## Code Style Guidelines
+## Code Format and Style
+
+### Encoding and Formatting
+- **File encoding**: UTF-8 without BOM
+- **Indentation**: 4 spaces (NO tabs)
+- **Braces**: Symmetric (opening and closing braces align)
+- **Operators**: Add spaces around operators
+  - Example: `int result = a + b;` (not `int result=a+b;`)
+- **Build system**: Use CMakeLists.txt for all builds
+
+### Code Style Guidelines
 
 ### C++ Specific
 - Follow existing codebase patterns in `src/libslic3r/` and `src/slic3r/`
@@ -44,6 +82,62 @@
 - Prefer smart pointers (`std::unique_ptr`, `std::shared_ptr`) over raw pointers
 - Use RAII patterns for resource management
 - Keep functions focused and single-purpose
+
+### Comment Standards
+
+**Header File Comments:**
+```cpp
+// ------------------------------------------
+// author: Your Name
+// date: 2024/12/18
+// copyright: (c) 2024 ELEGOO
+// description: This file contains the declaration of the class.
+// ------------------------------------------
+
+#ifndef CLASS_NAME_H
+#define CLASS_NAME_H
+```
+
+**Class/Function/Variable Comments (Doxygen style):**
+```cpp
+/**
+ * @brief A class demonstrating usage.
+ */
+class ExampleClass {
+public:
+    /**
+     * @brief Constructor for ExampleClass.
+     * @param value An integer value to initialize the class.
+     */
+    ExampleClass(int value);
+
+    /**
+     * @brief Get the name value.
+     * @return A reference to the name string.
+     */
+    const std::string& getName() const;
+
+private:
+    std::string mName;  //< Member variable storing the name
+};
+```
+
+### Parameter Passing Rules
+
+1. **Add `const` for parameters that won't be modified**
+   - Example: `void process(const std::string& data)`
+
+2. **Use references to avoid copying**
+   - Example: `void update(std::vector<int>& vec)` (not `void update(std::vector<int> vec)`)
+
+3. **Prefer references over pointers when possible**
+   - Example: `void set(const Config& config)` (not `void set(const Config* config)`)
+
+4. **Consider move semantics for specific scenarios**
+   - Example: `void transfer(std::vector<int>&& data)`
+
+5. **Function parameters limit: max 4 parameters**
+   - If more than 4, encapsulate into a struct
 
 ### JavaScript Specific
 - Use ES6+ features (const/let, arrow functions, async/await)
@@ -115,12 +209,14 @@ Closes #234
 ```
 
 ```
-fix(slicer): correct perimeter generation offset calculation
+fix(CerealTest): fix crash issue in serialization
 
-The previous calculation didn't account for precise outer wall settings,
-causing dimensional inaccuracies in some edge cases.
+Fixed crash that occurred when serializing certain objects
 
-Fixes #456
+1. Modified serialization logic in CerealTest.cpp
+2. Added handling for special edge cases
+
+Closes #123
 ```
 
 ```
@@ -132,11 +228,15 @@ status polling into a single method.
 
 **Bad:**
 ```
-修复bug  // Chinese - NEVER DO THIS
+fixed bug  // Too vague, no context
 ```
 
 ```
 fixed stuff  // Too vague
+```
+
+```
+update code  // Not descriptive enough
 ```
 
 ```
@@ -157,27 +257,170 @@ Added new feature.  // Wrong tense (should be "add")
 - [ ] Test your changes
 - [ ] Write meaningful commit message in English
 
+## Commit Content Rules
+
+### What CAN be committed to repository:
+- ✅ Source code files (.cpp, .hpp, .js, .html, .css)
+- ✅ Build files (CMakeLists.txt, .bat, .sh)
+- ✅ Resource files (images, translations, styles)
+- ✅ Scripts and configuration files
+- ✅ Third-party library headers
+- ✅ Unit test code
+- ✅ Project documentation
+
+### What CANNOT be committed:
+- ❌ Build output/intermediate files (.obj, .o, .exe, .dll without source)
+- ❌ Test images and temporary files
+- ❌ IDE-specific files (except .cursorrules)
+- ❌ Binary files without purpose
+- ❌ Personal configuration files
+
+### Important Rules:
+- **Configure .gitignore properly** - prevent accidental commits of build artifacts
+- **Organize documentation** - put project docs in `doc/` folder
+- **Update README** - document common issues and solutions
+
 ## File Organization
 - C++ files: `src/libslic3r/`, `src/slic3r/GUI/`, `src/dev-utils/`
 - JavaScript files: `resources/web/`
+- Documentation: `doc/` folder
 - Headers: Use `.hpp` extension for C++ headers
 - Source: Use `.cpp` extension for C++ implementation
+- All text files: **UTF-8 encoding**
 
 ## Best Practices
 
+### Function Design
+1. **Single Responsibility**: One function implements one feature only
+2. **Function Length**: Recommended max 50 lines (guideline, not absolute)
+3. **Parameter Limit**: Max 4 parameters; if more, use a struct
+4. **Nesting Depth**: Max 3 levels of nesting
+
+### Pointer Safety
+```cpp
+// ✅ Always check pointers before use
+if (ptr != nullptr) {
+    ptr->doSomething();
+}
+
+// ✅ Use assertions for debug builds
+assert(ptr != nullptr && "Pointer should not be null");
+ptr->doSomething();
+
+// ✅ Set to nullptr after delete
+delete ptr;
+ptr = nullptr;
+```
+
+### Container Safety
+```cpp
+// ✅ Check size before accessing
+std::vector<int> vec;
+int index = 2;
+if (index < vec.size()) {
+    vec[index] = 0;
+}
+
+// ✅ Check queue before popping
+std::queue<int> queue;
+if (!queue.empty()) {
+    queue.pop();
+}
+```
+
+### Variable Initialization
+```cpp
+// ✅ Always initialize variables
+int elegooVal{0};
+std::string name{""};
+MyClass* ptr{nullptr};
+
+// ❌ Never use uninitialized variables
+int badVal;  // Dangerous!
+```
+
+### Code Maintenance
+1. **Remove commented-out code** - delete obsolete code promptly
+2. **Keep comments synchronized** - update comments when code changes
+3. **Exception handling** - add try-catch where appropriate with logging
+4. **Use namespaces** - wrap large feature modules in namespaces
+
+### Header File Management
+1. **Forward declarations**: Use forward declarations in headers when possible
+   ```cpp
+   // In .hpp file
+   class OtherClass;  // Forward declaration
+   
+   // In .cpp file
+   #include "OtherClass.hpp"  // Include only in implementation
+   ```
+
+2. **Include order**: Group headers logically
+   ```cpp
+   // System headers
+   #include <iostream>
+   #include <vector>
+   
+   // C++ standard library
+   #include <string>
+   #include <memory>
+   
+   // Third-party libraries
+   #include <boost/filesystem.hpp>
+   #include <wx/window.h>
+   
+   // Project headers
+   #include "BaseException.h"
+   #include "Utils.hpp"
+   ```
+
+### Class Design
+1. **Member access order**: public → protected → private (no mixing)
+   ```cpp
+   class ElegooClass {
+   public:
+       // Public members
+   protected:
+       // Protected members
+   private:
+       // Private members
+   };
+   ```
+
+2. **Encapsulation**: Don't expose members directly; use getters/setters
+   ```cpp
+   class ElegooClass {
+   public:
+       const std::string& getName() const { return mName; }
+       void setName(const std::string& name) { mName = name; }
+   private:
+       std::string mName;
+   };
+   ```
+
+3. **Deep copy**: Implement deep copy for classes with pointers/resources
+4. **Move semantics**: Use move constructors for large objects to improve performance
+
+### Code Quality
+- **Extensibility**: Design for future extensions, avoid hardcoding
+- **Unit tests**: Write tests for new features and submit to repository
+- **Unified styles**: Keep UI styles in a single file
+- **String resources**: Use English strings; translate as needed
+
 ### When Adding New Code:
 1. Write all comments in English
-2. Use camelCase for variables and functions (C++ and JS)
-3. Use PascalCase for classes
-4. Follow existing code patterns in the file
-5. Add clear comments for complex logic
-6. Keep functions focused and readable
+2. Follow naming conventions with proper prefixes
+3. Initialize all variables
+4. Add Doxygen-style comments for public APIs
+5. Keep functions focused and readable
+6. Consider thread safety and performance
 
 ### When Committing:
 1. Write commit message in English
 2. Use descriptive commit messages
 3. Reference related issues if applicable
 4. Keep commits atomic (one logical change per commit)
+5. Ensure UTF-8 encoding for all files
 
 ## Code Review Checklist
 
@@ -215,18 +458,33 @@ Added new feature.  // Wrong tense (should be "add")
 ### Good C++ Code:
 ```cpp
 // Set crash log folder path
-void CBaseException::setLogFolder(std::string logFolder)
+void CBaseException::setLogFolder(const std::string& logFolder)
 {
     gLogFolder = logFolder;
 }
 
-// Show exception information with detailed system context
+/**
+ * @brief Show detailed exception information including system context
+ */
 void CBaseException::showExceptionInformation()
 {
     // Output crash report header
-    OutputString(_T("================================================================================\r\n"));
-    // ...
+    OutputString(_T("===============================================\r\n"));
+    // Output exception details...
 }
+
+/**
+ * @brief Example class with proper encapsulation
+ */
+class UserConfig {
+public:
+    const std::string& getName() const { return mName; }
+    void setName(const std::string& name) { mName = name; }
+    
+private:
+    std::string mName;     //< User name
+    int mUserId{0};        //< User ID (initialized)
+};
 ```
 
 ### Good JavaScript Code:
@@ -247,11 +505,14 @@ async onLogout() {
 
 ### Good Commit Message:
 ```
-Add crash test menu for debugging
+fix(CerealTest): fix crash issue in serialization
 
-- Added simple crash test option
-- Helps verify crash reporting system works correctly
-- Only visible in debug builds
+Fixed crash that occurred when serializing certain objects
+
+1. Modified serialization logic in CerealTest.cpp
+2. Added handling for special edge cases
+
+Closes #123
 ```
 
 ---
@@ -288,9 +549,8 @@ int binarySearch(const std::vector<int>& arr, int target) {
 // Increment i
 i++;
 
-// ❌ BAD: Chinese - NEVER DO THIS
-// 增加计数器
-i++;
+// ❌ BAD: Using non-English comments
+// (Never use Chinese or other non-English languages)
 ```
 
 ### Error Handling Standards
