@@ -2,6 +2,64 @@
 
 > Based on OrcaSlicer, developed by ELEGOO for FDM 3D printing
 
+## Project Structure & Module Organization
+
+ElegooSlicer's C++17 sources live in `src/`, split by feature modules and platform adapters:
+- **Core slicing engine**: `src/libslic3r/`
+- **GUI components**: `src/slic3r/GUI/`
+- **Development utilities**: `src/dev-utils/`
+- **User assets and presets**: `resources/` (icons, printer profiles, translations)
+- **Translations**: `localization/`
+- **Tests**: `tests/` (grouped by domain: `libslic3r/`, `sla_print/`, etc.)
+- **Test fixtures**: `tests/data/`
+- **CMake helpers**: `cmake/`
+- **Documentation**: `doc/` and `SoftFever_doc/`
+- **Automation scripts**: `scripts/` and `tools/`
+- **Vendored dependencies**: `deps/` and `deps_src/` (treat as snapshots, do not modify without mirroring upstream)
+
+## Build, Test, and Development Commands
+
+**Out-of-source builds:**
+```bash
+# Configure and generate build files
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+# Compile the application (add --parallel to speed up)
+cmake --build build --target ElegooSlicer --config Release
+
+# Build and run tests
+cmake --build build --target tests
+ctest --test-dir build --output-on-failure
+```
+
+**Platform-specific helpers:**
+- Linux: `build_linux.sh`
+- macOS: `build_release_macos.sh` (use `-sx` flag for debugging build issues)
+- Windows: `build_release_vs2022.bat`
+- Docker: `scripts/DockerBuild.sh` (reproducible container builds)
+
+## Testing Guidelines
+
+- Unit tests use **Catch2** framework (`tests/catch2/`)
+- Name test files after the component: e.g., `tests/libslic3r/TestPlanarHole.cpp`
+- Tag long-running tests so `ctest -L fast` remains useful
+- Use deterministic fixtures or sample G-code stored in `tests/data/`
+- Document manual printer validation or regression checks in PR when automated coverage is insufficient
+
+## Code Formatting
+
+- **DO NOT use auto-formatting tools on existing code** - This project is based on OrcaSlicer branch, auto-formatting existing files will cause massive merge conflicts
+- `.clang-format` exists in the project but **should NOT be applied to existing code**
+- For **new files or new code blocks**, you may follow the formatting rules below, but do NOT reformat existing code
+- When modifying existing files, **match the existing style** of that file to minimize diff
+
+## Security & Configuration
+
+- Follow `SECURITY.md` for vulnerability reporting
+- Keep API tokens and printer credentials out of tracked configs
+- Use `sandboxes/` for experimental settings
+- When modifying third-party code in `deps_src/`, record upstream commit/release in PR description
+
 ## Language Requirements
 - **All code comments MUST be written in English**
 - **All git commit messages MUST be written in English**
@@ -16,13 +74,15 @@
 ### Code Modification Principles
 1. **Do NOT automatically refactor existing code** - Due to historical reasons, much legacy code does not follow current naming conventions. Only modify code when explicitly requested by the user.
 
-2. **Always read current file contents before making changes** - Do NOT rely solely on conversation context or memory. The user may have manually modified the code after previous AI changes. Always use the `read_file` tool to check the latest file state before editing.
+2. **Do NOT auto-format existing code** - This project is based on OrcaSlicer branch. Auto-formatting will cause massive merge conflicts with upstream. Match existing file style instead.
 
-3. **Respect manual user changes** - If the user has manually modified code between AI interactions, preserve those changes. Do not overwrite user modifications with previous AI suggestions from conversation history.
+3. **Always read current file contents before making changes** - Do NOT rely solely on conversation context or memory. The user may have manually modified the code after previous AI changes. Always use the `read_file` tool to check the latest file state before editing.
 
-4. **Focus on requested changes only** - When asked to modify specific functionality, do not "improve" or "refactor" unrelated code, even if it doesn't follow current conventions.
+4. **Respect manual user changes** - If the user has manually modified code between AI interactions, preserve those changes. Do not overwrite user modifications with previous AI suggestions from conversation history.
 
-5. **Ask before large refactoring** - If you notice code that could be improved but wasn't explicitly requested, mention it but do not change it without permission.
+5. **Focus on requested changes only** - When asked to modify specific functionality, do not "improve" or "refactor" unrelated code, even if it doesn't follow current conventions.
+
+6. **Ask before large refactoring** - If you notice code that could be improved but wasn't explicitly requested, mention it but do not change it without permission.
 
 ## Naming Conventions
 
@@ -77,26 +137,9 @@
 
 ## Code Format and Style
 
-### Encoding and Formatting
+### Basic Requirements (for new files only)
 - **File encoding**: UTF-8 without BOM
 - **Indentation**: 4 spaces (NO tabs)
-- **Braces**: Allman style (opening brace on new line, aligned with closing brace)
-  ```cpp
-  // ✅ Correct
-  void function()
-  {
-      if (condition)
-      {
-          // code
-      }
-  }
-  ```
-  - Exception: Single-line member functions may use same-line braces for brevity
-    ```cpp
-    const std::string& getName() const { return mName; }
-    ```
-- **Operators**: Add spaces around operators
-  - Example: `int result = a + b;` (not `int result=a+b;`)
 - **Build system**: Use CMakeLists.txt for all builds
 
 ### Code Style Guidelines
@@ -490,11 +533,11 @@ A → B → C → merge           A → B → C → D
 5. Result: A → B → C → D (linear!)
 
 ### Before Committing
-- [ ] Run code formatter/linter
 - [ ] Remove debugging code
 - [ ] Remove commented-out code
 - [ ] Test your changes
 - [ ] Write meaningful commit message in English
+- [ ] Keep code changes minimal (do NOT reformat existing code)
 
 ## Commit Content Rules
 
