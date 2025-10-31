@@ -1,0 +1,367 @@
+# ElegooSlicer Project Development Rules
+
+> Based on OrcaSlicer, developed by ELEGOO for FDM 3D printing
+
+## Language Requirements
+- **All code comments MUST be written in English**
+- **All git commit messages MUST be written in English**
+- **All variable and function names MUST be in English**
+- Use clear, descriptive English that explains the "why" behind complex logic
+- Keep comments concise and meaningful
+- Absolutely NO Chinese characters in code, comments, or commit messages
+
+## Naming Conventions
+
+### C++ (Backend)
+- **Variables**: Use `camelCase` (lower camelCase) for local variables and function parameters
+  - Example: `userInfo`, `crashLogPath`, `exceptionCode`
+- **Functions**: Use `camelCase` for function names
+  - Example: `showExceptionInformation()`, `getLogicalAddress()`, `setLogFolder()`
+- **Classes**: Use `PascalCase` (upper camelCase) for class names
+  - Example: `CBaseException`, `PrintObject`, `BackgroundSlicingProcess`
+- **Constants**: Use `SCREAMING_SNAKE_CASE` for constants
+  - Example: `MAX_PATH`, `ELEGOOSLICER_VERSION`
+- **Member Variables**: Use `camelCase` with optional `m_` prefix for private members
+  - Example: `mPEp`, `gLogFolder`
+
+### JavaScript (Frontend)
+- **Variables**: Use `camelCase` for variables
+  - Example: `userInfo`, `loginStatus`, `avatarUrl`
+- **Functions**: Use `camelCase` for function names
+  - Example: `onLogout()`, `ipcRequest()`, `checkLoginStatus()`
+- **Constants**: Use `SCREAMING_SNAKE_CASE` or `camelCase` with `const`
+  - Example: `MAX_RETRY_COUNT`, `const defaultAvatar = ''`
+- **Classes**: Use `PascalCase` (same as C++)
+  - Example: `NavigationController`, `UserManager`
+- **Objects**: Use `camelCase` for object names
+  - Example: `userInfo`, `navigationData`
+
+## Code Style Guidelines
+
+### C++ Specific
+- Follow existing codebase patterns in `src/libslic3r/` and `src/slic3r/`
+- Use `#pragma once` for header guards (not `#ifndef`)
+- Prefer smart pointers (`std::unique_ptr`, `std::shared_ptr`) over raw pointers
+- Use RAII patterns for resource management
+- Keep functions focused and single-purpose
+
+### JavaScript Specific
+- Use ES6+ features (const/let, arrow functions, async/await)
+- Prefer `const` over `let` when possible
+- Use meaningful variable and function names
+- Keep functions small and focused
+- Use template literals for string concatenation
+
+## Git Commit Message Standards
+
+### Commit Message Format
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Type (Required)
+- **feat**: New feature
+- **fix**: Bug fix
+- **docs**: Documentation changes
+- **style**: Code style changes (formatting, missing semicolons, etc)
+- **refactor**: Code refactoring (neither fixes a bug nor adds a feature)
+- **perf**: Performance improvements
+- **test**: Adding or modifying tests
+- **chore**: Changes to build process or auxiliary tools
+- **revert**: Reverts a previous commit
+
+### Scope (Optional)
+Indicates which part of the codebase is affected:
+- `gui`: GUI components
+- `slicer`: Core slicing engine
+- `network`: Network/cloud features
+- `printer`: Printer management
+- `config`: Configuration management
+- `build`: Build system
+- `deps`: Dependencies
+
+### Subject (Required)
+- Use imperative mood: "add feature" not "added feature" or "adds feature"
+- Start with lowercase
+- No period at the end
+- Maximum 50 characters
+- Be specific and descriptive
+
+### Body (Optional but Recommended)
+- Explain WHAT and WHY, not HOW
+- Wrap at 72 characters
+- Separate from subject with a blank line
+- Can include multiple paragraphs
+
+### Footer (Optional)
+- Reference issues: `Closes #123`, `Fixes #456`, `Relates to #789`
+- Breaking changes: `BREAKING CHANGE: description`
+
+### Examples:
+
+**Good:**
+```
+feat(gui): add crash test menu for debugging
+
+- Added simple crash test option in Help menu
+- Helps verify crash reporting system works correctly
+- Only visible in debug/development builds
+
+Closes #234
+```
+
+```
+fix(slicer): correct perimeter generation offset calculation
+
+The previous calculation didn't account for precise outer wall settings,
+causing dimensional inaccuracies in some edge cases.
+
+Fixes #456
+```
+
+```
+refactor(network): simplify printer discovery logic
+
+Removed redundant network checks and consolidated printer
+status polling into a single method.
+```
+
+**Bad:**
+```
+修复bug  // Chinese - NEVER DO THIS
+```
+
+```
+fixed stuff  // Too vague
+```
+
+```
+Added new feature.  // Wrong tense (should be "add")
+```
+
+### Commit Frequency
+- Commit often, but keep commits atomic
+- One logical change per commit
+- Don't commit broken code
+- Don't commit debugging code or commented-out code
+- Don't commit unrelated changes together
+
+### Before Committing
+- [ ] Run code formatter/linter
+- [ ] Remove debugging code
+- [ ] Remove commented-out code
+- [ ] Test your changes
+- [ ] Write meaningful commit message in English
+
+## File Organization
+- C++ files: `src/libslic3r/`, `src/slic3r/GUI/`, `src/dev-utils/`
+- JavaScript files: `resources/web/`
+- Headers: Use `.hpp` extension for C++ headers
+- Source: Use `.cpp` extension for C++ implementation
+
+## Best Practices
+
+### When Adding New Code:
+1. Write all comments in English
+2. Use camelCase for variables and functions (C++ and JS)
+3. Use PascalCase for classes
+4. Follow existing code patterns in the file
+5. Add clear comments for complex logic
+6. Keep functions focused and readable
+
+### When Committing:
+1. Write commit message in English
+2. Use descriptive commit messages
+3. Reference related issues if applicable
+4. Keep commits atomic (one logical change per commit)
+
+## Code Review Checklist
+
+### Before Submitting PR
+- [ ] All comments are in English
+- [ ] Naming conventions followed (camelCase for C++ variables/functions, camelCase for JS)
+- [ ] Code follows existing patterns
+- [ ] Commit messages are in English and descriptive
+- [ ] No Chinese characters anywhere in code
+- [ ] No debugging/test code left in
+- [ ] No commented-out code (remove or explain why it's there)
+- [ ] Code is properly formatted
+- [ ] No compiler warnings
+- [ ] All tests pass
+- [ ] Documentation updated if needed
+
+### Code Quality Standards
+- [ ] Functions are focused and single-purpose
+- [ ] No magic numbers (use constants)
+- [ ] Error handling is appropriate
+- [ ] Resource cleanup is proper (RAII in C++)
+- [ ] No memory leaks
+- [ ] Thread-safety considered for concurrent code
+- [ ] Performance impact considered for critical paths
+
+### Security Considerations
+- [ ] Input validation implemented
+- [ ] No hardcoded credentials
+- [ ] Sensitive data properly handled
+- [ ] SQL injection prevention (if applicable)
+- [ ] Cross-site scripting prevention (if applicable)
+
+## Examples
+
+### Good C++ Code:
+```cpp
+// Set crash log folder path
+void CBaseException::setLogFolder(std::string logFolder)
+{
+    gLogFolder = logFolder;
+}
+
+// Show exception information with detailed system context
+void CBaseException::showExceptionInformation()
+{
+    // Output crash report header
+    OutputString(_T("================================================================================\r\n"));
+    // ...
+}
+```
+
+### Good JavaScript Code:
+```javascript
+// Handle user logout action
+async onLogout() {
+    console.log('Logout clicked');
+    try {
+        await this.ipcRequest('logout', {});
+        // Reset user info after successful logout
+        this.userInfo.loginStatus = 0;
+        this.userInfo.nickname = '';
+    } catch (error) {
+        console.error('Logout failed:', error);
+    }
+}
+```
+
+### Good Commit Message:
+```
+Add crash test menu for debugging
+
+- Added simple crash test option
+- Helps verify crash reporting system works correctly
+- Only visible in debug builds
+```
+
+---
+
+## Prohibited Practices
+
+### NEVER Do These:
+1. **❌ Use Chinese in code, comments, or commit messages**
+2. **❌ Commit broken/non-compiling code**
+3. **❌ Commit directly to main/master branch**
+4. **❌ Force push without team agreement**
+5. **❌ Leave debugging code (console.log, printf, etc.)**
+6. **❌ Leave commented-out code without explanation**
+7. **❌ Use magic numbers (use named constants)**
+8. **❌ Ignore compiler warnings**
+9. **❌ Skip code review process**
+10. **❌ Mix unrelated changes in one commit**
+
+### Code Comments Best Practices
+```cpp
+// ✅ GOOD: Explain WHY
+// Use double buffer to prevent flickering during rapid updates
+void renderWithDoubleBuffer() {
+    // ...
+}
+
+// ✅ GOOD: Explain complex logic
+// Binary search requires sorted array. Time complexity: O(log n)
+int binarySearch(const std::vector<int>& arr, int target) {
+    // ...
+}
+
+// ❌ BAD: Stating the obvious
+// Increment i
+i++;
+
+// ❌ BAD: Chinese - NEVER DO THIS
+// 增加计数器
+i++;
+```
+
+### Error Handling Standards
+```cpp
+// ✅ C++: Use exceptions for exceptional cases
+try {
+    processFile(filename);
+} catch (const std::exception& e) {
+    BOOST_LOG_TRIVIAL(error) << "Failed to process file: " << e.what();
+    return false;
+}
+
+// ✅ Check return values
+if (!initializeSystem()) {
+    BOOST_LOG_TRIVIAL(error) << "System initialization failed";
+    return EXIT_FAILURE;
+}
+```
+
+```javascript
+// ✅ JavaScript: Use try-catch for async operations
+try {
+    const result = await apiCall();
+    return result;
+} catch (error) {
+    console.error('API call failed:', error);
+    throw error;
+}
+```
+
+### Performance Guidelines
+- Profile before optimizing
+- Consider Big O complexity for algorithms
+- Use appropriate data structures
+- Avoid premature optimization
+- Cache expensive computations when appropriate
+- Be mindful of memory allocations in loops
+
+### Testing Standards
+- Write tests for new features
+- Update tests when fixing bugs
+- Test edge cases and error conditions
+- Keep tests focused and readable
+- Run all tests before committing
+
+---
+
+## Quick Reference Card
+
+### Naming
+- C++ variables/functions: `camelCase`
+- C++ classes: `PascalCase`
+- Constants: `SCREAMING_SNAKE_CASE`
+- JS variables/functions: `camelCase`
+
+### Git Commits
+- Format: `<type>(<scope>): <subject>`
+- Types: feat, fix, docs, style, refactor, perf, test, chore
+- Subject: lowercase, imperative, < 50 chars
+- Language: **English ONLY**
+
+### Comments
+- Language: **English ONLY**
+- Explain WHY, not WHAT
+- Keep concise and meaningful
+
+---
+
+**Remember**: 
+- ✅ Consistency is key
+- ✅ Always use English
+- ✅ Code quality over speed
+- ✅ Review your own code before submitting
+- ✅ Test your changes thoroughly

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-OrcaSlicer is an open-source 3D slicer application forked from Bambu Studio, built using C++ with wxWidgets for the GUI and CMake as the build system. The project uses a modular architecture with separate libraries for core slicing functionality, GUI components, and platform-specific code.
+ElegooSlicer is an open-source 3D slicer application based on OrcaSlicer, developed by ELEGOO with enhanced integration for ELEGOO printers. OrcaSlicer is forked from Bambu Studio, built using C++ with wxWidgets for the GUI and CMake as the build system. The project uses a modular architecture with separate libraries for core slicing functionality, GUI components, and platform-specific code. ElegooSlicer adds custom features including ElegooLink print host integration, printer network management, and Material Management System (MMS) support.
 
 ## Build Commands
 

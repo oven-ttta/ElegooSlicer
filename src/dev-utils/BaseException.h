@@ -19,8 +19,10 @@ public:
 	static LONG WINAPI UnhandledExceptionFilter(PEXCEPTION_POINTERS pExceptionInfo);
 	static LONG WINAPI UnhandledExceptionFilter2(PEXCEPTION_POINTERS pExceptionInfo);
 	static void STF(unsigned int ui,  PEXCEPTION_POINTERS pEp);
-	//BBS set crash log folder
+	// Set crash log folder
 	static void set_log_folder(std::string log_folder);
+	// Create minidump file
+	static void create_minidump(PEXCEPTION_POINTERS pExceptionInfo);
 protected:
 	PEXCEPTION_POINTERS m_pEp;
 	boost::nowide::ofstream *output_file;

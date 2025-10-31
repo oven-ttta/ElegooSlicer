@@ -9,6 +9,38 @@
 #include <boost/format.hpp>
 #include <mutex>
 
+// Forward declare Windows API functions to avoid header conflicts
+#ifdef _WIN32
+#include <DbgHelp.h>
+#pragma comment(lib, "Dbghelp.lib")
+
+extern "C" {
+    typedef struct _PROCESS_MEMORY_COUNTERS_EX {
+        DWORD cb;
+        DWORD PageFaultCount;
+        SIZE_T PeakWorkingSetSize;
+        SIZE_T WorkingSetSize;
+        SIZE_T QuotaPeakPagedPoolUsage;
+        SIZE_T QuotaPagedPoolUsage;
+        SIZE_T QuotaPeakNonPagedPoolUsage;
+        SIZE_T QuotaNonPagedPoolUsage;
+        SIZE_T PagefileUsage;
+        SIZE_T PeakPagefileUsage;
+        SIZE_T PrivateUsage;
+    } PROCESS_MEMORY_COUNTERS_EX, *PPROCESS_MEMORY_COUNTERS_EX;
+
+    __declspec(dllimport) BOOL __stdcall GetProcessMemoryInfo(
+        HANDLE Process,
+        void* ppsmemCounters,
+        DWORD cb
+    );
+}
+#endif
+
+#ifndef ELEGOOSLICER_VERSION
+#define ELEGOOSLICER_VERSION "Unknown"
+#endif
+
 static std::string g_log_folder;
 static std::atomic<int> g_crash_log_count = 0;
 static std::mutex g_dump_mutex;
@@ -260,6 +292,70 @@ void CBaseException::ShowExceptionResoult(DWORD dwExceptionCode)
 #endif
 }
 
+// Create minidump file for debugging
+void CBaseException::create_minidump(PEXCEPTION_POINTERS pExceptionInfo)
+{
+#ifdef _WIN32
+	if (g_log_folder.empty())
+		return;
+
+	std::time_t t = std::time(0);
+	std::tm* now_time = std::localtime(&t);
+	std::stringstream buf;
+	buf << std::put_time(now_time, "crash_%a_%b_%d_%H_%M_%S_") << g_crash_log_count << ".dmp";
+	
+	auto log_folder = (boost::filesystem::path(g_log_folder) / "log").make_preferred();
+	if (!boost::filesystem::exists(log_folder)) {
+		boost::filesystem::create_directory(log_folder);
+	}
+	
+	auto dump_path = boost::filesystem::path(log_folder / buf.str()).make_preferred();
+	std::wstring dump_filename = dump_path.wstring();
+
+	HANDLE hFile = CreateFileW(
+		dump_filename.c_str(),
+		GENERIC_WRITE,
+		0,
+		NULL,
+		CREATE_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL
+	);
+
+	if (hFile != INVALID_HANDLE_VALUE) {
+		MINIDUMP_EXCEPTION_INFORMATION mdei;
+		mdei.ThreadId = GetCurrentThreadId();
+		mdei.ExceptionPointers = pExceptionInfo;
+		mdei.ClientPointers = FALSE;
+
+		MINIDUMP_TYPE dumpType = (MINIDUMP_TYPE)(
+			MiniDumpWithFullMemory |
+			MiniDumpWithHandleData |
+			MiniDumpWithThreadInfo |
+			MiniDumpWithUnloadedModules
+		);
+
+		BOOL success = MiniDumpWriteDump(
+			GetCurrentProcess(),
+			GetCurrentProcessId(),
+			hFile,
+			dumpType,
+			pExceptionInfo ? &mdei : NULL,
+			NULL,
+			NULL
+		);
+
+		CloseHandle(hFile);
+
+		if (success) {
+			BOOST_LOG_TRIVIAL(info) << "Minidump created: " << dump_path.string();
+		} else {
+			BOOST_LOG_TRIVIAL(error) << "Failed to create minidump. Error: " << GetLastError();
+		}
+	}
+#endif
+}
+
 LONG WINAPI CBaseException::UnhandledExceptionFilter(PEXCEPTION_POINTERS pExceptionInfo )
 {
 	if (pExceptionInfo->ExceptionRecord->ExceptionCode < 0x80000000
@@ -273,6 +369,11 @@ LONG WINAPI CBaseException::UnhandledExceptionFilter(PEXCEPTION_POINTERS pExcept
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
     g_dump_mutex.lock();
+	
+	// Create minidump first
+	create_minidump(pExceptionInfo);
+	
+	// Then create text log
 	CBaseException base(GetCurrentProcess(), GetCurrentProcessId(), NULL, pExceptionInfo);
 	base.ShowExceptionInformation();
     g_dump_mutex.unlock();
@@ -282,6 +383,10 @@ LONG WINAPI CBaseException::UnhandledExceptionFilter(PEXCEPTION_POINTERS pExcept
 
 LONG WINAPI CBaseException::UnhandledExceptionFilter2(PEXCEPTION_POINTERS pExceptionInfo )
 {
+	// Create minidump first
+	create_minidump(pExceptionInfo);
+	
+	// Then create text log
 	CBaseException base(GetCurrentProcess(), GetCurrentProcessId(), NULL, pExceptionInfo);
 	base.ShowExceptionInformation();
 
@@ -310,7 +415,6 @@ BOOL CBaseException::GetLogicalAddress(
 
 	DWORD_PTR rva = (DWORD_PTR)addr - hMod;
 
-	//���㵱ǰ��ַ�ڵڼ�����
 	for (unsigned i = 0; i < pNtHdr->FileHeader.NumberOfSections; i++, pSection++ )
 	{
 		DWORD sectionStart = pSection->VirtualAddress;
@@ -365,24 +469,140 @@ void CBaseException::STF(unsigned int ui,  PEXCEPTION_POINTERS pEp)
 
 void CBaseException::ShowExceptionInformation()
 {
-	OutputString(_T("Exceptions:\r\n"));
+	// Crash report header
+	OutputString(_T("================================================================================\r\n"));
+	OutputString(_T("                        ELEGOOSLICER CRASH REPORT                              \r\n"));
+	OutputString(_T("================================================================================\r\n\r\n"));
+
+	// Timestamp
+	std::time_t t = std::time(0);
+	std::tm* now_time = std::localtime(&t);
+	TCHAR time_buffer[128];
+	_tcsftime(time_buffer, sizeof(time_buffer)/sizeof(TCHAR), _T("%Y-%m-%d %H:%M:%S"), now_time);
+	OutputString(_T("Crash Time: %s\r\n"), time_buffer);
+
+	// Version information
+	OutputString(_T("ElegooSlicer Version: %s\r\n"), _T(ELEGOOSLICER_VERSION));
+	OutputString(_T("\r\n"));
+
+	// System information
+	OutputString(_T("---- SYSTEM INFORMATION ----\r\n"));
+	
+	// Computer name
+	TCHAR computerName[MAX_COMPUTERNAME_LENGTH + 1];
+	DWORD compNameSize = sizeof(computerName) / sizeof(TCHAR);
+	if (GetComputerName(computerName, &compNameSize)) {
+		OutputString(_T("Computer Name: %s\r\n"), computerName);
+	}
+	
+	// OS version
+	OSVERSIONINFOEX osvi = {};
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+#pragma warning(push)
+#pragma warning(disable: 4996)
+	if (GetVersionEx((OSVERSIONINFO*)&osvi)) {
+		OutputString(_T("OS Version: %d.%d Build %d %s\r\n"), 
+			osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber, osvi.szCSDVersion);
+		OutputString(_T("OS Type: %s\r\n"), (osvi.wProductType == VER_NT_WORKSTATION) ? _T("Workstation") : _T("Server"));
+	}
+#pragma warning(pop)
+
+	// CPU information
+	SYSTEM_INFO sysInfo;
+	GetSystemInfo(&sysInfo);
+	OutputString(_T("Number of Processors: %d\r\n"), sysInfo.dwNumberOfProcessors);
+	OutputString(_T("Processor Architecture: "));
+	switch (sysInfo.wProcessorArchitecture) {
+		case PROCESSOR_ARCHITECTURE_AMD64:
+			OutputString(_T("x64 (AMD or Intel)\r\n"));
+			break;
+		case PROCESSOR_ARCHITECTURE_INTEL:
+			OutputString(_T("x86\r\n"));
+			break;
+		case PROCESSOR_ARCHITECTURE_ARM:
+			OutputString(_T("ARM\r\n"));
+			break;
+		case PROCESSOR_ARCHITECTURE_ARM64:
+			OutputString(_T("ARM64\r\n"));
+			break;
+		default:
+			OutputString(_T("Unknown (%d)\r\n"), sysInfo.wProcessorArchitecture);
+			break;
+	}
+
+	// System memory info
+	MEMORYSTATUSEX memInfo = {};
+	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+	if (GlobalMemoryStatusEx(&memInfo)) {
+		OutputString(_T("Total Physical Memory: %llu MB\r\n"), memInfo.ullTotalPhys / (1024 * 1024));
+		OutputString(_T("Available Physical Memory: %llu MB\r\n"), memInfo.ullAvailPhys / (1024 * 1024));
+		OutputString(_T("Memory Load: %d%%\r\n"), memInfo.dwMemoryLoad);
+	}
+
+	// Process information
+	OutputString(_T("Process ID: %d\r\n"), GetCurrentProcessId());
+	OutputString(_T("Thread ID: %d\r\n"), GetCurrentThreadId());
+	
+	// Get process memory usage
+	PROCESS_MEMORY_COUNTERS_EX pmc = {};
+	pmc.cb = sizeof(pmc);
+	if (GetProcessMemoryInfo(GetCurrentProcess(), (void*)&pmc, sizeof(pmc))) {
+		OutputString(_T("Process Working Set: %llu MB\r\n"), pmc.WorkingSetSize / (1024 * 1024));
+		OutputString(_T("Process Peak Working Set: %llu MB\r\n"), pmc.PeakWorkingSetSize / (1024 * 1024));
+		OutputString(_T("Process Private Bytes: %llu MB\r\n"), pmc.PrivateUsage / (1024 * 1024));
+	}
+
+	OutputString(_T("\r\n"));
+
+	// Exception information
+	OutputString(_T("---- EXCEPTION INFORMATION ----\r\n"));
 	ShowExceptionResoult(m_pEp->ExceptionRecord->ExceptionCode);
 
-	OutputString(_T("Exception Flag :0x%x "), m_pEp->ExceptionRecord->ExceptionFlags);
-	OutputString(_T("NumberParameters :%ld \n"), m_pEp->ExceptionRecord->NumberParameters);
+	OutputString(_T("Exception Flags: 0x%x "), m_pEp->ExceptionRecord->ExceptionFlags);
+	if (m_pEp->ExceptionRecord->ExceptionFlags == EXCEPTION_NONCONTINUABLE) {
+		OutputString(_T("(NONCONTINUABLE)\r\n"));
+	} else {
+		OutputString(_T("(CONTINUABLE)\r\n"));
+	}
+	
+	OutputString(_T("Exception Record Address: 0x%p\r\n"), m_pEp->ExceptionRecord);
+	OutputString(_T("Number of Parameters: %ld\r\n"), m_pEp->ExceptionRecord->NumberParameters);
+	
 	for (int i = 0; i < m_pEp->ExceptionRecord->NumberParameters; i++)
 	{
-		OutputString(_T("Param %d :0x%x \n"), i, m_pEp->ExceptionRecord->ExceptionInformation[i]);
+		OutputString(_T("  Parameter[%d]: 0x%p\r\n"), i, (void*)m_pEp->ExceptionRecord->ExceptionInformation[i]);
 	}
-	OutputString(_T("Context :%p \n"), m_pEp->ContextRecord);
-    OutputString(_T("ContextFlag : 0x%x, EFlags: 0x%x \n"), m_pEp->ContextRecord->ContextFlags, m_pEp->ContextRecord->EFlags);
 
+	// Context information
+	OutputString(_T("Context Record: 0x%p\r\n"), m_pEp->ContextRecord);
+	OutputString(_T("Context Flags: 0x%x, EFlags: 0x%x\r\n"), 
+		m_pEp->ContextRecord->ContextFlags, m_pEp->ContextRecord->EFlags);
+
+	// Fault address with module info
 	TCHAR szFaultingModule[MAX_PATH];
 	DWORD section, offset;
-	GetLogicalAddress(m_pEp->ExceptionRecord->ExceptionAddress, szFaultingModule, sizeof(szFaultingModule), section, offset );
-	OutputString( _T("Fault address:  0x%X 0x%X:0x%X %s\r\n"), m_pEp->ExceptionRecord->ExceptionAddress, section, offset, szFaultingModule );
+	GetLogicalAddress(m_pEp->ExceptionRecord->ExceptionAddress, szFaultingModule, sizeof(szFaultingModule), section, offset);
+	OutputString(_T("\r\nFault Address: 0x%p\r\n"), m_pEp->ExceptionRecord->ExceptionAddress);
+	OutputString(_T("Faulting Module: %s\r\n"), szFaultingModule);
+	OutputString(_T("Module Section:Offset: 0x%X:0x%X\r\n"), section, offset);
 
+	OutputString(_T("\r\n"));
+
+	// Register dump
 	ShowRegistorInformation(m_pEp->ContextRecord);
 
+	// Call stack
+	OutputString(_T("---- CALL STACK ----\r\n"));
 	ShowCallstack(GetCurrentThread(), m_pEp->ContextRecord);
+
+	OutputString(_T("\r\n"));
+
+	// Loaded modules
+	OutputString(_T("---- LOADED MODULES ----\r\n"));
+	ShowLoadModules();
+
+	OutputString(_T("\r\n"));
+	OutputString(_T("================================================================================\r\n"));
+	OutputString(_T("                           END OF CRASH REPORT                                 \r\n"));
+	OutputString(_T("================================================================================\r\n"));
 }
