@@ -7422,6 +7422,10 @@ void Plater::priv::on_tab_selection_changing(wxBookCtrlEvent& e)
     sidebar_layout.show = new_sel == MainFrame::tp3DEditor || new_sel == MainFrame::tpPreview;
     update_sidebar();
     int old_sel = e.GetOldSelection();
+    
+    // BBL device now uses PrinterManagerView, no need to check network plugin
+    // Original check for network plugin is removed for BBL devices
+    /*
     if (wxGetApp().preset_bundle && wxGetApp().preset_bundle->use_bbl_device_tab() && new_sel == MainFrame::tpMonitor) {
         if (!wxGetApp().getAgent()) {
             e.Veto();
@@ -7432,13 +7436,14 @@ void Plater::priv::on_tab_selection_changing(wxBookCtrlEvent& e)
             }
         }
     } else {
-        if (new_sel == MainFrame::tpMonitor && wxGetApp().preset_bundle != nullptr) {
-            auto     cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
-            wxString url = cfg.opt_string("print_host_webui").empty() ? cfg.opt_string("print_host") : cfg.opt_string("print_host_webui");
-            if (main_frame->m_printer_view && url.empty()) {
-                // It's missing_connection page, reload so that we can replay the gif image
-                main_frame->m_printer_view->reload();
-            }
+    */
+    
+    if (new_sel == MainFrame::tpMonitor && wxGetApp().preset_bundle != nullptr) {
+        auto     cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+        wxString url = cfg.opt_string("print_host_webui").empty() ? cfg.opt_string("print_host") : cfg.opt_string("print_host_webui");
+        if (main_frame->m_printer_view && url.empty()) {
+            // It's missing_connection page, reload so that we can replay the gif image
+            main_frame->m_printer_view->reload();
         }
     }
 }
