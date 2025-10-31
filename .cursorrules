@@ -436,6 +436,59 @@ Added new feature.  // Wrong tense (should be "add")
 - Don't commit debugging code or commented-out code
 - Don't commit unrelated changes together
 
+### Git Workflow for Multi-Developer Teams
+
+**When you have finished coding and ready to commit:**
+
+```bash
+# Step 1: Check current status
+git status
+
+# Step 2: Stage your changes
+git add <modified-files>
+# or: git add .  (add all changes)
+
+# Step 3: Commit to LOCAL repository
+git commit -m "type(scope): brief description"
+
+# Step 4: Pull with rebase to maintain linear history (critical for multi-developer)
+git pull --rebase origin <branch-name>
+
+# Step 5a: If NO conflicts - directly push
+git push origin <branch-name>
+
+# Step 5b: If conflicts occur during rebase:
+#   - Git will mark conflicted files
+#   - Open and edit conflicted files (look for <<<<<<, ======, >>>>>> markers)
+#   - Resolve conflicts manually
+#   - Stage resolved files: git add <resolved-files>
+#   - Continue rebase: git rebase --continue  (NOT git commit!)
+#   - If more conflicts, repeat until done
+#   - Then push: git push origin <branch-name>
+
+# Step 5c: If you want to abort rebase and start over:
+git rebase --abort
+```
+
+**Why use `--rebase` instead of regular pull?**
+- Regular `git pull` creates merge commits → branching history
+- `git pull --rebase` replays your commits on top of remote → **linear history**
+- Linear history is cleaner and easier to understand
+
+**Visualized:**
+```
+Without rebase (merge):     With rebase (linear):
+A → B → C → merge           A → B → C → D
+     ↘ D ↗                  (your commit moved on top)
+```
+
+**Common scenario:**
+1. You start coding at 10:00 AM
+2. You finish and commit at 11:00 AM (commit D)
+3. Meanwhile, colleague pushed changes at 10:30 AM (commit C)
+4. `git pull --rebase` will replay your commit D on top of C
+5. Result: A → B → C → D (linear!)
+
 ### Before Committing
 - [ ] Run code formatter/linter
 - [ ] Remove debugging code
