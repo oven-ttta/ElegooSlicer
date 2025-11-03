@@ -129,8 +129,14 @@
 	</array>
 	<key>CSResourcesFileMapped</key>
 	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.15</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>${MACOSX_BUNDLE_COPYRIGHT}</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
 	<key>NSAppTransportSecurity</key>  
 	<dict>
 		<!-- Disable App Transport Security. Resolves https://github.com/SoftFever/OrcaSlicer/issues/791 -->

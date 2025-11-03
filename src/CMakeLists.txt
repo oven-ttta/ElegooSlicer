@@ -99,6 +99,9 @@ if(ORCA_TOOLS)
     target_compile_definitions(ElegooSlicer_profile_validator PRIVATE -DBOOST_ALL_NO_LIB -DBOOST_USE_WINAPI_VERSION=0x602 -DBOOST_SYSTEM_USE_UTF8)
     if(WIN32)
         target_link_libraries(ElegooSlicer_profile_validator bcrypt.lib)
+    elseif(APPLE)
+        # Link SystemConfiguration framework needed for libcurl's SCDynamicStoreCopyProxies
+        target_link_libraries(ElegooSlicer_profile_validator "-framework SystemConfiguration")
     endif()
 endif()
 
@@ -131,7 +134,8 @@ if (APPLE)
 #    add_compile_options(-stdlib=libc++)
 #    add_definitions(-DBOOST_THREAD_DONT_USE_CHRONO -DBOOST_NO_CXX11_RVALUE_REFERENCES -DBOOST_THREAD_USES_MOVE)
     # -liconv: boost links to libiconv by default
-    target_link_libraries(ElegooSlicer "-liconv -framework IOKit" "-framework CoreFoundation" "-framework AVFoundation" "-framework AVKit" "-framework CoreMedia" "-framework VideoToolbox" -lc++)
+    # -framework SystemConfiguration: needed for libcurl's SCDynamicStoreCopyProxies
+    target_link_libraries(ElegooSlicer "-liconv -framework IOKit" "-framework CoreFoundation" "-framework SystemConfiguration" "-framework AVFoundation" "-framework AVKit" "-framework CoreMedia" "-framework VideoToolbox" -lc++)
 elseif (MSVC)
     # Manifest is provided through ElegooSlicer.rc, don't generate your own.
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")

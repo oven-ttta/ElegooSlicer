@@ -41,7 +41,7 @@ public:
     PrinterWebView(wxWindow* parent);
     virtual ~PrinterWebView();
 
-    void load_url(wxString& url, wxString apikey = "");
+    void load_url(const wxString& url, const wxString& apikey = "");
     void UpdateState();
     void OnClose(const wxCloseEvent& evt);
     void OnError(const wxWebViewEvent& evt);
