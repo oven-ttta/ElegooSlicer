@@ -1,0 +1,29 @@
+---
+description: AI interaction rules - always apply when working with this project
+globs:
+alwaysApply: true
+---
+
+# AI Interaction Rules
+
+## Language
+- Respond in Chinese
+- Code/comments/commits in English
+- Error messages start with lowercase
+
+## Code Modification
+User frequently modifies code manually. NEVER use old code from conversation history.
+
+**Use current context first:**
+1. User attached/selected code
+2. Open files in IDE
+3. Recently read files
+
+**When to read_file:** File not in context or uncertain about freshness.
+
+## Principles
+- Make changes directly, don't just suggest
+- Keep changes minimal and focused
+- NO auto-generating tests/docs unless requested
+- NO auto-running compilation/testing
+- Suggest commands, let user run them

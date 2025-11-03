@@ -6,112 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ElegooSlicer is an open-source 3D slicer application based on OrcaSlicer, developed by ELEGOO with enhanced integration for ELEGOO printers. OrcaSlicer is forked from Bambu Studio, built using C++ with wxWidgets for the GUI and CMake as the build system. The project uses a modular architecture with separate libraries for core slicing functionality, GUI components, and platform-specific code. ElegooSlicer adds custom features including ElegooLink print host integration, printer network management, and Material Management System (MMS) support.
 
-## Build Commands
-
-### Building on Windows
-```bash
-# Build everything
-build_release_vs2022.bat
-
-# Build with debug symbols
-build_release_vs2022.bat debug
-
-# Build only dependencies
-build_release_vs2022.bat deps
-
-# Build only slicer (after deps are built)
-build_release_vs2022.bat slicer
-
-
-```
-
-### Building on macOS
-```bash
-# Build everything (dependencies and slicer)
-./build_release_macos.sh
-
-# Build only dependencies
-./build_release_macos.sh -d
-
-# Build only slicer (after deps are built)
-./build_release_macos.sh -s
-
-# Use Ninja generator for faster builds
-./build_release_macos.sh -x
-
-# Build for specific architecture
-./build_release_macos.sh -a arm64    # or x86_64 or universal
-
-# Build for specific macOS version target
-./build_release_macos.sh -t 11.3
-```
-
-### Building on Linux
-```bash
-# First time setup - install system dependencies
-./build_linux.sh -u
-
-# Build dependencies and slicer
-./build_linux.sh -dsi
-
-# Build everything (alternative)
-./build_linux.sh -dsi
-
-# Individual options:
-./build_linux.sh -d    # dependencies only
-./build_linux.sh -s    # slicer only  
-./build_linux.sh -i    # build AppImage
-
-# Performance and debug options:
-./build_linux.sh -j N  # limit to N cores
-./build_linux.sh -1    # single core build
-./build_linux.sh -b    # debug build
-./build_linux.sh -c    # clean build
-./build_linux.sh -r    # skip RAM/disk checks
-./build_linux.sh -l    # use Clang instead of GCC
-```
-
-### Build System
-- Uses CMake with minimum version 3.13 (maximum 3.31.x on Windows)
-- Primary build directory: `build/`
-- Dependencies are built in `deps/build/`
-- The build process is split into dependency building and main application building
-- Windows builds use Visual Studio generators
-- macOS builds use Xcode by default, Ninja with -x flag
-- Linux builds use Ninja generator
-
-### Testing
-Tests are located in the `tests/` directory and use the Catch2 testing framework. Test structure:
-- `tests/libslic3r/` - Core library tests (21 test files)
-  - Geometry processing, algorithms, file formats (STL, 3MF, AMF)
-  - Polygon operations, clipper utilities, Voronoi diagrams
-- `tests/fff_print/` - Fused Filament Fabrication tests (12 test files)
-  - Slicing algorithms, G-code generation, print mechanics
-  - Fill patterns, extrusion, support material
-- `tests/sla_print/` - Stereolithography tests (4 test files)
-  - SLA-specific printing algorithms, support generation
-- `tests/libnest2d/` - 2D nesting algorithm tests
-- `tests/slic3rutils/` - Utility function tests
-- `tests/sandboxes/` - Experimental/sandbox test code
-
-Run all tests after building:
-```bash
-cd build && ctest
-```
-
-Run tests with verbose output:
-```bash
-cd build && ctest --output-on-failure
-```
-
-Run individual test suites:
-```bash
-# From build directory
-./tests/libslic3r/libslic3r_tests
-./tests/fff_print/fff_print_tests
-./tests/sla_print/sla_print_tests
-```
-
 ## Architecture
 
 ### Core Libraries
@@ -184,14 +78,21 @@ Run individual test suites:
 - `tools/` - Windows build tools (gettext utilities)
 - `deps/` - External dependency build configurations
 
-## Development Workflow
+## Development Rules
 
-### Code Style and Standards
-- **C++17 standard** with selective C++20 features
-- **Naming conventions**: PascalCase for classes, snake_case for functions/variables
-- **Header guards**: Use `#pragma once` 
-- **Memory management**: Prefer smart pointers, RAII patterns
-- **Thread safety**: Use TBB for parallelization, be mindful of shared state
+**Detailed rules in `.cursor/rules/`:**
+- `ai-interaction.md` - Language, code modification workflow (ALWAYS APPLY)
+- `coding-standards.md` - Naming conventions, code style, organization
+- `git-workflow.md` - Git rebase workflow, commit message format
+- `build-and-test.md` - Build commands, testing guidelines
+
+**Key principles:**
+- Work from latest code in context, never old conversation history
+- All code/comments in English, no Chinese characters
+- Keep changes minimal and focused
+- Follow existing patterns in codebase
+
+## Development Workflow
 
 ### Common Development Tasks
 
@@ -240,7 +141,7 @@ Run individual test suites:
 
 ### Codebase Navigation
 - Use search tools extensively - codebase has 500k+ lines
-- Key entry points: `src/OrcaSlicer.cpp` for application startup
+- Key entry points: `src/ElegooSlicer.cpp` for application startup
 - Core slicing: `libslic3r/Print.cpp` orchestrates the slicing pipeline
 - Configuration: `PrintConfig.cpp` defines all print/printer/material settings
 
