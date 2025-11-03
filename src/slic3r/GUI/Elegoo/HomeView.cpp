@@ -227,9 +227,7 @@ webviewIpc::IPCResult HomeView::handleReady()
 
 webviewIpc::IPCResult HomeView::handleLogout()
 {
-    UserNetworkInfo userNetworkInfo = UserNetworkInfo();
-    userNetworkInfo.loginStatus = LOGIN_STATUS_NO_USER;
-    UserNetworkManager::getInstance()->setUserInfo(userNetworkInfo);
+    UserNetworkManager::getInstance()->logout();
     return webviewIpc::IPCResult::success();
 }
 
@@ -367,7 +365,7 @@ void HomeView::refreshUserInfo()
 void HomeView::onRegionChanged()
 {
     //logout user
-    UserNetworkManager::getInstance()->setUserInfo(UserNetworkInfo());
+    UserNetworkManager::getInstance()->logout();
     if (mIpc && mIsReady) {
         mIpc->sendEvent("onRegionChanged", nlohmann::json::object(), mIpc->generateRequestId());
     }

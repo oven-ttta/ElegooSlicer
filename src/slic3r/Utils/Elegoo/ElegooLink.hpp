@@ -38,7 +38,6 @@ public:
     PrinterNetworkResult<bool> uninstallPlugin();
     PrinterNetworkResult<bool> logout(const UserNetworkInfo& userInfo);
     PrinterNetworkResult<UserNetworkInfo> connectToIot(const UserNetworkInfo& userInfo);
-    PrinterNetworkResult<bool> disconnectFromIot();
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
     PrinterNetworkResult<UserNetworkInfo> refreshToken(const UserNetworkInfo& userInfo);
@@ -47,7 +46,6 @@ public:
     PrinterNetworkResult<bool> unbindWANPrinter(const std::string& serialNumber);
     PrinterNetworkResult<bool> setRegion(const std::string& region);
  
-
 private:
     bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10, bool isWan = false);
     void doUninstallPlugin();

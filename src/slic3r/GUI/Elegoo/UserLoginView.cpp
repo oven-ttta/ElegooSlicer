@@ -137,7 +137,7 @@ void UserLoginView::setupIPCHandlers()
             return webviewIpc::IPCResult::error();
         }
    
-        UserNetworkManager::getInstance()->setUserInfo(userNetworkInfo);
+        UserNetworkManager::getInstance()->login(userNetworkInfo);
 
         CallAfter([this]() {
             std::this_thread::sleep_for(std::chrono::seconds(1));

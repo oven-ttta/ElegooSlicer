@@ -895,11 +895,11 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetwork
     UserNetworkInfo userInfoRet = userInfo;
 
     elink::VoidResult       setHttpCredentialResult = elink::ElegooNetwork::getInstance().setHttpCredential(params);
-    PrinterNetworkErrorCode resultCode              = parseElegooResult(setHttpCredentialResult.code);
+    PrinterNetworkErrorCode resultCode = parseElegooResult(setHttpCredentialResult.code);
 
     if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
         elink::GetUserInfoResult userInfoResult = elink::ElegooNetwork::getInstance().getUserInfo();
-        resultCode                              = parseElegooResult(userInfoResult.code);
+        resultCode = parseElegooResult(userInfoResult.code);
         if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if (userInfoResult.hasData()) {
                 const auto& userInfoData = userInfoResult.value();
@@ -908,7 +908,9 @@ PrinterNetworkResult<UserNetworkInfo> ElegooLink::connectToIot(const UserNetwork
                 userInfoRet.email        = userInfoData.email;
                 userInfoRet.nickname     = userInfoData.nickName;
                 userInfoRet.avatar       = userInfoData.avatar;
-            } 
+            } else {
+                resultCode = PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD;
+            }
         }
     }
     return PrinterNetworkResult<UserNetworkInfo>(resultCode, userInfoRet,
@@ -925,17 +927,11 @@ PrinterNetworkResult<bool> ElegooLink::updatePrinterName(const std::string& prin
     params.printerName = printerName;
     if(isWan) {
         result = elink::ElegooNetwork::getInstance().updatePrinterName(params);
-    } 
+    } else {
+        result.code = elink::ELINK_ERROR_CODE::SUCCESS;
+    }
     PrinterNetworkErrorCode resultCode = parseElegooResult(result.code);
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS, parseUnknownErrorMsg(resultCode, result.message));
-}
-
-PrinterNetworkResult<bool> ElegooLink::disconnectFromIot()
-{
-    CHECK_INITIALIZED(true, false);
-    elink::ElegooNetwork::getInstance().clearHttpCredential();
-    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
-
 }
 
 PrinterNetworkResult<UserNetworkInfo> ElegooLink::getRtcToken()
