@@ -39,6 +39,13 @@ if "%debug%"=="ON" (
         set build_dir=build
     )
 )
+
+set ELEGOO_INTERNAL_TESTING=0
+for %%a in (%*) do (
+    if "%%a"=="test" (
+        set ELEGOO_INTERNAL_TESTING=1
+    )
+)
 echo build type set to %build_type%
 
 setlocal DISABLEDELAYEDEXPANSION 
@@ -58,20 +65,13 @@ if "%1"=="pack_install" (
 echo "building deps.."
 
 echo on
-cmake ../ -G "Visual Studio 17 2022" -A x64 -DDESTDIR="%DEPS%" -DCMAKE_BUILD_TYPE=%build_type% -DDEP_DEBUG=%debug% -DORCA_INCLUDE_DEBUG_INFO=%debuginfo%
+cmake ../ -G "Visual Studio 17 2022" -A x64 -DDESTDIR="%DEPS%" -DCMAKE_BUILD_TYPE=%build_type% -DDEP_DEBUG=%debug% -DORCA_INCLUDE_DEBUG_INFO=%debuginfo% -DELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%
 cmake --build . --config %build_type% --target deps -- -m
 @echo off
 
 if "%1"=="deps" exit /b 0
 
 :slicer
-
-set ELEGOO_INTERNAL_TESTING=0
-for %%a in (%*) do (
-    if "%%a"=="test" (
-        set ELEGOO_INTERNAL_TESTING=1
-    )
-)
 
 echo "building ElegooSlicer...ELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%"
 cd %WP%
