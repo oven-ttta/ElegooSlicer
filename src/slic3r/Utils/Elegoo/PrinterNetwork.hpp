@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <map>
+#include <mutex>
 #include "libslic3r/PrinterNetworkInfo.hpp"
 
 namespace Slic3r {
@@ -35,7 +36,6 @@ public:
     virtual PrinterNetworkResult<bool>                            sendRtmMessage(const std::string& message)                = 0;
     virtual PrinterNetworkResult<PrinterPrintFileResponse>        getFileDetail(const std::string& fileName)                = 0;
     virtual PrinterNetworkResult<bool>                            updatePrinterName(const std::string& printerName)         = 0;
-
     // WAN
     virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
     virtual PrinterNetworkResult<bool>               unbindWANPrinter(const std::string& serialNumber)            = 0;
@@ -62,19 +62,29 @@ public:
 
     virtual PrinterNetworkResult<bool>                            logout()                                      = 0;
     virtual PrinterNetworkResult<UserNetworkInfo>                 connectToIot(const UserNetworkInfo& userInfo) = 0;
-    virtual PrinterNetworkResult<bool>                            disconnectFromIot()                           = 0;
     virtual PrinterNetworkResult<UserNetworkInfo>                 getRtcToken()                                 = 0;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters()                        = 0;
     virtual PrinterNetworkResult<UserNetworkInfo>                 refreshToken(const UserNetworkInfo& userInfo) = 0;
     virtual PrinterNetworkResult<bool>                            setRegion(const std::string& region)          = 0;
 
-    const UserNetworkInfo& getUserNetworkInfo() const { return mUserNetworkInfo; }
+    UserNetworkInfo getUserNetworkInfo() const 
+    { 
+        std::lock_guard<std::mutex> lock(mUserNetworkInfoMutex);
+        return mUserNetworkInfo; 
+    }
+    
+    void updateUserNetworkInfo(const UserNetworkInfo& userNetworkInfo) 
+    { 
+        std::lock_guard<std::mutex> lock(mUserNetworkInfoMutex);
+        mUserNetworkInfo = userNetworkInfo; 
+    }
 
     static void init();
     static void uninit();
 
 protected:
     UserNetworkInfo mUserNetworkInfo;
+    mutable std::mutex mUserNetworkInfoMutex;
 };
 
 class IPluginNetwork

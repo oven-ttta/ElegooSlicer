@@ -84,7 +84,7 @@ private:
 
     // refresh online printers from user network
     std::mutex mOnlinePrintersMutex;
-    std::chrono::steady_clock::time_point mLastRefreshOnlinePrintersTime{};
+    std::chrono::steady_clock::time_point mLastRefreshOnlinePrintersTime;
     void refreshOnlinePrinters(bool force = false);
     std::string generatePrinterId();
 
@@ -96,5 +96,10 @@ private:
     std::thread mConnectionThread;
     std::chrono::steady_clock::time_point mLastConnectionLoopTime;
     void monitorPrinterConnections();
+    
+    // Check and handle WAN network error (like token expiration)
+    template<typename T>
+    void checkUserAuthStatus(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkResult<T>& result, 
+                             const UserNetworkInfo& requestUserInfo);
 };
 } // namespace Slic3r::GUI 

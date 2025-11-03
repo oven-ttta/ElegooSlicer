@@ -24,7 +24,8 @@ public:
     
     UserNetworkInfo getUserInfo() const;
     // only can be called by login or logout
-    void setUserInfo(const UserNetworkInfo& userInfo);
+    void logout();
+    void login(const UserNetworkInfo& userInfo);
     // for frontend click avatar, check user need re-login
     PrinterNetworkResult<bool> checkUserNeedReLogin();
     // for frontend refresh token
@@ -33,32 +34,30 @@ public:
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
     // printermanager get user bound printers
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
+    // check user network error and update user info login status
+    void checkUserAuthStatus(const UserNetworkInfo& requestUserInfo, const PrinterNetworkErrorCode& errorCode);
 
 private:
     UserNetworkManager();
     ~UserNetworkManager();
     
-    void monitorLoop();
+    void monitorUserNetwork();
     bool refreshToken(UserNetworkInfo& userInfo, std::shared_ptr<IUserNetwork>& network);
     
-    void syncBoundPrinters(std::shared_ptr<IUserNetwork> network);
-    std::vector<PrinterNetworkInfo> getBoundPrinters() const;
-    void setBoundPrinters(const std::vector<PrinterNetworkInfo>& printers);
-    void clearBoundPrinters();
-
     std::shared_ptr<IUserNetwork> getNetwork() const;
     void setNetwork(std::shared_ptr<IUserNetwork> network);
         
     void saveUserInfo(const UserNetworkInfo& userInfo);
     void loadUserInfo();
     bool updateUserInfo(const UserNetworkInfo& userInfo);
-    bool updateUserInfoLoginStatus(const LoginStatus& loginStatus, const std::string& userId);
+    bool updateUserInfoLoginStatus(const UserNetworkInfo& userInfo, const LoginStatus& loginStatus);
     bool needReLogin(const UserNetworkInfo& userInfo);
 
     std::string getLoginErrorMessage(const UserNetworkInfo& userInfo);
     void notifyUserInfoUpdated();
 
     bool checkNeedRefreshToken(const UserNetworkInfo& userInfo);
+
 private:
     mutable std::recursive_mutex mInitMutex;
     std::atomic<bool> mIsInitialized{false};
@@ -67,10 +66,7 @@ private:
     UserNetworkInfo mUserInfo;
     std::shared_ptr<IUserNetwork> mUserNetwork;
     
-    mutable std::mutex mBoundPrintersMutex;
-    std::vector<PrinterNetworkInfo> mBoundPrintersList;
-    
-    std::mutex mMonitorMutex;
+    std::timed_mutex mMonitorMutex;
     std::atomic<bool> mRunning{false};
     std::thread mMonitorThread;
     std::chrono::steady_clock::time_point mLastLoopTime;
