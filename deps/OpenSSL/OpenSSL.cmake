@@ -15,8 +15,8 @@ endif()
 if(WIN32)
     set(_conf_cmd perl Configure )
     set(_cross_comp_prefix_line "")
-    set(_make_cmd nmake)
-    set(_install_cmd nmake install_sw )
+    set(_make_cmd nmake /E)
+    set(_install_cmd nmake /E install_sw )
 else()
     if(APPLE)
         set(_conf_cmd export MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET} && ./Configure -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET})
@@ -40,10 +40,11 @@ endif()
 
 ExternalProject_Add(dep_OpenSSL
     #EXCLUDE_FROM_ALL ON
-    URL "https://github.com/openssl/openssl/archive/OpenSSL_1_1_1w.tar.gz"
-    URL_HASH SHA256=2130E8C2FB3B79D1086186F78E59E8BC8D1A6AEDF17AB3907F4CB9AE20918C41
-    # URL "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.1.2.tar.gz"
-    # URL_HASH SHA256=8c776993154652d0bb393f506d850b811517c8bd8d24b1008aef57fbe55d3f31
+    # URL "https://github.com/openssl/openssl/archive/OpenSSL_1_1_1w.tar.gz"
+    # URL_HASH SHA256=2130E8C2FB3B79D1086186F78E59E8BC8D1A6AEDF17AB3907F4CB9AE20918C41
+
+    URL "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.1.8.zip"
+    URL_HASH SHA256=bbd5cbd8cc8ea852d31c001a9b767eadef0548b098e132b580a1f0c80d1778b7
     DOWNLOAD_DIR ${DEP_DOWNLOAD_DIR}/OpenSSL
 	CONFIGURE_COMMAND ${_conf_cmd} ${_cross_arch}
         "--openssldir=${DESTDIR}"

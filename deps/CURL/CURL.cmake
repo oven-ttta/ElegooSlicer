@@ -22,6 +22,8 @@ set(_curl_platform_flags
   -DUSE_RTMP:BOOL=OFF
   -DUSE_NGHTTP2:BOOL=OFF
   -DUSE_MBEDTLS:BOOL=OFF
+  -DUSE_LIBIDN2:BOOL=OFF
+  -DCURL_USE_LIBPSL:BOOL=OFF
 )
 
 if (WIN32)
@@ -59,8 +61,11 @@ endif()
 elegooslicer_add_cmake_project(CURL
   # GIT_REPOSITORY      https://github.com/curl/curl.git
   # GIT_TAG             curl-7_75_0
-  URL                 https://github.com/curl/curl/archive/refs/tags/curl-7_75_0.zip
-  URL_HASH            SHA256=a63ae025bb0a14f119e73250f2c923f4bf89aa93b8d4fafa4a9f5353a96a765a
+  # URL                 https://github.com/curl/curl/archive/refs/tags/curl-7_75_0.zip
+  # URL_HASH            SHA256=a63ae025bb0a14f119e73250f2c923f4bf89aa93b8d4fafa4a9f5353a96a765a
+
+    URL                 https://github.com/curl/curl/archive/refs/tags/curl-8_16_0.zip
+  URL_HASH              SHA256=9356d1d769fbc30e6dac9a59216396582d492d25e38eab0126f8f61c16c75f54
   DEPENDS             ${ZLIB_PKG}
   # PATCH_COMMAND       ${GIT_EXECUTABLE} checkout -f -- . && git clean -df && 
   #                     ${GIT_EXECUTABLE} apply --whitespace=fix ${CMAKE_CURRENT_LIST_DIR}/curl-mods.patch
@@ -69,6 +74,7 @@ elegooslicer_add_cmake_project(CURL
     -DBUILD_CURL_EXE:BOOL=OFF
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     -DCURL_STATICLIB=${_curl_static}
+    -DCURL_USE_OPENSSL:BOOL=ON
     ${_curl_platform_flags}
 )
 
