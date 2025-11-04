@@ -109,7 +109,7 @@ const PrinterManager = {
         },
 
         getPrinterStatusStyle(printerStatus, connectStatus) {
-            if (connectStatus === 0) {
+            if (connectStatus === 0 || printerStatus === -1) {
                 return {
                     color: 'var(--printer-status-offline-color)',
                     backgroundColor: 'var(--printer-status-offline-bg)'
@@ -212,7 +212,7 @@ const PrinterManager = {
 };
 
 
-window.loginLinkClickHandler = function() {
+window.loginLinkClickHandler = function () {
     // Implement the login logic here
     console.log("Login link clicked");
     try {
