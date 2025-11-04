@@ -198,7 +198,7 @@ void ElegooLink::init()
 
     auto webDir = resources_dir();
     std::replace(webDir.begin(), webDir.end(), '\\', '/');
-    cfg.staticWebPath = webDir + "/web/elegoo-fdm-web";
+    cfg.staticWebPath = webDir + "/plugins/elegoolink/web";
 
     if (!elink::ElegooLink::getInstance().initialize(cfg)) {
         wxLogError("Error initializing ElegooLink");
