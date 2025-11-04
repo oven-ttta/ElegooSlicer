@@ -29,7 +29,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooPrinterNetwork::connectToPrinter(
 
 PrinterNetworkResult<bool> ElegooPrinterNetwork::disconnectFromPrinter()
 {
-    return ElegooLink::getInstance()->disconnectFromPrinter(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+    return ElegooLink::getInstance()->disconnectFromPrinter(mPrinterNetworkInfo.printerId);
 }
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooPrinterNetwork::bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo)
@@ -49,12 +49,12 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooPrinterNetwork::disc
 
 PrinterNetworkResult<bool> ElegooPrinterNetwork::sendPrintTask(const PrinterNetworkParams& params)
 {
-    return ElegooLink::getInstance()->sendPrintTask(params, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+    return ElegooLink::getInstance()->sendPrintTask(params);
 }
 
 PrinterNetworkResult<bool> ElegooPrinterNetwork::sendPrintFile(const PrinterNetworkParams& params)
 {
-    return ElegooLink::getInstance()->sendPrintFile(params, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+    return ElegooLink::getInstance()->sendPrintFile(params);
 }
 
 PrinterNetworkResult<PrinterPrintFileResponse> ElegooPrinterNetwork::getFileDetail(const std::string& fileName)
@@ -64,21 +64,21 @@ PrinterNetworkResult<PrinterPrintFileResponse> ElegooPrinterNetwork::getFileDeta
 
 PrinterNetworkResult<bool> ElegooPrinterNetwork::updatePrinterName(const std::string& printerName)
 {
-    return ElegooLink::getInstance()->updatePrinterName(mPrinterNetworkInfo.printerId, printerName, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+    return ElegooLink::getInstance()->updatePrinterName(mPrinterNetworkInfo.printerId, printerName);
 }
 PrinterNetworkResult<PrinterMmsGroup> ElegooPrinterNetwork::getPrinterMmsInfo()
 {
-    return ElegooLink::getInstance()->getPrinterMmsInfo(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+    return ElegooLink::getInstance()->getPrinterMmsInfo(mPrinterNetworkInfo.printerId);
 }
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooPrinterNetwork::getPrinterAttributes()
 {
-    return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+    return ElegooLink::getInstance()->getPrinterAttributes(mPrinterNetworkInfo.printerId);
 }
 
 PrinterNetworkResult<PrinterNetworkInfo> ElegooPrinterNetwork::getPrinterStatus()
 {
-    return ElegooLink::getInstance()->getPrinterStatus(mPrinterNetworkInfo.printerId, mPrinterNetworkInfo.networkType == NETWORK_TYPE_WAN);
+    return ElegooLink::getInstance()->getPrinterStatus(mPrinterNetworkInfo.printerId);
 }
 
 PrinterNetworkResult<PrinterPrintFileResponse> ElegooPrinterNetwork::getFileList(int pageNumber, int pageSize)

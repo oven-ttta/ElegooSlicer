@@ -14,27 +14,27 @@ ElegooPluginNetwork::~ElegooPluginNetwork(){
 
 void ElegooPluginNetwork::uninit()
 {
-    ElegooLink::getInstance()->uninit();
+  
 }
 
 void ElegooPluginNetwork::init()
 {
-    ElegooLink::getInstance()->init();
+    
 }
 
 PrinterNetworkResult<PluginNetworkInfo> ElegooPluginNetwork::hasInstalledPlugin()
 {
-    return ElegooLink::getInstance()->hasInstalledPlugin();
+    return PrinterNetworkResult<PluginNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, PluginNetworkInfo());
 }
 
 PrinterNetworkResult<bool> ElegooPluginNetwork::installPlugin(const std::string& pluginPath)
 {
-    return ElegooLink::getInstance()->installPlugin(pluginPath);
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }   
 
 PrinterNetworkResult<bool> ElegooPluginNetwork::uninstallPlugin()
 {
-    return ElegooLink::getInstance()->uninstallPlugin();
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
 }
 
 PrinterNetworkResult<PluginNetworkInfo> ElegooPluginNetwork::getPluginLastestVersion()

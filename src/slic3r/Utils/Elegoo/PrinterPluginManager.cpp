@@ -88,9 +88,9 @@ PrinterNetworkResult<bool> PrinterPluginManager::uninstallPlugin(const PluginNet
 
 std::vector<std::string> PrinterPluginManager::getSupportedPluginTypeList() {
     std::vector<std::string> pluginList;
-    for (const auto& hostType : {htElegooLink}) {    
-        pluginList.push_back(PrintHost::get_print_host_type_str(hostType));
-    }
+    // for (const auto& hostType : {htElegooLink}) {    
+    //     pluginList.push_back(PrintHost::get_print_host_type_str(hostType));
+    // }
     return pluginList;
 }
 
