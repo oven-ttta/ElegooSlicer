@@ -16,13 +16,29 @@ build_release_vs2022.bat
 # Build with debug symbols
 build_release_vs2022.bat debug
 
+# Build with debug info
+build_release_vs2022.bat debuginfo
+
 # Build only dependencies
 build_release_vs2022.bat deps
+build_release_vs2022.bat deps debug
+build_release_vs2022.bat deps debuginfo
 
 # Build only slicer (after deps are built)
 build_release_vs2022.bat slicer
+build_release_vs2022.bat slicer debug
+build_release_vs2022.bat slicer debuginfo
 
+# Pack dependencies
+build_release_vs2022.bat pack
 
+# Pack installer
+build_release_vs2022.bat pack_install
+build_release_vs2022.bat slicer pack_install
+
+# Test environment
+build_release_vs2022.bat test
+build_release_vs2022.bat slicer test
 ```
 
 ### Building on macOS
@@ -44,6 +60,20 @@ build_release_vs2022.bat slicer
 
 # Build for specific macOS version target
 ./build_release_macos.sh -t 11.3
+
+# Build config (Debug or Release)
+./build_release_macos.sh -c Debug
+
+# Pack dependencies
+./build_release_macos.sh -p
+
+# Test environment
+./build_release_macos.sh -e
+
+# Other options:
+./build_release_macos.sh -b    # build only (skip CMake configure)
+./build_release_macos.sh -1    # single core build
+./build_release_macos.sh -n    # nightly build
 ```
 
 ### Building on Linux
@@ -69,6 +99,13 @@ build_release_vs2022.bat slicer
 ./build_linux.sh -c    # clean build
 ./build_linux.sh -r    # skip RAM/disk checks
 ./build_linux.sh -l    # use Clang instead of GCC
+./build_linux.sh -L    # use ld.lld linker
+./build_linux.sh -p    # disable precompiled headers
+./build_linux.sh -C    # enable colored output
+
+# Build with tests:
+./build_linux.sh -t    # enable tests
+./build_linux.sh -dst  # build deps + slicer + tests
 ```
 
 ### Build System
