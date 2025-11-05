@@ -41,6 +41,7 @@ public:
     PrinterNetworkResult<bool> addPrinter(PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> updatePrinterName(const std::string& printerId, const std::string& name);
     PrinterNetworkResult<bool> updatePrinterHost(const std::string& printerId, const std::string& host);
+    PrinterNetworkResult<bool> updatePhysicalPrinter(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
     PrinterNetworkResult<bool> deletePrinter(const std::string& printerId);
     PrinterNetworkResult<PrinterMmsGroup> getPrinterMmsInfo(const std::string& printerId);
     PrinterNetworkResult<PrinterPrintFileResponse> getFileList(const std::string& printerId, int pageNumber, int pageSize);

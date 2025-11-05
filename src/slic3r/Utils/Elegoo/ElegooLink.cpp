@@ -320,6 +320,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
         connectionParams.token             = printerNetworkInfo.token;
         connectionParams.accessCode        = printerNetworkInfo.accessCode;
         connectionParams.pinCode           = printerNetworkInfo.pinCode;
+        connectionParams.webUrl            = printerNetworkInfo.webUrl;
 
         elinkResult = elink::ElegooLink::getInstance().connectPrinter(connectionParams);
 

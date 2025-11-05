@@ -336,6 +336,25 @@ const usePrinterStore = defineStore('printer', {
     async requestUpdatePrinterHost(printerId, host) {
       await this.requestUpdatePrinterNameAndHost(printerId, null, host);
     },
+
+    async requestUpdatePhysicalPrinter(printerId, printer) {
+      const loading = ElLoading.service({
+        lock: true,
+      });
+      try {
+        await this.ipcRequest('request_update_physical_printer', { printerId, printer });
+        this.requestPrinterList();
+        ElementPlus.ElMessage.success({
+          message: i18n.global.t("printerManager.modifySuccess"),
+          duration: 3000,
+        });
+      } catch (error) {
+        console.error('failed to update printer:', error);
+        throw error;
+      } finally {
+        loading.close();
+      }
+    },
     // Handle printer information updates
     updatePrinterInfo(data) {
       if (data.command === 'update_printer_info') {

@@ -89,28 +89,7 @@ const PrinterSettingPhysicalComponent = {
         async handleUpdatePhysicalPrinter(newPrinter) {
             if (!this.printer) return;
 
-            let name = null;
-            let host = null;
-            // check if name has changed
-            if (newPrinter.printerName !== this.printer.printerName) {
-                name = newPrinter.printerName;
-            }
-
-            // check if host has changed
-            if (newPrinter.host !== this.printer.host) {
-                host = newPrinter.host;
-            }
-
-            if (name || host) {
-                await this.printerStore.requestUpdatePrinterNameAndHost(this.printer.printerId, name, host);
-                this.printer.printerName = newPrinter.printerName;
-                this.printer.host = newPrinter.host;
-            } else {
-                ElementPlus.ElMessage.success({
-                    message: i18n.global.t("printerManager.modifySuccess"),
-                    duration: 3000,
-                });
-            }
+            await this.printerStore.requestUpdatePhysicalPrinter(this.printer.printerId, newPrinter);
             this.closeModal();
         },
     }

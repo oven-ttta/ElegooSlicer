@@ -46,6 +46,7 @@ private:
     webviewIpc::IPCResult addPhysicalPrinter(const nlohmann::json& printer);
     webviewIpc::IPCResult updatePrinterName(const std::string& printerId, const std::string& printerName);
     webviewIpc::IPCResult updatePrinterHost(const std::string& printerId, const std::string& host);
+    webviewIpc::IPCResult updatePhysicalPrinter(const std::string& printerId, const nlohmann::json& printer);
     webviewIpc::IPCResult deletePrinter(const std::string& printerId);
     webviewIpc::IPCResult browseCAFile();
     webviewIpc::IPCResult handleReady();
