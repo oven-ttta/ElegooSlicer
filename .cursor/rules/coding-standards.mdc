@@ -1,7 +1,7 @@
 ---
-description: Coding standards for ElegooSlicer
+type: auto-attach
 globs: ["**/*.cpp", "**/*.hpp", "**/*.js", "**/*.ts", "**/*.h", "**/*.c"]
-alwaysApply: false
+description: Coding standards for ElegooSlicer - applies when editing code files
 ---
 
 # Coding Standards

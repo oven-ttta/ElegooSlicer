@@ -1,7 +1,6 @@
 ---
+type: agent-request
 description: Apply when user mentions git, commit, push, merge, rebase, conflict, or code submission. Contains critical git pull --rebase workflow and commit message format.
-globs:
-alwaysApply: false
 ---
 
 # Git Workflow

@@ -1,7 +1,6 @@
 ---
-description: AI interaction rules - always apply when working with this project
-globs:
-alwaysApply: true
+type: always
+description: AI interaction rules - how to work with this project and communicate with user
 ---
 
 # AI Interaction Rules

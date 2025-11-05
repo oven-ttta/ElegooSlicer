@@ -1,7 +1,6 @@
 ---
-description: Build commands and testing guidelines
-globs:
-alwaysApply: false
+type: agent-request
+description: Apply when user mentions build, compile, test, CMake, or asks about building/testing. Contains build commands and testing guidelines.
 ---
 
 # Build and Test
