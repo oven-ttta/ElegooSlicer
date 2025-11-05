@@ -160,9 +160,16 @@ if (APPLE)
     endif ()
     if (CMAKE_MACOSX_BUNDLE)
         set(CMAKE_INSTALL_RPATH @executable_path/../Frameworks)
+        set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
     endif()
     SET(CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.elegoo3d.elegoo-slicer")
     # SET(CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.softfever3d.orca-slicer")
+    
+    # Disable automatic code signing by Xcode (we sign manually in pack_macos.sh)
+    # This is needed because embedded frameworks have ad-hoc signatures
+    SET(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+    SET(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+    SET(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO")
 
     message(STATUS "Elegoo: IS_CROSS_COMPILE: ${IS_CROSS_COMPILE}")
 endif ()

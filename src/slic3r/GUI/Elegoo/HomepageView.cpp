@@ -188,21 +188,6 @@ webviewIpc::IPCResult RecentHomepageView::handleRemoveFromRecent(const nlohmann:
 
 void RecentHomepageView::OnNavigationRequest(wxWebViewEvent& evt){
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
-    const wxString &url = evt.GetURL();
-    if (url.StartsWith("File://") || url.StartsWith("file://")) {
-        if (!url.Contains("resources/web/")) {
-            auto file = wxURL::Unescape(wxURL(url).GetPath());
-#ifdef _WIN32
-            if (file.StartsWith('/'))
-                file = file.Mid(1);
-            else
-                file = "//" + file; // When file from network location
-#endif
-            wxGetApp().plater()->load_files(wxArrayString{1, &file});
-            evt.Veto();
-            return;
-        }
-    }
 }
 void RecentHomepageView::OnNavigationComplete(wxWebViewEvent& evt){
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();

@@ -253,6 +253,26 @@ else ()
         set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${ELEGOOSLICER_VERSION})
         set(MACOSX_BUNDLE_COPYRIGHT " ")
         # set(MACOSX_BUNDLE_COPYRIGHT "Copyright(C) 2022-2024 Li Jiang All Rights Reserved")
+        
+        # Copy Agora frameworks to app bundle
+        add_custom_command(TARGET ElegooSlicer POST_BUILD
+            # Create Frameworks directory
+            COMMAND ${CMAKE_COMMAND} -E make_directory 
+                "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks"
+            
+            # Copy AgoraRtmKit.framework
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_PREFIX_PATH}/bin/AgoraRtmKit.framework"
+                "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks/AgoraRtmKit.framework"
+            
+            # Copy aosl.framework
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_PREFIX_PATH}/bin/aosl.framework"
+                "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks/aosl.framework"
+            
+            COMMENT "Copying Agora frameworks to app bundle"
+            VERBATIM
+        )
     endif()
     add_custom_command(TARGET ElegooSlicer POST_BUILD
         COMMAND ln -sfn "${SLIC3R_RESOURCES_DIR}" "${BIN_RESOURCES_DIR}"

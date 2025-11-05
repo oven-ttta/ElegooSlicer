@@ -245,8 +245,9 @@ void HomeView::onWebViewError(wxWebViewEvent& event)
 void HomeView::OnNavigationRequest(wxWebViewEvent& evt){
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
     const wxString &url = evt.GetURL();
+    auto resourceDir = from_u8(resources_dir() + "/web/");
     if (url.StartsWith("File://") || url.StartsWith("file://")) {
-        if (!url.Contains("resources/web/")) {
+        if (!url.Contains(resourceDir)) {
             auto file = wxURL::Unescape(wxURL(url).GetPath());
 #ifdef _WIN32
             if (file.StartsWith('/'))
@@ -267,8 +268,9 @@ void HomeView::OnNavigationComplete(wxWebViewEvent& evt){
 void HomeView::OnNewWindowRequest(wxWebViewEvent& event){
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << event.GetTarget().ToUTF8().data();
     const wxString &url = event.GetURL();
+    auto resourceDir = from_u8(resources_dir() + "/web/");
     if (url.StartsWith("File://") || url.StartsWith("file://")) {
-        if (!url.Contains("resources/web/")) {
+        if (!url.Contains(resourceDir)) {
             auto file = wxURL::Unescape(wxURL(url).GetPath());
 #ifdef _WIN32
             if (file.StartsWith('/'))

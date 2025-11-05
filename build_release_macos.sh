@@ -142,6 +142,7 @@ function build_deps() {
                     cmake "${DEPS_DIR}" \
                         -G "${DEPS_CMAKE_GENERATOR}" \
                         -DDESTDIR="$DEPS" \
+                        -DELEGOO_INTERNAL_TESTING="${ELEGOO_INTERNAL_TESTING}" \
                         -DOPENSSL_ARCH="darwin64-${_ARCH}-cc" \
                         -DCMAKE_BUILD_TYPE="$BUILD_CONFIG" \
                         -DCMAKE_OSX_ARCHITECTURES:STRING="${_ARCH}" \
