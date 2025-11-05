@@ -25,7 +25,7 @@
 #include <chrono>
 #include <boost/filesystem.hpp>
 #include "slic3r/Utils/WebviewIPCManager.h"
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 #include <mutex>
 #include "slic3r/Utils/Elegoo/PrinterNetworkEvent.hpp"
 #include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
@@ -1164,7 +1164,7 @@ void PrinterManagerView::saveTabState()
             boost::filesystem::create_directories(dir);
         }
         
-        std::ofstream file(filePath);
+        boost::nowide::ofstream file(filePath);
         if (file.is_open()) {
             file << tabState.dump(4);
             file.close();
@@ -1184,7 +1184,7 @@ void PrinterManagerView::loadTabState()
             return; // No saved state
         }
         
-        std::ifstream file(filePath);
+        boost::nowide::ifstream file(filePath);
         if (!file.is_open()) {
             return;
         }

@@ -10,7 +10,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <nlohmann/json.hpp>
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 
 #define CHECK_INITIALIZED(returnVal) \
     std::lock_guard<std::recursive_mutex> __initLock(mInitMutex); \
@@ -606,7 +606,7 @@ void UserNetworkManager::saveUserInfo(const UserNetworkInfo& userInfo)
             fs::create_directories(path.parent_path());
         }
 
-        std::ofstream file(path.string());
+        boost::nowide::ofstream file(path.string());
         if (file.is_open()) {
             file << convertUserNetworkInfoToJson(userInfo).dump(4);
             file.close();
@@ -625,7 +625,7 @@ void UserNetworkManager::loadUserInfo()
             return;
         }
 
-        std::ifstream file(path.string());
+        boost::nowide::ifstream file(path.string());
         if (!file.is_open()) {
             return;
         }

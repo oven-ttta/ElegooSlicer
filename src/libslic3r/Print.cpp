@@ -2520,7 +2520,7 @@ FilamentTempType Print::get_filament_temp_type(const std::string& filament_type)
 
     if (filament_temp_type_map.empty()) {
         fs::path file_path = fs::path(resources_dir()) / "info" / "filament_info.json";
-        std::ifstream in(file_path.string());
+        boost::nowide::ifstream in(file_path.string());
         json j;
         try{
             j = json::parse(in);

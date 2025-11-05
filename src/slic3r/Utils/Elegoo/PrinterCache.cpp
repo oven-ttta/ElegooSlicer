@@ -1,7 +1,7 @@
 #include "PrinterCache.hpp"
 #include <algorithm>
 #include <stdexcept>
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 #include <nlohmann/json.hpp>
 #include <boost/filesystem.hpp>
 #include <wx/log.h>
@@ -26,7 +26,7 @@ bool PrinterCache::loadPrinterList() {
     std::lock_guard<std::mutex> lock(mCacheMutex);
     fs::path printerListPath = fs::path(Slic3r::data_dir()) / "user" / "printer_list.json";
     // read printer list from file
-    std::ifstream ifs(printerListPath.string());
+    boost::nowide::ifstream ifs(printerListPath.string());
     if (!ifs.is_open()) {
         wxLogError("Failed to open printer list file for reading: %s", printerListPath.string().c_str());
         return false;
@@ -63,7 +63,7 @@ bool PrinterCache::savePrinterList() {
         
         jsonData[printerId] = printerJson;
     }
-    std::ofstream ofs(printerListPath.string());
+    boost::nowide::ofstream ofs(printerListPath.string());
     ofs << jsonData.dump(4);
     return true;
 }
