@@ -247,11 +247,9 @@ void HomeView::OnNavigationRequest(wxWebViewEvent& evt)
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
     wxString url = evt.GetURL();
     url.Replace("\\", "/");
-    wxString resourceDir = from_u8(resources_dir() + "/web/");
-    resourceDir.Replace("\\", "/");
-    
     if (url.StartsWith("File://") || url.StartsWith("file://")) {
-        if (!url.Contains(resourceDir)) {
+        if (!url.Contains("/resources/web/") &&
+            !url.Contains("/Resources/web/")) {
             wxString file = wxURL::Unescape(wxURL(evt.GetURL()).GetPath());
 #ifdef _WIN32
             if (file.StartsWith('/')) {
@@ -275,11 +273,10 @@ void HomeView::OnNewWindowRequest(wxWebViewEvent& event)
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << event.GetTarget().ToUTF8().data();
     wxString url = event.GetURL();
     url.Replace("\\", "/");
-    wxString resourceDir = from_u8(resources_dir() + "/web/");
-    resourceDir.Replace("\\", "/");
     
     if (url.StartsWith("File://") || url.StartsWith("file://")) {
-        if (!url.Contains(resourceDir)) {
+        if (!url.Contains("/resources/web/") &&
+            !url.Contains("/Resources/web/")) {
             wxString file = wxURL::Unescape(wxURL(event.GetURL()).GetPath());
 #ifdef _WIN32
             if (file.StartsWith('/')) {

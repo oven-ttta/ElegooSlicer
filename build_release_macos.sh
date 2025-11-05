@@ -148,7 +148,7 @@ function build_deps() {
                         -DCMAKE_OSX_ARCHITECTURES:STRING="${_ARCH}" \
                         -DCMAKE_OSX_DEPLOYMENT_TARGET="${OSX_DEPLOYMENT_TARGET}"
                 fi
-                cmake --build . --config "$BUILD_CONFIG" --target deps
+                cmake --build . --config "$BUILD_CONFIG" --target deps --parallel 
             )
         fi
     done
@@ -193,7 +193,7 @@ function build_slicer() {
                     -DCMAKE_OSX_DEPLOYMENT_TARGET="${OSX_DEPLOYMENT_TARGET}" \
                     -DELEGOO_INTERNAL_TESTING="${ELEGOO_INTERNAL_TESTING}"
             fi
-            cmake --build . --config "$BUILD_CONFIG" --target "$SLICER_BUILD_TARGET"
+            cmake --build . --config "$BUILD_CONFIG" --target "$SLICER_BUILD_TARGET" --parallel 
         )
 
         echo "Verify localization with gettext..."

@@ -67,7 +67,7 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>images/ElegooSlicer.icns</string>
 			<key>CFBundleTypeName</key>
-			<string>STL</string>
+			<string>OBJ</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LISsAppleDefaultForType</key>

@@ -256,21 +256,12 @@ else ()
         
         # Copy Agora frameworks to app bundle
         add_custom_command(TARGET ElegooSlicer POST_BUILD
-            # Create Frameworks directory
-            COMMAND ${CMAKE_COMMAND} -E make_directory 
-                "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks"
-            
-            # Copy AgoraRtmKit.framework
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${CMAKE_PREFIX_PATH}/bin/AgoraRtmKit.framework"
-                "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks/AgoraRtmKit.framework"
-            
-            # Copy aosl.framework
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${CMAKE_PREFIX_PATH}/bin/aosl.framework"
-                "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks/aosl.framework"
-            
-            COMMENT "Copying Agora frameworks to app bundle"
+            COMMAND rm -rf "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks/AgoraRtmKit.framework"
+            COMMAND rm -rf "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks/aosl.framework"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks"
+            COMMAND rsync -a "${CMAKE_PREFIX_PATH}/bin/AgoraRtmKit.framework" "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks/"
+            COMMAND rsync -a "${CMAKE_PREFIX_PATH}/bin/aosl.framework" "$<TARGET_BUNDLE_CONTENT_DIR:ElegooSlicer>/Frameworks/"
+            COMMENT "Copying Agora frameworks to app bundle with symlinks preserved"
             VERBATIM
         )
     endif()
