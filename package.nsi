@@ -1,5 +1,9 @@
 ; 该脚本使用 HM VNISEdit 脚本编辑器向导产生
 !define LIBRARY_X64
+
+; request admin rights for all users installation
+RequestExecutionLevel admin
+
 ; 安装程序初始定义常量
 !define PRODUCT_NAME "ElegooSlicer"
 !define PRODUCT_PUBLISHER "Shenzhen Elegoo Technology Co.,Ltd"
@@ -89,6 +93,8 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 Section "MainSection" SEC01
+  ; set shell context to all users
+  SetShellVarContext all
 
   ${WordFind} "$INSTDIR" "ElegooSlicer" "E+1{" $R0
   IfErrors notfound end
@@ -104,8 +110,8 @@ Section "MainSection" SEC01
   ; 创建开始菜单快捷方式
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe"
-  CreateShortCut "$DESKTOP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe" "" "$INSTDIR\resources\images\ElegooSlicer.ico" 0
+  CreateShortCut "$DESKTOP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe" "" "$INSTDIR\resources\images\ElegooSlicer.ico" 0
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
@@ -163,6 +169,8 @@ FunctionEnd
 
 
 Function .onInit
+  ; set shell context to all users
+  SetShellVarContext all
   SetRegView 64
   ;!insertmacro MUI_LANGDLL_DISPLAY 
   System::Call 'Kernel32::GetUserDefaultUILanguage() i.r0'
@@ -236,6 +244,8 @@ FunctionEnd
  ******************************/
 
 Section Uninstall
+  ; set shell context to all users for uninstallation
+  SetShellVarContext all
   SetRegView 64
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
@@ -255,6 +265,8 @@ SectionEnd
 #-- 根据 NSIS 脚本编辑规则，所有 Function 区段必须放置在 Section 区段之后编写，以避免安装程序出现未可预知的问题。--#
 
 Function un.onInit
+  ; set shell context to all users for uninstallation
+  SetShellVarContext all
   System::Call 'Kernel32::GetUserDefaultUILanguage() i.r0'
   ${If} $0 == ${LANG_CHINESE_SIMPLIFIED}
       StrCpy $LANGUAGE ${LANG_CHINESE_SIMPLIFIED}
