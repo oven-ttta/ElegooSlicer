@@ -25,7 +25,7 @@
 #include <chrono>
 #include <boost/filesystem.hpp>
 #include "slic3r/Utils/WebviewIPCManager.h"
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 #include <mutex>
 #include "slic3r/Utils/Elegoo/PrinterNetworkEvent.hpp"
 #include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
@@ -708,9 +708,42 @@ void PrinterManagerView::setupIPCHandlers()
         return updatePrinterName(printerId, printerName);;
     });
 
+    // Handle request_update_physical_printer
+    mIpc->onRequestAsync("request_update_physical_printer", [this](const webviewIpc::IPCRequest& request,
+                                                                    std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        auto params = request.params;
+        if (!params.contains("printerId") || !params.contains("printer")) {
+            sendResponse(webviewIpc::IPCResult::error("missing printerId or printer parameter"));
+            return;
+        }
+        
+        std::string printerId = params.value("printerId", "");
+        nlohmann::json printer = params["printer"];
+        
+        std::weak_ptr<bool> life_tracker = m_lifeTracker;
+        std::thread([life_tracker, printerId, printer, sendResponse, this]() {
+            try {
+                if (auto tracker = life_tracker.lock()) {
+                    auto result = updatePhysicalPrinter(printerId, printer);
+                    if (life_tracker.lock()) {
+                        sendResponse(result);
+                    }
+                }
+            } catch (const std::exception& e) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error(std::string("update physical printer failed: ") + e.what()));
+                }
+            } catch (...) {
+                if (life_tracker.lock()) {
+                    sendResponse(webviewIpc::IPCResult::error("update physical printer failed: unknown error"));
+                }
+            }
+        }).detach();
+    });
+
     // Handle request_update_printer_host
     mIpc->onRequestAsync("request_update_printer_host", [this](const webviewIpc::IPCRequest& request,
-                                                                 std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+                                                                std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string host = params.value("host", "");
@@ -891,6 +924,30 @@ webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& p
     }
     return result;
 }
+
+webviewIpc::IPCResult PrinterManagerView::updatePhysicalPrinter(const std::string& printerId, const nlohmann::json& printer)
+{
+    webviewIpc::IPCResult result;
+    PrinterNetworkInfo printerInfo = convertJsonToPrinterNetworkInfo(printer);
+    auto networkResult = PrinterManager::getInstance()->updatePhysicalPrinter(printerId, printerInfo);
+    result.message = networkResult.message;
+    result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
+    
+    if (result.code == 0) {
+        PrinterNetworkInfo updatedPrinter = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
+        auto it = mPrinterViews.find(printerId);
+        if (it != mPrinterViews.end()) {
+            int page = mTabBar->GetPageIndex(it->second);
+            if (page != wxNOT_FOUND) {
+                mTabBar->SetPageText(page, from_u8(updatedPrinter.printerName));
+                wxString url = updatedPrinter.webUrl;
+                it->second->load_url(url);
+            }
+        }
+    }
+    return result;
+}
+
 webviewIpc::IPCResult PrinterManagerView::addPrinter(const nlohmann::json& printer)
 {
     webviewIpc::IPCResult result;
@@ -907,12 +964,8 @@ webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::jso
     PrinterNetworkErrorCode errorCode = PrinterNetworkErrorCode::SUCCESS;
     PrinterNetworkInfo printerInfo;
     try {
+        printerInfo = convertJsonToPrinterNetworkInfo(printer);
         printerInfo.isPhysicalPrinter = true;
-        printerInfo.hostType = printer["hostType"];
-        printerInfo.host = printer["host"];
-        printerInfo.printerName = printer["printerName"];
-        printerInfo.vendor = printer["vendor"];
-        printerInfo.printerModel = printer["printerModel"];
         auto networkResult = PrinterManager::getInstance()->addPrinter(printerInfo);
         result.message = networkResult.message;
         errorCode = networkResult.code;
@@ -1111,7 +1164,7 @@ void PrinterManagerView::saveTabState()
             boost::filesystem::create_directories(dir);
         }
         
-        std::ofstream file(filePath);
+        boost::nowide::ofstream file(filePath);
         if (file.is_open()) {
             file << tabState.dump(4);
             file.close();
@@ -1131,7 +1184,7 @@ void PrinterManagerView::loadTabState()
             return; // No saved state
         }
         
-        std::ifstream file(filePath);
+        boost::nowide::ifstream file(filePath);
         if (!file.is_open()) {
             return;
         }

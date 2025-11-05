@@ -5,7 +5,7 @@
 #include "slic3r/GUI/MainFrame.hpp"
 #include "slic3r/GUI/GUI_App.hpp"
 #include <boost/algorithm/string.hpp>
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 #include <boost/filesystem.hpp>
 #include <mutex>
 #include <cmath>
@@ -760,7 +760,7 @@ nlohmann::json PrinterMmsManager::loadFilamentMmsMappingFromFile()
         std::string filePath = (boost::filesystem::path(Slic3r::data_dir()) / "user" / "filament_mms_mapping.json").string();
         
         if (boost::filesystem::exists(filePath)) {
-            std::ifstream file(filePath);
+            boost::nowide::ifstream file(filePath);
             if (file.is_open()) {
                 nlohmann::json jsonData;
                 file >> jsonData;
@@ -787,7 +787,7 @@ void PrinterMmsManager::saveFilamentMmsMappingToFile(const nlohmann::json& mappi
             boost::filesystem::create_directories(dir);
         }
         
-        std::ofstream file(filePath);
+        boost::nowide::ofstream file(filePath);
         if (file.is_open()) {
             file << mappingJson.dump(4); // Pretty print with 4 spaces indentation
             file.close();

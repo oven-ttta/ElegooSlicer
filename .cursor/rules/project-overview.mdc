@@ -1,6 +1,9 @@
-# CLAUDE.md
+---
+type: always
+description: ElegooSlicer project architecture, technology stack, and development overview
+---
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# ElegooSlicer Project Overview
 
 ## Overview
 
@@ -24,7 +27,7 @@ ElegooSlicer is an open-source 3D slicer application based on OrcaSlicer, develo
 - **src/slic3r/**: Main application framework and GUI
   - GUI application built with wxWidgets
   - Integration between libslic3r core and user interface
-  - Located in `src/slic3r/GUI/` (not shown in this directory but exists)
+  - Located in `src/slic3r/GUI/`
 
 ### Key Algorithmic Components
 - **Arachne Wall Generation**: Variable-width perimeter generation using skeletal trapezoidation
@@ -78,20 +81,6 @@ ElegooSlicer is an open-source 3D slicer application based on OrcaSlicer, develo
 - `tools/` - Windows build tools (gettext utilities)
 - `deps/` - External dependency build configurations
 
-## Development Rules
-
-**Detailed rules in `.cursor/rules/`:**
-- `ai-interaction.md` - Language, code modification workflow (ALWAYS APPLY)
-- `coding-standards.md` - Naming conventions, code style, organization
-- `git-workflow.md` - Git rebase workflow, commit message format
-- `build-and-test.md` - Build commands, testing guidelines
-
-**Key principles:**
-- Work from latest code in context, never old conversation history
-- All code/comments in English, no Chinese characters
-- Keep changes minimal and focused
-- Follow existing patterns in codebase
-
 ## Development Workflow
 
 ### Common Development Tasks
@@ -111,7 +100,7 @@ ElegooSlicer is an open-source 3D slicer application based on OrcaSlicer, develo
 5. Add regression tests where appropriate
 
 #### GUI Development
-1. GUI code resides in `src/slic3r/GUI/` (not visible in current tree)
+1. GUI code resides in `src/slic3r/GUI/`
 2. Use existing wxWidgets patterns and custom controls
 3. Support both light and dark themes
 4. Consider DPI scaling on high-resolution displays

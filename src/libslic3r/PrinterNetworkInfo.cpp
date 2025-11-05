@@ -68,9 +68,6 @@ PrinterNetworkInfo convertJsonToPrinterNetworkInfo(const nlohmann::json& json)
         if (json.contains("webUrl")) {
             printerNetworkInfo.webUrl = json["webUrl"];
         }
-        if (json.contains("connectionUrl")) {
-            printerNetworkInfo.connectionUrl = json["connectionUrl"];
-        }
         if (json.contains("extraInfo")) {
             printerNetworkInfo.extraInfo = json["extraInfo"].dump();
         } else {
@@ -169,7 +166,6 @@ nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printer
     json["pinCode"]         = printerNetworkInfo.pinCode;
     json["webUrl"]          = printerNetworkInfo.webUrl;
     json["networkType"]     = printerNetworkInfo.networkType;
-    json["connectionUrl"]   = printerNetworkInfo.connectionUrl;
     if (!printerNetworkInfo.extraInfo.empty()) {
         json["extraInfo"] = nlohmann::json::parse(printerNetworkInfo.extraInfo);
     } else {

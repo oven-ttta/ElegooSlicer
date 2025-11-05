@@ -1,7 +1,7 @@
 #include "PrinterCache.hpp"
 #include <algorithm>
 #include <stdexcept>
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 #include <nlohmann/json.hpp>
 #include <boost/filesystem.hpp>
 #include <wx/log.h>
@@ -26,7 +26,7 @@ bool PrinterCache::loadPrinterList() {
     std::lock_guard<std::mutex> lock(mCacheMutex);
     fs::path printerListPath = fs::path(Slic3r::data_dir()) / "user" / "printer_list.json";
     // read printer list from file
-    std::ifstream ifs(printerListPath.string());
+    boost::nowide::ifstream ifs(printerListPath.string());
     if (!ifs.is_open()) {
         wxLogError("Failed to open printer list file for reading: %s", printerListPath.string().c_str());
         return false;
@@ -63,7 +63,7 @@ bool PrinterCache::savePrinterList() {
         
         jsonData[printerId] = printerJson;
     }
-    std::ofstream ofs(printerListPath.string());
+    boost::nowide::ofstream ofs(printerListPath.string());
     ofs << jsonData.dump(4);
     return true;
 }
@@ -127,8 +127,6 @@ bool PrinterCache::updatePrinterHost(const std::string& printerId, const Printer
     auto it = mPrinters.find(printerId);
     if (it != mPrinters.end()) {
         it->second.host = printerInfo.host;
-        it->second.webUrl = printerInfo.webUrl;
-        it->second.connectionUrl = printerInfo.connectionUrl;
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         it->second.modifyTime     = now;
         it->second.lastActiveTime = now;
@@ -197,12 +195,14 @@ void PrinterCache::updatePrinterAttributes(const std::string& printerId, const P
         it->second.firmwareVersion = printerInfo.firmwareVersion;
         it->second.printCapabilities = printerInfo.printCapabilities;
         it->second.systemCapabilities = printerInfo.systemCapabilities;
-        it->second.webUrl = printerInfo.webUrl;
         if(it->second.mainboardId.empty() && !printerInfo.mainboardId.empty()) {
             it->second.mainboardId = printerInfo.mainboardId;
         }
         if(it->second.serialNumber.empty() && !printerInfo.serialNumber.empty()) {
             it->second.serialNumber = printerInfo.serialNumber;
+        }
+        if(it->second.webUrl.empty() && !printerInfo.webUrl.empty()) {
+            it->second.webUrl = printerInfo.webUrl;
         }
     }
 }

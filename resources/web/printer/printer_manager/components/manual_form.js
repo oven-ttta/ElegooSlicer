@@ -102,8 +102,8 @@ const ManualFormTemplate = /*html*/
                 </div>
                 
                 <div class="form-group advanced-field" v-show="showAdvanced">
-                    <label>{{ $t('manualForm.deviceUI') }}</label>
-                    <el-input type="text" v-model="formData.deviceUi"/>
+                    <label>{{ $t('manualForm.webUrl') }}</label>
+                    <el-input type="text" v-model="formData.webUrl"/>
                 </div>
                 
                 <div class="form-group advanced-field" v-show="showAdvanced">
@@ -117,7 +117,17 @@ const ManualFormTemplate = /*html*/
                         <el-input type="text" v-model="formData.caFile" readonly/>
                         <button type="button" class="btn-secondary">{{ $t('manualForm.preview') }}</button>
                     </div>
-                    <label>{{ $t('manualForm.httpsCAFileNote') }}</label>
+                </div>
+                
+                <div class="form-group advanced-field" v-show="showAdvanced">
+                    <label class="checkbox-label">
+                        <span>{{ $t('manualForm.ignoreCertRevocation') }}</span>
+                        <input type="checkbox" v-model="formData.ignoreCertRevocation"/>
+                    </label>
+                </div>
+                
+                <div class="form-group advanced-field" v-show="showAdvanced">
+                    <label class="form-note">{{ $t('manualForm.httpsCAFileNote') }}</label>
                 </div>
             </div>
         </el-form>
@@ -150,9 +160,10 @@ const ManualFormComponent = {
                 printerName: '',
                 hostType: '',
                 host: '',
-                deviceUi: '',
+                webUrl: '',
                 apiKey: '',
-                caFile: ''
+                caFile: '',
+                ignoreCertRevocation: false
             },
             formRules: {
                 vendor: [
@@ -335,16 +346,21 @@ const ManualFormComponent = {
                 this.formData.host = printer.host;
             }
             
-            if (printer.deviceUi) {
-                this.formData.deviceUi = printer.deviceUi;
+            if (printer.webUrl) {
+                this.formData.webUrl = printer.webUrl;
             }
             
-            if (printer.apiKey) {
-                this.formData.apiKey = printer.apiKey;
-            }
-            
-            if (printer.caFile) {
-                this.formData.caFile = printer.caFile;
+            if (printer.extraInfo) {
+                const extraInfo = typeof printer.extraInfo === 'string' ? JSON.parse(printer.extraInfo) : printer.extraInfo;
+                if (extraInfo.apiKey) {
+                    this.formData.apiKey = extraInfo.apiKey;
+                }
+                if (extraInfo.caFile) {
+                    this.formData.caFile = extraInfo.caFile;
+                }
+                if (extraInfo.ignoreCertRevocation) {
+                    this.formData.ignoreCertRevocation = extraInfo.ignoreCertRevocation;
+                }
             }
         },
         
@@ -352,15 +368,19 @@ const ManualFormComponent = {
             return new Promise((resolve) => {
                 this.$refs.manualForm.validate((valid) => {
                     if (valid) {
+                        const extraInfo = {
+                            apiKey: this.formData.apiKey,
+                            caFile: this.formData.caFile,
+                            ignoreCertRevocation: this.formData.ignoreCertRevocation
+                        };
                         const printer = {
                             printerName: this.formData.printerName.trim() ? this.formData.printerName.trim() : this.formData.printerModel,
                             host: this.formData.host,
-                            apiKey: this.formData.apiKey,
-                            caFile: this.formData.caFile,
-                            deviceUi: this.formData.deviceUi,
                             vendor: this.formData.vendor,
                             printerModel: this.formData.printerModel,
-                            hostType: this.formData.hostType
+                            hostType: this.formData.hostType,
+                            webUrl: this.formData.webUrl,
+                            extraInfo: JSON.stringify(extraInfo)
                         };
                         resolve(printer);
                     } else {

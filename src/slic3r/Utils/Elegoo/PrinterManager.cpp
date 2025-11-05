@@ -387,6 +387,10 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterHost(const std::string& 
     if (oldNetwork) {
         oldNetwork->disconnectFromPrinter();
         deletePrinterNetwork(printerId);
+    } 
+    size_t pos = printer.value().webUrl.find(printer.value().host);
+    if (pos != std::string::npos) {
+        printer.value().webUrl.replace(pos, printer.value().host.length(), host);
     }
     printer.value().host = host;
     std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printer.value());
@@ -408,8 +412,12 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterHost(const std::string& 
                 network->disconnectFromPrinter();
                 return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_HOST_NOT_MATCH, false);
             }
-            PrinterCache::getInstance()->updatePrinterHost(printerId, printer.value());
-            PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_CONNECTED);
+            PrinterCache::getInstance()->updatePrinterField(printerId, [&printer](PrinterNetworkInfo& printerInfo) {
+                printerInfo.webUrl = printer.value().webUrl;
+                printerInfo.host = printer.value().host;
+                printerInfo.connectStatus = PRINTER_CONNECT_STATUS_CONNECTED;
+
+            });
             PrinterCache::getInstance()->updatePrinterAttributes(printerId, printerAttributes);
             addPrinterNetwork(network);
             PrinterCache::getInstance()->savePrinterList();
@@ -430,6 +438,88 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterHost(const std::string& 
     return PrinterNetworkResult<bool>(connectResult.code, false);
 }
 
+PrinterNetworkResult<bool> PrinterManager::updatePhysicalPrinter(const std::string& printerId, const PrinterNetworkInfo& printerInfo)
+{
+    PrinterLock lock(printerId);
+    auto v = PrinterCache::getInstance()->getPrinter(printerId);
+    if (!v.has_value()) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+    }
+    PrinterNetworkInfo printer = v.value();
+    bool needReconnect = printer.host != printerInfo.host;
+    printer.host = printerInfo.host;
+    printer.webUrl = printerInfo.webUrl;
+    printer.hostType = printerInfo.hostType;
+    printer.printerName = printerInfo.printerName;
+    printer.extraInfo = printerInfo.extraInfo;
+
+    if (needReconnect) {
+        PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
+        std::shared_ptr<IPrinterNetwork> oldNetwork = getPrinterNetwork(printerId);
+        if (oldNetwork) {
+            oldNetwork->disconnectFromPrinter();
+            deletePrinterNetwork(printerId);
+        }
+        std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printer);
+        if (!network) {
+            wxLogError("failed to create network for printer, host: %s, printerName: %s, printerModel: %s, hostType: %s",
+                       printer.host, printer.printerName,
+                       printer.printerModel, printer.hostType);
+            return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::CREATE_NETWORK_FOR_HOST_TYPE_FAILED, false);
+        }
+        auto connectResult = network->connectToPrinter();
+        if (connectResult.isSuccess()) {
+            auto attributes = network->getPrinterAttributes();
+            if (attributes.isSuccess() && attributes.hasData()) {
+                auto printerAttributes = attributes.data.value();
+                if (!printer.mainboardId.empty() && printerAttributes.mainboardId != printer.mainboardId) {
+                    wxLogError("printer mainboardId not match, local: %s, remote: %s",
+                               printer.mainboardId.c_str(), printerAttributes.mainboardId.c_str());
+                    network->disconnectFromPrinter();
+                    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_HOST_NOT_MATCH, false);
+                }
+                if (!printer.serialNumber.empty() && printerAttributes.serialNumber != printer.serialNumber) {
+                    wxLogError("printer serialNumber not match, local: %s, remote: %s",
+                               printer.serialNumber.c_str(), printerAttributes.serialNumber.c_str());
+                    network->disconnectFromPrinter();
+                    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_HOST_NOT_MATCH, false);
+                }
+                PrinterCache::getInstance()->updatePrinterField(printerId, [&printer](PrinterNetworkInfo& p) {
+                    p.printerName = printer.printerName;
+                    p.hostType    = printer.hostType;
+                    p.host        = printer.host;
+                    p.webUrl      = printer.webUrl;
+                    p.extraInfo   = printer.extraInfo;
+                    p.connectStatus = PRINTER_CONNECT_STATUS_CONNECTED;
+                });
+                PrinterCache::getInstance()->updatePrinterAttributes(printerId, printerAttributes);
+                addPrinterNetwork(network);
+            } else {
+                wxLogWarning("failed to get printer attributes for updated printer %s %s %s: %s",
+                             printerInfo.host, printerInfo.printerName,
+                             printerInfo.printerModel, attributes.message.c_str());
+                network->disconnectFromPrinter();
+                return PrinterNetworkResult<bool>(attributes.isSuccess() ? PrinterNetworkErrorCode::PRINTER_INVALID_RESPONSE : attributes.code, false);
+            }
+        } else {
+            wxLogWarning("failed to connect to printer, host: %s, printerName: %s, printerModel: %s, hostType: %s",
+                         printerInfo.host, printerInfo.printerName,
+                         printerInfo.printerModel, printerInfo.hostType);
+            return PrinterNetworkResult<bool>(connectResult.code, false);
+        }
+    } else {
+        PrinterCache::getInstance()->updatePrinterField(printerId, [&printer](PrinterNetworkInfo& p) {
+            p.printerName = printer.printerName;
+            p.hostType    = printer.hostType;
+            p.host        = printer.host;
+            p.webUrl      = printer.webUrl;
+            p.extraInfo   = printer.extraInfo;
+        });
+    }
+    PrinterCache::getInstance()->savePrinterList();
+    wxLogMessage("updated printer: %s %s %s", printer.host, printer.printerName, printer.printerModel);
+    return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::SUCCESS, true);
+}
 PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
 {
     // Use a static mutex to serialize printer addition to prevent race conditions
@@ -487,7 +577,9 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
             printerNetworkInfo.firmwareVersion    = printerAttributes.firmwareVersion;
             printerNetworkInfo.mainboardId        = printerAttributes.mainboardId;
             printerNetworkInfo.serialNumber       = printerAttributes.serialNumber;
-            printerNetworkInfo.webUrl             = printerAttributes.webUrl;
+            if(printerNetworkInfo.webUrl.empty() && !printerNetworkInfo.host.empty()) {
+                printerNetworkInfo.webUrl = printerNetworkInfo.host;
+            }
             if (printerNetworkInfo.isPhysicalPrinter) {
                 printerNetworkInfo.authMode = printerAttributes.authMode;
             }
@@ -552,9 +644,11 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPr
                     PrinterLock lock(p.printerId);
                     wxLogMessage("Printer %s %s %s IP changed, disconnect and connect to new IP, old IP: %s, new IP: %s", p.host,
                                  p.printerName, p.printerModel, p.host, discoveredPrinter.host);
+                    size_t pos = p.webUrl.find(p.host);
+                    if (pos != std::string::npos) {
+                        p.webUrl.replace(pos, p.host.length(), discoveredPrinter.host);
+                    }
                     p.host          = discoveredPrinter.host;
-                    p.webUrl        = discoveredPrinter.webUrl;
-                    p.connectionUrl = discoveredPrinter.connectionUrl;
                     PrinterCache::getInstance()->updatePrinterHost(p.printerId, p);
                     PrinterCache::getInstance()->savePrinterList();
                 }
@@ -1040,8 +1134,10 @@ void PrinterManager::monitorPrinterConnections()
                             // been replaced with a new mainboard need to delete the printer and add the printer or discover the printer again
                             wxLogError("Printer mainboardId not match, local: %s, remote: %s", printer.value().mainboardId.c_str(),
                                                  printerAttributes.mainboardId.c_str());
-                            PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
-                            PrinterCache::getInstance()->updatePrinterStatus(printerId, PRINTER_STATUS_ID_NOT_MATCH);
+                            PrinterCache::getInstance()->updatePrinterField(printerId, [&printer](PrinterNetworkInfo& printerInfo) {
+                                printerInfo.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
+                                printerInfo.printerStatus = PRINTER_STATUS_ID_NOT_MATCH;
+                            });
                             network->disconnectFromPrinter();
                             return;
                         }
@@ -1052,8 +1148,10 @@ void PrinterManager::monitorPrinterConnections()
                             // need to delete the printer and  add the printer or discover the printer again
                             wxLogError("Printer serialNumber not match, local: %s, remote: %s", printer.value().serialNumber.c_str(),
                                                  printerAttributes.serialNumber.c_str());
-                            PrinterCache::getInstance()->updatePrinterConnectStatus(printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
-                            PrinterCache::getInstance()->updatePrinterStatus(printerId, PRINTER_STATUS_ID_NOT_MATCH);
+                            PrinterCache::getInstance()->updatePrinterField(printerId, [&printer](PrinterNetworkInfo& printerInfo) {
+                                printerInfo.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
+                                printerInfo.printerStatus = PRINTER_STATUS_ID_NOT_MATCH;
+                            });
                             network->disconnectFromPrinter();
                             return;
                         }
@@ -1185,7 +1283,7 @@ void PrinterManager::syncOldPresetPrinters()
             if (config.has("printhost_ssl_ignore_revoke")) {
                 auto sslIgnoreRevoke = config.option<ConfigOptionString>("printhost_ssl_ignore_revoke");
                 if (sslIgnoreRevoke && !sslIgnoreRevoke->value.empty()) {
-                    extraInfo[PRINTER_NETWORK_EXTRA_INFO_KEY_HOST] = sslIgnoreRevoke->value;
+                    printerInfo.webUrl = sslIgnoreRevoke->value;
                 }
             }
             printerInfo.extraInfo = extraInfo.dump();
