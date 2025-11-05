@@ -242,18 +242,23 @@ void HomeView::onWebViewError(wxWebViewEvent& event)
     wxMessageBox("WebView Error: " + error, "Error", wxOK | wxICON_ERROR);
 }
 
-void HomeView::OnNavigationRequest(wxWebViewEvent& evt){
+void HomeView::OnNavigationRequest(wxWebViewEvent& evt)
+{
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
-    const wxString &url = evt.GetURL();
-    auto resourceDir = from_u8(resources_dir() + "/web/");
+    wxString url = evt.GetURL();
+    url.Replace("\\", "/");
+    wxString resourceDir = from_u8(resources_dir() + "/web/");
+    resourceDir.Replace("\\", "/");
+    
     if (url.StartsWith("File://") || url.StartsWith("file://")) {
         if (!url.Contains(resourceDir)) {
-            auto file = wxURL::Unescape(wxURL(url).GetPath());
+            wxString file = wxURL::Unescape(wxURL(evt.GetURL()).GetPath());
 #ifdef _WIN32
-            if (file.StartsWith('/'))
+            if (file.StartsWith('/')) {
                 file = file.Mid(1);
-            else
-                file = "//" + file; // When file from network location
+            } else {
+                file = "//" + file;
+            }
 #endif
             wxGetApp().plater()->load_files(wxArrayString{1, &file});
             evt.Veto();
@@ -265,18 +270,23 @@ void HomeView::OnNavigationComplete(wxWebViewEvent& evt){
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
 }
 
-void HomeView::OnNewWindowRequest(wxWebViewEvent& event){
+void HomeView::OnNewWindowRequest(wxWebViewEvent& event)
+{
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << event.GetTarget().ToUTF8().data();
-    const wxString &url = event.GetURL();
-    auto resourceDir = from_u8(resources_dir() + "/web/");
+    wxString url = event.GetURL();
+    url.Replace("\\", "/");
+    wxString resourceDir = from_u8(resources_dir() + "/web/");
+    resourceDir.Replace("\\", "/");
+    
     if (url.StartsWith("File://") || url.StartsWith("file://")) {
         if (!url.Contains(resourceDir)) {
-            auto file = wxURL::Unescape(wxURL(url).GetPath());
+            wxString file = wxURL::Unescape(wxURL(event.GetURL()).GetPath());
 #ifdef _WIN32
-            if (file.StartsWith('/'))
+            if (file.StartsWith('/')) {
                 file = file.Mid(1);
-            else
-                file = "//" + file; // When file from network location
+            } else {
+                file = "//" + file;
+            }
 #endif
             wxGetApp().plater()->load_files(wxArrayString{1, &file});
             event.Veto();
