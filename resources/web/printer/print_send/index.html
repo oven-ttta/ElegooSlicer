@@ -256,7 +256,7 @@
 
                         <div class="toggle-item">
                             <div class="toggle-label trans"
-                                v-if="curPrinter && curPrinter.printCapabilities.supportsTimeLapse" tid="time_lapse">{{
+                                v-if="curPrinter && curPrinter.printCapabilities.supportsTimeLapse && curPrinter.networkType===0" tid="time_lapse">{{
                                 $t('printSend.timelapse') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.timeLapse" />
