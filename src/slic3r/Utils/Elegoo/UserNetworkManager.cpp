@@ -345,27 +345,27 @@ bool UserNetworkManager::checkNeedRefreshToken(const UserNetworkInfo& userInfo)
         return false;
     }
 
-    // last token refresh time is greater than access token expire time, time is abnormal, need to refresh token(maybe system time is modified is abnormal)
-    if (userInfo.lastTokenRefreshTime >= userInfo.accessTokenExpireTime) {
-        wxLogMessage("UserNetworkManager::checkNeedRefreshToken last token refresh time is greater than access token expire time, time is "
-                     "abnormal, need to refresh token, user id: %s, user login status: %d, user nickname: %s, last token refresh "
-                     "time: %llu, access token expire time: %llu, refresh token expire time: %llu",
-                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
-                     static_cast<unsigned long long>(userInfo.lastTokenRefreshTime),
-                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
-                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
-        return true;
+    // last token refresh time is greater than access token expire time, time is abnormal
+    if (userInfo.lastTokenRefreshTime > userInfo.accessTokenExpireTime) {
+       wxLogMessage("UserNetworkManager::checkNeedRefreshToken last token refresh time is greater than access token expire time, time is "
+                    "abnormal, user id: %s, user login status: %d, user nickname: %s, last token refresh "
+                    "time: %llu, access token expire time: %llu, refresh token expire time: %llu",
+                    userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
+                    static_cast<unsigned long long>(userInfo.lastTokenRefreshTime),
+                    static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
+                    static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+       return false;
     }
-    // nowTime is less than last token refresh time, time is abnormal, need to refresh token (maybe system time was modified)
+    // nowTime is less than last token refresh time, time is abnormal
     if (nowTime < userInfo.lastTokenRefreshTime) {
-        wxLogMessage("UserNetworkManager::checkNeedRefreshToken nowTime is less than last token refresh time, time is abnormal, need to "
-                     "refresh token, user id: %s, user login status: %d, user nickname: %s, last token refresh time: %llu, nowTime: %llu, "
-                     "access token expire time: %llu, refresh token expire time: %llu",
-                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
-                     static_cast<unsigned long long>(userInfo.lastTokenRefreshTime), static_cast<unsigned long long>(nowTime),
-                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
-                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
-        return true;
+       wxLogMessage("UserNetworkManager::checkNeedRefreshToken nowTime is less than last token refresh time, time is abnormal, need to "
+                    "refresh token, user id: %s, user login status: %d, user nickname: %s, last token refresh time: %llu, nowTime: %llu, "
+                    "access token expire time: %llu, refresh token expire time: %llu",
+                    userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
+                    static_cast<unsigned long long>(userInfo.lastTokenRefreshTime), static_cast<unsigned long long>(nowTime),
+                    static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
+                    static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+       return false;
     }
 
     // token expired
