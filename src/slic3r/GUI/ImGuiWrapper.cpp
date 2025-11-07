@@ -2620,20 +2620,20 @@ void ImGuiWrapper::push_combo_style(const float scale)
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 1.0f * scale);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f * scale);
         ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGuiWrapper::COL_WINDOW_BG_DARK);
-        ImGui::PushStyleColor(ImGuiCol_BorderActive, ImVec4(0.f, 150.f / 255.f, 136.f / 255.f, 0.6f));  // ORCA hovered item border color
+        ImGui::PushStyleColor(ImGuiCol_BorderActive, to_ImVec4(decode_color_to_float_array("#1677ff")));  // ORCA hovered item border color
         ImGui::PushStyleColor(ImGuiCol_HeaderHovered, {0.f, 0.f, 0.f, 0.f});                            // ORCA hovered item background color
         ImGui::PushStyleColor(ImGuiCol_HeaderActive, COL_ORCA);
-        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.f, 150.f / 255.f, 136.f / 255.f, 0.25f));       // ORCA active item background color
+        ImGui::PushStyleColor(ImGuiCol_Header, to_ImVec4(decode_color_to_float_array("#1677ff")));       // ORCA active item background color
         ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, ImGuiWrapper::COL_WINDOW_BG_DARK);
         ImGui::PushStyleColor(ImGuiCol_Button, {1.00f, 1.00f, 1.00f, 0.0f});
     } else {
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 1.0f * scale);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f * scale);
         ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGuiWrapper::COL_WINDOW_BG);
-        ImGui::PushStyleColor(ImGuiCol_BorderActive, ImVec4(0.f, 150.f / 255.f, 136.f / 255.f, 0.6f));  // ORCA hovered item border color
+        ImGui::PushStyleColor(ImGuiCol_BorderActive, to_ImVec4(decode_color_to_float_array("#1677ff")));  // ORCA hovered item border color
         ImGui::PushStyleColor(ImGuiCol_HeaderHovered, {0.f, 0.f, 0.f, 0.f});                            // ORCA hovered item background color
         ImGui::PushStyleColor(ImGuiCol_HeaderActive, COL_ORCA);
-        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.f, 150.f / 255.f, 136.f / 255.f, 0.25f));       // ORCA active item background color
+        ImGui::PushStyleColor(ImGuiCol_Header, to_ImVec4(decode_color_to_float_array("#1677ff")));       // ORCA active item background color
         ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, ImGuiWrapper::COL_WINDOW_BG);
         ImGui::PushStyleColor(ImGuiCol_Button, {1.00f, 1.00f, 1.00f, 0.0f});
     }

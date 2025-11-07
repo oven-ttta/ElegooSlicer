@@ -64,11 +64,13 @@
                                         <button class="printer-refresh-btn" @click.stop="refreshPrinterList">
                                             <img src="img/refresh.svg" alt="Refresh" />
                                         </button>
-                                        <img :src="(curPrinter && curPrinter.printerImg) || ''" alt="" class="dropdown-icon" />
+                                        <img :src="(curPrinter && curPrinter.printerImg) || ''" alt=""
+                                            class="dropdown-icon" />
                                         <div class="dropdown-content">
                                             <div class="dropdown-title">{{ (curPrinter && curPrinter.printerName) ||
                                                 $t('printSend.noPrinter') }}</div>
-                                            <div class="dropdown-subtitle">{{ (curPrinter && (curPrinter.networkType===0 ? curPrinter.host : "SN: " +  curPrinter.serialNumber)) ||
+                                            <div class="dropdown-subtitle">{{ (curPrinter && (curPrinter.networkType===0
+                                                ? curPrinter.host : "SN: " + curPrinter.serialNumber)) ||
                                                 $t('printSend.pleaseConnectPrinter') }}</div>
                                         </div>
                                     </div>
@@ -80,7 +82,9 @@
                                             <img :src="printer.printerImg" alt="" class="dropdown-item-icon" />
                                             <div class="dropdown-item-content">
                                                 <div class="dropdown-item-title">{{ printer.printerName }}</div>
-                                                <div v-if="printer.host" class="dropdown-item-subtitle">{{ printer.networkType===0 ? printer.host : "SN: " +  printer.serialNumber }}</div>
+                                                <div v-if="printer.host" class="dropdown-item-subtitle">{{
+                                                    printer.networkType===0 ? printer.host : "SN: " +
+                                                    printer.serialNumber }}</div>
                                             </div>
                                         </li>
                                     </ul>
@@ -203,7 +207,8 @@
                                                     class="mms-row">
                                                     <div class="tray-popover-content">
                                                         <div v-for="tray in mms.trayList" :key="tray.trayName"
-                                                            class="tray-popover-card" :class="{ 'disabled': tray.status === 0 || tray.status === 2 }"
+                                                            class="tray-popover-card"
+                                                            :class="{ 'disabled': tray.status === 0 || tray.status === 2 }"
                                                             :style="getMmsCardStyle(tray)"
                                                             @click="tray.status === 1 || tray.status === 3 ? updateFilamentMapping(filament.index, tray) : null">
                                                             <div class="tray-name">{{ tray.trayName }}</div>
@@ -218,10 +223,12 @@
                                         </div>
                                     </template>
                                     <template #reference>
-                                        <div class="tray-rect" :title="(filament.mappedMmsFilament && filament.mappedMmsFilament.filamentName) || ''">
+                                        <div class="tray-rect"
+                                            :title="(filament.mappedMmsFilament && filament.mappedMmsFilament.filamentName) || ''">
                                             <span v-html="getFilamentSvg(filament.mappedMmsFilament)">
                                             </span>
-                                            <div class="tray-filament-type">{{ (filament.mappedMmsFilament && filament.mappedMmsFilament.filamentType)
+                                            <div class="tray-filament-type">{{ (filament.mappedMmsFilament &&
+                                                filament.mappedMmsFilament.filamentType)
                                                 ||
                                                 '?' }}
                                             </div>
@@ -244,19 +251,19 @@
                     </div>
 
                     <div class="print-options-grid">
-                        <div class="toggle-item">
-                            <div class="toggle-label trans"
-                                v-if="curPrinter && curPrinter.printCapabilities.supportsAutoBedLeveling"
-                                tid="heated_bed_leveling">{{ $t('printSend.autoBedLeveling') }}</div>
+                        <div class="toggle-item"
+                            v-show="curPrinter && curPrinter.printCapabilities.supportsAutoBedLeveling">
+                            <div class="toggle-label trans" tid="heated_bed_leveling">{{ $t('printSend.autoBedLeveling')
+                                }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.heatedBedLeveling" />
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
 
-                        <div class="toggle-item">
-                            <div class="toggle-label trans"
-                                v-if="curPrinter && curPrinter.printCapabilities.supportsTimeLapse && curPrinter.networkType===0" tid="time_lapse">{{
+                        <div class="toggle-item"
+                            v-show="curPrinter && curPrinter.printCapabilities.supportsTimeLapse && curPrinter.networkType===0">
+                            <div class="toggle-label trans" tid="time_lapse">{{
                                 $t('printSend.timelapse') }}</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="printInfo.timeLapse" />

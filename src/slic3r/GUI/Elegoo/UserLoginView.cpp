@@ -87,7 +87,7 @@ void UserLoginView::initUI()
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
     topsizer->Add(mBrowser, wxSizerFlags().Expand().Proportion(1));
-    wxSize pSize = FromDIP(wxSize(650, 840));
+    wxSize pSize = FromDIP(wxSize(496, 723));
     SetSize(pSize);
     CenterOnParent();
 
