@@ -3,13 +3,6 @@ project(libslic3r_gui)
 
 include(PrecompiledHeader)
 
-# Find and enable OpenMP
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-    message(STATUS "OpenMP found and enabled")
-else()
-    message(STATUS "OpenMP not found, will use serial processing")
-endif()
 
 set(SLIC3R_GUI_SOURCES
     Config/Snapshot.cpp
@@ -754,10 +747,6 @@ find_package(libnoise REQUIRED)
 find_package(elegoolink REQUIRED)
 target_link_libraries(libslic3r_gui libslic3r cereal::cereal imgui imguizmo minilzo GLEW::GLEW OpenGL::GL hidapi ${wxWidgets_LIBRARIES} glfw libcurl OpenSSL::SSL OpenSSL::Crypto noise::noise elegoolink::elegoolink)
 
-# Add OpenMP if found
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(libslic3r_gui OpenMP::OpenMP_CXX)
-endif()
 
 if (MSVC)
     target_link_libraries(libslic3r_gui Setupapi.lib)

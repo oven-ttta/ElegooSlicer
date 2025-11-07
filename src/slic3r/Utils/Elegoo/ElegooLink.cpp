@@ -321,7 +321,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
         connectionParams.accessCode        = printerNetworkInfo.accessCode;
         connectionParams.pinCode           = printerNetworkInfo.pinCode;
         connectionParams.webUrl            = printerNetworkInfo.webUrl;
-
+        connectionParams.networkMode        = (printerNetworkInfo.networkType == NETWORK_TYPE_LAN) ? elink::NetworkMode::LAN : elink::NetworkMode::CLOUD;
         elinkResult = elink::ElegooLink::getInstance().connectPrinter(connectionParams);
 
         resultCode = parseElegooResult(elinkResult.code);
