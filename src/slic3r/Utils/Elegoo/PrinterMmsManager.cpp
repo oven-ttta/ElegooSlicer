@@ -555,7 +555,7 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterMmsManager::getPrinterMmsInfo(const
             break;
         }
         std::string mmsIndexStr =trayIndexList[mmsIndex];
-        int trayIndex = 0;
+        int trayIndex = 1;
         mmsIndex++;
         for(auto& tray : mms.trayList) {
             tray.trayName = mmsIndexStr + std::to_string(trayIndex);
