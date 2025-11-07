@@ -36,7 +36,7 @@
 #define ELEGOO_GLOBAL_UPDATE_URL ""
 #define ELEGOO_CHINA_PROFILE_UPDATE_URL ""
 #define ELEGOO_GLOBAL_PROFILE_UPDATE_URL ""
-#define ELEGOO_CHINA_LOGIN_URL "https://www.nexprint.cn/elegooSlicer"
+#define ELEGOO_CHINA_LOGIN_URL "https://www.nexprint.cn/account/slicer-login"
 #define ELEGOO_GLOBAL_LOGIN_URL "https://www.nexprint.com/account/slicer-login"
 #define ELEGOO_CHINA_ONLINE_MODEL_URL "https://www.nexprint.cn/elegooSlicer"
 #define ELEGOO_GLOBAL_ONLINE_MODEL_URL "https://www.nexprint.com/elegooSlicer"
