@@ -57,7 +57,6 @@ enum TrayStatus {
 };
 
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_PORT "httpsCaFile"
-#define PRINTER_NETWORK_EXTRA_INFO_KEY_VENDOR "apiKey"
 #define PRINTER_NETWORK_EXTRA_INFO_KEY_IGNORE_CERT_REVOCATION "ignoreCertRevocation"
 
 struct PrinterMmsTray
