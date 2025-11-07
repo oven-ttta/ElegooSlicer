@@ -8054,7 +8054,7 @@ msgstr ""
 "0 significa che il filamento non è supportato sul piatto Textured PEI"
 
 msgid "Textured Cool Plate"
-msgstr ""
+msgstr "Piatto ruvido a bassa temperatura"
 
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "

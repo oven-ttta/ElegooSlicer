@@ -422,13 +422,13 @@ msgid "Bulge"
 msgstr "凸度"
 
 msgid "Bulge proportion related to radius"
-msgstr ""
+msgstr "与半径相关的凸起比例"
 
 msgid "Space"
 msgstr "间隔"
 
 msgid "Space proportion related to radius"
-msgstr ""
+msgstr "与半径相关的间隔比例"
 
 msgid "Confirm connectors"
 msgstr "确认"
@@ -702,7 +702,7 @@ msgid "ITALIC"
 msgstr "斜体"
 
 msgid "SWISS"
-msgstr ""
+msgstr "瑞士体"
 
 msgid "MODERN"
 msgstr "现代"
@@ -743,7 +743,7 @@ msgid "Too small, enlarged font height inside text input."
 msgstr "文字输入里面的字体高度太小，放大了。"
 
 msgid "Text doesn't show current horizontal alignment."
-msgstr ""
+msgstr "文本不显示当前水平对齐方式"
 
 msgid "Revert font changes."
 msgstr "还原字体更改。"
@@ -994,7 +994,7 @@ msgstr "选择文字使其面向摄像头"
 
 #, boost-format
 msgid "Font \"%1%\" can't be used. Please select another."
-msgstr ""
+msgstr "字体\"%1%\"无法使用，请选择其他字体"
 
 #, boost-format
 msgid ""
@@ -1011,7 +1011,7 @@ msgid "Loading"
 msgstr "载入中"
 
 msgid "In queue"
-msgstr ""
+msgstr "队列中"
 
 #. TRN - Input label. Be short as possible
 #. Height of one text line - Font Ascent
@@ -1080,13 +1080,13 @@ msgid "SVG move"
 msgstr "移动SVG图形"
 
 msgid "Enter SVG gizmo"
-msgstr ""
+msgstr "进入SVG小工具"
 
 msgid "Leave SVG gizmo"
-msgstr ""
+msgstr "离开SVG小工具"
 
 msgid "SVG actions"
-msgstr ""
+msgstr "SVG操作"
 
 msgid "SVG"
 msgstr "SVG矢量图"
@@ -1115,12 +1115,12 @@ msgid "Undefined stroke type"
 msgstr "未定义的描边类型"
 
 msgid "Path can't be healed from self-intersection and multiple points."
-msgstr ""
+msgstr "路径无法从自相交和多点中修复"
 
 msgid ""
 "Final shape contains self-intersection or multiple points with same "
 "coordinate."
-msgstr ""
+msgstr "最终形状包含自相交或相同坐标的多点"
 
 #, boost-format
 msgid "Shape is marked as invisible (%1%)."
@@ -1160,16 +1160,18 @@ msgid "Change to another .svg file"
 msgstr "更改为另一个.svg文件"
 
 msgid "Forget the file path"
-msgstr ""
+msgstr "忘记文件路径"
 
 msgid ""
 "Do NOT save local path to 3MF file.\n"
 "Also disables 'reload from disk' option."
 msgstr ""
+"请勿将本地路径保存到3MF文件中。\n"
+"同时禁用'从磁盘重新加载'选项。"
 
 #. TRN: An menu option to convert the SVG into an unmodifiable model part.
 msgid "Bake"
-msgstr ""
+msgstr "烘焙"
 
 #. TRN: Tooltip for the menu item.
 msgid "Bake into model as uneditable part"
@@ -1250,7 +1252,7 @@ msgid "SVG file does NOT contain a single path to be embossed (%1%)."
 msgstr "SVG文件不包含路径以进行浮雕操作 (%1%)。"
 
 msgid "No feature"
-msgstr ""
+msgstr "无特征"
 
 msgid "Vertex"
 msgstr "顶点"
@@ -1394,7 +1396,7 @@ msgid "Rotate around center:"
 msgstr "绕中心旋转:"
 
 msgid "Parallel distance:"
-msgstr ""
+msgstr "平行距离："
 
 msgid "Flip by Face 2"
 msgstr "通过面2翻转"
@@ -1988,7 +1990,7 @@ msgid "Reload All"
 msgstr "重新加载全部"
 
 msgid "reload all from disk"
-msgstr ""
+msgstr "从磁盘重新加载全部"
 
 msgid "Auto Rotate"
 msgstr "自动朝向"
@@ -2012,7 +2014,7 @@ msgid "Center"
 msgstr "居中"
 
 msgid "Drop"
-msgstr ""
+msgstr "下降"
 
 msgid "Edit Process Settings"
 msgstr "编辑工艺参数"
@@ -3096,7 +3098,7 @@ msgstr "发生错误。可能系统内存不足或者程序存在bug。"
 
 #, boost-format
 msgid "A fatal error occurred: \"%1%\""
-msgstr ""
+msgstr "发生致命错误：\"%1%\""
 
 msgid "Please save project and restart the program."
 msgstr "请保存项目并重启程序。"
@@ -3843,37 +3845,37 @@ msgid "Edit Custom G-code (%1%)"
 msgstr "编辑自定义G-code (%1%)"
 
 msgid "Built-in placeholders (Double click item to add to G-code)"
-msgstr ""
+msgstr "内置占位符（双击项目添加到G-code）"
 
 msgid "Search gcode placeholders"
 msgstr ""
 
 msgid "Add selected placeholder to G-code"
-msgstr ""
+msgstr "添加选中的占位符到G-code"
 
 msgid "Select placeholder"
-msgstr ""
+msgstr "选择占位符"
 
 msgid "[Global] Slicing State"
-msgstr ""
+msgstr "[全局]切片状态"
 
 msgid "Read Only"
-msgstr ""
+msgstr "只读"
 
 msgid "Read Write"
-msgstr ""
+msgstr "读写"
 
 msgid "Slicing State"
-msgstr ""
+msgstr "切片状态"
 
 msgid "Print Statistics"
-msgstr ""
+msgstr "打印统计"
 
 msgid "Objects Info"
-msgstr ""
+msgstr "对象信息"
 
 msgid "Dimensions"
-msgstr ""
+msgstr "尺寸"
 
 msgid "Temperatures"
 msgstr "温度"
@@ -3883,7 +3885,7 @@ msgstr "时间戳"
 
 #, boost-format
 msgid "Specific for %1%"
-msgstr ""
+msgstr "特定于%1%"
 
 msgid "Presets"
 msgstr "预设"
@@ -3895,7 +3897,7 @@ msgid "Filament settings"
 msgstr "耗材丝设置"
 
 msgid "SLA Materials settings"
-msgstr ""
+msgstr "SLA材料设置"
 
 msgid "Printer settings"
 msgstr "打印机设置"
@@ -3941,7 +3943,7 @@ msgid "Input value is out of range"
 msgstr "输入值超出范围外"
 
 msgid "Some extension in the input is invalid"
-msgstr ""
+msgstr "输入中的某些扩展无效"
 
 #, boost-format
 msgid "Invalid format. Expected vector format: \"%1%\""
@@ -4691,7 +4693,7 @@ msgid "Use Orthogonal View"
 msgstr "使用正交视角"
 
 msgid "Auto Perspective"
-msgstr ""
+msgstr "自动透视"
 
 msgid ""
 "Automatically switch between orthographic and perspective when changing from "
@@ -4729,7 +4731,7 @@ msgid "Show object overhang highlight in 3D scene"
 msgstr "在3D场景中显示悬空高亮"
 
 msgid "Show Selected Outline (beta)"
-msgstr ""
+msgstr "显示选中轮廓（测试版）"
 
 msgid "Show outline around selected object in 3D scene"
 msgstr ""
@@ -4756,13 +4758,13 @@ msgid "Flow rate test - Pass 2"
 msgstr "流量测试 - 通过 2"
 
 msgid "YOLO (Recommended)"
-msgstr ""
+msgstr "YOLO（推荐）"
 
 msgid "Orca YOLO flowrate calibration, 0.01 step"
 msgstr ""
 
 msgid "YOLO (perfectionist version)"
-msgstr ""
+msgstr "YOLO（完美主义者版本）"
 
 msgid "Orca YOLO flowrate calibration, 0.005 step"
 msgstr ""
@@ -4850,7 +4852,7 @@ msgid "Overwrite file"
 msgstr "覆盖文件"
 
 msgid "Overwrite config"
-msgstr ""
+msgstr "覆盖配置"
 
 msgid "Yes to All"
 msgstr "全是"
@@ -5087,6 +5089,8 @@ msgid ""
 "File: %s\n"
 "Title: %s\n"
 msgstr ""
+"文件：%s\n"
+"标题：%s\n"
 
 msgid "Download waiting..."
 msgstr "等待下载中..."
@@ -5676,7 +5680,7 @@ msgstr "硬化钢"
 
 #, c-format, boost-format
 msgid "%.1f"
-msgstr ""
+msgstr "%.1f"
 
 msgid "Global"
 msgstr "全局"
@@ -5776,7 +5780,7 @@ msgid "Search plate, object and part."
 msgstr "搜索盘、模型和零件。"
 
 msgid "Pellets"
-msgstr ""
+msgstr "颗粒"
 
 msgid ""
 "No AMS filaments. Please select a printer in 'Device' page to load AMS info."
@@ -6108,17 +6112,17 @@ msgid ""
 msgstr "导入到ElegooSlicer失败。请下载文件并手动导入。"
 
 msgid "INFO:"
-msgstr ""
+msgstr "信息："
 
 msgid ""
 "No accelerations provided for calibration. Use default acceleration value "
-msgstr ""
+msgstr "未提供校准加速度。使用默认加速度值"
 
 msgid "mm/s²"
 msgstr "mm/s²"
 
 msgid "No speeds provided for calibration. Use default optimal speed "
-msgstr ""
+msgstr "未提供校准速度。使用默认最佳速度"
 
 msgid "mm/s"
 msgstr "mm/s"
@@ -6515,7 +6519,7 @@ msgid "Auto arrange plate after cloning"
 msgstr "克隆后自动排列板"
 
 msgid "Auto arrange plate after object cloning"
-msgstr ""
+msgstr "对象克隆后自动排列打印板"
 
 msgid "Auto sync user presets(Printer/Filament/Process)"
 msgstr "同步用户预设（打印机/耗材丝/工艺）"
@@ -6685,13 +6689,13 @@ msgid "Host Setting"
 msgstr "主机设置"
 
 msgid "DEV host: api-dev.bambu-lab.com/v1"
-msgstr ""
+msgstr "开发主机：api-dev.bambu-lab.com/v1"
 
 msgid "QA  host: api-qa.bambu-lab.com/v1"
-msgstr ""
+msgstr "QA主机：api-qa.bambu-lab.com/v1"
 
 msgid "PRE host: api-pre.bambu-lab.com/v1"
-msgstr ""
+msgstr "预发布主机：api-pre.bambu-lab.com/v1"
 
 msgid "Product host"
 msgstr "正式环境"
@@ -6751,7 +6755,7 @@ msgid "The selected preset is null!"
 msgstr "选择的预设为空！"
 
 msgid "End"
-msgstr ""
+msgstr "结束"
 
 msgid "Customize"
 msgstr "自定义"
@@ -7522,7 +7526,7 @@ msgid "Prime tower"
 msgstr "擦拭塔"
 
 msgid "Filament for Features"
-msgstr ""
+msgstr "特征用耗材"
 
 msgid "Ooze prevention"
 msgstr "Ooze 预防"
@@ -7630,7 +7634,7 @@ msgstr ""
 "安装纹理低温打印热床时的热床温度。0值表示这个耗材丝不支持纹理低温打印热床"
 
 msgid "Cool Plate (SuperTack)"
-msgstr ""
+msgstr "低温打印板（超强粘附）"
 
 msgid ""
 "Bed temperature when cool plate is installed. Value 0 means the filament "
@@ -7711,7 +7715,7 @@ msgstr "可打印区域"
 #. TRN: First argument is parameter name, the second one is the value.
 #, boost-format
 msgid "Invalid value provided for parameter %1%: %2%"
-msgstr ""
+msgstr "参数%1%提供了无效值：%2%"
 
 msgid "G-code flavor is switched"
 msgstr "G-code风格已切换"
@@ -7808,12 +7812,13 @@ msgid ""
 "This is a single extruder multi-material printer, diameters of all extruders "
 "will be set to the new value. Do you want to proceed?"
 msgstr ""
+"这是一台单挤出机多材料打印机，所有挤出机的直径都将被设置为新值。您想继续吗？"
 
 msgid "Layer height limits"
 msgstr "层高限制"
 
 msgid "Z-Hop"
-msgstr ""
+msgstr "Z轴抬升"
 
 msgid "Retraction when switching material"
 msgstr "切换耗材时的回抽量"
@@ -8002,7 +8007,7 @@ msgstr "选择要比较的预设"
 
 msgid ""
 "You can only transfer to current active profile because it has been modified."
-msgstr ""
+msgstr "只能传输到当前活动的配置文件，因为它已被修改。"
 
 msgid ""
 "Transfer the selected options from left preset to the right.\n"
@@ -8018,7 +8023,7 @@ msgstr "从左到右的转移值"
 msgid ""
 "If enabled, this dialog can be used for transfer selected values from left "
 "to right preset."
-msgstr ""
+msgstr "如果启用，此对话框可用于将选定的值从左侧预设传输到右侧预设。"
 
 msgid "Add File"
 msgstr "添加文件"
@@ -8488,7 +8493,7 @@ msgid "Alt+Mouse wheel"
 msgstr "Alt+鼠标滚轮"
 
 msgid "Gizmo"
-msgstr ""
+msgstr "小工具"
 
 msgid "Set extruder number for the objects and parts"
 msgstr "设置对象、零件使用的挤出机编号"
@@ -8533,10 +8538,10 @@ msgid "Shift+Mouse wheel"
 msgstr "Shift+鼠标滚轮"
 
 msgid "Horizontal slider - Move to start position"
-msgstr ""
+msgstr "水平滑块 - 移动到起始位置"
 
 msgid "Horizontal slider - Move to last position"
-msgstr ""
+msgstr "水平滑块 - 移动到末尾位置"
 
 msgid "Release Note"
 msgstr "更新说明"
@@ -8614,7 +8619,7 @@ msgid ""
 msgstr "步骤2, 如果下面的IP和访问码与打印机上的实际值不同，请输入正确的值。"
 
 msgid "IP"
-msgstr ""
+msgstr "IP地址"
 
 msgid "Access Code"
 msgstr "访问码"
@@ -8623,7 +8628,7 @@ msgid "Printer model"
 msgstr "打印机模型"
 
 msgid "Printer name"
-msgstr ""
+msgstr "打印机名称"
 
 msgid "Where to find your printer's IP and Access Code?"
 msgstr "在哪里可以找到打印机的IP和访问码?"
@@ -8632,7 +8637,7 @@ msgid "Connect"
 msgstr "连接"
 
 msgid "Manual Setup"
-msgstr ""
+msgstr "手动设置"
 
 msgid "connecting..."
 msgstr "连接中..."
@@ -9893,6 +9898,7 @@ msgid ""
 "Speed of internal bridges. If the value is expressed as a percentage, it "
 "will be calculated based on the bridge_speed. Default value is 150%."
 msgstr ""
+"内部桥接的速度。如果该值以百分比表示，将基于桥接速度计算。默认值为150%。"
 
 msgid "Brim width"
 msgstr "Brim宽度"
@@ -10394,6 +10400,12 @@ msgid ""
 "\n"
 "This option will be disabled if spiral vase mode is enabled."
 msgstr ""
+"从上往下看时墙循环挤出的方向。\n"
+"\n"
+"默认情况下，所有墙都以逆时针方向挤出，除非启用了偶数层反转。将此设置为自动以"
+"外的任何选项将强制墙方向，而不管偶数层反转如何。\n"
+"\n"
+"如果启用螺旋花瓶模式，此选项将被禁用。"
 
 msgid "Counter clockwise"
 msgstr "逆时针"
@@ -10723,7 +10735,7 @@ msgid ""
 msgstr "耗材丝直径被用于计算G-code文件中的挤出量。因此很重要，应尽可能精确。"
 
 msgid "Pellet flow coefficient"
-msgstr ""
+msgstr "颗粒流动系数"
 
 msgid ""
 "Pellet flow coefficient is empirically derived and allows for volume "
@@ -11012,7 +11024,7 @@ msgid "Cross Hatch"
 msgstr "交叉层叠"
 
 msgid "Quarter Cubic"
-msgstr ""
+msgstr "四分之一立方体"
 
 msgid "Lattice angle 1"
 msgstr ""
@@ -11521,7 +11533,7 @@ msgid "What kind of gcode the printer is compatible with"
 msgstr "打印机兼容的G-code风格'"
 
 msgid "Klipper"
-msgstr ""
+msgstr "Klipper固件"
 
 msgid "Pellet Modded Printer"
 msgstr "颗粒改装打印机"
@@ -11575,7 +11587,7 @@ msgstr ""
 "自动合并若干层稀疏填充一起打印以可缩短时间。内外墙依然保持原始层高打印。"
 
 msgid "Infill combination - Max layer height"
-msgstr ""
+msgstr "填充组合 - 最大层高"
 
 msgid ""
 "Maximum layer height for the combined sparse infill. \n"
@@ -11608,6 +11620,9 @@ msgid ""
 "value to ~10-15% to minimize potential over extrusion and accumulation of "
 "material resulting in rough top surfaces."
 msgstr ""
+"填充区域略微扩大以与墙壁重叠，以获得更好的粘合。百分比值相对于稀疏填充的线"
+"宽。将此值设置为约10-15%，以最小化潜在的过挤出和材料积累，从而导致顶部表面粗"
+"糙。"
 
 msgid "Top/Bottom solid infill/wall overlap"
 msgstr "顶/底部实心填充/墙重叠率"
@@ -12007,7 +12022,7 @@ msgid ""
 msgstr ""
 
 msgid "Apply only on external features"
-msgstr ""
+msgstr "仅应用于外部特征"
 
 msgid ""
 "Applies extrusion rate smoothing only on external perimeters and overhangs. "
@@ -12816,7 +12831,7 @@ msgid ""
 msgstr ""
 
 msgid "Spiral starting flow ratio"
-msgstr ""
+msgstr "螺旋开始流量比"
 
 #, no-c-format, no-boost-format
 msgid ""
@@ -12827,7 +12842,7 @@ msgid ""
 msgstr ""
 
 msgid "Spiral finishing flow ratio"
-msgstr ""
+msgstr "螺旋结束流量比"
 
 #, no-c-format, no-boost-format
 msgid ""
@@ -12865,7 +12880,7 @@ msgid ""
 msgstr ""
 
 msgid "Preheat time"
-msgstr ""
+msgstr "预热时间"
 
 msgid ""
 "To reduce the waiting time after tool change, Orca can preheat the next tool "
@@ -12875,7 +12890,7 @@ msgid ""
 msgstr ""
 
 msgid "Preheat steps"
-msgstr ""
+msgstr "预热步骤"
 
 msgid ""
 "Insert multiple preheat commands(e.g. M104.1). Only useful for Prusa XL. For "
@@ -13652,6 +13667,8 @@ msgid ""
 "purging lines thicker or narrower than they normally would be. The spacing "
 "is adjusted automatically."
 msgstr ""
+"用于擦拭塔冲刷线的额外流量。这使冲刷线比正常情况下更厚或更窄。间距会自动调"
+"整。"
 
 msgid "Idle temperature"
 msgstr "待机温度"
@@ -13909,10 +13926,10 @@ msgid "Export STL"
 msgstr "导出STL文件"
 
 msgid "Export the objects as single STL."
-msgstr ""
+msgstr "将对象导出为单个STL。"
 
 msgid "Export multiple STLs"
-msgstr ""
+msgstr "导出多个STL"
 
 msgid "Export the objects as multiple STLs to directory"
 msgstr ""
@@ -13927,13 +13944,13 @@ msgid "Show command help."
 msgstr "显示命令行帮助。"
 
 msgid "UpToDate"
-msgstr ""
+msgstr "最新"
 
 msgid "Update the configs values of 3mf to latest."
 msgstr "将3mf的配置值更新为最新值。"
 
 msgid "downward machines check"
-msgstr ""
+msgstr "向下机器检查"
 
 msgid ""
 "check whether current machine downward compatible with the machines in the "
@@ -13953,13 +13970,13 @@ msgid "export 3mf with minimum size."
 msgstr "以最小尺寸导出3mf。"
 
 msgid "mtcpp"
-msgstr ""
+msgstr "材料温度补偿"
 
 msgid "max triangle count per plate for slicing."
 msgstr "切片时每个盘的最大三角形数。"
 
 msgid "mstpp"
-msgstr ""
+msgstr "材料温度暂停"
 
 msgid "max slicing time per plate in seconds."
 msgstr "每个盘的最大切片时间（秒）。"
@@ -14062,7 +14079,7 @@ msgid "Skip some objects in this print"
 msgstr "打印过程中跳过一些零件"
 
 msgid "Clone Objects"
-msgstr ""
+msgstr "克隆对象"
 
 msgid "Clone objects in the load list"
 msgstr ""
@@ -14088,13 +14105,13 @@ msgid ""
 msgstr ""
 
 msgid "downward machines settings"
-msgstr ""
+msgstr "向下机器设置"
 
 msgid "the machine settings list need to do downward checking"
 msgstr ""
 
 msgid "Load assemble list"
-msgstr ""
+msgstr "加载组合列表"
 
 msgid "Load assemble object list from config file"
 msgstr ""
@@ -14127,7 +14144,7 @@ msgstr ""
 "trace\n"
 
 msgid "Enable timelapse for print"
-msgstr ""
+msgstr "为打印启用延时摄影"
 
 msgid "If enabled, this slicing will be considered using timelapse"
 msgstr ""
@@ -14171,31 +14188,31 @@ msgid "Skip the modified gcodes in 3mf from Printer or filament Presets"
 msgstr ""
 
 msgid "MakerLab name"
-msgstr ""
+msgstr "MakerLab名称"
 
 msgid "MakerLab name to generate this 3mf"
 msgstr ""
 
 msgid "MakerLab version"
-msgstr ""
+msgstr "MakerLab版本"
 
 msgid "MakerLab version to generate this 3mf"
 msgstr ""
 
 msgid "metadata name list"
-msgstr ""
+msgstr "元数据名称列表"
 
 msgid "metadata name list added into 3mf"
 msgstr ""
 
 msgid "metadata value list"
-msgstr ""
+msgstr "元数据值列表"
 
 msgid "metadata value list added into 3mf"
 msgstr ""
 
 msgid "Allow 3mf with newer version to be sliced"
-msgstr ""
+msgstr "允许较新版本的3mf进行切片"
 
 msgid "Current z-hop"
 msgstr "当前z-hop"
@@ -14218,10 +14235,10 @@ msgstr ""
 "个变量，以便ElegooSlicer在获得控制权时正确地提取。"
 
 msgid "Extra de-retraction"
-msgstr ""
+msgstr "额外装填"
 
 msgid "Currently planned extra extruder priming after de-retraction."
-msgstr ""
+msgstr "当前挤出头在装填后进行额外的预挤出"
 
 msgid "Current extruder"
 msgstr "当前挤出机"
@@ -14267,10 +14284,10 @@ msgid ""
 msgstr ""
 
 msgid "Has single extruder MM priming"
-msgstr ""
+msgstr "单挤出机多材料预挤出"
 
 msgid "Are the extra multi-material priming regions used in this print?"
-msgstr ""
+msgstr "此打印中是否使用额外的多材料预注区域？"
 
 msgid "Volume per extruder"
 msgstr "单个挤出机体积"
@@ -15097,19 +15114,19 @@ msgid "PA step: "
 msgstr "步距"
 
 msgid "Accelerations: "
-msgstr ""
+msgstr "加速度： "
 
 msgid "Speeds: "
-msgstr ""
+msgstr "速度： "
 
 msgid "Print numbers"
 msgstr "打印数字"
 
 msgid "Comma-separated list of printing accelerations"
-msgstr ""
+msgstr "逗号分隔的打印加速度列表"
 
 msgid "Comma-separated list of printing speeds"
-msgstr ""
+msgstr "逗号分隔的打印速度列表"
 
 msgid ""
 "Please input valid values:\n"
@@ -15909,7 +15926,7 @@ msgid ""
 msgstr "要使用自定义 CA 文件，请将您的 CA 文件导入到证书存储 / 密钥链中。"
 
 msgid "Login/Test"
-msgstr ""
+msgstr "登录/测试"
 
 msgid "Connection to printers connected via the print host failed."
 msgstr "连接到通过打印主机连接的打印机失败。"

@@ -8173,6 +8173,8 @@ msgid ""
 "If the preset corresponds to a filament currently in use on your printer, "
 "please reset the filament information for that slot."
 msgstr ""
+"確定要刪除這個預設設定嗎？ \n"
+"若該預設目前正用於列印機中的某個材料，請務必重新設定該位置的材料資訊。"
 
 #, fuzzy, boost-format
 msgid "Are you sure to %1% the selected preset?"

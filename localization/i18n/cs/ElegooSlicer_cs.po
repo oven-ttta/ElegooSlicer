@@ -386,7 +386,7 @@ msgid "Drag"
 msgstr "Táhnutí"
 
 msgid "Draw cut line"
-msgstr ""
+msgstr "Kreslit přímku řezu"
 
 msgid "Left click"
 msgstr "Levý klik"
@@ -533,7 +533,7 @@ msgid "Cut by Plane"
 msgstr "Řez Rovinou"
 
 msgid "non-manifold edges be caused by cut tool, do you want to fix it now?"
-msgstr ""
+msgstr "Řezací nástroj způsobil ne‑manifold hrany, chcete je nyní opravit?"
 
 msgid "Repairing model object"
 msgstr "Oprava objektu modelu"
@@ -1008,7 +1008,7 @@ msgstr "Orientovat text směrem ke kameře."
 
 #, boost-format
 msgid "Font \"%1%\" can't be used. Please select another."
-msgstr ""
+msgstr "Font \"%1%\" nelze použít. Prosím vyberte jiný."
 
 #, boost-format
 msgid ""
@@ -1267,7 +1267,7 @@ msgid "SVG file does NOT contain a single path to be embossed (%1%)."
 msgstr "SVG soubor neobsahuje jedinou cestu, kterou lze embosovat (%1%)."
 
 msgid "No feature"
-msgstr ""
+msgstr "Žádný prvek"
 
 msgid "Vertex"
 msgstr "Vertex"
@@ -1309,7 +1309,7 @@ msgid "Esc"
 msgstr "Esc"
 
 msgid "Cancel a feature until exit"
-msgstr ""
+msgstr "Zrušit zvolený prvek"
 
 msgid "Measure"
 msgstr "Měření"
@@ -1319,14 +1319,14 @@ msgid ""
 msgstr ""
 
 msgid "Please select at least one object."
-msgstr ""
+msgstr "Prosím, vyberte alespoň jeden objekt."
 
 msgid "Edit to scale"
 msgstr "Změna rozměru"
 
 msgctxt "Verb"
 msgid "Scale all"
-msgstr ""
+msgstr "Škálovat vše"
 
 msgid "None"
 msgstr "Žádné"
@@ -1341,31 +1341,37 @@ msgid "Selection"
 msgstr "Výběr"
 
 msgid " (Moving)"
-msgstr ""
+msgstr " (Pohyb)"
 
 msgid ""
 "Select 2 faces on objects and \n"
 " make objects assemble together."
 msgstr ""
+"Vyberte 2 plochy na objektech a\n"
+"sestavte objekty k sobě."
 
 msgid ""
 "Select 2 points or circles on objects and \n"
 " specify distance between them."
 msgstr ""
+"Vyberte 2 body nebo kružnice na objektech a\n"
+"zadejte vzdálenost mezi nimi."
 
 msgid "Face"
-msgstr ""
+msgstr "Plocha"
 
 msgid " (Fixed)"
-msgstr ""
+msgstr " (Opraveno)"
 
 msgid "Point"
-msgstr ""
+msgstr "Bod"
 
 msgid ""
 "Feature 1 has been reset, \n"
 "feature 2 has been feature 1"
 msgstr ""
+"Prvek 1 byl resetován,\n"
+"prvek 2 byl přeřazen na pozici prvku 1"
 
 msgid "Warning:please select Plane's feature."
 msgstr ""
@@ -1392,25 +1398,25 @@ msgid "Distance XYZ"
 msgstr "Vzdálenost XYZ"
 
 msgid "Parallel"
-msgstr ""
+msgstr "Rovnoběžné"
 
 msgid "Center coincidence"
-msgstr ""
+msgstr "Shoda středů"
 
 msgid "Featue 1"
 msgstr ""
 
 msgid "Reverse rotation"
-msgstr ""
+msgstr "Obrátit rotaci"
 
 msgid "Rotate around center:"
-msgstr ""
+msgstr "Otáčet kolem středu:"
 
 msgid "Parallel distance:"
-msgstr ""
+msgstr "Rovnoběžná vzdálenost:"
 
 msgid "Flip by Face 2"
-msgstr ""
+msgstr "Překlopit podle plochy 2"
 
 msgid "Ctrl+"
 msgstr "Ctrl+"
@@ -1604,9 +1610,11 @@ msgid ""
 "The number of user presets cached in the cloud has exceeded the upper limit, "
 "newly created user presets can only be used locally."
 msgstr ""
+"Počet uživatelských předvoleb uložených v cloudu překročil horní limit, nově "
+"vytvořené uživatelské předvolby lze použít pouze lokálně."
 
 msgid "Sync user presets"
-msgstr ""
+msgstr "Synchronizovat uživatelské předvolby"
 
 msgid "Loading user preset"
 msgstr "Načítání uživatelské předvolby"
@@ -1773,10 +1781,10 @@ msgid "Cone"
 msgstr "Kužel"
 
 msgid "Disc"
-msgstr ""
+msgstr "Disk"
 
 msgid "Torus"
-msgstr ""
+msgstr "Torus"
 
 msgid "Elegoo Cube"
 msgstr "Elegoo Kostka"
@@ -1791,7 +1799,7 @@ msgid "Voron Cube"
 msgstr "Voron Kostka"
 
 msgid "Stanford Bunny"
-msgstr ""
+msgstr "Stanfordský králík"
 
 msgid "Elegoo String Hell"
 msgstr ""
@@ -1838,10 +1846,10 @@ msgid "Fix model"
 msgstr "Opravit model"
 
 msgid "Export as one STL"
-msgstr ""
+msgstr "Exportovat jako jedno STL"
 
 msgid "Export as STLs"
-msgstr ""
+msgstr "Exportovat jako STL"
 
 msgid "Reload from disk"
 msgstr "Znovu načíst z disku"
@@ -2010,10 +2018,10 @@ msgid "arrange current plate"
 msgstr "uspořádat aktuální podložku"
 
 msgid "Reload All"
-msgstr ""
+msgstr "Přenačíst vše"
 
 msgid "reload all from disk"
-msgstr ""
+msgstr "Přenačíst vše z disku"
 
 msgid "Auto Rotate"
 msgstr "Automatické otáčení"
@@ -2620,10 +2628,10 @@ msgid "Orienting"
 msgstr "Orientování"
 
 msgid "Orienting canceled."
-msgstr ""
+msgstr "Orientování zrušeno"
 
 msgid "Filling"
-msgstr ""
+msgstr "Výplň"
 
 msgid "Bed filling canceled."
 msgstr "Vyplnění podložky zrušeno."
@@ -2999,7 +3007,7 @@ msgid "Print with the filament mounted on the back of chassis"
 msgstr "Tisk s filamentem namontovaným na zadní straně podvozku"
 
 msgid "Current AMS humidity"
-msgstr ""
+msgstr "Aktuální vlhkost AMS"
 
 msgid ""
 "Please change the desiccant when it is too wet. The indicator may not "
@@ -3354,22 +3362,22 @@ msgid "Printing"
 msgstr "Tisk"
 
 msgid "Upgrading"
-msgstr ""
+msgstr "Aktualizace"
 
 msgid "Incompatible"
 msgstr "Nekompatibilní"
 
 msgid "syncing"
-msgstr ""
+msgstr "synchronizace"
 
 msgid "Printing Finish"
-msgstr ""
+msgstr "Tisk dokončen"
 
 msgid "Printing Failed"
-msgstr ""
+msgstr "Tisk selhal"
 
 msgid "Printing Pause"
-msgstr ""
+msgstr "Tisk pozastaven"
 
 msgid "Prepare"
 msgstr "Připravit"
@@ -3378,28 +3386,28 @@ msgid "Slicing"
 msgstr "Slicování"
 
 msgid "Pending"
-msgstr ""
+msgstr "Čeká"
 
 msgid "Sending"
-msgstr ""
+msgstr "Odesílání"
 
 msgid "Sending Finish"
-msgstr ""
+msgstr "Odesílání dokončeno"
 
 msgid "Sending Cancel"
-msgstr ""
+msgstr "Odesílání zrušeno"
 
 msgid "Sending Failed"
-msgstr ""
+msgstr "Odeslání selhalo"
 
 msgid "Print Success"
-msgstr ""
+msgstr "Tisk úspěšný"
 
 msgid "Print Failed"
-msgstr ""
+msgstr "Tisk neúspěšný"
 
 msgid "Removed"
-msgstr ""
+msgstr "Odstraněno"
 
 msgid "Resume"
 msgstr "Pokračovat"
@@ -3408,25 +3416,25 @@ msgid "Stop"
 msgstr "Zastavit"
 
 msgid "Task Status"
-msgstr ""
+msgstr "Stav úlohy"
 
 msgid "Sent Time"
-msgstr ""
+msgstr "Čas odeslání"
 
 msgid "There are no tasks to be sent!"
-msgstr ""
+msgstr "Nejsou žádné úlohy k odeslání!"
 
 msgid "No historical tasks!"
-msgstr ""
+msgstr "Žádné historické úlohy!"
 
 msgid "Loading..."
 msgstr "Načítání..."
 
 msgid "No AMS"
-msgstr ""
+msgstr "Žádné AMS"
 
 msgid "Send to Multi-device"
-msgstr ""
+msgstr "Odeslat na více zařízení"
 
 msgid "Preparing print job"
 msgstr "Příprava tiskové úlohy"
@@ -4119,7 +4127,7 @@ msgid "Flushed"
 msgstr "Čištění"
 
 msgid "Tower"
-msgstr ""
+msgstr "Věž"
 
 msgid "Total"
 msgstr "Celkem"
@@ -16942,6 +16950,9 @@ msgid ""
 "Did you know that you can fix a corrupted 3D model to avoid a lot of slicing "
 "problems on the Windows system?"
 msgstr ""
+"Oprava modelu\n"
+"Věděli jste, že můžete opravit poškozený 3D model abyste se vyvarovali "
+"spoustě problémů se slicování na systému Windows?"
 
 #: resources/data/hints.ini: [hint:Timelapse]
 msgid ""
@@ -17005,6 +17016,10 @@ msgid ""
 "Did you know that you can reduce the number of triangles in a mesh using the "
 "Simplify mesh feature? Right-click the model and select Simplify model."
 msgstr ""
+"Zjednodušení modelu\n"
+"Věděli jste, že můžete zmenšit počet trojúhelníků mřížky použitím funkce "
+"zjednodušení mřížky? Kliknětě pravým tlačítkem na model a vyberte "
+"zjednodušit model."
 
 #: resources/data/hints.ini: [hint:Slicing Parameter Table]
 msgid ""
