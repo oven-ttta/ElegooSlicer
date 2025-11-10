@@ -55,7 +55,7 @@ get_property(_is_multi GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
 if (_is_multi)
     option(DEP_DEBUG "Build debug variants (only applicable on Windows)" OFF)
-    option(ELEGOO_INCLUDE_DEBUG_INFO "Includes debug information in a release build (like RelWithDebInfo) in a way that works with multi-configuration generators and incompatible dependencies. DEP_DEBUG option takes priority over this." OFF)
+    option(ORCA_INCLUDE_DEBUG_INFO "Includes debug information in a release build (like RelWithDebInfo) in a way that works with multi-configuration generators and incompatible dependencies. DEP_DEBUG option takes priority over this." OFF)
 endif ()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -102,11 +102,11 @@ if (NOT _is_multi AND NOT CMAKE_BUILD_TYPE)
 endif ()
 
 function(elegooslicer_add_cmake_project projectname)
-    cmake_parse_arguments(P_ARGS "" "INSTALL_DIR;BUILD_COMMAND;INSTALL_COMMAND" "CMAKE_ARGS" ${ARGN})
+    cmake_parse_arguments(P_ARGS "FORCE_RELEASE_CONFIG" "INSTALL_DIR;BUILD_COMMAND;INSTALL_COMMAND" "CMAKE_ARGS" ${ARGN})
 
     set(_configs_line -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE})
     if (_is_multi OR MSVC)
-        if (ELEGOO_INCLUDE_DEBUG_INFO AND NOT DEP_DEBUG)
+        if (ORCA_INCLUDE_DEBUG_INFO AND NOT DEP_DEBUG AND NOT P_ARGS_FORCE_RELEASE_CONFIG)
             set(_configs_line "-DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELWITHDEBINFO} -DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
         else ()
             set(_configs_line "")
@@ -119,6 +119,21 @@ function(elegooslicer_add_cmake_project projectname)
         set(_gen CMAKE_GENERATOR "${DEP_MSVC_GEN}" CMAKE_GENERATOR_PLATFORM "${DEP_PLATFORM}")
         set(_build_j "/m")
     endif ()
+
+    # Determine build config for dependencies
+    set(_dep_build_config "${CMAKE_BUILD_TYPE}")
+    if (_is_multi OR MSVC)
+        if (DEP_DEBUG)
+            set(_dep_build_config "Debug")
+        elseif (ORCA_INCLUDE_DEBUG_INFO AND NOT P_ARGS_FORCE_RELEASE_CONFIG)
+            set(_dep_build_config "RelWithDebInfo")
+        else ()
+            set(_dep_build_config "Release")
+        endif ()
+    endif ()
+
+    message(STATUS "[${projectname}] _configs_line: ${_configs_line}")
+    message(STATUS "[${projectname}] _dep_build_config: ${_dep_build_config}")
 
 if (NOT IS_CROSS_COMPILE OR NOT APPLE)
     ExternalProject_Add(
@@ -141,8 +156,8 @@ if (NOT IS_CROSS_COMPILE OR NOT APPLE)
             ${DEP_CMAKE_OPTS}
             ${P_ARGS_CMAKE_ARGS}
        ${P_ARGS_UNPARSED_ARGUMENTS}
-       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release -- ${_build_j}
-       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
+       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${_dep_build_config} -- ${_build_j}
+       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${_dep_build_config}
     )
 elseif(FLATPAK)
     # the only reason this is here is because of the HACK at the bottom for ci
@@ -170,8 +185,8 @@ elseif(FLATPAK)
             ${DEP_CMAKE_OPTS}
             ${P_ARGS_CMAKE_ARGS}
        ${P_ARGS_UNPARSED_ARGUMENTS}
-       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release -- ${_build_j}
-       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
+       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${_dep_build_config} -- ${_build_j}
+       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${_dep_build_config}
        # HACK: save space after each compile job, because CI
        # reasoning: cmake changes directory after this command, so just keep only the folders
        # so that it can navigate out
@@ -193,8 +208,8 @@ else()
             ${DEP_CMAKE_OPTS}
             ${P_ARGS_CMAKE_ARGS}
        ${P_ARGS_UNPARSED_ARGUMENTS}
-       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release -- ${_build_j}
-       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config Release 
+       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${_dep_build_config} -- ${_build_j}
+       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${_dep_build_config} 
     )
 
 endif()
