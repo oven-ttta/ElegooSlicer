@@ -38,7 +38,7 @@ wxBEGIN_EVENT_TABLE(RecentHomepageView, HomepageView) EVT_WEBVIEW_LOADED(wxID_AN
     initUI();
 }
 
-RecentHomepageView::~RecentHomepageView() { cleanupIPC(); }
+RecentHomepageView::~RecentHomepageView() { }
 
 void RecentHomepageView::initUI()
 {
@@ -105,7 +105,6 @@ void RecentHomepageView::setupIPCHandlers()
     mIpc->onRequest("removeFromRecent", [this](const webviewIpc::IPCRequest& request) { return handleRemoveFromRecent(request.params); });
 }
 
-void RecentHomepageView::cleanupIPC() {}
 void RecentHomepageView::showRecentFiles(int images){
     boost::property_tree::wptree data;
     wxGetApp().mainframe->get_recent_projects(data, images);
@@ -218,10 +217,14 @@ wxBEGIN_EVENT_TABLE(OnlineModelsHomepageView, HomepageView) EVT_WEBVIEW_LOADED(w
     initUI();
 }
 
-OnlineModelsHomepageView::~OnlineModelsHomepageView() { cleanupIPC(); }
+OnlineModelsHomepageView::~OnlineModelsHomepageView() {  }
 
 void OnlineModelsHomepageView::initUI()
 {
+    if (mBrowser != nullptr) {
+        mBrowser->Destroy();
+        mBrowser = nullptr;
+    }
     // Create webview
     mBrowser = WebView::CreateWebView(this, "");
 
@@ -249,16 +252,11 @@ void OnlineModelsHomepageView::initUI()
         wxLogError("Could not create network helper");
         return;
     }
-    std::string region = networkHelper->getRegion();
-    if (region == "CN") {
-        wxLogMessage("China region detected, online models page will not be loaded");
-        return;
-    }
-
     std::string url = networkHelper->getOnlineModelsUrl();
     mBrowser->SetUserAgent(networkHelper->getUserAgent());
     mBrowser->LoadURL(url);
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
+    Layout();
 }
 
 void OnlineModelsHomepageView::initialize()
@@ -388,18 +386,15 @@ void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetw
 
 void OnlineModelsHomepageView::onRegionChanged()
 {
+    lock_guard<mutex> lock(mUserInfoMutex);
     //reload online models page
+    mIsReady = false;
+    mRefreshUserInfo = UserNetworkInfo();
     initUI();
     if(mBrowser) {
         mBrowser->Reload();
     }
 }
-
-void OnlineModelsHomepageView::cleanupIPC()
-{
-
-}
-
 
 webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
 {

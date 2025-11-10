@@ -133,7 +133,7 @@
 					<div class="btn-icon"><img class="left-icon" src="img/recent-icon.svg" /></div>
 					<div>{{ $t("homepage.recent") }}</div>
 				</div>
-				<div v-if="region !== 'CN' && region !== ''" menu="online-models"
+				<div menu="online-models"
 					:class="['btn-item', { 'btn-item-selected': currentPage === 'online-models' }]"
 					@click="navigateToPage('online-models')">
 					<div class="btn-icon"><img class="left-icon" src="img/online-models-icon.png" /></div>

@@ -42,8 +42,7 @@ public:
 private:
     void initUI();
     void setupIPCHandlers();
-    void cleanupIPC();
-    
+ 
     // IPC handlers
     webviewIpc::IPCResult handleGetRecentFiles(const nlohmann::json& data);
     webviewIpc::IPCResult handleClearRecentFiles(const nlohmann::json& data);
@@ -80,8 +79,7 @@ public:
 private:
     void initUI();
     void setupIPCHandlers();
-    void cleanupIPC();
-    
+
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
     void onWebViewError(wxWebViewEvent& event);

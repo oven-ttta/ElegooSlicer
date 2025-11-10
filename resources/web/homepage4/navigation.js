@@ -11,7 +11,6 @@ const Navigation = {
                 loginStatus: 0
             },
             currentPage: 'recent',
-            region: '',
         }
     },
     methods: {
@@ -21,25 +20,18 @@ const Navigation = {
                 console.log('getUserInfo response:', response);
                 if (response) {
                     this.userInfo = response;
-                    this.region = response.region || '';
                 }
             } catch (error) {
                 console.error('Failed to get user info:', error);
             }
             
             try {
-                const regionResponse = await this.ipcRequest('getRegion', {});
-                this.region = regionResponse || '';
-                console.log('Region:', this.region);
+                this.currentPage = 'online-models';
+                await this.ipcRequest('navigateToPage', { page: 'online-models' });
+                console.log('Navigated to online-models');               
                 
-                if (this.region && this.region !== 'CN') {
-                    this.currentPage = 'online-models';
-                    await this.ipcRequest('navigateToPage', { page: 'online-models' });
-                    console.log('Navigated to online-models for region:', this.region);
-                }
             } catch (error) {
-                console.error('Failed to get region:', error);
-                this.region = '';
+                console.error('Failed to navigate to online-models:', error);
             }
         },
         async navigateToPage(pageName) {
@@ -143,25 +135,6 @@ const Navigation = {
         nativeIpc.on('onUserInfoUpdated', (data) => {
             console.log('Received user info update event from backend:', data);
             this.userInfo = data;
-            this.region = data.region || '';
-        });
-        
-        nativeIpc.on('onRegionChanged', async () => {
-            console.log('Region changed event received');
-            try {
-                const regionResponse = await this.ipcRequest('getRegion', {});
-                this.region = regionResponse || '';
-                console.log('Region changed to:', this.region);
-                
-                // If switched to CN and currently on online-models, navigate to recent
-                if (this.region === 'CN' && this.currentPage === 'online-models') {
-                    console.log('Switched to CN region, navigating from online-models to recent');
-                    await this.navigateToPage('recent');
-                }
-            } catch (error) {
-                console.error('Failed to get region:', error);
-                this.region = '';
-            }
         });
         
         window.addEventListener('blur', () => {
