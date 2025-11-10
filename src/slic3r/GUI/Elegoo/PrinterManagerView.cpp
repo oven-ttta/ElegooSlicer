@@ -930,8 +930,8 @@ webviewIpc::IPCResult PrinterManagerView::updatePhysicalPrinter(const std::strin
     webviewIpc::IPCResult result;
     PrinterNetworkInfo printerInfo = convertJsonToPrinterNetworkInfo(printer);
 
-    PrinterNetworkInfo oldPrinter = PrinterCache::getInstance()->getPrinter(printerId);
-    if (!oldPrinter.has_value()) {
+    PrinterNetworkInfo oldPrinter =  PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
+    if (!oldPrinter.printerId.empty()) {
         result.code = static_cast<int>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND);
         result.message = getErrorMessage(PrinterNetworkErrorCode::PRINTER_NOT_FOUND);
         return result;
@@ -941,7 +941,7 @@ webviewIpc::IPCResult PrinterManagerView::updatePhysicalPrinter(const std::strin
     result.message = networkResult.message;
     result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
     
-    if (result.code == 0 && (oldPrinter.value().host != printerInfo.host || oldPrinter.value().webUrl != printerInfo.webUrl)) {
+    if (result.code == 0 && (oldPrinter.host != printerInfo.host || oldPrinter.webUrl != printerInfo.webUrl)) {
         PrinterNetworkInfo updatedPrinter = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
         auto it = mPrinterViews.find(printerId);
         if (it != mPrinterViews.end()) {
@@ -950,7 +950,7 @@ webviewIpc::IPCResult PrinterManagerView::updatePhysicalPrinter(const std::strin
                 mTabBar->SetPageText(page, from_u8(updatedPrinter.printerName));
                 wxString url = updatedPrinter.webUrl;
                 it->second->load_url(url);
-                it->secode->reload();
+                it->second->reload();
             }
         }
     }
