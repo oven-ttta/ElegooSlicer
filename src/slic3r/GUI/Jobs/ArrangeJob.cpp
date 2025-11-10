@@ -18,6 +18,7 @@
 
 #define SAVE_ARRANGE_POLY 0
 
+#define ARRANGE_LOG(level) BOOST_LOG_TRIVIAL(level) << "arrange: "
 namespace Slic3r { namespace GUI {
     using ArrangePolygon = arrangement::ArrangePolygon;
 
@@ -423,6 +424,103 @@ void ArrangeJob::prepare_partplate() {
     plate_list.preprocess_exclude_areas(m_unselected, current_plate_index + 1);
 }
 
+
+void ArrangeJob::prepare_outside_plate() {
+    clear_input();
+    typedef std::tuple<int, int, int>         obj_inst_plate_t;
+    std::map<std::pair<int,int>,int>        all_inside_objects;
+    std::map<std::pair<int, int>, int>      all_outside_objects;
+
+    Model         &model      = m_plater->model();
+    PartPlateList &plate_list = m_plater->get_partplate_list();
+    //collect all the objects outside
+    for (int plate_idx = 0; plate_idx < plate_list.get_plate_count(); plate_idx++) {
+        PartPlate *plate = plate_list.get_plate(plate_idx);
+        assert(plate != nullptr);
+        std::set<std::pair<int, int>>& plate_objects = plate->get_obj_and_inst_set();
+        std::set<std::pair<int, int>>& plate_outside_objects = plate->get_obj_and_inst_outside_set();
+        if (plate_objects.empty()) {
+            // no instances on this plate
+            ARRANGE_LOG(info) << __FUNCTION__ << format(": no instances in plate %d!", plate_idx);
+            continue;
+        }
+
+        for (auto &obj_inst : plate_objects) { all_inside_objects[obj_inst] = plate_idx; }
+        for (auto &obj_inst : plate_outside_objects) { all_outside_objects[obj_inst] = plate_idx; }
+
+        if (plate->is_locked()) {
+            ARRANGE_LOG(info) << __FUNCTION__ << format(": skip locked plate %d!", plate_idx);
+            continue;
+        }
+
+        // if there are objects inside the plate, lock the plate and don't put new objects in it
+        //if (plate_objects.size() > plate_outside_objects.size()) {
+        //    plate->lock(true);
+        //    m_uncompatible_plates.push_back(plate_idx);
+        //    ARRANGE_LOG(info) << __FUNCTION__ << format(": lock plate %d because there are objects inside!", plate_idx);
+        //}
+    }
+
+    std::set<int> locked_plates;
+    for (int obj_idx = 0; obj_idx < model.objects.size(); obj_idx++) {
+        ModelObject *object = model.objects[obj_idx];
+        for (size_t inst_idx = 0; inst_idx < object->instances.size(); ++inst_idx) {
+            ModelInstance * instance = object->instances[inst_idx];
+
+            auto iter1 = all_inside_objects.find(std::pair(obj_idx, inst_idx));
+            auto iter2 = all_outside_objects.find(std::pair(obj_idx, inst_idx));
+            bool outside_plate = false;
+            PartPlate *plate_locked         = nullptr;
+            if (iter1 == all_inside_objects.end()) {
+                continue;
+            } else {
+                int plate_idx = iter1->second;
+                if (plate_list.get_plate(plate_idx)->is_locked()) {
+                    plate_locked = plate_list.get_plate(plate_idx);
+                    locked_plates.insert(plate_idx);
+                }
+            }
+            if (iter2 != all_outside_objects.end()) {
+                outside_plate = true;
+                ARRANGE_LOG(debug) << object->name << " is outside!";
+            }
+            ArrangePolygon&& ap = prepare_arrange_polygon(instance);
+            ArrangePolygons &cont = !instance->printable ? m_unprintable : plate_locked ? m_locked : outside_plate ? m_selected : m_unselected;
+            ap.itemid                      = cont.size();
+            if (!outside_plate) {
+                plate_list.preprocess_arrange_polygon(obj_idx, inst_idx, ap, false);
+                ap.bed_idx      = iter1->second;
+                ap.locked_plate = iter1->second;
+            }
+            cont.emplace_back(std::move(ap));
+        }
+    }
+
+    if (!locked_plates.empty()) {
+        std::sort(m_unselected.begin(), m_unselected.end(), [](auto &ap1, auto &ap2) { return ap1.bed_idx < ap2.bed_idx; });
+        for (auto &ap : m_unselected) {
+            int locked_plate_count = 0;
+            for (auto &plate_idx : locked_plates) {
+                if (plate_idx < ap.bed_idx)
+                    locked_plate_count++;
+                else
+                    break;
+            }
+            ap.bed_idx -= locked_plate_count;
+        }
+    }
+
+    prepare_wipe_tower();
+
+    const DynamicPrintConfig &current_config  = wxGetApp().preset_bundle->prints.get_edited_preset().config;
+    //bool enable_wrapping = current_config.option<ConfigOptionBool>("enable_wrapping_detection")->value;
+    bool enable_wrapping = false;
+    // add the virtual object into unselect list if has
+    plate_list.preprocess_exclude_areas(m_unselected, enable_wrapping, current_plate_index + 1);
+}
+
+
+
 //BBS: add partplate logic
 void ArrangeJob::prepare()
 {
@@ -449,6 +547,9 @@ void ArrangeJob::prepare()
     else if (state == Job::JobPrepareState::PREPARE_STATE_MENU) {
         only_on_partplate = true;   // only arrange items on current plate
         prepare_partplate();
+    } else if (state == Job::JobPrepareState::PREPARE_STATE_OUTSIDE_BED) {
+        only_on_partplate = false;
+        prepare_outside_plate();
     }
 
 

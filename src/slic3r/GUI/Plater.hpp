@@ -631,6 +631,7 @@ public:
     bool show_publish_dialog(bool show = true);
     //BBS: post process string object exception strings by warning types
     void post_process_string_object_exception(StringObjectException &err);
+    void update_objects_position_when_select_preset(const std::function<void()> &select_prest);
 
 #if ENABLE_ENVIRONMENT_MAP
     void init_environment_texture();

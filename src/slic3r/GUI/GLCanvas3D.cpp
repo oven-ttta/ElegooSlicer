@@ -992,6 +992,7 @@ wxDEFINE_EVENT(EVT_GLCANVAS_REMOVE_OBJECT, SimpleEvent);
 wxDEFINE_EVENT(EVT_GLCANVAS_ARRANGE, SimpleEvent);
 //BBS: add arrange and orient event
 wxDEFINE_EVENT(EVT_GLCANVAS_ARRANGE_PARTPLATE, SimpleEvent);
+wxDEFINE_EVENT(EVT_GLCANVAS_ARRANGE_OUTPLATE, SimpleEvent);
 wxDEFINE_EVENT(EVT_GLCANVAS_ORIENT, SimpleEvent);
 wxDEFINE_EVENT(EVT_GLCANVAS_ORIENT_PARTPLATE, SimpleEvent);
 wxDEFINE_EVENT(EVT_GLCANVAS_SELECT_CURR_PLATE_ALL, SimpleEvent);
@@ -3101,7 +3102,8 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
     int keyCode = evt.GetKeyCode();
     int ctrlMask = wxMOD_CONTROL;
     int shiftMask = wxMOD_SHIFT;
-
+    int altMask   = wxMOD_ALT;
+    
     auto imgui = wxGetApp().imgui();
     if (imgui->update_key_data(evt)) {
         render();
@@ -3316,7 +3318,7 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
         //    break;
         //}
         //case '-': {
-        //    if (dynamic_cast<Preview*>(m_canvas->GetParent()) != nullptr)
+    //    if (dynamic_cast<Preview*>(m_canvas->GetParent()) != nullptr)
         //        post_event(wxKeyEvent(EVT_GLCANVAS_EDIT_COLOR_CHANGE, evt));
         //    else
         //        post_event(Event<int>(EVT_GLCANVAS_INCREASE_INSTANCES, -1));
@@ -3328,6 +3330,8 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
             {
                 if ((evt.GetModifiers() & shiftMask) != 0)
                     post_event(SimpleEvent(EVT_GLCANVAS_ARRANGE_PARTPLATE));
+                else if ((evt.GetModifiers() & altMask) != 0)
+                    post_event(SimpleEvent(EVT_GLCANVAS_ARRANGE_OUTPLATE));
                 else
                     post_event(SimpleEvent(EVT_GLCANVAS_ARRANGE));
                 break;

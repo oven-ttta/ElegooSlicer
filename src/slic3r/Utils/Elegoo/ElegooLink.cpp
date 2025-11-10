@@ -971,6 +971,9 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::getUserBoundPr
     if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
         if (elinkResult.hasData()) {
             for (const auto& printer : elinkResult.value().printers) {
+                if(printer.networkMode == elink::NetworkMode::LAN) {
+                    continue;
+                }
                 printers.push_back(convertFromElegooPrinterInfo(printer));
             }
         }
