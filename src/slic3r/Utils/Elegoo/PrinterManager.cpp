@@ -253,13 +253,10 @@ void PrinterManager::init()
         PrinterCache::getInstance()->updatePrinterAttributesByNotify(event.printerId, event.printerInfo);
     });
 
-    // wan network depends on plugin, wan printer depends on user information
-    // firstinit plugin manager
+
     PrinterPluginManager::getInstance()->init();
-    // then init user network
-    UserNetworkManager::getInstance()->init();
-    // finally initialize printer network
     IPrinterNetwork::init();
+    UserNetworkManager::getInstance()->init();  
 
     PrinterCache::getInstance()->loadPrinterList();
     syncOldPresetPrinters();
@@ -298,9 +295,8 @@ void PrinterManager::close()
 
     PrinterCache::getInstance()->savePrinterList();
 
-    // Uninitialize network
-    IPrinterNetwork::uninit();
     UserNetworkManager::getInstance()->uninit();
+    IPrinterNetwork::uninit();
     PrinterPluginManager::getInstance()->uninit();
 }
 PrinterNetworkResult<bool> PrinterManager::deletePrinter(const std::string& printerId)

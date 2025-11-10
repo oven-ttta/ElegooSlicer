@@ -13,12 +13,12 @@ ElegooUserNetwork::~ElegooUserNetwork(){
 
 void ElegooUserNetwork::uninit()
 {
-    ElegooLink::getInstance()->uninit();
+   
 }
 
 void ElegooUserNetwork::init()
 {
-    ElegooLink::getInstance()->init();
+    
 }
 
 
