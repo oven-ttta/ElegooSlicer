@@ -39,6 +39,7 @@ elegooslicer_add_cmake_project(elegoolink
     DEPENDS 
         dep_ixwebsocket 
         dep_PahoMqttCpp
+        ${OPENSSL_PKG}
 
     CMAKE_ARGS 
         -DBUILD_EXAMPLES=OFF
