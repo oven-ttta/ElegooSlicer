@@ -497,8 +497,25 @@ bool PrinterMmsManager::tryMatchFilamentByFilamentType(
     bool isGeneric)
 {
     std::string filamentType = boost::to_upper_copy(tray.filamentType);
-    auto it = presetMap.find(filamentType);
-    if(it == presetMap.end()) return false;
+    if(presetMap.find(filamentType) == presetMap.end()) {    
+        // Orca's filament types are not standardized (e.g., PPA type may be configured as PPA-CF). Try using filament name as type for lookup as a fallback.
+        filamentType = boost::to_upper_copy(tray.filamentName);
+        if(presetMap.find(filamentType) == presetMap.end()) {
+            return false;
+        }
+        
+    }
+
+    for(const auto& filamentInfo : presetMap.at(filamentType)) {
+        if(isNamesMatch(tray, filamentInfo, printerNetworkInfo, isGeneric)) {
+            // match success, update tray info
+            tray.filamentId = filamentInfo.filamentId;
+            tray.settingId = filamentInfo.settingId;
+            tray.filamentPresetName = filamentInfo.filamentName;
+            return true;
+        }
+    }  
+
 
     // try match filament by mms filament type and preset filament name
     for(const auto& filamentInfo : presetMap.at(filamentType)) {
