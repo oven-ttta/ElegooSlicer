@@ -5,64 +5,98 @@
 
 namespace Slic3r {
 
-std::string ElegooNetworkHelper::getOnlineModelsUrl() {
-    std::string region = getRegion();
-    std::string language = getLanguage();
-    std::string onlineModelsUrl = ELEGOO_CHINA_ONLINE_MODEL_URL;
-    if (region == "CN") {
-        onlineModelsUrl = ELEGOO_CHINA_ONLINE_MODEL_URL;
-    } else {
-        onlineModelsUrl = ELEGOO_GLOBAL_ONLINE_MODEL_URL;
+namespace {
+
+std::string getTestEnvUrl(const nlohmann::json& testEnvJson, const char* key, const std::string& fallback)
+{
+    if (!testEnvJson.is_object()) {
+        return fallback;
     }
-    return onlineModelsUrl + "?language=" + language + "&region=" + region;
+    auto it = testEnvJson.find(key);
+    if (it == testEnvJson.end() || !it->is_string()) {
+        return fallback;
+    }
+    const std::string value = it->get<std::string>();
+    return value.empty() ? fallback : value;
+}
+
+std::string buildUrl(const std::string& base, const std::string& language, const std::string& region)
+{
+    return base + "?language=" + language + "&region=" + region;
+}
+
+} // namespace
+
+std::string ElegooNetworkHelper::getOnlineModelsUrl()
+{
+    std::string    region          = getRegion();
+    std::string    language        = getLanguage();
+    nlohmann::json testEnvJson     = INetworkHelper::testEnvJson;
+    const bool      isChina        = region == "CN";
+    std::string     onlineModelsUrl =
+        getTestEnvUrl(testEnvJson,
+                      isChina ? "elegoo_china_online_model_url" : "elegoo_global_online_model_url",
+                      isChina ? ELEGOO_CHINA_ONLINE_MODEL_URL : ELEGOO_GLOBAL_ONLINE_MODEL_URL);
+    return buildUrl(onlineModelsUrl, language, region);
 }
 
 std::string ElegooNetworkHelper::getLoginUrl() {
     std::string region = getRegion();
     std::string language = getLanguage();
-    std::string loginUrl = ELEGOO_CHINA_LOGIN_URL;
-    if (region == "CN") {
-        loginUrl = ELEGOO_CHINA_LOGIN_URL;
-    } else {
-        loginUrl = ELEGOO_GLOBAL_LOGIN_URL;
-    }
-    return loginUrl + "?language=" + language + "&region=" + region;
+    nlohmann::json testEnvJson = INetworkHelper::testEnvJson;
+    const bool     isChina     = region == "CN";
+    std::string    loginUrl =
+        getTestEnvUrl(testEnvJson,
+                      isChina ? "elegoo_china_login_url" : "elegoo_global_login_url",
+                      isChina ? ELEGOO_CHINA_LOGIN_URL : ELEGOO_GLOBAL_LOGIN_URL);
+    return buildUrl(loginUrl, language, region);
 }
 
 std::string ElegooNetworkHelper::getProfileUpdateUrl() {
     std::string region = getRegion();
     std::string language = getLanguage();
-    std::string profileUpdateUrl = ELEGOO_CHINA_PROFILE_UPDATE_URL;
-    if (region == "CN") {
-        profileUpdateUrl = ELEGOO_CHINA_PROFILE_UPDATE_URL;
-    } else {
-        profileUpdateUrl = ELEGOO_GLOBAL_PROFILE_UPDATE_URL;
-    }
-    return profileUpdateUrl + "?language=" + language + "&region=" + region;
+    nlohmann::json testEnvJson = INetworkHelper::testEnvJson;
+    const bool     isChina     = region == "CN";
+    std::string    profileUpdateUrl =
+        getTestEnvUrl(testEnvJson,
+                      isChina ? "elegoo_china_profile_update_url" : "elegoo_global_profile_update_url",
+                      isChina ? ELEGOO_CHINA_PROFILE_UPDATE_URL : ELEGOO_GLOBAL_PROFILE_UPDATE_URL);
+    return buildUrl(profileUpdateUrl, language, region);
 }
 
 std::string ElegooNetworkHelper::getAppUpdateUrl() {
     std::string region = getRegion();
     std::string language = getLanguage();
-    std::string appUpdateUrl = ELEGOO_CHINA_UPDATE_URL;
-    if (region == "CN") {
-        appUpdateUrl = ELEGOO_CHINA_UPDATE_URL;
-    } else {
-        appUpdateUrl = ELEGOO_GLOBAL_UPDATE_URL;
-    }
-    return appUpdateUrl + "?language=" + language + "&region=" + region;
+    nlohmann::json testEnvJson = INetworkHelper::testEnvJson;
+    const bool     isChina     = region == "CN";
+    std::string    appUpdateUrl =
+        getTestEnvUrl(testEnvJson,
+                      isChina ? "elegoo_china_app_update_url" : "elegoo_global_app_update_url",
+                      isChina ? ELEGOO_CHINA_UPDATE_URL : ELEGOO_GLOBAL_UPDATE_URL);
+    return buildUrl(appUpdateUrl, language, region);
 }
 
 std::string ElegooNetworkHelper::getPluginUpdateUrl() { 
     std::string region = getRegion();
     std::string language = getLanguage();
-    std::string pluginUpdateUrl = ELEGOO_CHINA_PLUGIN_UPDATE_URL;
-    if (region == "CN") {
-        pluginUpdateUrl = ELEGOO_CHINA_PLUGIN_UPDATE_URL;
-    } else {
-        pluginUpdateUrl = ELEGOO_GLOBAL_PLUGIN_UPDATE_URL;
-    }
-    return pluginUpdateUrl + "?language=" + language + "&region=" + region;
+    nlohmann::json testEnvJson = INetworkHelper::testEnvJson;
+    const bool     isChina     = region == "CN";
+    std::string    pluginUpdateUrl =
+        getTestEnvUrl(testEnvJson,
+                      isChina ? "elegoo_china_plugin_update_url" : "elegoo_global_plugin_update_url",
+                      isChina ? ELEGOO_CHINA_PLUGIN_UPDATE_URL : ELEGOO_GLOBAL_PLUGIN_UPDATE_URL);
+    return buildUrl(pluginUpdateUrl, language, region);
+}
+
+std::string ElegooNetworkHelper::getIotUrl() {
+    std::string region = getRegion();
+    nlohmann::json testEnvJson = INetworkHelper::testEnvJson;
+    const bool     isChina     = region == "CN";
+    std::string    iotUrl =
+        getTestEnvUrl(testEnvJson,
+                      isChina ? "elegoo_china_iot_url" : "elegoo_global_iot_url",
+                      isChina ? ELEGOO_CHINA_IOT_URL : ELEGOO_GLOBAL_IOT_URL);
+    return iotUrl;
 }
 
 std::string ElegooNetworkHelper::getUserAgent() {

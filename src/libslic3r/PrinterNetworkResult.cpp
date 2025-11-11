@@ -102,6 +102,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Insufficient memory. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_SERIAL_NUMBER_EMPTY:
             return _u8L("Printer serial number is empty. Please enter the serial number.");
+        case PrinterNetworkErrorCode::PRINTER_NOT_CONNECTED_TO_UNBIND:
+            return _u8L("Printer not connected to unbind.");
         case PrinterNetworkErrorCode::OPERATION_NOT_IMPLEMENTED:
             return _u8L("Operation not implemented. Please try again later.");
         default:

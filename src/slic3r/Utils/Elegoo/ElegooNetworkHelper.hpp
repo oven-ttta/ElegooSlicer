@@ -19,6 +19,7 @@ public:
     std::string getAppUpdateUrl() override;
     std::string getPluginUpdateUrl() override;
     std::string getUserAgent() override;
+    std::string getIotUrl() override;
 
 
 };

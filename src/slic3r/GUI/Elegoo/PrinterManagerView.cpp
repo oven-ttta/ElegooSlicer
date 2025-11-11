@@ -21,9 +21,11 @@
 #include "libslic3r/Utils.hpp"
 #include <map>
 #include <algorithm>
+#include <cctype>
 #include <thread>
 #include <chrono>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include "slic3r/Utils/WebviewIPCManager.h"
 #include <boost/nowide/fstream.hpp>
 #include <mutex>
@@ -1125,6 +1127,12 @@ webviewIpc::IPCResult PrinterManagerView::getPrinterModelList()
             if (!hostTypeStr.empty()) {
                 modelObj["hostType"]   = hostTypeStr;
             }
+            bool supportWanNetwork = false;
+            
+            if (config.has("support_wan_network")) {
+                supportWanNetwork = config.opt_bool("support_wan_network");
+            }
+            modelObj["supportWanNetwork"] = supportWanNetwork;
             vendorObj["models"].push_back(modelObj);
         }
         response.push_back(vendorObj);

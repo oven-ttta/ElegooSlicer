@@ -12,16 +12,6 @@ ElegooPluginNetwork::~ElegooPluginNetwork(){
 
 }
 
-void ElegooPluginNetwork::uninit()
-{
-  
-}
-
-void ElegooPluginNetwork::init()
-{
-    
-}
-
 PrinterNetworkResult<PluginNetworkInfo> ElegooPluginNetwork::hasInstalledPlugin()
 {
     return PrinterNetworkResult<PluginNetworkInfo>(PrinterNetworkErrorCode::SUCCESS, PluginNetworkInfo());

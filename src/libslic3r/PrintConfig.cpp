@@ -3944,9 +3944,7 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     // def->readonly = true;
     def->cli = ConfigOptionDef::nocli;
-    def->set_default_value(new ConfigOptionEnum<PrintHostType>(htOctoPrint));
-
-    
+    def->set_default_value(new ConfigOptionEnum<PrintHostType>(htOctoPrint));  
 
     def = this->add("nozzle_volume", coFloat);
     def->label = L("Nozzle volume");
@@ -6101,6 +6099,12 @@ void PrintConfigDef::init_fff_params()
     def = this->add("support_multi_filament", coBool);
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBool(false));
+
+
+    def = this->add("support_wan_network", coBool);
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(false));
+
 }
 
 void PrintConfigDef::init_extruder_option_keys()

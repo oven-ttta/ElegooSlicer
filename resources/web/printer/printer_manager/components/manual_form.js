@@ -75,10 +75,15 @@ const ManualFormTemplate = /*html*/
                     </el-form-item>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" v-if="showHostType">
                     <label class="required">{{ $t('manualForm.hostType') }}</label>
                     <el-form-item prop="hostType">
-                        <el-select v-model="formData.hostType" :placeholder="$t('manualForm.selectHostType')" :show-arrow="false">
+                        <el-select
+                            v-model="formData.hostType"
+                            :placeholder="$t('manualForm.selectHostType')"
+                            :show-arrow="false"
+                            :disabled="isHostTypeDisabled"
+                        >
                             <el-option
                                 v-for="hostType in hostTypes"
                                 :key="hostType"
@@ -89,7 +94,27 @@ const ManualFormTemplate = /*html*/
                     </el-form-item>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" v-if="showNetworkType">
+                    <label class="required">{{ $t('manualForm.connectionMethod') }}</label>
+                    <el-form-item prop="networkType">
+                        <el-select
+                            :show-arrow="false"
+                            v-model="formData.networkType"
+                            @change="onNetworkTypeChange"
+                            :disabled="isNetworkTypeDisabled"
+                            :placeholder="$t('manualForm.selectConnectionMethod')"
+                        >
+                            <el-option
+                                v-for="option in networkTypeOptions"
+                                :key="option.value"
+                                :value="option.value"
+                                :label="$t(option.label)"
+                            />
+                        </el-select>
+                    </el-form-item>
+                </div>
+
+                <div class="form-group" v-if="formData.networkType === 0">
                     <label class="required">{{ $t('manualForm.hostNameIpUrl') }}</label>
                     <el-form-item prop="host">
                         <el-input
@@ -97,32 +122,35 @@ const ManualFormTemplate = /*html*/
                             v-model="formData.host"
                             required
                             @keydown="onHostKeydown"
-                        />
-                    </el-form-item>
-                </div>
-                <div class="form-group">
-                    <label>{{ $t('manualForm.serialNumber') }}</label>
-                    <el-form-item prop="serialNumber">
-                        <el-input
-                            type="text"
-                            v-model="formData.serialNumber"
-                            :placeholder="$t('manualForm.serialNumberPlaceholder')"
-                            maxlength="50"
+                            :title="$t('manualForm.hostSamples')"
                         />
                     </el-form-item>
                 </div>
 
                 <div class="form-group">
-                    <label>{{ $t('manualForm.accessCode') }}</label>
-                    <el-form-item prop="accessCode">
-                        <el-input
-                            type="password"
-                            v-model="formData.accessCode"
-                            :placeholder="$t('manualForm.accessCodePlaceholder')"
-                            maxlength="20"
-                            show-password
-                        />
-                    </el-form-item>
+                    <label :class="{ required: formData.networkType === 1 }">{{ formData.networkType === 0 ? $t('manualForm.accessCode') : $t('manualForm.pinCode') }}</label>
+                    <template v-if="formData.networkType === 0">
+                        <el-form-item prop="accessCode">
+                            <el-input
+                                type="password"
+                                v-model="formData.accessCode"
+                                :placeholder="$t('manualForm.accessCodePlaceholder')"
+                                maxlength="20"
+                                show-password
+                            />
+                        </el-form-item>
+                    </template>
+                    <template v-else>
+                        <el-form-item prop="pinCode">
+                            <el-input
+                                type="password"
+                                v-model="formData.pinCode"
+                                :placeholder="$t('manualForm.pinCodePlaceholderRequired')"
+                                maxlength="20"
+                                show-password
+                            />
+                        </el-form-item>
+                    </template>
                 </div>
 
                 
@@ -194,9 +222,11 @@ const ManualFormComponent = {
                 printerModel: '',
                 printerName: '',
                 hostType: '',
+                networkType: 0,
                 host: '',
                 serialNumber: '',
                 accessCode: '',
+                pinCode: '',
                 webUrl: '',
                 password: '',
                 caFile: '',
@@ -209,18 +239,62 @@ const ManualFormComponent = {
                 printerModel: [
                     { required: true, message: this.$t('manualForm.pleaseSelectPrinterModel'), trigger: 'change' }
                 ],
-                // printerName: [
-                //     { required: true, message: this.$t('manualForm.pleaseEnterPrinterName'), trigger: 'change' },
-                //     // { min: 1, max: 50, message: this.$t('manualForm.lengthShouldBe1To50'), trigger: 'change' }
-                // ],
                 hostType: [
-                    { required: true, message: this.$t('manualForm.pleaseSelectHostType'), trigger: 'change' }
-                ],
-                host: [
-                    { required: true, message: this.$t('manualForm.pleaseEnterHostNameIpUrl'), trigger: 'blur' },
                     {
                         validator: (rule, value, callback) => {
+                            if (this.showHostType && !value) {
+                                callback(new Error(this.$t('manualForm.pleaseSelectHostType')));
+                                return;
+                            }
+                            callback();
+                        },
+                        trigger: 'change'
+                    }
+                ],
+                networkType: [
+                    {
+                        validator: (rule, value, callback) => {
+                            if (!this.showNetworkType) {
+                                callback();
+                                return;
+                            }
+                            if (value === null || value === undefined) {
+                                callback(new Error(this.$t('manualForm.pleaseSelectConnectionMethod')));
+                                return;
+                            }
+                            callback();
+                        },
+                        trigger: 'change'
+                    }
+                ],
+                host: [
+                    {
+                        validator: (rule, value, callback) => {
+                            if (this.formData.networkType !== 0) {
+                                callback();
+                                return;
+                            }
+                            if (!value || !value.trim()) {
+                                callback(new Error(this.$t('manualForm.pleaseEnterHostNameIpUrl')));
+                                return;
+                            }
                             this.printerStore.validateHost(rule, value, callback);
+                        },
+                        trigger: 'blur'
+                    }
+                ],
+                pinCode: [
+                    {
+                        validator: (rule, value, callback) => {
+                            if (this.formData.networkType !== 1) {
+                                callback();
+                                return;
+                            }
+                            if (!value || !value.trim()) {
+                                callback(new Error(this.$t('manualForm.pleaseEnterPinCode')));
+                                return;
+                            }
+                            callback();
                         },
                         trigger: 'blur'
                     }
@@ -232,7 +306,15 @@ const ManualFormComponent = {
             hostTypes: [],
             allModels: [],
             isVendorDisabled: false,
-            isModelDisabled: false
+            isModelDisabled: false,
+            isHostTypeDisabled: false,
+            isNetworkTypeDisabled: false,
+            showHostType: true,
+            networkTypeOptions: [
+                { value: 0, label: 'manualForm.networkTypeLan' },
+                { value: 1, label: 'manualForm.networkTypeWan' }
+            ],
+            wanCapabilityMap: {}
         };
     },
 
@@ -245,6 +327,15 @@ const ManualFormComponent = {
     computed: {
         printerModelList() {
             return this.printerStore.printerModelList;
+        },
+        isEditing() {
+            return !!this.printer;
+        },
+        showNetworkType() {
+            if (this.isEditing && this.formData.networkType === 1) {
+                return true;
+            }
+            return this.isWanCapableModel(this.formData.vendor, this.formData.printerModel);
         }
     },
 
@@ -278,14 +369,32 @@ const ManualFormComponent = {
 
             // extract all models
             this.allModels = [];
+            this.wanCapabilityMap = {};
             printerModelList.forEach(vendorModels => {
-                this.allModels.push(...vendorModels.models);
+                const vendorName = vendorModels.vendor || '';
+                const vendorLower = vendorName.toString().trim().toLowerCase();
+                (vendorModels.models || []).forEach(model => {
+                    const modelName = model.modelName || '';
+                    const modelLower = modelName.toString().trim().toLowerCase();
+                    this.allModels.push({
+                        vendor: vendorName,
+                        vendorLower,
+                        modelName,
+                        modelNameLower: modelLower,
+                        hostType: model.hostType,
+                        supportWanNetwork: !!model.supportWanNetwork
+                    });
+                    const key = `${vendorLower}|||${modelLower}`;
+                    this.wanCapabilityMap[key] = !!model.supportWanNetwork;
+                });
             });
 
             // extract unique host types
             const uniqueHostTypes = new Set();
             this.allModels.forEach(model => {
-                uniqueHostTypes.add(model.hostType);
+                if (model.hostType) {
+                    uniqueHostTypes.add(model.hostType);
+                }
             });
             this.hostTypes = Array.from(uniqueHostTypes);
 
@@ -299,16 +408,21 @@ const ManualFormComponent = {
             if (printer) {
                 this.renderPrinter(printer);
             }
+            this.ensureNetworkTypeState();
         },
 
         onVendorChange() {
             const selectedVendor = this.formData.vendor;
             this.availableModels = [];
+            this.showHostType = this.shouldShowHostType(selectedVendor);
 
             if (selectedVendor && this.printerModelList) {
                 const vendorData = this.printerModelList.find(vendor => vendor.vendor === selectedVendor);
                 if (vendorData) {
-                    this.availableModels = vendorData.models;
+                    this.availableModels = (vendorData.models || []).map(model => ({
+                        ...model,
+                        supportWanNetwork: !!model.supportWanNetwork
+                    }));
 
                     if (this.availableModels.length > 0 && !this.formData.printerModel) {
                         this.formData.printerModel = this.availableModels[0].modelName;
@@ -316,6 +430,7 @@ const ManualFormComponent = {
                     }
                 }
             }
+            this.ensureNetworkTypeState();
         },
 
         onModelChange() {
@@ -324,12 +439,71 @@ const ManualFormComponent = {
                 const model = this.availableModels.find(m => m.modelName === selectedModel);
                 if (model) {
                     this.formData.hostType = model.hostType;
+                    this.formData.supportWanNetwork = model.supportWanNetwork;
                 }
             }
+            this.ensureNetworkTypeState();
         },
 
         toggleAdvanced() {
             // showAdvanced is automatically updated through v-model
+        },
+
+        shouldShowHostType(vendor) {
+            if (!vendor) {
+                return true;
+            }
+            return vendor.toString().toLowerCase() !== 'elegoo';
+        },
+
+        isWanCapableModel(vendor, model) {
+            if (!vendor || !model) {
+                return false;
+            }
+            const normalizedVendor = vendor.toString().trim().toLowerCase();
+            const normalizedModel = model.toString().trim().toLowerCase();
+            const key = `${normalizedVendor}|||${normalizedModel}`;
+            if (Object.prototype.hasOwnProperty.call(this.wanCapabilityMap, key)) {
+                return !!this.wanCapabilityMap[key];
+            }
+            return false;
+        },
+
+        ensureNetworkTypeState() {
+            const wanSupported = this.isWanCapableModel(this.formData.vendor, this.formData.printerModel);
+            if (!wanSupported) {
+                if (this.isEditing && this.formData.networkType === 1) {
+                    return;
+                }
+                if (this.formData.networkType !== 0) {
+                    this.formData.networkType = 0;
+                }
+                if (this.formData.pinCode) {
+                    this.formData.pinCode = '';
+                }
+                this.$nextTick(() => {
+                    if (this.$refs.manualForm) {
+                        this.$refs.manualForm.clearValidate(['networkType', 'pinCode']);
+                    }
+                });
+            } else if (this.formData.networkType !== 0 && this.formData.networkType !== 1) {
+                this.formData.networkType = 0;
+            }
+        },
+
+        onNetworkTypeChange() {
+            if (this.formData.networkType === 0) {
+                this.formData.pinCode = '';
+            } else {
+                this.formData.accessCode = '';
+                this.formData.host = '';
+            }
+            this.$nextTick(() => {
+                if (this.$refs.manualForm) {
+                    this.$refs.manualForm.clearValidate(['host', 'pinCode']);
+                }
+            });
+            this.ensureNetworkTypeState();
         },
 
         onPrinterNameKeydown(e) {
@@ -382,13 +556,23 @@ const ManualFormComponent = {
             if (printer.vendor || printer.printerModel) {
                 this.isVendorDisabled = true;
                 this.isModelDisabled = true;
+                this.isHostTypeDisabled = true;
+                this.isNetworkTypeDisabled = true;
             }
 
             // fill other fields
             this.formData.printerName = printer.printerName ? printer.printerName : '';
             this.formData.host = printer.host ? printer.host : '';
+            this.showHostType = this.shouldShowHostType(printer.vendor);
             this.formData.serialNumber = printer.serialNumber ? printer.serialNumber : '';
-            this.formData.accessCode = printer.accessCode ? printer.accessCode : '';
+            this.formData.networkType = typeof printer.networkType === 'number' ? printer.networkType : 0;
+            if (this.formData.networkType === 0) {
+                this.formData.accessCode = printer.accessCode ? printer.accessCode : '';
+                this.formData.pinCode = '';
+            } else {
+                this.formData.pinCode = printer.pinCode ? printer.pinCode : '';
+                this.formData.accessCode = '';
+            }
             this.formData.webUrl = printer.webUrl ? printer.webUrl : '';
             this.formData.password = printer.password ? printer.password : '';
 
@@ -406,6 +590,7 @@ const ManualFormComponent = {
             }
             this.formData.caFile = extraInfo.caFile ? extraInfo.caFile : '';
             this.formData.ignoreCertRevocation = extraInfo.ignoreCertRevocation ? extraInfo.ignoreCertRevocation : false;
+            this.ensureNetworkTypeState();
         },
 
         getFormData() {
@@ -416,7 +601,9 @@ const ManualFormComponent = {
                         const host = this.formData.host ? this.formData.host.trim() : '';
                         const webUrl = this.formData.webUrl ? this.formData.webUrl.trim() : '';
                         const serialNumber = this.formData.serialNumber ? this.formData.serialNumber.trim() : '';
-                        const accessCode = this.formData.accessCode ? this.formData.accessCode.trim() : '';
+                        const networkType = this.formData.networkType;
+                        const accessCode = networkType === 0 && this.formData.accessCode ? this.formData.accessCode.trim() : '';
+                        const pinCode = networkType === 1 && this.formData.pinCode ? this.formData.pinCode.trim() : '';
                         const password = this.formData.password ? this.formData.password.trim() : '';
                         const extraInfo = {
                             caFile: this.formData.caFile,
@@ -428,9 +615,11 @@ const ManualFormComponent = {
                             vendor: this.formData.vendor,
                             printerModel: this.formData.printerModel,
                             hostType: this.formData.hostType,
+                            networkType,
                             webUrl,
                             serialNumber,
                             accessCode,
+                            pinCode,
                             password,
                             extraInfo: JSON.stringify(extraInfo)
                         };
@@ -448,12 +637,18 @@ const ManualFormComponent = {
             this.showAdvanced = false;
             this.isVendorDisabled = false;
             this.isModelDisabled = false;
+            this.isHostTypeDisabled = false;
+            this.isNetworkTypeDisabled = false;
+            this.showHostType = true;
+            this.formData.networkType = 0;
             this.formData.serialNumber = '';
             this.formData.accessCode = '';
+            this.formData.pinCode = '';
             this.formData.webUrl = '';
             this.formData.password = '';
             this.formData.caFile = '';
             this.formData.ignoreCertRevocation = false;
+            this.ensureNetworkTypeState();
         },
 
         // add form validation method

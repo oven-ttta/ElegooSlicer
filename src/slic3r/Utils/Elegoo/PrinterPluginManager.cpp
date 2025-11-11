@@ -21,8 +21,6 @@ bool PrinterPluginManager::init() {
         return true;
     }
     
-    IPluginNetwork::init();
-    
     loadPluginList();
     
     std::vector<std::string> supportedPluginList = getSupportedPluginTypeList();
@@ -51,8 +49,6 @@ bool PrinterPluginManager::uninit() {
     }
 
     mPluginList.clear();
-    IPluginNetwork::uninit();
-    
     mInitialized = false;
     return true;
 }

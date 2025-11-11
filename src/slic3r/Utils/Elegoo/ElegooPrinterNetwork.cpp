@@ -11,9 +11,9 @@ ElegooPrinterNetwork::~ElegooPrinterNetwork(){
 
 
 }
-void ElegooPrinterNetwork::init()
+void ElegooPrinterNetwork::init(const std::string& region, std::string& iotUrl)
 {
-    ElegooLink::getInstance()->init();
+    ElegooLink::getInstance()->init(region, iotUrl);
 }
 
 void ElegooPrinterNetwork::uninit()

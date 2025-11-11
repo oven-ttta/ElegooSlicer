@@ -57,6 +57,7 @@ private:
     void notifyUserInfoUpdated();
 
     bool checkNeedRefreshToken(const UserNetworkInfo& userInfo);
+    bool checkTokenTimeInvalid(const UserNetworkInfo& userInfo);
 
 private:
     mutable std::recursive_mutex mInitMutex;

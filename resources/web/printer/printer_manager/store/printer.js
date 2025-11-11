@@ -218,7 +218,7 @@ const usePrinterStore = defineStore('printer', {
     async requestDiscoverPrinters() {
       this.isDiscovering = true;
       try {
-        const response = await this.ipcRequest('request_discover_printers', {}, 30 * 1000);
+        const response = await this.ipcRequest('request_discover_printers', {}, 60 * 1000);
         this.discoveredPrinters = response || [];
         this.isDiscovering = false;
       } catch (error) {
@@ -232,7 +232,7 @@ const usePrinterStore = defineStore('printer', {
         lock: true,
       });
       try {
-        await this.ipcRequest('request_delete_printer', { printerId });
+        await this.ipcRequest('request_delete_printer', { printerId }, 60 * 1000);
         this.requestPrinterList();
         await new Promise(resolve => setTimeout(resolve, 500));
         // Response handling is done in event listeners
@@ -252,7 +252,7 @@ const usePrinterStore = defineStore('printer', {
       try {
 
         await new Promise(resolve => setTimeout(resolve, 500));
-        await this.ipcRequest('request_add_printer', { printer });
+        await this.ipcRequest('request_add_printer', { printer }, 60 * 1000);
         this.requestPrinterList();
         ElementPlus.ElMessage.success({
           message: i18n.global.t("printerManager.addPrinterSuccess"),
@@ -272,7 +272,7 @@ const usePrinterStore = defineStore('printer', {
       });
       try {
         await new Promise(resolve => setTimeout(resolve, 500));
-        await this.ipcRequest('request_add_physical_printer', { printer });
+        await this.ipcRequest('request_add_physical_printer', { printer }, 60 * 1000);
         this.requestPrinterList();
       } catch (error) {
         console.error('Failed to add physical printer:', error);
@@ -297,7 +297,7 @@ const usePrinterStore = defineStore('printer', {
           await this.ipcRequest('request_update_printer_name', {
             printerId,
             printerName
-          });
+          }, 60 * 1000);
         }
 
         if (host) {
@@ -308,7 +308,7 @@ const usePrinterStore = defineStore('printer', {
             await this.ipcRequest('request_update_printer_host', {
               printerId,
               host
-            });
+            }, 60 * 1000);
           } finally {
             loading.close();
           }

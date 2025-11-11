@@ -42,9 +42,6 @@ public:
 
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
 
-    static void init();
-    static void uninit();
-
 protected:
     PrinterNetworkInfo mPrinterNetworkInfo;
     // if 1 to 1, implement http websocket etc. network management here
@@ -65,7 +62,7 @@ public:
     virtual PrinterNetworkResult<UserNetworkInfo>                 getRtcToken()                                 = 0;
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters()                        = 0;
     virtual PrinterNetworkResult<UserNetworkInfo>                 refreshToken(const UserNetworkInfo& userInfo) = 0;
-    virtual PrinterNetworkResult<bool>                            setRegion(const std::string& region)          = 0;
+    virtual PrinterNetworkResult<bool>                            setRegion(const std::string& region, const std::string& iotUrl)          = 0;
 
     UserNetworkInfo getUserNetworkInfo() const 
     { 
@@ -78,9 +75,6 @@ public:
         std::lock_guard<std::mutex> lock(mUserNetworkInfoMutex);
         mUserNetworkInfo = userNetworkInfo; 
     }
-
-    static void init();
-    static void uninit();
 
 protected:
     UserNetworkInfo mUserNetworkInfo;
@@ -104,9 +98,6 @@ public:
 
     const PluginNetworkInfo& getPluginNetworkInfo() const { return mPluginNetworkInfo; }
 
-    static void init();
-    static void uninit();
-
 protected:
     PluginNetworkInfo mPluginNetworkInfo;
 };
@@ -128,11 +119,22 @@ public:
     virtual std::string getAppUpdateUrl()     = 0;
     virtual std::string getPluginUpdateUrl()  = 0;
     virtual std::string getUserAgent()        = 0;
+    virtual std::string getIotUrl()           = 0;
 
     PrintHostType getHostType() const { return mHostType; }
 
+    static void setTestEnvJson(const nlohmann::json &testObj) { testEnvJson = testObj; }
 protected:
     PrintHostType mHostType;
+    static nlohmann::json testEnvJson;
+};
+
+
+class NetworkInitializer
+{
+public:
+    static void init();
+    static void uninit();
 };
 
 class NetworkFactory

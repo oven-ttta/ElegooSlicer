@@ -310,7 +310,8 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         if (userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() ||
             userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN ||
             userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
-            return webviewIpc::IPCResult::error();
+            wxLogMessage("OnlineModelsHomepageView: User info is invalid, return empty user info");
+            userNetworkInfo = UserNetworkInfo();
         }
         nlohmann::json  data = generateUserInfoData(userNetworkInfo);
         return webviewIpc::IPCResult::success(data);

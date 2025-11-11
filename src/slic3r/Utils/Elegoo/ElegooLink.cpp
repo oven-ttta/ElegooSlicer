@@ -176,7 +176,7 @@ ElegooLink::ElegooLink() {}
 
 ElegooLink::~ElegooLink() {}
 
-void ElegooLink::init()
+void ElegooLink::init(const std::string& region, std::string& iotUrl)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mIsInitialized) {
@@ -203,6 +203,11 @@ void ElegooLink::init()
     if (!elink::ElegooLink::getInstance().initialize(cfg)) {
         wxLogError("Error initializing ElegooLink");
     }
+    elink::SetRegionParams setRegionParams;
+    setRegionParams.region = region;
+    setRegionParams.baseUrl = iotUrl;
+    elink::ElegooLink::getInstance().setRegion(setRegionParams);
+
     std::string version = elink::ElegooLink::getInstance().getVersion();
     wxLogMessage("ElegooLink version: %s", version.c_str());
     // Subscribe to ElegooLink events
@@ -416,11 +421,12 @@ PrinterNetworkResult<bool> ElegooLink::unbindWANPrinter(const std::string& seria
                                       parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
-PrinterNetworkResult<bool> ElegooLink::setRegion(const std::string& region)
+PrinterNetworkResult<bool> ElegooLink::setRegion(const std::string& region, const std::string& iotUrl)
 {
     CHECK_INITIALIZED(false);
     elink::SetRegionParams params;
-    params.region                       = region;
+    params.region  = region;
+    params.baseUrl = iotUrl;
     elink::VoidResult       elinkResult = elink::ElegooLink::getInstance().setRegion(params);
     PrinterNetworkErrorCode resultCode  = parseElegooResult(elinkResult.code);
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS,
@@ -435,7 +441,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
     elink::PrinterDiscoveryResult   elinkResult;
     try {
         elink::PrinterDiscoveryParams discoveryParams;
-        discoveryParams.timeoutMs         = 5 * 1000;
+        discoveryParams.timeoutMs         = 10 * 1000;
         discoveryParams.broadcastInterval = 1000;
         discoveryParams.enableAutoRetry   = true;
         elinkResult                       = elink::ElegooLink::getInstance().startPrinterDiscovery(discoveryParams);
