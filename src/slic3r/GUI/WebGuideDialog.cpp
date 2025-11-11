@@ -1022,10 +1022,10 @@ int GuideFrame::LoadProfileData()
         auto filament_library_name = boost::filesystem::path(PresetBundle::ORCA_FILAMENT_LIBRARY).replace_extension(".json");
         if (boost::filesystem::exists(vendor_dir / filament_library_name)) {
             m_OrcaFilaLibPath = (vendor_dir / PresetBundle::ORCA_FILAMENT_LIBRARY).string();
-            LoadProfileFamily(PresetBundle::ORCA_FILAMENT_LIBRARY, (vendor_dir / filament_library_name).string());
+            LoadProfileFamily(PresetBundle::ORCA_FILAMENT_LIBRARY, into_u8(from_path(vendor_dir / filament_library_name)));
         } else {
             m_OrcaFilaLibPath = (rsrc_vendor_dir / PresetBundle::ORCA_FILAMENT_LIBRARY).string();
-            LoadProfileFamily(PresetBundle::ORCA_FILAMENT_LIBRARY, (rsrc_vendor_dir / filament_library_name).string());
+            LoadProfileFamily(PresetBundle::ORCA_FILAMENT_LIBRARY, into_u8(from_path(rsrc_vendor_dir / filament_library_name)));
         }
         loaded_vendors.insert(PresetBundle::ORCA_FILAMENT_LIBRARY);
 
@@ -1033,15 +1033,15 @@ int GuideFrame::LoadProfileData()
         boost::filesystem::directory_iterator endIter;
         for (boost::filesystem::directory_iterator iter(vendor_dir); iter != endIter; iter++) {
             if (!boost::filesystem::is_directory(*iter)) {
-                wxString strVendor = from_u8(iter->path().string()).BeforeLast('.');
+                wxString strVendor = from_path(iter->path()).BeforeLast('.');
                 strVendor          = strVendor.AfterLast('\\');
                 strVendor          = strVendor.AfterLast('/');
 
-                wxString strExtension = from_u8(iter->path().string()).AfterLast('.').Lower();
+                wxString strExtension = from_path(iter->path()).AfterLast('.').Lower();
                 if(strExtension.CmpNoCase("json") != 0 || loaded_vendors.find(w2s(strVendor)) != loaded_vendors.end())
                     continue;
 
-                LoadProfileFamily(w2s(strVendor), iter->path().string());
+                LoadProfileFamily(w2s(strVendor), into_u8(from_path(iter->path())));
                 loaded_vendors.insert(w2s(strVendor));
             }
             if (m_destroy)
@@ -1051,14 +1051,14 @@ int GuideFrame::LoadProfileData()
         boost::filesystem::directory_iterator others_endIter;
         for (boost::filesystem::directory_iterator iter(rsrc_vendor_dir); iter != others_endIter; iter++) {
             if (!boost::filesystem::is_directory(*iter)) {
-                wxString strVendor = from_u8(iter->path().string()).BeforeLast('.');
+                wxString strVendor = from_path(iter->path()).BeforeLast('.');
                 strVendor          = strVendor.AfterLast('\\');
                 strVendor          = strVendor.AfterLast('/');
-                wxString strExtension = from_u8(iter->path().string()).AfterLast('.').Lower();
+                wxString strExtension = from_path(iter->path()).AfterLast('.').Lower();
                 if (strExtension.CmpNoCase("json") != 0 || loaded_vendors.find(w2s(strVendor)) != loaded_vendors.end())
                     continue;
 
-                LoadProfileFamily(w2s(strVendor), iter->path().string());
+                LoadProfileFamily(w2s(strVendor), into_u8(from_path(iter->path())));
                 loaded_vendors.insert(w2s(strVendor));
             }
             if (m_destroy)
@@ -1183,7 +1183,7 @@ void StringReplace(string &strBase, string strSrc, string strDes)
 int GuideFrame::LoadProfileFamily(std::string strVendor, std::string strFilePath)
 {
     // wxString strFolder = strFilePath.BeforeLast(boost::filesystem::path::preferred_separator);
-    boost::filesystem::path file_path(strFilePath);
+    boost::filesystem::path file_path = into_path(from_u8(strFilePath));
     boost::filesystem::path vendor_dir = boost::filesystem::absolute(file_path.parent_path() / strVendor).make_preferred();
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(",  vendor path %1%.") % vendor_dir.string();
     try {
@@ -1213,7 +1213,7 @@ int GuideFrame::LoadProfileFamily(std::string strVendor, std::string strFilePath
             boost::filesystem::path sub_path = boost::filesystem::absolute(vendor_dir / s2).make_preferred();
             if (!boost::filesystem::exists(sub_path)) continue;
 
-            std::string             sub_file = sub_path.string();
+            std::string             sub_file = into_u8(from_path(sub_path));
 
             // wxLogMessage("GUIDE: json_path2  %s", w2s(ModelFilePath));
             LoadFile(sub_file, contents);
@@ -1258,7 +1258,7 @@ int GuideFrame::LoadProfileFamily(std::string strVendor, std::string strFilePath
             boost::filesystem::path sub_path = boost::filesystem::absolute(vendor_dir / s2).make_preferred();
             if (!boost::filesystem::exists(sub_path)) continue;
 
-            std::string             sub_file = sub_path.string();
+            std::string             sub_file = into_u8(from_path(sub_path));
             LoadFile(sub_file, contents);
             json pm = json::parse(contents);
 
@@ -1301,7 +1301,7 @@ int GuideFrame::LoadProfileFamily(std::string strVendor, std::string strFilePath
                 boost::filesystem::path sub_path = boost::filesystem::absolute(vendor_dir / s2).make_preferred();
                 if (!boost::filesystem::exists(sub_path)) continue;
 
-                std::string             sub_file = sub_path.string();
+                std::string             sub_file = into_u8(from_path(sub_path));
                 LoadFile(sub_file, contents);
                 json pm = json::parse(contents);
 
@@ -1312,7 +1312,7 @@ int GuideFrame::LoadProfileFamily(std::string strVendor, std::string strFilePath
                     std::string sV;
                     std::string sT;
 
-                    int nRet = GetFilamentInfo(vendor_dir.string(),tFilaList, sub_file, sV, sT);
+                    int nRet = GetFilamentInfo(into_u8(from_path(vendor_dir)), tFilaList, sub_file, sV, sT);
                     if (nRet != 0) {
                         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << "Load Filament:" << s1 << ",GetFilamentInfo Failed, Vendor:" << sV << ",Type:"<< sT;
                         continue;
@@ -1363,7 +1363,7 @@ int GuideFrame::LoadProfileFamily(std::string strVendor, std::string strFilePath
             boost::filesystem::path sub_path = boost::filesystem::absolute(vendor_dir / s2).make_preferred();
             if (!boost::filesystem::exists(sub_path)) continue;
 
-            std::string             sub_file = sub_path.string();
+            std::string             sub_file = into_u8(from_path(sub_path));
             LoadFile(sub_file, contents);
             json pm = json::parse(contents);
 
@@ -1399,7 +1399,7 @@ void GuideFrame::StrReplace(std::string &strBase, std::string strSrc, std::strin
 
 std::string GuideFrame::w2s(wxString sSrc)
 {
-    return std::string(sSrc.mb_str());
+    return into_u8(sSrc);
 }
 
 void GuideFrame::GetStardardFilePath(std::string &FilePath) {
