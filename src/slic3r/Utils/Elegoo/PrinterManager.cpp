@@ -353,7 +353,9 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterName(const std::string& 
     UserNetworkInfo requestUserInfo = UserNetworkManager::getInstance()->getUserInfo();
     auto updateNameResult = printerNetwork->updatePrinterName(printerName);
     checkUserAuthStatus(printer.value(), updateNameResult, requestUserInfo);
-    
+    if (updateNameResult.isSuccess() && printer.value().networkType == NETWORK_TYPE_WAN) {  
+        refreshOnlinePrinters();        
+    }
     PrinterCache::getInstance()->updatePrinterName(printerId, printerName);
     PrinterCache::getInstance()->savePrinterList();
     wxLogMessage("Update printer name: %s %s %s to %s", printer.value().host, printer.value().printerName, printer.value().printerModel,
@@ -585,12 +587,9 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
             printerNetworkInfo.firmwareVersion    = printerAttributes.firmwareVersion;
             printerNetworkInfo.mainboardId        = printerAttributes.mainboardId;
             printerNetworkInfo.serialNumber       = printerAttributes.serialNumber;
-            if(printerNetworkInfo.webUrl.empty() && !printerNetworkInfo.host.empty()) {
-                printerNetworkInfo.webUrl = printerNetworkInfo.host;
-            }
-            if (printerNetworkInfo.isPhysicalPrinter) {
-                printerNetworkInfo.authMode = printerAttributes.authMode;
-            }
+            printerNetworkInfo.webUrl             = printerAttributes.webUrl;        
+            printerNetworkInfo.authMode           = printerAttributes.authMode;
+            
         } else {
             wxLogWarning("Failed to get printer attributes for added printer %s %s %s: %s", printerNetworkInfo.host,
                          printerNetworkInfo.printerName, printerNetworkInfo.printerModel, attributes.message.c_str());
@@ -837,12 +836,6 @@ void PrinterManager::refreshOnlinePrinters()
                 PrinterCache::getInstance()->updatePrinterField(p.printerId, [boundPrinter](PrinterNetworkInfo& cachedPrinter) {
                     if(cachedPrinter.printerName != boundPrinter.printerName) {
                         cachedPrinter.printerName = boundPrinter.printerName;
-                    }
-                    if(cachedPrinter.firmwareVersion != boundPrinter.firmwareVersion) {
-                        cachedPrinter.firmwareVersion = boundPrinter.firmwareVersion;
-                    }
-                    if(cachedPrinter.protocolVersion != boundPrinter.protocolVersion) {
-                        cachedPrinter.protocolVersion = boundPrinter.protocolVersion;
                     }
                 });
                 break;

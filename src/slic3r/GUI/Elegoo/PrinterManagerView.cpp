@@ -933,7 +933,7 @@ webviewIpc::IPCResult PrinterManagerView::updatePhysicalPrinter(const std::strin
     PrinterNetworkInfo printerInfo = convertJsonToPrinterNetworkInfo(printer);
 
     PrinterNetworkInfo oldPrinter =  PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
-    if (!oldPrinter.printerId.empty()) {
+    if (oldPrinter.printerId.empty()) {
         result.code = static_cast<int>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND);
         result.message = getErrorMessage(PrinterNetworkErrorCode::PRINTER_NOT_FOUND);
         return result;
