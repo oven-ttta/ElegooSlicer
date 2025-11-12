@@ -5,6 +5,8 @@
 #include "slic3r/GUI/MainFrame.hpp"
 #include "slic3r/GUI/GUI_App.hpp"
 #include <boost/algorithm/string.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/filesystem.hpp>
 #include <mutex>
@@ -602,7 +604,8 @@ void PrinterMmsManager::getFilamentMmsMapping(const PrinterNetworkInfo& printerN
         std::string filamentStandardColor = standardColor.colorHex;
         std::string StandardColorName = standardColor.colorName;
         if(StandardColorName.empty() || filamentStandardColor.empty()) {
-            wxLogError("PrinterMmsManager::getFilamentMmsMapping: standard color name or filament standard color is empty, filamentType: %s, filamentAlias: %s, filamentColor: %s", printFilament.filamentType.c_str(), printFilament.filamentAlias.c_str(), printFilament.filamentColor.c_str());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": standard color name or filament standard color is empty, filamentType: %s, filamentAlias: %s, filamentColor: %s")
+                                                      % printFilament.filamentType % printFilament.filamentAlias % printFilament.filamentColor;
             continue;
         }
         std::string mmsMappingFilamentType = "";
@@ -732,7 +735,8 @@ void PrinterMmsManager::saveFilamentMmsMapping(std::vector<PrintFilamentMmsMappi
         std::string mappedStandardColorName = mappedStandardColor.colorName;
         
         if(mappedStandardColorName.empty() || mappedFilamentStandardColor.empty()) {
-            wxLogError("PrinterMmsManager::saveFilamentMmsMapping: color name or filament standard color is empty, filamentType: %s, filamentAlias: %s, filamentColor: %s", printFilament.filamentType.c_str(), printFilament.filamentAlias.c_str(), printFilament.filamentColor.c_str());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": color name or filament standard color is empty, filamentType: %s, filamentAlias: %s, filamentColor: %s")
+                                                  % printFilament.filamentType % printFilament.filamentAlias % printFilament.filamentColor;
             continue;
         }
         StandardColor standardColor = getStandardColor(printFilament.filamentColor);
@@ -740,7 +744,8 @@ void PrinterMmsManager::saveFilamentMmsMapping(std::vector<PrintFilamentMmsMappi
         std::string filamentStandardColorName = standardColor.colorName;
         
         if(filamentStandardColorName.empty() || filamentStandardColor.empty()) {
-            wxLogError("PrinterMmsManager::saveFilamentMmsMapping: color name or filament standard color is empty, filamentType: %s, filamentAlias: %s, filamentColor: %s", printFilament.filamentType.c_str(), printFilament.filamentAlias.c_str(), printFilament.filamentColor.c_str());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": color name or filament standard color is empty, filamentType: %s, filamentAlias: %s, filamentColor: %s")
+                                                  % printFilament.filamentType % printFilament.filamentAlias % printFilament.filamentColor;
             continue;
         }
         // Create three-level structure: filamentType -> filamentAlias -> filamentStandardColor
@@ -786,7 +791,7 @@ nlohmann::json PrinterMmsManager::loadFilamentMmsMappingFromFile()
             }
         }
     } catch (const std::exception& e) {
-        wxLogError("Failed to load filament MMS mapping file: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to load filament MMS mapping file: %s") % e.what();
     }
     
     return nlohmann::json::object();
@@ -810,7 +815,7 @@ void PrinterMmsManager::saveFilamentMmsMappingToFile(const nlohmann::json& mappi
             file.close();
         }
     } catch (const std::exception& e) {
-        wxLogError("Failed to save filament MMS mapping file: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to save filament MMS mapping file: %s") % e.what();
     }
 }
 
@@ -842,7 +847,7 @@ void PrinterMmsManager::removeFilamentMmsMapping(const std::string& filamentType
             saveFilamentMmsMappingToFile(mappingJson);
         }
     } catch (const std::exception& e) {
-        wxLogError("Failed to remove filament MMS mapping: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to remove filament MMS mapping: %s") % e.what();
     }
 }
 

@@ -23,6 +23,7 @@ if "%1"=="pack" (
 
 set debug=OFF
 set debuginfo=OFF
+set build_dir_cn=
 if "%1"=="debug" set debug=ON
 if "%2"=="debug" set debug=ON
 if "%1"=="debuginfo" set debuginfo=ON
@@ -46,6 +47,7 @@ for %%a in (%*) do (
         set ELEGOO_INTERNAL_TESTING=1
     )
 )
+
 echo build type set to %build_type%
 
 setlocal DISABLEDELAYEDEXPANSION 
@@ -72,6 +74,13 @@ cmake --build . --config %build_type% --target deps -- -m
 if "%1"=="deps" exit /b 0
 
 :slicer
+
+
+for %%a in (%*) do (
+    if "%%a"=="cn" (
+        set build_dir=build-dbginfo-中文
+    )
+)
 
 echo "building ElegooSlicer...ELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%"
 cd %WP%

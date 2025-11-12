@@ -95,7 +95,7 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::SERVER_RTM_NOT_CONNECTED:
             return _u8L("RTM client not connected or not logged in. Please try again later.");
         case PrinterNetworkErrorCode::SERVER_UNAUTHORIZED:
-            return _u8L("Unauthorized access. Please try again later.");
+            return _u8L("Unauthorized access, please check your account login status and try again.");
         case PrinterNetworkErrorCode::SERVER_FORBIDDEN:
             return _u8L("Forbidden access. Please try again later.");
         case PrinterNetworkErrorCode::INSUFFICIENT_MEMORY:

@@ -4,13 +4,15 @@
 #include "slic3r/GUI/GUI_App.hpp"
 #include "slic3r/GUI/MainFrame.hpp"
 #include "libslic3r/Utils.hpp"
-#include <wx/log.h>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <nlohmann/json.hpp>
 #include <boost/nowide/fstream.hpp>
+#include "libslic3r/format.hpp"
 
 #define CHECK_INITIALIZED(returnVal) \
     std::lock_guard<std::recursive_mutex> __initLock(mInitMutex); \
@@ -127,7 +129,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> UserNetworkManager::getUse
 
     std::unique_lock<std::timed_mutex> lock(mMonitorMutex, std::defer_lock);
     if (!lock.try_lock_for(std::chrono::seconds(3))) {
-        wxLogMessage("getUserBoundPrinters: Failed to acquire lock after 3 seconds, user network busy");
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": failed to acquire lock after 3 seconds, user network busy";
         return PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::USER_NETWORK_BUSY, std::vector<PrinterNetworkInfo>());
     }
 
@@ -157,23 +159,27 @@ void UserNetworkManager::checkUserAuthStatus(const UserNetworkInfo& requestUserI
     
     // 1. Check if user changed
     if (currentUserInfo.userId != requestUserInfo.userId) {
-        wxLogMessage("User id is different, skip check network error, request userId: %s, current userId: %s", 
-                     requestUserInfo.userId.c_str(), currentUserInfo.userId.c_str());
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": user id is different, skip check network error, request userId: %s, current userId: %s")
+                                       % requestUserInfo.userId % currentUserInfo.userId;
         return;
     }
     
     // 2. Check if token was changed (more precise than time check)
     if (!requestUserInfo.token.empty() && !currentUserInfo.token.empty() && requestUserInfo.token != currentUserInfo.token) {
-        wxLogMessage("Token was changed after this request, ignore stale error (request token: %s..., current token: %s...)",
-                     requestUserInfo.token.substr(0, 10).c_str(), currentUserInfo.token.substr(0, 10).c_str());
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": token was changed after this request, ignore stale error (request token: %s..., current token: %s...)")
+                   % requestUserInfo.token.substr(0, 10) % currentUserInfo.token.substr(0, 10);
         return;
     }
     
     // 3. Check if token was refreshed after this request was sent (lastTokenRefreshTime is different)
     if (currentUserInfo.lastTokenRefreshTime != requestUserInfo.lastTokenRefreshTime) {
-        wxLogMessage("Token was refreshed after this request (request time: %llu, current refresh time: %llu), "
-                     "ignore stale error", 
-                     requestUserInfo.lastTokenRefreshTime, currentUserInfo.lastTokenRefreshTime);
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": token was refreshed after this request (request time: %llu, current refresh time: %llu), ignore stale error")
+                   % requestUserInfo.lastTokenRefreshTime % currentUserInfo.lastTokenRefreshTime;
         return;
     }
      
@@ -183,8 +189,10 @@ void UserNetworkManager::checkUserAuthStatus(const UserNetworkInfo& requestUserI
         if (loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED || 
             loginStatus == LOGIN_STATUS_OFFLINE ||
             loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN) {
-            wxLogMessage("Update user login status from %d to %d due to network error code %d", 
-                         currentUserInfo.loginStatus, loginStatus, static_cast<int>(errorCode));
+            BOOST_LOG_TRIVIAL(info)
+                << __FUNCTION__
+                << boost::format(": update user login status from %d to %d due to network error code %d")
+                       % currentUserInfo.loginStatus % loginStatus % static_cast<int>(errorCode);
             updateUserInfoLoginStatus(requestUserInfo, loginStatus);
         }
     }
@@ -236,23 +244,27 @@ bool UserNetworkManager::updateUserInfo(const UserNetworkInfo& userInfo)
         bool needNotify = false;
         if (mUserInfo.loginStatus != userInfo.loginStatus) {
             needNotify = true;
-            wxLogMessage("User login status updated, user id: %s, login status: %d",
-                         userInfo.userId.c_str(), userInfo.loginStatus);
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                    << boost::format(": user login status updated, user id: %s, login status: %d")
+                                           % userInfo.userId % userInfo.loginStatus;
         }
         if (mUserInfo.token != userInfo.token) {
             needNotify = true;
-            wxLogMessage("User token updated, user id: %s, token: %s",
-                         userInfo.userId.c_str(), userInfo.token.c_str());
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                    << boost::format(": user token updated, user id: %s, token: %s")
+                                           % userInfo.userId % userInfo.token;
         }
         if (mUserInfo.avatar != userInfo.avatar) {
             needNotify = true;
-            wxLogMessage("User avatar updated, user id: %s, avatar: %s",
-                         userInfo.userId.c_str(), userInfo.avatar.c_str());
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                    << boost::format(": user avatar updated, user id: %s, avatar: %s")
+                                           % userInfo.userId % userInfo.avatar;
         }
         if (mUserInfo.nickname != userInfo.nickname) {
             needNotify = true;
-            wxLogMessage("User nickname updated, user id: %s, nickname: %s",
-                         userInfo.userId.c_str(), userInfo.nickname.c_str());
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                    << boost::format(": user nickname updated, user id: %s, nickname: %s")
+                                           % userInfo.userId % userInfo.nickname;
         }
         mUserInfo = userInfo;
         mUserInfo.loginErrorMessage = getLoginErrorMessage(userInfo);
@@ -263,29 +275,34 @@ bool UserNetworkManager::updateUserInfo(const UserNetworkInfo& userInfo)
         return true;
     } 
     // user id is different
-    wxLogMessage("User id is different, skip update user info, user id: %s, new user id: %s",
-                 mUserInfo.userId.c_str(), userInfo.userId.c_str());
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                            << boost::format(": user id is different, skip update user info, user id: %s, new user id: %s")
+                                   % mUserInfo.userId % userInfo.userId;
     return false;
 }
 
 bool UserNetworkManager::updateUserInfoLoginStatus(const UserNetworkInfo& userInfo, const LoginStatus& loginStatus)
 {
     std::lock_guard<std::mutex> lock(mUserMutex);
-    if(mUserInfo.userId != userInfo.userId) {
-        wxLogMessage("User id is different, skip update login status, user id: %s, new user id: %s, login status: %d",
-                     mUserInfo.userId.c_str(), userInfo.userId.c_str(), loginStatus);
+    if (mUserInfo.userId != userInfo.userId) {
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": user id is different, skip update login status, user id: %s, new user id: %s, login status: %d")
+                                       % mUserInfo.userId % userInfo.userId % loginStatus;
         return false;
     }
 
-    if(mUserInfo.token != userInfo.token) {
-        wxLogMessage("Token is different, skip update login status, user id: %s, new token: %s, login status: %d",
-                     mUserInfo.userId.c_str(), userInfo.token.c_str(), loginStatus);
+    if (mUserInfo.token != userInfo.token) {
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": token is different, skip update login status, user id: %s, new token: %s, login status: %d")
+                                       % mUserInfo.userId % userInfo.token % loginStatus;
         return false;
     }
 
-    if(mUserInfo.lastTokenRefreshTime != userInfo.lastTokenRefreshTime) {
-        wxLogMessage("Last token refresh time is different, skip update login status, user id: %s, new last token refresh time: %llu, login status: %d",
-                     mUserInfo.userId.c_str(), userInfo.lastTokenRefreshTime, loginStatus);
+    if (mUserInfo.lastTokenRefreshTime != userInfo.lastTokenRefreshTime) {
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": last token refresh time is different, skip update login status, user id: %s, new last token refresh time: %llu, login status: %d")
+                   % mUserInfo.userId % userInfo.lastTokenRefreshTime % loginStatus;
         return false;
     }
 
@@ -302,11 +319,13 @@ void UserNetworkManager::notifyUserInfoUpdated()
     if (wxGetApp().mainframe && wxGetApp().mainframe->is_loaded()) {
         auto evt = new wxCommandEvent(EVT_USER_INFO_UPDATED);
         wxQueueEvent(wxGetApp().mainframe, evt);
-        wxLogMessage("User info updated, send event to mainframe, user id: %s, login status: %d",
-                     mUserInfo.userId.c_str(), mUserInfo.loginStatus);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": user info updated, send event to mainframe, user id: %s, login status: %d")
+                                       % mUserInfo.userId % mUserInfo.loginStatus;
     } else {
-        wxLogMessage("Mainframe is not loaded, skip sending event, user id: %s, login status: %d",
-                     mUserInfo.userId.c_str(), mUserInfo.loginStatus);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": mainframe is not loaded, skip sending event, user id: %s, login status: %d")
+                                       % mUserInfo.userId % mUserInfo.loginStatus;
     }
 }
 
@@ -354,33 +373,34 @@ bool UserNetworkManager::checkTokenTimeInvalid(const UserNetworkInfo& userInfo)
 
     // refresh token expired
     if (userInfo.refreshTokenExpireTime <= nowTime) {
-        wxLogMessage("UserNetworkManager::checkTokenTimeInvalid refresh token is expired, token time is invalid, user id: %s, user login "
-                     "status: %d, user nickname: %s, refresh token expire time: %llu",
-                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
-                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": refresh token is expired, token time is invalid, user id: %s, user login status: %d, user nickname: %s, refresh token expire time: %llu")
+                   % userInfo.userId % userInfo.loginStatus % userInfo.nickname
+                   % static_cast<unsigned long long>(userInfo.refreshTokenExpireTime);
         return true;
     }
 
     // last token refresh time is greater than access token expire time, time is abnormal
     if (userInfo.lastTokenRefreshTime >= userInfo.accessTokenExpireTime) {
-        wxLogMessage("UserNetworkManager::checkTokenTimeInvalid last token refresh time is greater than access token expire time, time is "
-                     "abnormal, user id: %s, user login status: %d, user nickname: %s, last token refresh "
-                     "time: %llu, access token expire time: %llu, refresh token expire time: %llu",
-                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
-                     static_cast<unsigned long long>(userInfo.lastTokenRefreshTime),
-                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
-                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": last token refresh time is greater than access token expire time, user id: %s, user login status: %d, user nickname: %s, last token refresh time: %llu, access token expire time: %llu, refresh token expire time: %llu")
+                   % userInfo.userId % userInfo.loginStatus % userInfo.nickname
+                   % static_cast<unsigned long long>(userInfo.lastTokenRefreshTime)
+                   % static_cast<unsigned long long>(userInfo.accessTokenExpireTime)
+                   % static_cast<unsigned long long>(userInfo.refreshTokenExpireTime);
         return true;
     }
     // nowTime is less than last token refresh time, time is abnormal
     if (nowTime < userInfo.lastTokenRefreshTime) {
-        wxLogMessage("UserNetworkManager::checkTokenTimeInvalid nowTime is less than last token refresh time, time is abnormal, need to "
-                     "refresh token, user id: %s, user login status: %d, user nickname: %s, last token refresh time: %llu, nowTime: %llu, "
-                     "access token expire time: %llu, refresh token expire time: %llu",
-                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
-                     static_cast<unsigned long long>(userInfo.lastTokenRefreshTime), static_cast<unsigned long long>(nowTime),
-                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
-                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": nowTime is less than last token refresh time, need to refresh token, user id: %s, user login status: %d, user nickname: %s, last token refresh time: %llu, nowTime: %llu, access token expire time: %llu, refresh token expire time: %llu")
+                   % userInfo.userId % userInfo.loginStatus % userInfo.nickname
+                   % static_cast<unsigned long long>(userInfo.lastTokenRefreshTime) % static_cast<unsigned long long>(nowTime)
+                   % static_cast<unsigned long long>(userInfo.accessTokenExpireTime)
+                   % static_cast<unsigned long long>(userInfo.refreshTokenExpireTime);
         return true;
     }
     return false;
@@ -389,9 +409,10 @@ bool UserNetworkManager::checkNeedRefreshToken(const UserNetworkInfo& userInfo)
 {
     // if user login status is invalid token or invalid user, don't need to refresh token
     if (userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || userInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
-        wxLogMessage("UserNetworkManager::checkNeedRefreshToken user login status is invalid token or invalid user, don't need to refresh "
-                     "token, user id: %s, user nickname: %s, user login status: %d",
-                     userInfo.userId.c_str(), userInfo.nickname.c_str(), userInfo.loginStatus);
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": user login status is invalid token or invalid user, don't need to refresh token, user id: %s, user nickname: %s, user login status: %d")
+                   % userInfo.userId % userInfo.nickname % userInfo.loginStatus;
         return false;
     }
 
@@ -401,11 +422,12 @@ bool UserNetworkManager::checkNeedRefreshToken(const UserNetworkInfo& userInfo)
 
     // login status is token expired, need to refresh token
     if (userInfo.loginStatus == LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
-        wxLogMessage("UserNetworkManager::checkNeedRefreshToken user login status is token expired, need to refresh token, user id: %s, "
-                     "user nickname: %s, user login status: %d, access token expire time: %llu, refresh token expire time: %llu",
-                     userInfo.userId.c_str(), userInfo.nickname.c_str(), userInfo.loginStatus,
-                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
-                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": user login status is token expired, need to refresh token, user id: %s, user nickname: %s, user login status: %d, access token expire time: %llu, refresh token expire time: %llu")
+                   % userInfo.userId % userInfo.nickname % userInfo.loginStatus
+                   % static_cast<unsigned long long>(userInfo.accessTokenExpireTime)
+                   % static_cast<unsigned long long>(userInfo.refreshTokenExpireTime);
         return true;
     }
 
@@ -414,11 +436,12 @@ bool UserNetworkManager::checkNeedRefreshToken(const UserNetworkInfo& userInfo)
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
     // token expired
     if (userInfo.accessTokenExpireTime <= nowTime) {
-        wxLogMessage("UserNetworkManager::checkNeedRefreshToken token expired, user id: %s, user login status: %d, user nickname: %s, "
-                     "access token expire time: %llu, refresh token expire time: %llu",
-                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
-                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
-                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": token expired, user id: %s, user login status: %d, user nickname: %s, access token expire time: %llu, refresh token expire time: %llu")
+                   % userInfo.userId % userInfo.loginStatus % userInfo.nickname
+                   % static_cast<unsigned long long>(userInfo.accessTokenExpireTime)
+                   % static_cast<unsigned long long>(userInfo.refreshTokenExpireTime);
         return true;
     }
 
@@ -426,10 +449,12 @@ bool UserNetworkManager::checkNeedRefreshToken(const UserNetworkInfo& userInfo)
     uint64_t tokenValidDiffTime = userInfo.accessTokenExpireTime - userInfo.lastTokenRefreshTime;
     uint64_t elapsedTokenTime   = (nowTime > userInfo.lastTokenRefreshTime) ? (nowTime - userInfo.lastTokenRefreshTime) : 0ULL;
     if (elapsedTokenTime > tokenValidDiffTime / 2) {
-        wxLogMessage("UserNetworkManager::checkNeedRefreshToken token valid time is not enough, user id: %s, user login status: %d, user nickname: %s, access token expire time: %llu, refresh token expire time: %llu",
-                     userInfo.userId.c_str(), userInfo.loginStatus, userInfo.nickname.c_str(),
-                     static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
-                     static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": token valid time is not enough, user id: %s, user login status: %d, user nickname: %s, access token expire time: %llu, refresh token expire time: %llu")
+                   % userInfo.userId % userInfo.loginStatus % userInfo.nickname
+                   % static_cast<unsigned long long>(userInfo.accessTokenExpireTime)
+                   % static_cast<unsigned long long>(userInfo.refreshTokenExpireTime);
         return true;
     }
     return false;
@@ -445,57 +470,73 @@ UserNetworkInfo UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo
     std::shared_ptr<IUserNetwork> network = getNetwork();
     
     // redact sensitive tokens in logs; print timestamp fields with correct specifiers
-    wxLogMessage("UserNetworkManager::refreshToken start refresh token, user id: %s, login refresh time: %llu, access token expire time: %llu, refresh token expire time: %llu",
-                 userInfo.userId.c_str(),
-                 static_cast<unsigned long long>(userInfo.lastTokenRefreshTime),
-                 static_cast<unsigned long long>(userInfo.accessTokenExpireTime),
-                 static_cast<unsigned long long>(userInfo.refreshTokenExpireTime));            
+    BOOST_LOG_TRIVIAL(info)
+        << __FUNCTION__
+        << boost::format(": start refresh token, user id: %s, login refresh time: %llu, access token expire time: %llu, refresh token expire time: %llu")
+               % userInfo.userId % static_cast<unsigned long long>(userInfo.lastTokenRefreshTime)
+               % static_cast<unsigned long long>(userInfo.accessTokenExpireTime)
+               % static_cast<unsigned long long>(userInfo.refreshTokenExpireTime);
 
     // if current user id is empty, skip refresh token
-    if(currentUserInfo.userId.empty()) {
-        wxLogMessage("UserNetworkManager::refreshToken current user id is empty, skip refresh token, current user id: %s", currentUserInfo.userId.c_str());
+    if (currentUserInfo.userId.empty()) {
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": current user id is empty, skip refresh token, current user id: %s")
+                                       % currentUserInfo.userId;
         return UserNetworkInfo();
     }
 
     // if user login status is invalid token or invalid user, skip refresh token
-    if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN || 
+    if (currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN ||
         currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
-        wxLogMessage("UserNetworkManager::refreshToken user login status is invalid token or invalid user, skip refresh token, current user id: %s", currentUserInfo.userId.c_str());
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": user login status is invalid token or invalid user, skip refresh token, current user id: %s")
+                   % currentUserInfo.userId;
         return UserNetworkInfo();
     }
 
 
     // if user id changed and user already logged in, return current user info
-    if(userInfo.userId != currentUserInfo.userId && currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-        wxLogMessage("UserNetworkManager::refreshToken user id changed, current user id is not empty and user already logged in, return current user info, user id: %s", userInfo.userId.c_str());
+    if (userInfo.userId != currentUserInfo.userId && currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": user id changed, current user id is not empty and user already logged in, return current user info, user id: %s")
+                   % userInfo.userId;
         return currentUserInfo;
     }
 
     // if already refreshed token, skip refresh token
-    if(currentUserInfo.lastTokenRefreshTime > userInfo.lastTokenRefreshTime && currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
-        wxLogMessage("already refreshed token, skip refresh token, user id: %s", userInfo.userId.c_str());
+    if (currentUserInfo.lastTokenRefreshTime > userInfo.lastTokenRefreshTime &&
+        currentUserInfo.loginStatus == LOGIN_STATUS_LOGIN_SUCCESS) {
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": already refreshed token, skip refresh token, user id: %s")
+                                       % userInfo.userId;
         return currentUserInfo;
     }
 
-    if(network && currentUserInfo.userId != network->getUserNetworkInfo().userId) {
+    if (network && currentUserInfo.userId != network->getUserNetworkInfo().userId) {
         // user id changed
         network = nullptr;
-        wxLogMessage("UserNetworkManager::refreshToken user id changed, set network to nullptr, user id: %s", userInfo.userId.c_str());
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": user id changed, set network to nullptr, user id: %s") % userInfo.userId;
     }
 
-    if(refreshToken(currentUserInfo, network)) {
-        wxLogMessage("UserNetworkManager::refreshToken refresh token success, user id: %s", userInfo.userId.c_str());
+    if (refreshToken(currentUserInfo, network)) {
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": refresh token success, user id: %s") % userInfo.userId;
         updateUserInfo(currentUserInfo);
         setNetwork(network);
         return currentUserInfo;
-    } else if(currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN) {
+    } else if (currentUserInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN) {
         updateUserInfo(currentUserInfo);
         setNetwork(nullptr);
-        wxLogMessage("UserNetworkManager::refreshToken refresh token failed, need to re-login, user id: %s", userInfo.userId.c_str());
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": refresh token failed, need to re-login, user id: %s") % userInfo.userId;
         return UserNetworkInfo();
     }
-    wxLogMessage("UserNetworkManager::refreshToken refresh token failed, user id: %s, login status: %d",
-                 userInfo.userId.c_str(), userInfo.loginStatus);
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                            << boost::format(": refresh token failed, user id: %s, login status: %d")
+                                   % userInfo.userId % userInfo.loginStatus;
     return currentUserInfo;
 }
 
@@ -506,19 +547,24 @@ bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr
         return false;
     }
 
-    if (!network) {
+        if (!network) {
         network = NetworkFactory::createUserNetwork(userInfo);
         if (!network) {
             userInfo.loginStatus    = LOGIN_STATUS_OFFLINE_INVALID_USER;
-            wxLogMessage("User token refresh failed, network is null, user id: %s", userInfo.userId.c_str());
+                BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                        << boost::format(": user token refresh failed, network is null, user id: %s")
+                                               % userInfo.userId;
             return false;
         }
         std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHost::get_print_host_type(userInfo.hostType));
-        if(networkHelper) {        
+            if (networkHelper) {
             network->setRegion(userInfo.region, networkHelper->getIotUrl());
         } else {
             userInfo.loginStatus    = LOGIN_STATUS_OFFLINE_INVALID_USER;
-            wxLogMessage("User token refresh failed, network helper is null, user id: %s, host type: %s", userInfo.userId.c_str(), userInfo.hostType.c_str());
+                BOOST_LOG_TRIVIAL(info)
+                    << __FUNCTION__
+                    << boost::format(": user token refresh failed, network helper is null, user id: %s, host type: %s")
+                           % userInfo.userId % userInfo.hostType;
             return false;
         }
     }
@@ -538,22 +584,27 @@ bool UserNetworkManager::refreshToken(UserNetworkInfo& userInfo, std::shared_ptr
                 std::chrono::system_clock::now().time_since_epoch()).count());
 
         network->updateUserNetworkInfo(userInfo);
-        wxLogMessage("User token refreshed successfully, user id: %s", userInfo.userId.c_str());
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                << boost::format(": user token refreshed successfully, user id: %s") % userInfo.userId;
         return true;
     } 
     if (refreshResult.code != PrinterNetworkErrorCode::NETWORK_ERROR) {
         // if error code is not network error, token is invalid, need to re-login
         userInfo.loginStatus    = LOGIN_STATUS_OFFLINE_INVALID_TOKEN;
-        wxLogMessage("User token refresh failed, need to re-login, user id: %s, error code: %d",
-                     userInfo.userId.c_str(), static_cast<int>(refreshResult.code));
+        BOOST_LOG_TRIVIAL(info)
+            << __FUNCTION__
+            << boost::format(": user token refresh failed, need to re-login, user id: %s, error code: %d")
+                   % userInfo.userId % static_cast<int>(refreshResult.code);
         return false;
     } 
     // if error code is network error, don't need to re-login, just set login status to offline
-    if(userInfo.loginStatus != LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
+    if (userInfo.loginStatus != LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
         userInfo.loginStatus = LOGIN_STATUS_OFFLINE;
     }
-    wxLogMessage("User token refresh failed, user id: %s, status: %d, error code: %d, error message: %s",
-                 userInfo.userId.c_str(), userInfo.loginStatus, static_cast<int>(refreshResult.code), refreshResult.message.c_str());
+    BOOST_LOG_TRIVIAL(info)
+        << __FUNCTION__
+        << boost::format(": user token refresh failed, user id: %s, status: %d, error code: %d, error message: %s")
+               % userInfo.userId % userInfo.loginStatus % static_cast<int>(refreshResult.code) % refreshResult.message;
     return false;
 }
 
@@ -634,7 +685,9 @@ void UserNetworkManager::monitorUserNetwork()
             if(lastLoginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER) {
                 updateUserInfoLoginStatus(userInfo, LOGIN_STATUS_OFFLINE_INVALID_USER);
             }
-            wxLogMessage("User connect to IoT failed, network helper is null, user id: %s, host type: %s", userInfo.userId.c_str(), userInfo.hostType.c_str());
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__
+                                    << boost::format(": user connect to IoT failed, network helper is null, user id: %s, host type: %s")
+                                           % userInfo.userId % userInfo.hostType;
             continue;
         }
 
@@ -679,7 +732,8 @@ void UserNetworkManager::saveUserInfo(const UserNetworkInfo& userInfo)
             file.close();
         }
     } catch (const std::exception& e) {
-        wxLogError("Failed to save user info: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__
+                                 << boost::format(": failed to save user info: %s") % e.what();
     }
 }
 
@@ -713,7 +767,8 @@ void UserNetworkManager::loadUserInfo()
             mUserInfo               = userInfo;
         }
     } catch (const std::exception& e) {
-        wxLogError("Failed to load user info: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__
+                                 << boost::format(": failed to load user info: %s") % e.what();
     }
 }
 

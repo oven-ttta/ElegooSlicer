@@ -4,7 +4,8 @@
 #include "ElegooPluginNetwork.hpp"
 #include "ElegooNetworkHelper.hpp"
 
-#include <wx/log.h>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 #include <fstream>
 #include <boost/filesystem.hpp>
 #include "PrintHost.hpp"
@@ -26,7 +27,7 @@ std::shared_ptr<IPrinterNetwork> NetworkFactory::createPrinterNetwork(const Prin
         return std::make_shared<ElegooPrinterNetwork>(printerNetworkInfo);
     }
     default: {
-        wxLogWarning("Unsupported network type: %s", printerNetworkInfo.hostType.c_str());
+        BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(": unsupported network type: %s") % printerNetworkInfo.hostType;
         return nullptr;
     }
     }
@@ -40,7 +41,7 @@ std::shared_ptr<IUserNetwork> NetworkFactory::createUserNetwork(const UserNetwor
         return std::make_shared<ElegooUserNetwork>(userNetworkInfo);
     }
     default: {
-        wxLogWarning("Unsupported network type: %s", userNetworkInfo.hostType.c_str());
+        BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(": unsupported network type: %s") % userNetworkInfo.hostType;
         return nullptr;
     }
     }
@@ -54,7 +55,7 @@ std::shared_ptr<IPluginNetwork> NetworkFactory::createPluginNetwork(const Plugin
         return std::make_shared<ElegooPluginNetwork>(pluginNetworkInfo);
     }
     default: {
-        wxLogWarning("Unsupported network type: %s", pluginNetworkInfo.hostType.c_str());
+        BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(": unsupported network type: %s") % pluginNetworkInfo.hostType;
         return nullptr;
     }
     }
@@ -75,7 +76,7 @@ std::shared_ptr<INetworkHelper> NetworkFactory::createNetworkHelper(PrintHostTyp
                     INetworkHelper::setTestEnvJson(jsonData);
                 }
             } catch (const std::exception& e) {
-                wxLogError("failed to load test env json from JSON: %s", e.what());
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to load test env json from JSON: %s") % e.what();
             }
         }
     });
@@ -85,7 +86,9 @@ std::shared_ptr<INetworkHelper> NetworkFactory::createNetworkHelper(PrintHostTyp
         return std::make_shared<ElegooNetworkHelper>();
     }
     default: {
-        wxLogWarning("Unsupported network type: %s", PrintHost::get_print_host_type_str(hostType).c_str());
+        BOOST_LOG_TRIVIAL(warning) << __FUNCTION__
+                                   << boost::format(": unsupported network type: %s")
+                                          % PrintHost::get_print_host_type_str(hostType);
         return nullptr;
     }
     }

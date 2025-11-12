@@ -44,3 +44,4 @@ resources/web/elegoo-fdm-web/
 deps_src/build/
 .env.testing
 resources/plugins/
+work/

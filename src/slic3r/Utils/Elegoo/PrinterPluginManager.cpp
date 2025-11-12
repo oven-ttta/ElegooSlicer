@@ -2,10 +2,11 @@
 #include "PrintHost.hpp"
 #include "libslic3r/Utils.hpp"
 #include "PrinterNetwork.hpp"
-#include <wx/log.h>
 #include <boost/filesystem.hpp>
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 namespace Slic3r {
 
@@ -106,21 +107,6 @@ void PrinterPluginManager::loadPluginList() {
                 continue;
             }
 
-            // fs::path infoFile = it->path() / "plugin-info.json";
-            // if (!fs::exists(infoFile)) {
-            //     continue;
-            // }
-
-            // std::ifstream file(infoFile.string());
-            // if (!file.is_open()) {
-            //     continue;
-            // }
-
-            // try {
-            //     nlohmann::json json;
-            //     file >> json;
-            //     file.close();
-
             std::string hostType = it->path().filename().string();
             PluginNetworkInfo info;
             info.pluginPath    = it->path().string();
@@ -131,14 +117,11 @@ void PrinterPluginManager::loadPluginList() {
 
             mPluginList[hostType] = info;
 
-            // } catch (const std::exception& e) {
-            //     wxLogError("Failed to parse %s: %s", infoFile.string().c_str(), e.what());
-            // }
         }
 
-        wxLogMessage("Loaded %zu plugins", mPluginList.size());
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": loaded %zu plugins") % mPluginList.size();
     } catch (const std::exception& e) {
-        wxLogError("Failed to load plugins: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to load plugins: %s") % e.what();
     }
 }
 

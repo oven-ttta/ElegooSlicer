@@ -14,6 +14,8 @@
 #include "libslic3r/AppConfig.hpp"
 #include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 #include "slic3r/Utils/Elegoo/PrinterMmsManager.hpp"
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 
 namespace Slic3r { namespace GUI {
@@ -44,7 +46,7 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
     // DestroyChildren();
     mBrowser = WebView::CreateWebView(this, "");
     if (mBrowser == nullptr) {
-        wxLogError("Could not init m_browser");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init m_browser";
         return;
     }
 
@@ -90,7 +92,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
         try {
             return getPrinterList();
         } catch (const std::exception& e) {
-            wxLogError("Error in getPrinterList: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in getPrinterList: %s") % e.what();
             return webviewIpc::IPCResult::error("Failed to get printer list");
         }
     });
@@ -128,16 +130,16 @@ void PrinterMmsSyncView::setupIPCHandlers()
                 if (life_tracker.lock()) {
                     // Mark async operation as completed even on error
                     m_asyncOperationInProgress = false;
-                    
-                    wxLogError("Error in getPrinterFilamentInfo: %s", e.what());
+
+                    BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in getPrinterFilamentInfo: %s") % e.what();
                     sendResponse(webviewIpc::IPCResult::error(std::string("Failed to get printer filament info: ") + e.what()));
                 }
             } catch (...) {
                 if (life_tracker.lock()) {
                     // Mark async operation as completed even on unknown error
                     m_asyncOperationInProgress = false;
-                    
-                    wxLogError("Unknown error in getPrinterFilamentInfo");
+
+                    BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": unknown error in getPrinterFilamentInfo";
                     sendResponse(webviewIpc::IPCResult::error("Failed to get printer filament info: Unknown error"));
                 }
             }
@@ -150,7 +152,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
             syncMmsFilament(event.data);
             EndModal(wxID_OK);
         } catch (const std::exception& e) {
-            wxLogError("Error in syncMmsFilament: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in syncMmsFilament: %s") % e.what();
         }
     });
 
@@ -159,7 +161,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
         try {
             EndModal(wxID_CANCEL);
         } catch (const std::exception& e) {
-            wxLogError("Error in closeDialog: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in closeDialog: %s") % e.what();
         }
     });
 }

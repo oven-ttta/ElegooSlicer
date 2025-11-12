@@ -14,6 +14,8 @@
 #include <slic3r/Utils/Elegoo/UserNetworkManager.hpp>
 #include <nlohmann/json.hpp>
 #include <wx/url.h>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 namespace Slic3r { namespace GUI {
 
 wxBEGIN_EVENT_TABLE(HomeView, wxPanel) EVT_WEBVIEW_LOADED(wxID_ANY, HomeView::onWebViewLoaded)
@@ -114,12 +116,12 @@ void HomeView::createHomepageViews()
 
 void HomeView::showPage(const wxString& pageName)
 {
-    wxLogMessage("showPage called with: %s", pageName);
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": showPage called with: %s") % pageName;
 
     // Hide all views first
     for (auto& pair : mHomepageViews) {
         pair.second->Show(false);
-        wxLogMessage("Hiding view: %s", pair.first);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": hiding view: %s") % pair.first;
     }
 
     // Show the selected view
@@ -128,9 +130,9 @@ void HomeView::showPage(const wxString& pageName)
         mCurrentView = it->second;
         mCurrentView->Show(true);
         mContentSizer->Layout();
-        wxLogMessage("Showing view: %s", pageName);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": showing view: %s") % pageName;
     } else {
-        wxLogMessage("View not found: %s", pageName);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": view not found: %s") % pageName;
     }
 }
 
@@ -188,12 +190,12 @@ webviewIpc::IPCResult HomeView::handleNavigateToPage(const nlohmann::json& data)
     wxString    wxPageName = wxString::FromUTF8(pageName);
 
     // Debug: Print the page name
-    wxLogMessage("Navigating to page: %s", wxPageName);
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": navigating to page: %s") % wxPageName;
 
     // Check if the page exists
     auto it = mHomepageViews.find(wxPageName);
     if (it == mHomepageViews.end()) {
-        wxLogMessage("Page not found: %s", wxPageName);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": page not found: %s") % wxPageName;
         return webviewIpc::IPCResult::success();
     }
 
@@ -219,9 +221,9 @@ webviewIpc::IPCResult HomeView::handleReady()
         nlohmann::json data = convertUserNetworkInfoToJson(mRefreshUserInfo);
         mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
         mRefreshUserInfo = UserNetworkInfo();
-        wxLogMessage("HomeView: Sent pending user info to WebView");
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": sent pending user info to WebView";
     }
-    wxLogMessage("HomeView: Ready");  
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": ready";
     return webviewIpc::IPCResult::success();
 }
 

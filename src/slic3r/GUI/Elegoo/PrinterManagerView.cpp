@@ -32,6 +32,8 @@
 #include "slic3r/Utils/Elegoo/PrinterNetworkEvent.hpp"
 #include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
 #include "slic3r/Utils/Elegoo/PrinterManager.hpp"
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 #define FIRST_TAB_NAME _L("Connected Printer")
 #define TAB_MAX_WIDTH 200
@@ -363,7 +365,7 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
 
     mBrowser = WebView::CreateWebView(mTabBar, "");
     if (mBrowser == nullptr) {
-        wxLogError("Could not init mBrowser");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init mBrowser";
         return;
     }
     
@@ -443,7 +445,7 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
         }
     }
     if (printerInfo.printerId.empty()) {
-        wxLogError("Printer %s not found", printerId.c_str());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": printer %s not found") % printerId;
         return;
     }
     PrinterWebView* view = new PrinterWebView(mTabBar);
@@ -981,7 +983,7 @@ webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::jso
         result.message = networkResult.message;
         errorCode = networkResult.code;
     } catch (const std::exception& e) {
-        wxLogMessage("Add physical printer error: %s", e.what());
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": add physical printer error: %s") % e.what();
         errorCode = PrinterNetworkErrorCode::INVALID_PARAMETER;
         result.message = getErrorMessage(errorCode);
     }
@@ -1067,7 +1069,7 @@ webviewIpc::IPCResult PrinterManagerView::browseCAFile()
             path = openFileDialog.GetPath().ToStdString();
         }
     } catch (const std::exception& e) {
-        wxLogMessage("Browse CA file error: %s", e.what());
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": browse CA file error: %s") % e.what();
         errorCode = PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR;
     }
     result.data = path;
@@ -1084,9 +1086,9 @@ webviewIpc::IPCResult PrinterManagerView::handleReady()
         nlohmann::json data = convertUserNetworkInfoToJson(mRefreshUserInfo);
         mIpc->sendEvent("onUserInfoUpdated", data, mIpc->generateRequestId());
         mRefreshUserInfo = UserNetworkInfo();
-        wxLogMessage("PrinterManagerView: Sent pending user info to WebView");
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": sent pending user info to WebView";
     }
-    wxLogMessage("PrinterManagerView: Ready");  
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": ready";
     return webviewIpc::IPCResult::success();
 }
 webviewIpc::IPCResult PrinterManagerView::handleCheckLoginStatus()
@@ -1187,7 +1189,7 @@ void PrinterManagerView::saveTabState()
             file.close();
         }
     } catch (const std::exception& e) {
-        wxLogError("Failed to save tab state: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to save tab state: %s") % e.what();
     }
 }
 
@@ -1236,7 +1238,7 @@ void PrinterManagerView::loadTabState()
             mTabBar->SetSelection(activeTabIndex);
         }
     } catch (const std::exception& e) {
-        wxLogError("Failed to load tab state: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to load tab state: %s") % e.what();
     }
 }
 

@@ -29,6 +29,8 @@
 #include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 #include "slic3r/Utils/Elegoo/PrinterMmsManager.hpp"
 #include <slic3r/Utils/WebviewIPCManager.h>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 #define HAS_MMS_HEIGHT 800
 #define NO_MMS_HEIGHT 650
@@ -83,7 +85,7 @@ void PrintSendDialogEx::init()
     // DestroyChildren();
     mBrowser = WebView::CreateWebView(this, "");
     if (mBrowser == nullptr) {
-        wxLogError("Could not init m_browser");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init m_browser";
         return;
     }
 
@@ -233,7 +235,7 @@ void PrintSendDialogEx::setupIPCHandlers()
                     // Mark async operation as completed even on error
                     mAsyncOperationInProgress = false;
 
-                    wxLogError("Error in request_print_task: %s", e.what());
+                    BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in request_print_task: %s") % e.what();
                     sendResponse(webviewIpc::IPCResult::error(std::string("Print task preparation failed: ") + e.what()));
                 }
             } catch (...) {
@@ -241,7 +243,7 @@ void PrintSendDialogEx::setupIPCHandlers()
                     // Mark async operation as completed even on unknown error
                     mAsyncOperationInProgress = false;
 
-                    wxLogError("Unknown error in request_print_task");
+                    BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": unknown error in request_print_task";
                     sendResponse(webviewIpc::IPCResult::error("Print task preparation failed: Unknown error"));
                 }
             }
@@ -253,7 +255,7 @@ void PrintSendDialogEx::setupIPCHandlers()
         try {
             return getPrinterList();
         } catch (const std::exception& e) {
-            wxLogError("Error in request_printer_list: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in request_printer_list: %s") % e.what();
             return webviewIpc::IPCResult::error("Failed to get printer list");
         }
     });
@@ -314,7 +316,7 @@ void PrintSendDialogEx::setupIPCHandlers()
             response["bedType"]     = bedTypeStr;
             return webviewIpc::IPCResult::success(response);
         } catch (const std::exception& e) {
-            wxLogError("Error in request_printer_list: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in request_printer_list: %s") % e.what();
             return webviewIpc::IPCResult::error("Failed to get printer list");
         }
     });
