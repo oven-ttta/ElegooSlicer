@@ -56,6 +56,7 @@ namespace GUI {
 
 class Bed3D;
 class PartPlateList;
+class GPUColorPicker;
 
 #if ENABLE_RETINA_GL
 class RetinaHelper;
@@ -546,6 +547,8 @@ private:
 
     GLVolumeCollection m_volumes;
     GCodeViewer m_gcode_viewer;
+    // GPU Color Picking 支持：在 MeshRaycaster 未构建前作为临时回退
+    std::unique_ptr<GPUColorPicker> m_gpu_picker;
 
     RenderTimer m_render_timer;
 

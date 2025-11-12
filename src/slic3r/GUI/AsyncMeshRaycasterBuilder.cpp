@@ -2,8 +2,6 @@
 
 #include "AsyncMeshRaycasterBuilder.hpp"
 
-#include "LogPanel.hpp"
-
 #include <boost/log/trivial.hpp>
 
 #include <chrono>

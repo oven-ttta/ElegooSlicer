@@ -63,6 +63,8 @@ std::pair<bool, std::string> GLShadersManager::init()
         );
     // used to render variable layers heights in 3d editor
     valid &= append_shader("variable_layer_height", { prefix + "variable_layer_height.vs", prefix + "variable_layer_height.fs" });
+     // used for GPU color picking (fast object selection fallback)
+    valid &= append_shader("picking", { prefix + "picking.vs", prefix + "picking.fs" });
     // used to render highlight contour around selected triangles inside the multi-material gizmo
     valid &= append_shader("mm_contour", { prefix + "mm_contour.vs", prefix + "mm_contour.fs" });
     // Used to render painted triangles inside the multi-material gizmo. Triangle normals are computed inside fragment shader.

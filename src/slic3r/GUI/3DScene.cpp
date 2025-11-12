@@ -7,7 +7,7 @@
 #include "Plater.hpp"
 #include "BitmapCache.hpp"
 #include "Camera.hpp"
-
+#include "AsyncMeshRaycasterBuilder.hpp"
 #include "libslic3r/BuildVolume.hpp"
 #include "libslic3r/ExtrusionEntity.hpp"
 #include "libslic3r/ExtrusionEntityCollection.hpp"
@@ -34,6 +34,12 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <Eigen/Dense>
+namespace Slic3r {
+    namespace GUI {
+    // global flag: whether to refresh raycasters (when async MeshRaycaster is ready)
+    std::atomic<bool> g_need_refresh_raycasters{false};
+} // namespace GUI
+} // namespace Slic3r
 
 #ifdef HAS_GLSAFE
 void glAssertRecentCallImpl(const char* file_name, unsigned int line, const char* function_name)
@@ -713,7 +719,34 @@ int GLVolumeCollection::load_object_volume(
     v.model.init_from(mesh, true);
 #else
     v.model.init_from(*mesh);
-    if (need_raycaster) { v.mesh_raycaster = std::make_unique<GUI::MeshRaycaster>(mesh); }
+    if (need_raycaster) 
+    { 
+        // v.mesh_raycaster = std::make_unique<GUI::MeshRaycaster>(mesh); 
+        // submit async build task
+    v.raycaster_ready = false;
+    
+    // capture GLVolume pointer (not reference) to ensure lifetime safety
+    GLVolume* volume_ptr = &v;
+    
+    v.async_build_task_id = Slic3r::GUI::AsyncMeshRaycasterBuilder::instance().submit_build_task(
+        mesh,
+        [volume_ptr](std::unique_ptr<GUI::MeshRaycaster> raycaster) {
+            // callback function: receive built raycaster in main thread
+            if (raycaster) {
+                volume_ptr->mesh_raycaster = std::move(raycaster);
+                volume_ptr->raycaster_ready = true;
+                
+                BOOST_LOG_TRIVIAL(info) << "[Async] MeshRaycaster is ready (faces: " << (volume_ptr->mesh_raycaster ? volume_ptr->mesh_raycaster->get_aabb_mesh().indices().size() : 0) << ")";
+                
+                // set global flag, notify to re-register raycasters
+                Slic3r::GUI::g_need_refresh_raycasters = true;
+            }
+        },
+        0  // priority: 0 means normal priority
+    );
+    
+    BOOST_LOG_TRIVIAL(info) << "[Async] Submitted async MeshRaycaster build task (Task ID: " << v.async_build_task_id << ")";
+    }
 #endif // ENABLE_SMOOTH_NORMALS
     v.composite_id = GLVolume::CompositeID(obj_idx, volume_idx, instance_idx);
 

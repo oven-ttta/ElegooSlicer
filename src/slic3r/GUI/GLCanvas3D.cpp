@@ -31,6 +31,9 @@
 #include "NotificationManager.hpp"
 #include "format.hpp"
 #include "DailyTips.hpp"
+#include "AsyncMeshRaycasterBuilder.hpp"
+#include "SceneRaycasterManager.hpp"
+#include "GPUColorPicker.hpp"
 
 #include "slic3r/GUI/Gizmos/GLGizmoPainterBase.hpp"
 #include "slic3r/Utils/UndoRedo.hpp"
@@ -68,6 +71,7 @@
 #include <float.h>
 #include <algorithm>
 #include <cmath>
+#include <string>
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -82,6 +86,20 @@ static Slic3r::ColorRGBA DEFAULT_BG_LIGHT_COLOR      = { 0.906f, 0.906f, 0.906f,
 static Slic3r::ColorRGBA DEFAULT_BG_LIGHT_COLOR_DARK = { 0.329f, 0.329f, 0.353f, 1.0f };
 static Slic3r::ColorRGBA ERROR_BG_LIGHT_COLOR        = { 0.753f, 0.192f, 0.039f, 1.0f };
 static Slic3r::ColorRGBA ERROR_BG_LIGHT_COLOR_DARK   = { 0.753f, 0.192f, 0.039f, 1.0f };
+
+namespace {
+    const char* picking_solution_to_text(SceneRaycasterManager::PickingSolution solution)
+    {
+        switch (solution) {
+        case SceneRaycasterManager::PickingSolution::CpuRaycaster:
+            return "CPU MeshRaycaster";
+        case SceneRaycasterManager::PickingSolution::GpuColorPicking:
+            return "GPU Color Picker";
+        default:
+            return "Unknown";
+        }
+    }
+}
 
 void GLCanvas3D::update_render_colors()
 {
@@ -1225,6 +1243,10 @@ bool GLCanvas3D::init()
     if (m_gizmos.is_enabled() && !m_gizmos.init())
         std::cout << "Unable to initialize gizmos: please, check that all the required textures are available" << std::endl;
 
+    // init AsyncMeshRaycasterBuilder
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": init AsyncMeshRaycasterBuilder";
+    AsyncMeshRaycasterBuilder::instance().init();
+
     BOOST_LOG_TRIVIAL(info) <<__FUNCTION__<< ": before _init_toolbars";
     if (!_init_toolbars())
         return false;
@@ -1234,6 +1256,14 @@ bool GLCanvas3D::init()
         return false;
 
     BOOST_LOG_TRIVIAL(info) <<__FUNCTION__<< ": finish m_selection";
+
+    // init GPU Color Picker (for fallback when MeshRaycaster is not ready)
+    {
+        const Size &cnv_size = get_canvas_size();
+        if (!m_gpu_picker)
+            m_gpu_picker = std::make_unique<GPUColorPicker>();
+        m_gpu_picker->init(cnv_size.get_width(), cnv_size.get_height());
+    }
 
 #if ENABLE_IMGUI_STYLE_EDITOR
     //BBS load render color for style editor
@@ -2430,6 +2460,9 @@ void GLCanvas3D::reload_scene(bool refresh_immediately, bool force_full_scene_re
             if (!model_volume.is_model_part())
                 continue;
 
+            if (model_volume.mmu_segmentation_facets.empty())
+                continue;
+
             unsigned int filaments_count = (unsigned int)dynamic_cast<const ConfigOptionStrings*>(m_config->option("filament_colour"))->values.size();
             model_volume.update_extruder_count(filaments_count);
         }
@@ -2864,7 +2897,13 @@ void GLCanvas3D::reload_scene(bool refresh_immediately, bool force_full_scene_re
     // refresh volume raycasters for picking
     for (size_t i = 0; i < m_volumes.volumes.size(); ++i) {
         const GLVolume* v = m_volumes.volumes[i];
-        assert(v->mesh_raycaster != nullptr);
+       
+        // async loading optimization: only register raycaster when MeshRaycaster is ready
+        // unready raycaster will be registered after building is completed, next reload_scene
+        if (v->mesh_raycaster == nullptr || !v->raycaster_ready.load()) {
+            continue;
+        }
+        // register raycaster
         std::shared_ptr<SceneRaycasterItem> raycaster = add_raycaster_for_picking(SceneRaycaster::EType::Volume, i, *v->mesh_raycaster, v->world_matrix());
         raycaster->set_active(v->is_active);
     }
@@ -3050,6 +3089,24 @@ void GLCanvas3D::on_idle(wxIdleEvent& evt)
 {
     if (!m_initialized)
         return;
+
+
+    // process completed tasks of AsyncMeshRaycasterBuilder
+    AsyncMeshRaycasterBuilder::instance().process_completed_tasks();
+    
+    // check if new raycaster is ready, need to refresh
+    if (Slic3r::GUI::g_need_refresh_raycasters.exchange(false)) {
+        // check if dragging
+        bool is_dragging = m_mouse.dragging || m_gizmos.is_dragging() || m_rectangle_selection.is_dragging();
+        
+        if (is_dragging) {
+            Slic3r::GUI::g_need_refresh_raycasters = true;
+        } else {
+            // no dragging, safe refresh
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": new MeshRaycaster is ready, reload scene";
+            reload_scene(false, false);
+        }
+    }
 
     m_dirty |= m_main_toolbar.update_items_state();
     //BBS: GUI refactor: GLToolbar
@@ -4734,7 +4791,7 @@ void GLCanvas3D::do_move(const std::string& snapshot_type)
                     if (cur_mv->get_transformation() != v->get_volume_transformation()) {
                         cur_mv->set_transformation(v->get_volume_transformation());
                         // BBS: backup
-                        Slic3r::save_object_mesh(*model_object);
+                        ::Slic3r::save_object_mesh(*model_object);
                     }
                 }
 
@@ -6787,6 +6844,11 @@ void GLCanvas3D::_resize(unsigned int w, unsigned int h)
 
     // ensures that this canvas is current
     _set_current();
+
+     // sync update GPU Color Picker viewport size
+     if (!m_gpu_picker)
+        m_gpu_picker = std::make_unique<GPUColorPicker>();
+     m_gpu_picker->resize(static_cast<int>(w), static_cast<int>(h));
 }
 
 BoundingBoxf3 GLCanvas3D::_max_bounding_box(bool include_gizmos, bool include_bed_model, bool include_plates) const
@@ -6869,7 +6931,18 @@ void GLCanvas3D::_picking_pass()
     const ClippingPlane clipping_plane = ((!current_gizmo || current_gizmo->apply_clipping_plane()) ? m_gizmos.get_clipping_plane() :
                                                                                                       ClippingPlane::ClipsNothing())
                                              .inverted_normal();
-    const SceneRaycaster::HitResult hit = m_scene_raycaster.hit(m_mouse.position, wxGetApp().plater()->get_camera(), &clipping_plane);
+    // const SceneRaycaster::HitResult hit = m_scene_raycaster.hit(m_mouse.position, wxGetApp().plater()->get_camera(), &clipping_plane);
+
+      // perform picking detection: automatically switch between CPU/GPU schemes based on MeshRaycaster state
+    const SceneRaycaster::HitResult hit = SceneRaycasterManager::hit_with_fallback(
+        m_scene_raycaster,             // scene raycaster
+        m_volumes.volumes,             // all volumes to be picked
+        m_mouse.position,              // current mouse position
+        wxGetApp().plater()->get_camera(), // camera
+        m_gpu_picker.get(),            // GPU Picker instance
+        &clipping_plane                // clipping plane
+    );
+
     if (hit.is_valid()) {
         switch (hit.type)
         {
@@ -9016,7 +9089,18 @@ Vec3d GLCanvas3D::_mouse_to_3d(const Point& mouse_pos, float* z)
         return Vec3d(DBL_MAX, DBL_MAX, DBL_MAX);
 
     if (z == nullptr) {
-        const SceneRaycaster::HitResult hit = m_scene_raycaster.hit(mouse_pos.cast<double>(), wxGetApp().plater()->get_camera(), nullptr);
+        // const SceneRaycaster::HitResult hit = m_scene_raycaster.hit(mouse_pos.cast<double>(), wxGetApp().plater()->get_camera(), nullptr);
+
+         // use GPU fallback mechanism, ensure correct picking even when MeshRaycaster is not ready
+        const ClippingPlane clipping_plane = ClippingPlane::ClipsNothing();
+        const SceneRaycaster::HitResult hit = SceneRaycasterManager::hit_with_fallback(
+            m_scene_raycaster,
+            m_volumes.volumes,
+            mouse_pos.cast<double>(),
+            wxGetApp().plater()->get_camera(),
+            m_gpu_picker.get(),
+            &clipping_plane
+        );
         return hit.is_valid() ? hit.position.cast<double>() : _mouse_to_bed_3d(mouse_pos);
     }
     else {

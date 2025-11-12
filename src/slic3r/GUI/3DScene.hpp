@@ -17,6 +17,7 @@
 
 #include <functional>
 #include <optional>
+#include <atomic>
 
 #ifndef NDEBUG
 #define HAS_GLSAFE
@@ -41,6 +42,7 @@ extern Slic3r::ColorRGBA              adjust_color_for_rendering(const Slic3r::C
 namespace Slic3r {
 namespace GUI {
     class Size;
+    extern std::atomic<bool> g_need_refresh_raycasters;
 }
 
 class SLAPrintObject;
@@ -209,6 +211,11 @@ public:
     GUI::GLModel            model;
     // raycaster used for picking
     std::unique_ptr<GUI::MeshRaycaster> mesh_raycaster;
+
+    // async MeshRaycaster build support
+    std::atomic<bool> raycaster_ready{false};  // MeshRaycaster is ready
+    int async_build_task_id{-1};               // async build task ID (-1 means no task)
+    
     // BBS
     mutable std::vector<GUI::GLModel> mmuseg_models;
     mutable ObjectBase::Timestamp       mmuseg_ts;
