@@ -242,6 +242,15 @@ GLVolume::GLVolume(float r, float g, float b, float a)
     color = { r, g, b, a };
     set_render_color(color);
     mmuseg_ts = 0;
+    raycaster_token = std::make_shared<AsyncRaycasterToken>();
+    raycaster_token->volume.store(this, std::memory_order_release);
+}
+
+GLVolume::~GLVolume()
+{
+    if (raycaster_token) {
+        raycaster_token->volume.store(nullptr, std::memory_order_release);
+    }
 }
 
 
@@ -725,21 +734,27 @@ int GLVolumeCollection::load_object_volume(
         // submit async build task
     v.raycaster_ready = false;
     
-    // capture GLVolume pointer (not reference) to ensure lifetime safety
-    GLVolume* volume_ptr = &v;
+    // capture lifetime token to ensure callback safety
+    auto volume_token = v.raycaster_token;
+    volume_token->volume.store(&v, std::memory_order_release);
     
     v.async_build_task_id = Slic3r::GUI::AsyncMeshRaycasterBuilder::instance().submit_build_task(
         mesh,
-        [volume_ptr](std::unique_ptr<GUI::MeshRaycaster> raycaster) {
+        [volume_token](std::unique_ptr<GUI::MeshRaycaster> raycaster) {
+            if (!raycaster)
+                return;
+
             // callback function: receive built raycaster in main thread
-            if (raycaster) {
+            if (GLVolume* volume_ptr = volume_token->volume.load(std::memory_order_acquire)) {
                 volume_ptr->mesh_raycaster = std::move(raycaster);
                 volume_ptr->raycaster_ready = true;
-                
+
                 BOOST_LOG_TRIVIAL(info) << "[Async] MeshRaycaster is ready (faces: " << (volume_ptr->mesh_raycaster ? volume_ptr->mesh_raycaster->get_aabb_mesh().indices().size() : 0) << ")";
-                
+
                 // set global flag, notify to re-register raycasters
                 Slic3r::GUI::g_need_refresh_raycasters = true;
+            } else {
+                BOOST_LOG_TRIVIAL(debug) << "[Async] MeshRaycaster ready but owning volume already destroyed, dropping result.";
             }
         },
         0  // priority: 0 means normal priority

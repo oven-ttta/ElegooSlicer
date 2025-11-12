@@ -41,7 +41,7 @@ void AsyncMeshRaycasterBuilder::init(int num_threads)
         m_workers.emplace_back(&AsyncMeshRaycasterBuilder::worker_thread_func, this);
     }
 
-    BOOST_LOG_TRIVIAL(info) << u8"AsyncMeshRaycasterBuilder 已启动 " << num_threads << u8" 个工作线程";
+    BOOST_LOG_TRIVIAL(info) << u8"AsyncMeshRaycasterBuilder started with " << num_threads << u8" worker threads";
 }
 
 void AsyncMeshRaycasterBuilder::shutdown(bool log_messages)
@@ -69,7 +69,7 @@ void AsyncMeshRaycasterBuilder::shutdown(bool log_messages)
     }
 
     if (log_messages) {
-        BOOST_LOG_TRIVIAL(info) << u8"AsyncMeshRaycasterBuilder 已关闭";
+        BOOST_LOG_TRIVIAL(info) << u8"AsyncMeshRaycasterBuilder closed";
     }
 }
 
@@ -78,8 +78,13 @@ int AsyncMeshRaycasterBuilder::submit_build_task(
     BuildCallback callback,
     int priority)
 {
+    if (m_shutdown_flag.load(std::memory_order_acquire)) {
+        BOOST_LOG_TRIVIAL(warning) << "AsyncMeshRaycasterBuilder::submit_build_task() - rejected, builder is shutting down";
+        return -1;
+    }
+
     if (!mesh || !callback) {
-        BOOST_LOG_TRIVIAL(warning) << "AsyncMeshRaycasterBuilder::submit_build_task() - 无效参数";
+        BOOST_LOG_TRIVIAL(warning) << "AsyncMeshRaycasterBuilder::submit_build_task() - Invalid parameters";
         return -1;
     }
 
@@ -93,6 +98,10 @@ int AsyncMeshRaycasterBuilder::submit_build_task(
 
     {
         std::lock_guard<std::mutex> lock(m_queue_mutex);
+        if (m_shutdown_flag.load(std::memory_order_relaxed)) {
+            BOOST_LOG_TRIVIAL(warning) << "AsyncMeshRaycasterBuilder::submit_build_task() - rejected after shutdown request";
+            return -1;
+        }
         m_pending_tasks.push(std::move(task));
     }
 
@@ -101,6 +110,7 @@ int AsyncMeshRaycasterBuilder::submit_build_task(
     return task_id;
 }
 
+// TODO: support cancellation
 bool AsyncMeshRaycasterBuilder::cancel_task(int task_id)
 {
     std::lock_guard<std::mutex> lock(m_queue_mutex);
@@ -128,7 +138,7 @@ void AsyncMeshRaycasterBuilder::worker_thread_func()
                 continue;
             }
 
-            task = std::move(const_cast<BuildTask&>(m_pending_tasks.top()));
+            task = m_pending_tasks.top();
             m_pending_tasks.pop();
         }
 
@@ -140,7 +150,7 @@ void AsyncMeshRaycasterBuilder::worker_thread_func()
             raycaster = std::make_unique<MeshRaycaster>(task.mesh);
         }
         catch (const std::exception& ex) {
-            BOOST_LOG_TRIVIAL(error) << "AsyncMeshRaycasterBuilder - MeshRaycaster构建失败: " << ex.what();
+            BOOST_LOG_TRIVIAL(error) << "AsyncMeshRaycasterBuilder - MeshRaycaster failed to build: " << ex.what();
             raycaster = nullptr;
         }
 
@@ -149,8 +159,8 @@ void AsyncMeshRaycasterBuilder::worker_thread_func()
 
         if (raycaster && duration_ms > 100) {
             size_t face_count = task.mesh->its.indices.size();
-            BOOST_LOG_TRIVIAL(info) << u8"[异步] MeshRaycaster构建完成: " << duration_ms
-                                    << u8" 毫秒 (面片: " << face_count << u8")";
+            BOOST_LOG_TRIVIAL(info) << u8"[Async] MeshRaycaster built in: " << duration_ms
+                                    << u8" milliseconds (faces: " << face_count << u8")";
         }
 
         {
@@ -184,7 +194,7 @@ void AsyncMeshRaycasterBuilder::process_completed_tasks()
                 task.callback(std::move(task.raycaster));
             }
             catch (const std::exception& ex) {
-                BOOST_LOG_TRIVIAL(error) << "AsyncMeshRaycasterBuilder - 回调函数执行失败: " << ex.what();
+                BOOST_LOG_TRIVIAL(error) << "AsyncMeshRaycasterBuilder - Callback function failed: " << ex.what();
             }
         }
     }

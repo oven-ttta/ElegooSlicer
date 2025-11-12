@@ -18,6 +18,7 @@
 #include <functional>
 #include <optional>
 #include <atomic>
+#include <memory>
 
 #ifndef NDEBUG
 #define HAS_GLSAFE
@@ -64,6 +65,8 @@ using ModelObjectPtrs = std::vector<ModelObject*>;
 // Return appropriate color based on the ModelVolume.
 extern ColorRGBA color_from_model_volume(const ModelVolume& model_volume);
 
+struct AsyncRaycasterToken;
+
 class GLVolume {
 public:
     std::string name;
@@ -96,7 +99,7 @@ public:
 
     GLVolume(float r = 1.f, float g = 1.f, float b = 1.f, float a = 1.f);
     GLVolume(const ColorRGBA& color) : GLVolume(color.r(), color.g(), color.b(), color.a()) {}
-    virtual ~GLVolume() = default;
+    virtual ~GLVolume();
 
     // BBS
 protected:
@@ -215,6 +218,7 @@ public:
     // async MeshRaycaster build support
     std::atomic<bool> raycaster_ready{false};  // MeshRaycaster is ready
     int async_build_task_id{-1};               // async build task ID (-1 means no task)
+    std::shared_ptr<AsyncRaycasterToken> raycaster_token;
     
     // BBS
     mutable std::vector<GUI::GLModel> mmuseg_models;
@@ -378,6 +382,11 @@ private:
 typedef std::vector<GLVolume*> GLVolumePtrs;
 typedef std::pair<GLVolume*, std::pair<unsigned int, double>> GLVolumeWithIdAndZ;
 typedef std::vector<GLVolumeWithIdAndZ> GLVolumeWithIdAndZList;
+
+struct AsyncRaycasterToken
+{
+    std::atomic<GLVolume*> volume{ nullptr };
+};
 
 class GLVolumeCollection
 {
