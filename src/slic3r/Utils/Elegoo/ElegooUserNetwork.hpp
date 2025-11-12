@@ -20,7 +20,8 @@ public:
     virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters() override;
     virtual PrinterNetworkResult<UserNetworkInfo> refreshToken(const UserNetworkInfo& userInfo) override;
     virtual PrinterNetworkResult<bool> setRegion(const std::string& region, const std::string& iotUrl) override;
-    
+    virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
+    virtual PrinterNetworkResult<bool>               unbindWANPrinter(const std::string& serialNumber)            override;
 };
 
 } // namespace Slic3r

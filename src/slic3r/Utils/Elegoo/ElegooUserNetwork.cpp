@@ -43,5 +43,16 @@ PrinterNetworkResult<bool> ElegooUserNetwork::logout()
 {
     return ElegooLink::getInstance()->logout(mUserNetworkInfo);
 }
+
+
+PrinterNetworkResult<PrinterNetworkInfo> ElegooUserNetwork::bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo)
+{
+    return ElegooLink::getInstance()->bindWANPrinter(printerNetworkInfo);
+}
+
+PrinterNetworkResult<bool> ElegooUserNetwork::unbindWANPrinter(const std::string& serialNumber)
+{
+    return ElegooLink::getInstance()->unbindWANPrinter(serialNumber);
+}   
 } // namespace Slic3r 
 

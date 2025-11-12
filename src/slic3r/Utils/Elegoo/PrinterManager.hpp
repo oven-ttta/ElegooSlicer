@@ -75,17 +75,14 @@ private:
 
     std::mutex mPrinterNetworkMutex;
     std::map<std::string, std::shared_ptr<IPrinterNetwork>> mPrinterNetworkConnections;
-    bool addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network);
+    PrinterNetworkResult<bool> connectToPrinter(PrinterNetworkInfo& printer);
     bool deletePrinterNetwork(const std::string& printerId);
     std::shared_ptr<IPrinterNetwork> getPrinterNetwork(const std::string& printerId);
-
-        
+     
     // sync old preset printers to network
     void syncOldPresetPrinters();
-    
     // Validate and complete printer info with system preset
     void validateAndCompletePrinterInfo(PrinterNetworkInfo& printerInfo);
-
 
     std::string generatePrinterId();
 
@@ -97,13 +94,13 @@ private:
     std::chrono::steady_clock::time_point mLastWanConnectionLoopTime;
     void monitorPrinterConnections();
     void monitorWanPrinterConnections();
-    std::mutex mOnlinePrintersMutex;
-    void refreshOnlinePrinters();
+    std::mutex mWanPrintersMutex;
+    void refreshWanPrinters();
     
     // Check and handle WAN network error (like token expiration)
     template<typename T>
     void checkUserAuthStatus(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkResult<T>& result, 
                              const UserNetworkInfo& requestUserInfo);
-    void handlePrinterConnection(const std::string& printerId);
+
 };
 } // namespace Slic3r::GUI 
