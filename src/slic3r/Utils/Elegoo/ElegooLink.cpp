@@ -212,6 +212,7 @@ void ElegooLink::init(const std::string& region, std::string& iotUrl)
     elink::SetRegionParams setRegionParams;
     setRegionParams.region = region;
     setRegionParams.baseUrl = iotUrl;
+    setRegionParams.caCertPath = cfg.caCertPath;
     elink::ElegooLink::getInstance().setRegion(setRegionParams);
 
     std::string version = elink::ElegooLink::getInstance().getVersion();
@@ -433,6 +434,9 @@ PrinterNetworkResult<bool> ElegooLink::setRegion(const std::string& region, cons
     elink::SetRegionParams params;
     params.region  = region;
     params.baseUrl = iotUrl;
+    std::string caCertDir = resources_dir();
+    std::replace(caCertDir.begin(), caCertDir.end(), '\\', '/');
+    params.caCertPath      =  caCertDir + "/cert/cacert.pem"; // Use system default CA certs
     elink::VoidResult       elinkResult = elink::ElegooLink::getInstance().setRegion(params);
     PrinterNetworkErrorCode resultCode  = parseElegooResult(elinkResult.code);
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS,
