@@ -191,8 +191,8 @@ Http::priv::priv(const std::string &url)
 	::curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_MAX_TLSv1_2);
 #endif
 	::curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-	::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	// ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	// ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
 	// https://everything.curl.dev/http/post/expect100.html
 	// remove the Expect: header, it will add a second delay to each request,
@@ -215,7 +215,7 @@ bool Http::priv::ca_file_supported(::CURL *curl)
 
 	if (curl == nullptr) { return res; }
 
-#if LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 48
+#if LIBCURL_VERSION_MAJOR > 7 || (LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 48)
 	::curl_tlssessioninfo *tls;
 	if (::curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &tls) == CURLE_OK) {
 		if (tls->backend == CURLSSLBACKEND_SCHANNEL || tls->backend == CURLSSLBACKEND_DARWINSSL) {

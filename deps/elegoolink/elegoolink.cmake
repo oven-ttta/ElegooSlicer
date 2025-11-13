@@ -32,13 +32,14 @@ endif()
 elegooslicer_add_cmake_project(elegoolink
 
     GIT_REPOSITORY      https://github.com/wujie-elegoo/elegoolink
-    GIT_TAG             origin/wan_mix
+    GIT_TAG             origin/wan_use_curl
     
 
 
     DEPENDS 
         dep_ixwebsocket 
         dep_PahoMqttCpp
+        dep_CURL
         ${OPENSSL_PKG}
 
     CMAKE_ARGS 

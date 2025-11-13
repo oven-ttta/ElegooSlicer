@@ -122,7 +122,9 @@ void CopyrightsDialog::fill_entries()
         { "TBB",                                            "",      "https://www.intel.cn/content/www/cn/zh/developer/tools/oneapi/onetbb.html" },
         { "wxWidgets",                                      "",      "https://www.wxwidgets.org" },
         { "zlib",                                           "",      "http://zlib.net" },
-
+        { "ixwebsocket",                                    "",      "https://github.com/machinezone/IXWebSocket" },
+        { "PahoMqttCpp",                                    "",      "https://github.com/eclipse/paho.mqtt.cpp" },
+        { "CA Certificates (cacert.pem)",                   "",      "https://curl.se/docs/caextract.html" }
     };
 }
 

@@ -202,6 +202,10 @@ void ElegooLink::init(const std::string& region, std::string& iotUrl)
     std::replace(webDir.begin(), webDir.end(), '\\', '/');
     cfg.staticWebPath = webDir + "/plugins/elegoolink/web";
 
+    std::string caCertDir = resources_dir();
+    std::replace(caCertDir.begin(), caCertDir.end(), '\\', '/');
+    cfg.caCertPath      =  caCertDir + "/cert/cacert.pem"; // Use system default CA certs
+
     if (!elink::ElegooLink::getInstance().initialize(cfg)) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": error initializing ElegooLink";
     }
