@@ -122,7 +122,7 @@ bool GPUColorPicker::check_framebuffer_status() const
     GLenum status = ::glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
     if (status != GL_FRAMEBUFFER_COMPLETE) {
-        std::string error_msg = u8"GPUColorPicker FBO 状态异常: ";
+        std::string error_msg = "GPUColorPicker FBO status error: ";
         switch (status) {
         case GL_FRAMEBUFFER_UNDEFINED:
             error_msg += "GL_FRAMEBUFFER_UNDEFINED";
@@ -137,7 +137,7 @@ bool GPUColorPicker::check_framebuffer_status() const
             error_msg += "GL_FRAMEBUFFER_UNSUPPORTED";
             break;
         default:
-            error_msg += u8"未知错误 (0x" + std::to_string(status) + ")";
+            error_msg += "Unknown error (0x" + std::to_string(status) + ")";
             break;
         }
         BOOST_LOG_TRIVIAL(error) << u8"gpu color picker framebuffer error: " << error_msg;

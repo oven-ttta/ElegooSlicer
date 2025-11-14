@@ -26,7 +26,7 @@ bool log_forced_gpu_once()
     static std::atomic<bool> logged(false);
     bool expected = false;
     if (logged.compare_exchange_strong(expected, true)) {
-        BOOST_LOG_TRIVIAL(warning) << u8"[测试模式] 强制使用 GPU Color Picking（忽略 MeshRaycaster）";
+        BOOST_LOG_TRIVIAL(warning) << "[Test Mode] Forcing GPU Color Picking (ignoring MeshRaycaster)";
         return true;
     }
     return false;
@@ -37,7 +37,7 @@ bool log_forced_cpu_once()
     static std::atomic<bool> logged(false);
     bool expected = false;
     if (logged.compare_exchange_strong(expected, true)) {
-        BOOST_LOG_TRIVIAL(warning) << u8"[测试模式] 强制使用 CPU MeshRaycaster（禁用 GPU fallback）";
+        BOOST_LOG_TRIVIAL(warning) << "[Test Mode] Forcing CPU MeshRaycaster (GPU fallback disabled)";
         return true;
     }
     return false;
@@ -63,7 +63,7 @@ SceneRaycaster::HitResult SceneRaycasterManager::hit_with_fallback(
             return gpu_result;
         }
 
-        BOOST_LOG_TRIVIAL(error) << u8"test-mode gpu color picking 被强制启用，但 GPU 拾取系统不可用";
+        BOOST_LOG_TRIVIAL(error) << "Test-mode GPU color picking was forced, but the GPU picking system is unavailable";
         g_last_picking_solution.store(PickingSolution::GpuColorPicking, std::memory_order_relaxed);
         return {};
     }
@@ -103,7 +103,7 @@ SceneRaycaster::HitResult SceneRaycasterManager::hit_with_fallback(
         return gpu_result;
     }
 
-    BOOST_LOG_TRIVIAL(warning) << u8"SceneRaycasterManager: 无法使用 GPU fallback（GPUColorPicker 未初始化）";
+    BOOST_LOG_TRIVIAL(warning) << "SceneRaycasterManager: Unable to use GPU fallback (GPUColorPicker not initialized)";
     g_last_picking_solution.store(PickingSolution::CpuRaycaster, std::memory_order_relaxed);
     return cpu_result;
 }
@@ -117,7 +117,7 @@ void SceneRaycasterManager::set_forced_picking_solution(PickingSolution solution
 {
     g_forced_picking_solution.store(solution, std::memory_order_relaxed);
     if (solution == PickingSolution::None) {
-        BOOST_LOG_TRIVIAL(info) << u8"[测试模式] 拾取方案切换为自动模式";
+        BOOST_LOG_TRIVIAL(info) << "[Test Mode] Picking solution switched to auto mode";
     }
 }
 

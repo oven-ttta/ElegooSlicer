@@ -16,11 +16,11 @@ struct Camera;
 class GPUColorPicker;
 
 /**
- * @brief SceneRaycaster 的 GPU 拾取管理器
+ * @brief GPU picking manager for SceneRaycaster
  *
- * - 当 MeshRaycaster 尚未就绪时，使用 GPU Color Picking 兜底
- * - MeshRaycaster 构建完成后自动切换回 CPU 精确射线
- * - 暴露测试开关以便强制使用 GPU/CPU 方案
+ * - Uses GPU Color Picking as a fallback while MeshRaycaster is not ready
+ * - Switches back to CPU ray casting once MeshRaycaster finishes building
+ * - Provides test toggles to force GPU/CPU solutions
  */
 class SceneRaycasterManager
 {
@@ -33,14 +33,14 @@ public:
     };
 
     /**
-     * @brief 增强版拾取接口，自动选择 GPU 或 CPU 方案
+     * @brief Enhanced picking API that automatically chooses GPU or CPU flow
      *
-     * @param raycaster 原始 SceneRaycaster
-     * @param volumes   所有 GLVolume 列表（用于 GPU 拾取）
-     * @param mouse_pos 鼠标坐标（窗口坐标）
-     * @param camera    当前相机
-     * @param gpu_picker GPU Color Picker 实例
-     * @param clipping_plane 可选裁剪平面
+     * @param raycaster      Original SceneRaycaster
+     * @param volumes        List of GLVolume objects (for GPU picking)
+     * @param mouse_pos      Mouse position in window coordinates
+     * @param camera        Active camera
+     * @param gpu_picker     GPU Color Picker instance
+     * @param clipping_plane Optional clipping plane
      */
     static SceneRaycaster::HitResult hit_with_fallback(
         const SceneRaycaster& raycaster,
@@ -54,11 +54,11 @@ public:
     static PickingSolution get_last_picking_solution();
 
     /**
-     * @brief 强制选择拾取方案（测试开关）
+     * @brief Force a picking solution (test hook)
      *
-     * - None：自动模式
-     * - CpuRaycaster：强制使用 MeshRaycaster
-     * - GpuColorPicking：强制使用 GPU Color Picking
+     * - None: automatic mode
+     * - CpuRaycaster: always use MeshRaycaster
+     * - GpuColorPicking: always use GPU Color Picking
      */
     static void set_forced_picking_solution(PickingSolution solution);
     static PickingSolution get_forced_picking_solution();
@@ -74,9 +74,9 @@ private:
     );
 
     /**
-     * @brief 根据 volume 索引与深度值构造 HitResult
+     * @brief Build a HitResult from a volume index and depth value
      *
-     * @param depth 来自 GPU FBO 的深度值，用于反投影到世界坐标
+     * @param depth Depth value from the GPU FBO, used for back-projection
      */
     static SceneRaycaster::HitResult create_hit_result_from_volume_idx(
         const std::vector<Slic3r::GLVolume*>& volumes,
