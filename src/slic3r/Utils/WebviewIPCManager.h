@@ -7,11 +7,47 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <vector>
+#include <queue>
+#include <condition_variable>
 #include <wx/webview.h>
 #include <nlohmann/json.hpp>
 
 namespace webviewIpc {
 using json = nlohmann::json;
+
+/**
+ * Simple thread pool for handling IPC callbacks asynchronously
+ */
+class ThreadPool {
+public:
+    explicit ThreadPool(size_t numThreads = 4);
+    ~ThreadPool();
+    
+    // Disable copy and move
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
+    ThreadPool(ThreadPool&&) = delete;
+    ThreadPool& operator=(ThreadPool&&) = delete;
+    
+    // Submit a task to the thread pool
+    void enqueue(std::function<void()> task);
+    
+    // Get the number of threads
+    size_t size() const { return m_workers.size(); }
+    
+    // Get the number of pending tasks
+    size_t pendingTasks() const;
+    
+private:
+    std::vector<std::thread> m_workers;
+    std::queue<std::function<void()>> m_tasks;
+    std::mutex m_queueMutex;
+    std::condition_variable m_condition;
+    std::atomic<bool> m_stop;
+    
+    void workerThread();
+};
 
 /**
  * IPC request structure
@@ -154,6 +190,9 @@ private:
     std::map<std::string, std::vector<EventHandler>> m_eventHandlers;
     std::mutex m_eventHandlersMutex;
     
+    // Thread pool for async execution
+    std::unique_ptr<ThreadPool> m_threadPool;
+    
     // Timeout check thread
     std::thread m_timeoutThread;
     std::atomic<bool> m_running;
@@ -181,7 +220,7 @@ private:
     void onScriptMessage(wxWebViewEvent& event);
     void onWebviewDestroy(wxEvent& event);
 public:
-    explicit WebviewIPCManager(wxWebView* webView);
+    explicit WebviewIPCManager(wxWebView* webView, size_t threadPoolSize = 4);
     ~WebviewIPCManager();
     
     // Disable copy constructor and assignment
@@ -190,8 +229,9 @@ public:
     
     /**
      * Initialize IPC manager
+     * @param threadPoolSize Number of threads in the thread pool (default: 4)
      */
-    void initialize();
+    void initialize(size_t threadPoolSize = 4);
     
     /**
      * Clean up resources
@@ -300,6 +340,16 @@ public:
      * Generate unique request ID
      */
     std::string generateRequestId();
+    
+    /**
+     * Get the number of worker threads in the thread pool
+     */
+    size_t getThreadPoolSize() const;
+    
+    /**
+     * Get the number of pending tasks in the thread pool
+     */
+    size_t getPendingTaskCount() const;
     
 private:
     /**

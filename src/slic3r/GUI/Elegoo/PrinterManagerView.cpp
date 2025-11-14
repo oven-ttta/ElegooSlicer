@@ -348,9 +348,7 @@ public:
 
 
 PrinterManagerView::PrinterManagerView(wxWindow *parent)
-    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize), 
-      m_isDestroying(false),
-      m_lifeTracker(std::make_shared<bool>(true))
+    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
 {
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
     
@@ -416,13 +414,8 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
 }
 
 PrinterManagerView::~PrinterManagerView() {
-    m_isDestroying = true;
-    
     // Save tab state before destruction
     saveTabState();
-    
-    // Reset the life tracker to signal all async operations that this object is being destroyed
-    m_lifeTracker.reset();
 }
 
 void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveState)
@@ -448,15 +441,12 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": printer %s not found") % printerId;
         return;
     }
-    PrinterWebView* view = new PrinterWebView(mTabBar);
+
     wxString url = from_u8(printerInfo.webUrl);
-    
     if(url.IsEmpty()) {
-        auto _dir = resources_dir();
-        std::replace(_dir.begin(), _dir.end(), '\\', '/');
-        url = from_u8((boost::filesystem::path(resources_dir()) / "web/elegoo-fdm-web/index.html").make_preferred().string());
-        url          = "file://" + url;
+        return;
     }
+    PrinterWebView* view = new PrinterWebView(mTabBar);
 
     if(PrintHost::get_print_host_type(printerInfo.hostType) == htElegooLink && (printerInfo.printerModel == "Elegoo Centauri Carbon 2")) 
     {
@@ -594,7 +584,9 @@ void PrinterManagerView::setupIPCHandlers()
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         if (!printerId.empty()) {
-            openPrinterTab(printerId);
+            wxGetApp().CallAfter([this, printerId]() {
+                openPrinterTab(printerId);
+            });
         }
         return webviewIpc::IPCResult::success();
     });
@@ -602,29 +594,13 @@ void PrinterManagerView::setupIPCHandlers()
     // Handle request_discover_printers (async due to time-consuming operation)
     mIpc->onRequestAsync("request_discover_printers", [this](const webviewIpc::IPCRequest& request, 
                                                            std::function<void(const webviewIpc::IPCResult&)> sendResponse) {  
-        // Create a weak reference to track object lifetime
-        std::weak_ptr<bool> life_tracker = m_lifeTracker;   
-        // Run the discovery operation in a separate thread to avoid blocking the UI
-        std::thread([life_tracker, sendResponse,this]() {
-            try {
-                // Check if the object still exists
-                if (auto tracker = life_tracker.lock()) {
-                    // Call the static method to avoid accessing this pointer
-                    auto result = this->discoverPrinter();
-                    // Final check before sending response
-                    if (life_tracker.lock()) {
-                        sendResponse(result);
-                    }
-                } else {
-                    // Object was destroyed, don't send response
-                    return;
-                }
-            } catch (const std::exception& e) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error(std::string("Discovery failed: ") + e.what()));
-                }
-            }
-        }).detach();
+        try {
+            // Call the static method to avoid accessing this pointer
+            auto result = this->discoverPrinter();
+            sendResponse(result);
+        } catch (const std::exception& e) {
+                sendResponse(webviewIpc::IPCResult::error(std::string("Discovery failed: ") + e.what()));
+        }
     });
 
     // Handle request_add_printer (async)
@@ -635,33 +611,16 @@ void PrinterManagerView::setupIPCHandlers()
             sendResponse(webviewIpc::IPCResult::error("Missing printer parameter"));
             return;
         }
-        
-        // Create a weak reference to track object lifetime
-        std::weak_ptr<bool> life_tracker = m_lifeTracker;
         nlohmann::json printer = params["printer"];
         
-        // Run the add printer operation in a separate thread
-        std::thread([life_tracker, printer, sendResponse, this]() {
-            try {
-                // Check if the object still exists
-                if (auto tracker = life_tracker.lock()) {
-                    auto result = addPrinter(printer);
-                    
-                    // Final check before sending response
-                    if (life_tracker.lock()) {
-                       sendResponse(result);
-                    }
-                }
-            } catch (const std::exception& e) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error(std::string("Add printer failed: ") + e.what()));
-                }
-            } catch (...) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error("Add printer failed: Unknown error"));
-                }
-            }
-        }).detach();
+        try {
+            auto result = addPrinter(printer);
+            sendResponse(result);        
+        } catch (const std::exception& e) {
+            sendResponse(webviewIpc::IPCResult::error(std::string("Add printer failed: ") + e.what()));
+        } catch (...) {
+            sendResponse(webviewIpc::IPCResult::error("Add printer failed: Unknown error"));
+        }
     });
 
     // Handle request_add_physical_printer (async)
@@ -674,34 +633,15 @@ void PrinterManagerView::setupIPCHandlers()
             return;
         }
         
-        // Create a weak reference to track object lifetime
-        std::weak_ptr<bool> life_tracker = m_lifeTracker;
         nlohmann::json printer = params["printer"];
-        
-        // Run the add physical printer operation in a separate thread
-        std::thread([life_tracker, printer, sendResponse, this]() {
             try {
-                // Check if the object still exists
-                if (auto tracker = life_tracker.lock()) {
-                    auto result = addPhysicalPrinter(printer);   
-                    // Final check before sending response
-                    if (life_tracker.lock()) {
-                        sendResponse(result);
-                    }
-                } else {
-                    // Object was destroyed, don't send response
-                    return;
-                }
+                auto result = addPhysicalPrinter(printer);   
+                sendResponse(result);
             } catch (const std::exception& e) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error(std::string("Add physical printer failed: ") + e.what()));
-                }
+                sendResponse(webviewIpc::IPCResult::error(std::string("Add physical printer failed: ") + e.what()));
             } catch (...) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error("Add physical printer failed: Unknown error"));
-                }
+                sendResponse(webviewIpc::IPCResult::error("Add physical printer failed: Unknown error"));
             }
-        }).detach();
     });
 
     // Handle request_update_printer_name
@@ -723,26 +663,15 @@ void PrinterManagerView::setupIPCHandlers()
         
         std::string printerId = params.value("printerId", "");
         nlohmann::json printer = params["printer"];
-        
-        std::weak_ptr<bool> life_tracker = m_lifeTracker;
-        std::thread([life_tracker, printerId, printer, sendResponse, this]() {
-            try {
-                if (auto tracker = life_tracker.lock()) {
-                    auto result = updatePhysicalPrinter(printerId, printer);
-                    if (life_tracker.lock()) {
-                        sendResponse(result);
-                    }
-                }
-            } catch (const std::exception& e) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error(std::string("update physical printer failed: ") + e.what()));
-                }
-            } catch (...) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error("update physical printer failed: unknown error"));
-                }
-            }
-        }).detach();
+
+        try {
+            auto result = updatePhysicalPrinter(printerId, printer);
+            sendResponse(result);
+        } catch (const std::exception& e) {
+            sendResponse(webviewIpc::IPCResult::error(std::string("update physical printer failed: ") + e.what()));
+        } catch (...) {
+            sendResponse(webviewIpc::IPCResult::error("update physical printer failed: unknown error"));
+        }
     });
 
     // Handle request_update_printer_host
@@ -752,32 +681,14 @@ void PrinterManagerView::setupIPCHandlers()
         std::string printerId = params.value("printerId", "");
         std::string host = params.value("host", "");
  
-        // Create a weak reference to track object lifetime
-        std::weak_ptr<bool> life_tracker = m_lifeTracker;
-        // Run the add printer operation in a separate thread
-        std::thread([life_tracker, printerId, host, sendResponse, this]() {
             try {
-                // Check if the object still exists
-                if (auto tracker = life_tracker.lock()) {
-                    auto result = updatePrinterHost(printerId, host);
-                    // Final check before sending response
-                    if (life_tracker.lock()) {
-                        sendResponse(result);
-                    }
-                } else {
-                    // Object was destroyed, don't send response
-                    return;
-                }
+                auto result = updatePrinterHost(printerId, host);
+                sendResponse(result);
             } catch (const std::exception& e) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error(std::string("Update printer host failed: ") + e.what()));
-                }
+                sendResponse(webviewIpc::IPCResult::error(std::string("Update printer host failed: ") + e.what()));
             } catch (...) {
-                if (life_tracker.lock()) {
-                    sendResponse(webviewIpc::IPCResult::error("Update printer host failed: Unknown error"));
-                }
+                sendResponse(webviewIpc::IPCResult::error("Update printer host failed: Unknown error"));    
             }
-        }).detach();
     });
 
     // Handle request_delete_printer

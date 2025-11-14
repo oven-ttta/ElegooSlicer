@@ -86,9 +86,6 @@ private:
     // Upload thread management
     std::atomic<bool> m_uploadInProgress;
     std::atomic<bool> m_shouldStop;
-    std::thread       m_uploadThread;
-    std::mutex        m_uploadMutex;
-
 private:
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     

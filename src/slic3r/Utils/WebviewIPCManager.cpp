@@ -5,12 +5,77 @@
 #include <wx/log.h>
 #include <slic3r/GUI/Widgets/WebView.hpp>
 #include "slic3r/GUI/GUI_App.hpp"
+
 namespace webviewIpc {
+
+// ThreadPool implementation
+ThreadPool::ThreadPool(size_t numThreads) : m_stop(false) {
+    for (size_t i = 0; i < numThreads; ++i) {
+        m_workers.emplace_back(&ThreadPool::workerThread, this);
+    }
+}
+
+ThreadPool::~ThreadPool() {
+    m_stop = true;
+    m_condition.notify_all();
+    
+    for (std::thread& worker : m_workers) {
+        if (worker.joinable()) {
+            worker.join();
+        }
+    }
+}
+
+void ThreadPool::enqueue(std::function<void()> task) {
+    {
+        std::lock_guard<std::mutex> lock(m_queueMutex);
+        m_tasks.push(std::move(task));
+    }
+    m_condition.notify_one();
+}
+
+size_t ThreadPool::pendingTasks() const {
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_queueMutex));
+    return m_tasks.size();
+}
+
+void ThreadPool::workerThread() {
+    while (!m_stop) {
+        std::function<void()> task;
+        
+        {
+            std::unique_lock<std::mutex> lock(m_queueMutex);
+            m_condition.wait(lock, [this] { return m_stop || !m_tasks.empty(); });
+            
+            if (m_stop && m_tasks.empty()) {
+                return;
+            }
+            
+            if (!m_tasks.empty()) {
+                task = std::move(m_tasks.front());
+                m_tasks.pop();
+            }
+        }
+        
+        if (task) {
+            try {
+                task();
+            } catch (const std::exception& e) {
+                wxLogError("ThreadPool: Task execution failed: %s", e.what());
+            } catch (...) {
+                wxLogError("ThreadPool: Task execution failed with unknown exception");
+            }
+        }
+    }
+}
+
+// WebviewIPCManager implementation
 std::vector<WebviewIPCManager*>WebviewIPCManager::s_instances;
 std::mutex WebviewIPCManager::s_instancesMutex;
-WebviewIPCManager::WebviewIPCManager(wxWebView* webView)
+
+WebviewIPCManager::WebviewIPCManager(wxWebView* webView, size_t threadPoolSize)
     : m_webView(webView), m_requestIdCounter(1000), m_running(false) {
-    initialize();
+    initialize(threadPoolSize);
     std::lock_guard<std::mutex> lock(s_instancesMutex);
     s_instances.push_back(this);
 }
@@ -23,10 +88,14 @@ WebviewIPCManager::~WebviewIPCManager() {
     cleanup();
 }
 
-void WebviewIPCManager::initialize() {
+void WebviewIPCManager::initialize(size_t threadPoolSize) {
     if (m_running) {
         return;
     }
+    
+    // Initialize thread pool
+    m_threadPool = std::make_unique<ThreadPool>(threadPoolSize);
+    
     if(m_webView){
         m_webView->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &WebviewIPCManager::onScriptMessage, this);
         m_webView->Bind(wxEVT_DESTROY, &WebviewIPCManager::onWebviewDestroy, this);
@@ -34,7 +103,7 @@ void WebviewIPCManager::initialize() {
     m_running = true;
     startTimeoutChecker();
     
-    wxLogMessage("IPC: C++ side initialization complete");
+    wxLogMessage("IPC: C++ side initialization complete with %zu worker threads", threadPoolSize);
 }
 
 void WebviewIPCManager::cleanup() {
@@ -48,6 +117,9 @@ void WebviewIPCManager::cleanup() {
         m_webView->Unbind(wxEVT_DESTROY, &WebviewIPCManager::onWebviewDestroy, this);
     }
     m_webView = nullptr;
+    
+    // Destroy thread pool (will wait for all tasks to complete)
+    m_threadPool.reset();
     
     // Clear pending requests
     std::lock_guard<std::mutex> lock(m_pendingRequestsMutex);
@@ -212,57 +284,75 @@ void WebviewIPCManager::handleRequest(const json& message) {
     
     std::lock_guard<std::mutex> lock(m_requestHandlersMutex);
     
-    // Check asynchronous handlers with event sending
+    // Check asynchronous handlers with event sending - execute in thread pool
     auto asyncWithEventsIt = m_asyncRequestHandlersWithEvents.find(method);
     if (asyncWithEventsIt != m_asyncRequestHandlersWithEvents.end()) {
-        try {
-            asyncWithEventsIt->second(request, 
-                [this, id, method](const IPCResult& result) {
+        // Capture handler and request data
+        AsyncRequestHandlerWithEvents handler = asyncWithEventsIt->second;
+        
+        // Submit to thread pool for async execution
+        m_threadPool->enqueue([this, handler, request, id, method]() {
+            try {
+                handler(request, 
+                    [this, id, method](const IPCResult& result) {
+                        // Convert IPCResult to IPCResponse for sending
+                        IPCResponse response(id, method, result.code, result.message, result.data);
+                        sendResponse(response);
+                    },
+                    [this, id](const std::string& eventMethod, const json& eventData) {
+                        sendEvent(eventMethod, eventData, id);
+                    });
+            } catch (const std::exception& e) {
+                wxLogError("IPC: Async handler with events execution failed for method '%s': %s", method.c_str(), e.what());
+                IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
+                sendResponse(errorResponse);
+            }
+        });
+        return;
+    }
+    
+    // Check regular asynchronous handlers - execute in thread pool
+    auto asyncIt = m_asyncRequestHandlers.find(method);
+    if (asyncIt != m_asyncRequestHandlers.end()) {
+        // Capture handler and request data
+        AsyncRequestHandler handler = asyncIt->second;
+        
+        // Submit to thread pool for async execution
+        m_threadPool->enqueue([this, handler, request, id, method]() {
+            try {
+                handler(request, [this, id, method](const IPCResult& result) {
                     // Convert IPCResult to IPCResponse for sending
                     IPCResponse response(id, method, result.code, result.message, result.data);
                     sendResponse(response);
-                },
-                [this, id](const std::string& eventMethod, const json& eventData) {
-                    sendEvent(eventMethod, eventData, id);
                 });
-        } catch (const std::exception& e) {
-            wxLogError("IPC: Async handler with events execution failed for method '%s': %s", method.c_str(), e.what());
-            IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
-            sendResponse(errorResponse);
-        }
+            } catch (const std::exception& e) {
+                wxLogError("IPC: Async handler execution failed for method '%s': %s", method.c_str(), e.what());
+                IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
+                sendResponse(errorResponse);
+            }
+        });
         return;
     }
     
-    // Check regular asynchronous handlers
-    auto asyncIt = m_asyncRequestHandlers.find(method);
-    if (asyncIt != m_asyncRequestHandlers.end()) {
-        try {
-            asyncIt->second(request, [this, id, method](const IPCResult& result) {
-                // Convert IPCResult to IPCResponse for sending
-                IPCResponse response(id, method, result.code, result.message, result.data);
-                sendResponse(response);
-            });
-        } catch (const std::exception& e) {
-            wxLogError("IPC: Async handler execution failed for method '%s': %s", method.c_str(), e.what());
-            IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
-            sendResponse(errorResponse);
-        }
-        return;
-    }
-    
-    // Check synchronous handlers
+    // Check synchronous handlers - execute in thread pool
     auto syncIt = m_requestHandlers.find(method);
     if (syncIt != m_requestHandlers.end()) {
-        try {
-            IPCResult result = syncIt->second(request);
-            // Convert IPCResult to IPCResponse for sending
-            IPCResponse response(request.id, request.method, result.code, result.message, result.data);
-            sendResponse(response);
-        } catch (const std::exception& e) {
-            wxLogError("IPC: Sync handler execution failed for method '%s': %s", method.c_str(), e.what());
-            IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
-            sendResponse(errorResponse);
-        }
+        // Capture handler and request data
+        RequestHandler handler = syncIt->second;
+        
+        // Submit to thread pool for async execution
+        m_threadPool->enqueue([this, handler, request, id, method]() {
+            try {
+                IPCResult result = handler(request);
+                // Convert IPCResult to IPCResponse for sending
+                IPCResponse response(request.id, request.method, result.code, result.message, result.data);
+                sendResponse(response);
+            } catch (const std::exception& e) {
+                wxLogError("IPC: Sync handler execution failed for method '%s': %s", method.c_str(), e.what());
+                IPCResponse errorResponse = IPCResponse::error(id, method, 500, "Handler execution failed");
+                sendResponse(errorResponse);
+            }
+        });
         return;
     }
     
@@ -333,27 +423,40 @@ void WebviewIPCManager::handleEvent(const json& message) {
         std::lock_guard<std::mutex> lock(m_pendingRequestsMutex);
         auto it = m_pendingRequests.find(id);
         if (it != m_pendingRequests.end() && it->second->hasEventCallback) {
-            try {
-                it->second->eventCallback(event);
-            } catch (const std::exception& e) {
-                wxLogError("IPC: Request event callback execution failed for method '%s', id '%s': %s", 
-                          method.c_str(), id.c_str(), e.what());
-            }
+            RequestEventHandler eventCallback = it->second->eventCallback;
+            
+            // Execute in thread pool
+            m_threadPool->enqueue([eventCallback, event, method, id]() {
+                try {
+                    eventCallback(event);
+                } catch (const std::exception& e) {
+                    wxLogError("IPC: Request event callback execution failed for method '%s', id '%s': %s", 
+                              method.c_str(), id.c_str(), e.what());
+                }
+            });
         }
     }
     
-    // Then handle global event handlers
-    std::lock_guard<std::mutex> lock(m_eventHandlersMutex);
-    auto it = m_eventHandlers.find(method);
-    if (it != m_eventHandlers.end()) {
-        for (auto& handler : it->second) {
+    // Then handle global event handlers - execute in thread pool
+    std::vector<EventHandler> handlers;
+    {
+        std::lock_guard<std::mutex> lock(m_eventHandlersMutex);
+        auto it = m_eventHandlers.find(method);
+        if (it != m_eventHandlers.end()) {
+            handlers = it->second;  // Copy handlers
+        }
+    }
+    
+    // Execute each handler in thread pool
+    for (const auto& handler : handlers) {
+        m_threadPool->enqueue([handler, event, method]() {
             try {
                 handler(event);
             } catch (const std::exception& e) {
                 wxLogError("IPC: Global event handler execution failed for method '%s': %s", 
                           method.c_str(), e.what());
             }
-        }
+        });
     }
 }
 
@@ -504,6 +607,14 @@ void WebviewIPCManager::offEvent(const std::string& method, const EventHandler& 
 
 std::string WebviewIPCManager::generateRequestId() {
     return "req-" + std::to_string(++m_requestIdCounter);
+}
+
+size_t WebviewIPCManager::getThreadPoolSize() const {
+    return m_threadPool ? m_threadPool->size() : 0;
+}
+
+size_t WebviewIPCManager::getPendingTaskCount() const {
+    return m_threadPool ? m_threadPool->pendingTasks() : 0;
 }
 
 void WebviewIPCManager::sendMessage(const json& message) {

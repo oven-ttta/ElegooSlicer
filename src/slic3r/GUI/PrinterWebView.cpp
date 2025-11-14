@@ -112,10 +112,6 @@ PrinterWebView::~PrinterWebView()
 
     // stop upload thread
     m_shouldStop = true;
-    if (m_uploadThread.joinable()) {
-        m_uploadThread.join();
-    }
-
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " End";
 }
 
@@ -297,9 +293,13 @@ void PrinterWebView::setupIPCHandlers()
         bool        needDownload = params.value("needDownload", false);
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": open URL: %s") % url;
         if (needDownload) {
-            GUI::wxGetApp().download(url);
+            CallAfter([this, url]() {
+                GUI::wxGetApp().download(url);
+            });
         } else {
-            wxLaunchDefaultBrowser(url);
+            CallAfter([this, url]() {
+                wxLaunchDefaultBrowser(url);
+            });
         }
         return webviewIpc::IPCResult::success();
     });
@@ -309,7 +309,9 @@ void PrinterWebView::setupIPCHandlers()
         auto params = request.params;
         if (!m_url.IsEmpty()) {
             m_loadState = PWLoadState::URL_LOADING;
-            loadUrl(m_url);
+            CallAfter([this, url = m_url]() {
+                loadUrl(url);
+            });
         }
         return webviewIpc::IPCResult::success();
     });
@@ -379,29 +381,19 @@ void PrinterWebView::setupIPCHandlers()
 
             // set upload status
             m_uploadInProgress = true;
-
-            // if the previous thread is still running, wait for it to end
-            if (m_uploadThread.joinable()) {
-                m_uploadThread.join();
+            bool ret = false;
+            try {
+                auto networkResult = PrinterManager::getInstance()->upload(networkParams);
+                ret                = networkResult.isSuccess();
+            } catch (...) {
+                ret = false;
             }
 
-            // start new upload thread
-            m_uploadThread = std::thread([this, networkParams, requestId, sendResponse]() mutable {
-                bool ret = false;
-                try {
-                    auto networkResult = PrinterManager::getInstance()->upload(networkParams);
-                    ret                = networkResult.isSuccess();
-                } catch (...) {
-                    ret = false;
-                }
-
-                // reset upload status
-                m_uploadInProgress = false;
-
-                // send response in main thread
-                auto response = ret ? webviewIpc::IPCResult::success() : webviewIpc::IPCResult::error("Upload failed");
-                sendResponse(response);
-            });
+            // reset upload status
+            m_uploadInProgress = false;
+            // send response in main thread
+            auto response = ret ? webviewIpc::IPCResult::success() : webviewIpc::IPCResult::error("Upload failed");
+            sendResponse(response);
         } catch (...) {
             m_uploadInProgress = false;
             sendResponse(webviewIpc::IPCResult::error("Upload initialization failed"));

@@ -135,7 +135,7 @@ body {
   border-radius: 8px;
   width: 100%;
   box-sizing: border-box;
-  max-height: calc(100vh - 120px);
+  /* max-height: calc(100vh - 120px); */
   overflow-y: auto;
   overflow-x: hidden;
   margin-bottom: 16px;

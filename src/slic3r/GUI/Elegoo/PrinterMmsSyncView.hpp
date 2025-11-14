@@ -41,8 +41,5 @@ private:
     wxWebView* mBrowser;   
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     PrinterMmsGroup mMmsGroup;
-    std::atomic<bool> m_isDestroying;
-    std::shared_ptr<bool> m_lifeTracker;
-    std::atomic<bool> m_asyncOperationInProgress;
 };
 }} // namespace Slic3r::GUI 

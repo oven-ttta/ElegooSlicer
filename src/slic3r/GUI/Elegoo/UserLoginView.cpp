@@ -152,7 +152,9 @@ void UserLoginView::setupIPCHandlers()
     mIpc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request) {
         auto        params = request.params;
         std::string url    = params.value("url", "");
-        wxLaunchDefaultBrowser(url);
+        CallAfter([this, url]() {
+            wxLaunchDefaultBrowser(url);
+        });
         return webviewIpc::IPCResult::success();
     });
 
@@ -160,7 +162,9 @@ void UserLoginView::setupIPCHandlers()
         std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
         if (networkHelper) {
             std::string url = networkHelper->getLoginUrl();
-            mBrowser->LoadURL(url);
+            CallAfter([this, url]() {
+                mBrowser->LoadURL(url);
+            });
         }
         return webviewIpc::IPCResult::success();
     });
