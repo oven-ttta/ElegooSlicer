@@ -510,7 +510,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     printerNetworkInfo.addTime        = now;
     printerNetworkInfo.modifyTime     = now;
     printerNetworkInfo.lastActiveTime = now;
-    if (printerNetworkInfo.printerId.empty()) {
+    if (printerNetworkInfo.printerId.empty() && printerNetworkInfo.networkType != NETWORK_TYPE_WAN) {
         printerNetworkInfo.printerId = generatePrinterId();
     }
     if (!printerNetworkInfo.password.empty()) {
@@ -525,12 +525,6 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
             printerNetworkInfo.authMode = PRINTER_AUTH_MODE_ACCESS_CODE;
     }
 
-    std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printerNetworkInfo);
-    if (!network) {
-        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": add printer failed to create network for printer %s %s %s, hostType: %s")
-                                 % printerNetworkInfo.host % printerNetworkInfo.printerName % printerNetworkInfo.printerModel % printerNetworkInfo.hostType;
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::CREATE_NETWORK_FOR_HOST_TYPE_FAILED, false);
-    }
     // bind the printer if it is a WAN printer
     if (printerNetworkInfo.networkType == NETWORK_TYPE_WAN) {
         PrinterNetworkResult<PrinterNetworkInfo> bindResult = UserNetworkManager::getInstance()->bindWANPrinter(printerNetworkInfo);
@@ -539,6 +533,9 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
                                       % printerNetworkInfo.host % printerNetworkInfo.printerName % printerNetworkInfo.printerModel % bindResult.message;
             return PrinterNetworkResult<bool>(bindResult.code, false, bindResult.message);
         }
+        PrinterNetworkInfo boundPrinterNetworkInfo = bindResult.data.value();
+        // update the printer network info with the bound printer network info
+        printerNetworkInfo.printerId = boundPrinterNetworkInfo.printerId;
     }
     PrinterNetworkResult<bool> addResult = connectToPrinter(printerNetworkInfo);
     if (addResult.isSuccess()) {

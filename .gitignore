@@ -45,3 +45,4 @@ deps_src/build/
 .env.testing
 resources/plugins/
 work/
+example/

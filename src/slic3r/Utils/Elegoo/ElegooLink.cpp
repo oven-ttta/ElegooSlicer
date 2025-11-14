@@ -385,8 +385,16 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::bindWANPrinter(const Printe
         resultCode  = parseElegooResult(elinkResult.code);
         if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if (elinkResult.data.has_value() && elinkResult.data.value().bindResult) {
-                // PrinterNetworkInfo info = convertFromElegooPrinterInfo(elinkResult.data.value().printerInfo);
-                return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo,
+                PrinterNetworkInfo boundInfo = printerNetworkInfo;
+                PrinterNetworkInfo resBoundInfo = convertFromElegooPrinterInfo(elinkResult.data.value().printerInfo);
+                boundInfo.serialNumber = resBoundInfo.serialNumber;
+                boundInfo.printerId = resBoundInfo.printerId;
+                boundInfo.printerName = resBoundInfo.printerName;
+                boundInfo.protocolVersion = resBoundInfo.protocolVersion;
+                boundInfo.firmwareVersion = resBoundInfo.firmwareVersion;
+                boundInfo.mainboardId = resBoundInfo.mainboardId;
+                boundInfo.webUrl = resBoundInfo.webUrl;
+                return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, boundInfo,
                                                                 parseUnknownErrorMsg(resultCode, elinkResult.message));
             }
         }
