@@ -638,12 +638,12 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
                         trayInfo.trayId        = std::to_string(tray.trayId);
                         trayInfo.mmsId         = std::to_string(canvas.canvasId);
                         trayInfo.vendor        = tray.brand;
-                        if(trayInfo.vendor.empty()) {
+                        if(trayInfo.vendor.empty() || trayInfo.vendor == " ") {
                             trayInfo.vendor = "Generic";
                         }
                         trayInfo.filamentType  = tray.filamentType;
                         trayInfo.filamentName  = tray.filamentName;
-                        if(trayInfo.filamentName.empty()) {
+                        if(trayInfo.filamentName.empty() || trayInfo.filamentName == " ") {
                             trayInfo.filamentName = tray.filamentType;
                         }
                         trayInfo.filamentColor = tray.filamentColor;
@@ -652,14 +652,14 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
                         switch (tray.status) {
                         case 0: trayInfo.status = TRAY_STATUS_DISCONNECTED; break;
                         case 1:
-                            if (tray.filamentType.empty() || tray.filamentName.empty()) {
+                            if (trayInfo.filamentType.empty() || trayInfo.filamentName.empty()) {
                                 trayInfo.status = TRAY_STATUS_PRELOADED_UNKNOWN_FILAMENT;
                             } else {
                                 trayInfo.status = TRAY_STATUS_PRELOADED;
                             }
                             break;
                         case 2:
-                            if (tray.filamentType.empty() || tray.filamentName.empty()) {
+                            if (trayInfo.filamentType.empty() || trayInfo.filamentName.empty()) {
                                 trayInfo.status = TRAY_STATUS_LOADED_UNKNOWN_FILAMENT;
                             } else {
                                 trayInfo.status = TRAY_STATUS_LOADED;
