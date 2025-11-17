@@ -28,10 +28,7 @@ public:
     virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& fileName) override;
     virtual PrinterNetworkResult<bool> updatePrinterName(const std::string& printerName) override;
     
-    virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) override;
-    virtual PrinterNetworkResult<bool> unbindWANPrinter(const std::string& serialNumber) override;
-
-    static void init();
+    static void init(const std::string& region, std::string& iotUrl);
     static void uninit();
 };
 

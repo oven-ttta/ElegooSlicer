@@ -6,6 +6,7 @@
 #include "slic3r/GUI/GUI_App.hpp"
 #include "slic3r/GUI/MainFrame.hpp"
 #include "libslic3r_version.h"
+#include "libslic3r/Utils.hpp"
 
 #include <wx/sizer.h>
 #include <wx/string.h>
@@ -22,6 +23,8 @@
 #include <mutex>
 #include <atomic>
 #include <slic3r/Utils/WebviewIPCManager.h>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 #define CONNECTIONG_URL_SUFFIX "/web/orca/connecting.html"
 #define FAILED_URL_SUFFIX "/web/orca/connection-failed.html"
@@ -36,7 +39,7 @@ PrinterWebView::PrinterWebView(wxWindow* parent) : wxPanel(parent, wxID_ANY, wxD
     // Create the webview
     m_browser = WebView::CreateWebView(this, "");
     if (m_browser == nullptr) {
-        wxLogError("Could not init m_browser");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init m_browser";
         return;
     }
     this->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
@@ -69,7 +72,7 @@ PrinterWebView::PrinterWebView(wxWindow* parent) : wxPanel(parent, wxID_ANY, wxD
         }
         injectJsFile.close();
     } else {
-        wxLogError("Could not open inject.js");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not open inject.js";
     }
     //
     // #ifdef WIN32
@@ -79,7 +82,7 @@ PrinterWebView::PrinterWebView(wxWindow* parent) : wxPanel(parent, wxID_ANY, wxD
     // Add inject.js to the webview
     bool ret = m_browser->AddUserScript(injectJs);
     if (!ret) {
-        wxLogError("Could not add user script");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not add user script";
     }
 
     topsizer->Add(m_browser, wxSizerFlags().Expand().Proportion(1));
@@ -109,10 +112,6 @@ PrinterWebView::~PrinterWebView()
 
     // stop upload thread
     m_shouldStop = true;
-    if (m_uploadThread.joinable()) {
-        m_uploadThread.join();
-    }
-
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " End";
 }
 
@@ -230,7 +229,7 @@ void PrinterWebView::OnScriptMessage(const wxWebViewEvent& event)
 {
     // #if defined(__APPLE__) || defined(__MACH__)
     wxString message = event.GetString();
-    wxLogMessage("Received message: %s", message);
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": received message: %s") % into_u8(message);
     // #endif
 }
 
@@ -292,11 +291,15 @@ void PrinterWebView::setupIPCHandlers()
         auto        params       = request.params;
         std::string url          = params.value("url", "");
         bool        needDownload = params.value("needDownload", false);
-        wxLogMessage("Open URL: %s", url);
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": open URL: %s") % url;
         if (needDownload) {
-            GUI::wxGetApp().download(url);
+            CallAfter([this, url]() {
+                GUI::wxGetApp().download(url);
+            });
         } else {
-            wxLaunchDefaultBrowser(url);
+            CallAfter([this, url]() {
+                wxLaunchDefaultBrowser(url);
+            });
         }
         return webviewIpc::IPCResult::success();
     });
@@ -306,7 +309,9 @@ void PrinterWebView::setupIPCHandlers()
         auto params = request.params;
         if (!m_url.IsEmpty()) {
             m_loadState = PWLoadState::URL_LOADING;
-            loadUrl(m_url);
+            CallAfter([this, url = m_url]() {
+                loadUrl(url);
+            });
         }
         return webviewIpc::IPCResult::success();
     });
@@ -376,29 +381,19 @@ void PrinterWebView::setupIPCHandlers()
 
             // set upload status
             m_uploadInProgress = true;
-
-            // if the previous thread is still running, wait for it to end
-            if (m_uploadThread.joinable()) {
-                m_uploadThread.join();
+            bool ret = false;
+            try {
+                auto networkResult = PrinterManager::getInstance()->upload(networkParams);
+                ret                = networkResult.isSuccess();
+            } catch (...) {
+                ret = false;
             }
 
-            // start new upload thread
-            m_uploadThread = std::thread([this, networkParams, requestId, sendResponse]() mutable {
-                bool ret = false;
-                try {
-                    auto networkResult = PrinterManager::getInstance()->upload(networkParams);
-                    ret                = networkResult.isSuccess();
-                } catch (...) {
-                    ret = false;
-                }
-
-                // reset upload status
-                m_uploadInProgress = false;
-
-                // send response in main thread
-                auto response = ret ? webviewIpc::IPCResult::success() : webviewIpc::IPCResult::error("Upload failed");
-                sendResponse(response);
-            });
+            // reset upload status
+            m_uploadInProgress = false;
+            // send response in main thread
+            auto response = ret ? webviewIpc::IPCResult::success() : webviewIpc::IPCResult::error("Upload failed");
+            sendResponse(response);
         } catch (...) {
             m_uploadInProgress = false;
             sendResponse(webviewIpc::IPCResult::error("Upload initialization failed"));

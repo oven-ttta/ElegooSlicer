@@ -4820,6 +4820,7 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
             }
             if(!j.contains("data")||!j["data"].is_object())
             {
+                if (by_user != 0)this->no_new_version();
                 return;
             }
             nlohmann::json root = j["data"];

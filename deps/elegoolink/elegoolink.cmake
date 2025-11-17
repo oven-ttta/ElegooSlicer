@@ -32,13 +32,13 @@ endif()
 elegooslicer_add_cmake_project(elegoolink
 
     GIT_REPOSITORY      https://github.com/wujie-elegoo/elegoolink
-    GIT_TAG             origin/wan_mix
+    GIT_TAG             origin/wan_use_curl
     
-
-
     DEPENDS 
         dep_ixwebsocket 
         dep_PahoMqttCpp
+        dep_CURL
+        ${OPENSSL_PKG}
 
     CMAKE_ARGS 
         -DBUILD_EXAMPLES=OFF
@@ -50,4 +50,5 @@ elegooslicer_add_cmake_project(elegoolink
         -DELEGOO_CHINA_IOT_URL=${ELEGOO_CHINA_IOT_URL}
         -DELEGOO_GLOBAL_IOT_URL=${ELEGOO_GLOBAL_IOT_URL}
         -DELEGOO_INTERNAL_TESTING=${ELEGOO_INTERNAL_TESTING}
+        -DELEGOO_GLOBAL_IOT_PATH_PREFIX=${ELEGOO_GLOBAL_IOT_PATH_PREFIX}
 )

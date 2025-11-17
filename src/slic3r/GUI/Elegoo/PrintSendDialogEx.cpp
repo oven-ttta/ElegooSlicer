@@ -29,6 +29,8 @@
 #include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 #include "slic3r/Utils/Elegoo/PrinterMmsManager.hpp"
 #include <slic3r/Utils/WebviewIPCManager.h>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 #define HAS_MMS_HEIGHT 800
 #define NO_MMS_HEIGHT 650
@@ -44,9 +46,6 @@ PrintSendDialogEx::PrintSendDialogEx(Plater* plater, int printPlateIdx, const bo
     , mTimeLapse(0)
     , mHeatedBedLeveling(0)
     , mBedType(BedType::btPTE)
-    , mIsDestroying(false)
-    , mLifeTracker(std::make_shared<bool>(true))
-    , mAsyncOperationInProgress(false)
     , mPostUploadAction(PrintHostPostUploadAction::None)
     , mSwitchToDeviceTab(false)
     , mPath(path)
@@ -66,10 +65,6 @@ PrintSendDialogEx::PrintSendDialogEx(Plater* plater, int printPlateIdx, const bo
 
 PrintSendDialogEx::~PrintSendDialogEx()
 {
-    mIsDestroying = true;
-
-    // Reset the life tracker to signal all async operations that this object is being destroyed
-    mLifeTracker.reset();
 }
 
 void PrintSendDialogEx::init()
@@ -83,7 +78,7 @@ void PrintSendDialogEx::init()
     // DestroyChildren();
     mBrowser = WebView::CreateWebView(this, "");
     if (mBrowser == nullptr) {
-        wxLogError("Could not init m_browser");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init m_browser";
         return;
     }
 
@@ -204,48 +199,17 @@ void PrintSendDialogEx::setupIPCHandlers()
                                                       std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         std::string printerId = request.params.value("printerId", "");
 
-        // Create a weak reference to track object lifetime
-        std::weak_ptr<bool> life_tracker = mLifeTracker;
-
-        // Mark async operation as in progress to prevent window closing
-        mAsyncOperationInProgress = true;
-
-        // Run the print task preparation in a separate thread to avoid blocking the UI
-        std::thread([life_tracker, printerId, sendResponse, this]() {
             try {
-                // Check if the object still exists
-                if (auto tracker = life_tracker.lock()) {
-                    webviewIpc::IPCResult response = this->preparePrintTask(printerId);
-
-                    // Final check before sending response
-                    if (life_tracker.lock()) {
-                        // Mark async operation as completed
-                        mAsyncOperationInProgress = false;
-
-                        sendResponse(response);
-                    }
-                } else {
-                    // Object was destroyed, don't send response
-                    return;
-                }
+                webviewIpc::IPCResult response = this->preparePrintTask(printerId);
+                sendResponse(response);
+                    
             } catch (const std::exception& e) {
-                if (life_tracker.lock()) {
-                    // Mark async operation as completed even on error
-                    mAsyncOperationInProgress = false;
-
-                    wxLogError("Error in request_print_task: %s", e.what());
-                    sendResponse(webviewIpc::IPCResult::error(std::string("Print task preparation failed: ") + e.what()));
-                }
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in request_print_task: %s") % e.what();
+                sendResponse(webviewIpc::IPCResult::error(std::string("Print task preparation failed: ") + e.what()));
             } catch (...) {
-                if (life_tracker.lock()) {
-                    // Mark async operation as completed even on unknown error
-                    mAsyncOperationInProgress = false;
-
-                    wxLogError("Unknown error in request_print_task");
-                    sendResponse(webviewIpc::IPCResult::error("Print task preparation failed: Unknown error"));
-                }
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": unknown error in request_print_task";
+                sendResponse(webviewIpc::IPCResult::error("Print task preparation failed: Unknown error"));
             }
-        }).detach();
     });
 
     // Handle request_printer_list
@@ -253,7 +217,7 @@ void PrintSendDialogEx::setupIPCHandlers()
         try {
             return getPrinterList();
         } catch (const std::exception& e) {
-            wxLogError("Error in request_printer_list: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in request_printer_list: %s") % e.what();
             return webviewIpc::IPCResult::error("Failed to get printer list");
         }
     });
@@ -261,7 +225,9 @@ void PrintSendDialogEx::setupIPCHandlers()
     // Handle cancel_print
     mIpc->onEvent("cancel_print", [this](const webviewIpc::IPCEvent& event) {
         try {
-            onCancel();
+            wxGetApp().CallAfter([this]() {
+                onCancel();
+            });
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in cancel_print: " << e.what();
         }
@@ -272,7 +238,9 @@ void PrintSendDialogEx::setupIPCHandlers()
         try {
             auto result = onPrint(event.data);
             if (result.code == 0) {
-                EndModal(wxID_OK);
+                wxGetApp().CallAfter([this]() {
+                    EndModal(wxID_OK);
+                });
             }
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in start_upload: " << e.what();
@@ -314,7 +282,7 @@ void PrintSendDialogEx::setupIPCHandlers()
             response["bedType"]     = bedTypeStr;
             return webviewIpc::IPCResult::success(response);
         } catch (const std::exception& e) {
-            wxLogError("Error in request_printer_list: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in request_printer_list: %s") % e.what();
             return webviewIpc::IPCResult::error("Failed to get printer list");
         }
     });
@@ -660,14 +628,14 @@ bool PrintSendDialogEx::getSwitchToDeviceTab() const
 
 void PrintSendDialogEx::OnCloseWindow(wxCloseEvent& event)
 {
-    // If async operation is in progress, prevent closing
-    if (mAsyncOperationInProgress && !mIsDestroying) {
-        // Show a message to user that operation is in progress
-        // wxMessageBox(_L("Print task preparation is in progress. Please wait..."),
-        //              _L("Operation in Progress"), wxOK | wxICON_INFORMATION);
-        event.Veto(); // Prevent the window from closing
-        return;
-    }
+    // // If async operation is in progress, prevent closing
+    // if (mAsyncOperationInProgress && !mIsDestroying) {
+    //     // Show a message to user that operation is in progress
+    //     // wxMessageBox(_L("Print task preparation is in progress. Please wait..."),
+    //     //              _L("Operation in Progress"), wxOK | wxICON_INFORMATION);
+    //     event.Veto(); // Prevent the window from closing
+    //     return;
+    // }
 
     // Allow normal close behavior
     event.Skip();

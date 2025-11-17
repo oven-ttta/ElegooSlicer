@@ -16,7 +16,7 @@ class ElegooLink : public Singleton<ElegooLink>
 public:
     ElegooLink();
     ~ElegooLink();
-    void init();
+    void init(const std::string& region, std::string& iotUrl);
     void uninit();
 
     PrinterNetworkResult<PrinterNetworkInfo>              connectToPrinter(const PrinterNetworkInfo& printerNetworkInfo);
@@ -44,7 +44,7 @@ public:
     PrinterNetworkResult<bool> sendRtmMessage(const std::string& printerId, const std::string& message);
     PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> unbindWANPrinter(const std::string& serialNumber);
-    PrinterNetworkResult<bool> setRegion(const std::string& region);
+    PrinterNetworkResult<bool> setRegion(const std::string& region, const std::string& iotUrl);
  
 private:
     bool isBusy(const std::string& printerId, PrinterStatus& status, int tryCount = 10);

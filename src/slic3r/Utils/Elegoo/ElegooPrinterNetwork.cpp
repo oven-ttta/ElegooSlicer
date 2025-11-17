@@ -11,9 +11,9 @@ ElegooPrinterNetwork::~ElegooPrinterNetwork(){
 
 
 }
-void ElegooPrinterNetwork::init()
+void ElegooPrinterNetwork::init(const std::string& region, std::string& iotUrl)
 {
-    ElegooLink::getInstance()->init();
+    ElegooLink::getInstance()->init(region, iotUrl);
 }
 
 void ElegooPrinterNetwork::uninit()
@@ -31,17 +31,6 @@ PrinterNetworkResult<bool> ElegooPrinterNetwork::disconnectFromPrinter()
 {
     return ElegooLink::getInstance()->disconnectFromPrinter(mPrinterNetworkInfo.printerId);
 }
-
-PrinterNetworkResult<PrinterNetworkInfo> ElegooPrinterNetwork::bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo)
-{
-    return ElegooLink::getInstance()->bindWANPrinter(printerNetworkInfo);
-}
-
-PrinterNetworkResult<bool> ElegooPrinterNetwork::unbindWANPrinter(const std::string& serialNumber)
-{
-    return ElegooLink::getInstance()->unbindWANPrinter(serialNumber);
-}
-
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooPrinterNetwork::discoverPrinters()   
 {
     return ElegooLink::getInstance()->discoverPrinters();

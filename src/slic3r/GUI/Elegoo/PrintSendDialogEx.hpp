@@ -80,12 +80,6 @@ private:
     std::string mProjectName;
     std::vector<PrintFilamentMmsMapping> mPrintFilamentList;
     bool mHasMms;
-
-    // async operation tracking
-    bool mIsDestroying{false};
-    std::shared_ptr<bool> mLifeTracker;
-    bool mAsyncOperationInProgress{false};
-
    
 };
 }} // namespace Slic3r::GUI 

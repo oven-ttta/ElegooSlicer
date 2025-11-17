@@ -13,6 +13,8 @@
 #include "slic3r/Utils/JsonUtils.hpp"
 #include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
 #include "slic3r/Utils/Elegoo/ElegooNetworkHelper.hpp"
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 namespace Slic3r { namespace GUI {
 
 std::atomic<bool> UserLoginView::s_isShown{false};
@@ -23,7 +25,7 @@ void UserLoginView::ShowLoginDialog()
 {
     bool expected = false;
     if (!s_isShown.compare_exchange_strong(expected, true)) {
-        wxLogMessage("UserLoginView already shown, ignore duplicate request");
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": UserLoginView already shown, ignore duplicate request";
         return;
     }
     
@@ -64,7 +66,7 @@ void UserLoginView::initUI()
     // Create webview
     mBrowser = WebView::CreateWebView(this, "");
     if (mBrowser == nullptr) {
-        wxLogError("Could not init m_browser");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init m_browser";
         return;
     }
 
@@ -74,7 +76,7 @@ void UserLoginView::initUI()
     // Load login page - online URL
     std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
     if (!networkHelper) {
-        wxLogError("Could not create network helper");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not create network helper";
         return;
     } 
     std::string url = networkHelper->getLoginUrl();
@@ -150,7 +152,9 @@ void UserLoginView::setupIPCHandlers()
     mIpc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request) {
         auto        params = request.params;
         std::string url    = params.value("url", "");
-        wxLaunchDefaultBrowser(url);
+        CallAfter([this, url]() {
+            wxLaunchDefaultBrowser(url);
+        });
         return webviewIpc::IPCResult::success();
     });
 
@@ -158,7 +162,9 @@ void UserLoginView::setupIPCHandlers()
         std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
         if (networkHelper) {
             std::string url = networkHelper->getLoginUrl();
-            mBrowser->LoadURL(url);
+            CallAfter([this, url]() {
+                mBrowser->LoadURL(url);
+            });
         }
         return webviewIpc::IPCResult::success();
     });

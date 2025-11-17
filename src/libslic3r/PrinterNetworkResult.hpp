@@ -78,6 +78,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_PLUGIN_NOT_INSTALLED = 10010, // Printer plugin not installed
     USER_NETWORK_BUSY = 10011, // User network busy
     PRINTER_SERIAL_NUMBER_EMPTY = 10012, // Printer serial number empty
+    PRINTER_NOT_CONNECTED_TO_UNBIND = 10013, // Printer not connected to unbind
 };
 
 

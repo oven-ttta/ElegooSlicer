@@ -58,6 +58,9 @@ public:
 
 private:
     PrinterManager();
+    std::atomic<bool> mIsInitialized;
+    std::mutex mInitializedMutex;
+
     class PrinterLock
     {
     public:
@@ -72,35 +75,32 @@ private:
 
     std::mutex mPrinterNetworkMutex;
     std::map<std::string, std::shared_ptr<IPrinterNetwork>> mPrinterNetworkConnections;
-    bool addPrinterNetwork(const std::shared_ptr<IPrinterNetwork>& network);
+    PrinterNetworkResult<bool> connectToPrinter(PrinterNetworkInfo& printer);
     bool deletePrinterNetwork(const std::string& printerId);
     std::shared_ptr<IPrinterNetwork> getPrinterNetwork(const std::string& printerId);
-
-        
+     
     // sync old preset printers to network
     void syncOldPresetPrinters();
-    
     // Validate and complete printer info with system preset
     void validateAndCompletePrinterInfo(PrinterNetworkInfo& printerInfo);
 
-    // refresh online printers from user network
-    std::mutex mOnlinePrintersMutex;
-    std::chrono::steady_clock::time_point mLastRefreshOnlinePrintersTime;
-    void refreshOnlinePrinters(bool force = false);
     std::string generatePrinterId();
 
-    
-    std::atomic<bool> mIsInitialized;
-    std::mutex mInitializedMutex;
-
     // thread to monitor printer connections
+    std::atomic<bool> monitorPrinterConnectionsRunning;
     std::thread mConnectionThread;
+    std::thread mWanPrinterConnectionThread;
     std::chrono::steady_clock::time_point mLastConnectionLoopTime;
+    std::chrono::steady_clock::time_point mLastWanConnectionLoopTime;
     void monitorPrinterConnections();
+    void monitorWanPrinterConnections();
+    std::mutex mWanPrintersMutex;
+    void refreshWanPrinters();
     
     // Check and handle WAN network error (like token expiration)
     template<typename T>
     void checkUserAuthStatus(const PrinterNetworkInfo& printerNetworkInfo, const PrinterNetworkResult<T>& result, 
                              const UserNetworkInfo& requestUserInfo);
+
 };
 } // namespace Slic3r::GUI 

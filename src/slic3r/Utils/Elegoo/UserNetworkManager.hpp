@@ -32,6 +32,10 @@ public:
     UserNetworkInfo refreshToken(const UserNetworkInfo& userInfo);
     // for frontend
     PrinterNetworkResult<UserNetworkInfo> getRtcToken();
+
+    // WAN
+    PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<bool>               unbindWANPrinter(const std::string& serialNumber);
     // printermanager get user bound printers
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters();
     // check user network error and update user info login status
@@ -57,6 +61,7 @@ private:
     void notifyUserInfoUpdated();
 
     bool checkNeedRefreshToken(const UserNetworkInfo& userInfo);
+    bool checkTokenTimeInvalid(const UserNetworkInfo& userInfo);
 
 private:
     mutable std::recursive_mutex mInitMutex;

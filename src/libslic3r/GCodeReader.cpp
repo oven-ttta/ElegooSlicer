@@ -93,7 +93,6 @@ const char* GCodeReader::parse_line_internal(const char *ptr, const char *end, G
     if (c > ptr) {
         PROFILE_BLOCK(copy_raw_string);
         gline.m_raw.assign(ptr, c);
-        REMOVE_COMP_TAG(gline.m_raw);
     }
 
     // Skip the trailing newlines.

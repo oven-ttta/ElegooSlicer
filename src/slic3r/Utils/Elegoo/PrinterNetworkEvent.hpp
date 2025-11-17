@@ -13,6 +13,8 @@
 #include <string>
 #include "libslic3r/PrinterNetworkInfo.hpp"
 #include "Singleton.hpp"
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 namespace Slic3r {
 
@@ -122,7 +124,7 @@ public:
             try {
                 handler(event);
             } catch (const std::exception& e) {
-                wxLogError("Exception in event handler: %s", e.what());
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception in event handler: %s") % e.what();
             }
         }
     }

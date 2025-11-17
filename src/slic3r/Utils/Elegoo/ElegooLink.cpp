@@ -4,6 +4,8 @@
 #include "libslic3r/PrinterNetworkInfo.hpp"
 #include "elegoolink/elegoo_link.h"
 #include "libslic3r/Utils.hpp"
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 #define ELEGOO_NETWORK_LIBRARY "ElegooNetwork"
 
@@ -176,7 +178,7 @@ ElegooLink::ElegooLink() {}
 
 ElegooLink::~ElegooLink() {}
 
-void ElegooLink::init()
+void ElegooLink::init(const std::string& region, std::string& iotUrl)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mIsInitialized) {
@@ -200,11 +202,21 @@ void ElegooLink::init()
     std::replace(webDir.begin(), webDir.end(), '\\', '/');
     cfg.staticWebPath = webDir + "/plugins/elegoolink/web";
 
+    std::string caCertDir = resources_dir();
+    std::replace(caCertDir.begin(), caCertDir.end(), '\\', '/');
+    cfg.caCertPath      =  caCertDir + "/cert/cacert.pem"; // Use system default CA certs
+
     if (!elink::ElegooLink::getInstance().initialize(cfg)) {
-        wxLogError("Error initializing ElegooLink");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": error initializing ElegooLink";
     }
+    elink::SetRegionParams setRegionParams;
+    setRegionParams.region = region;
+    setRegionParams.baseUrl = iotUrl;
+    setRegionParams.caCertPath = cfg.caCertPath;
+    elink::ElegooLink::getInstance().setRegion(setRegionParams);
+
     std::string version = elink::ElegooLink::getInstance().getVersion();
-    wxLogMessage("ElegooLink version: %s", version.c_str());
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": version: %s") % version;
     // Subscribe to ElegooLink events
     elink::ElegooLink::getInstance().subscribeEvent<elink::PrinterConnectionEvent>(
         [&](const std::shared_ptr<elink::PrinterConnectionEvent>& event) {
@@ -336,7 +348,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
             }
         }
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::connectToPrinter: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
 
@@ -373,13 +385,21 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::bindWANPrinter(const Printe
         resultCode  = parseElegooResult(elinkResult.code);
         if (resultCode == PrinterNetworkErrorCode::SUCCESS) {
             if (elinkResult.data.has_value() && elinkResult.data.value().bindResult) {
-                // PrinterNetworkInfo info = convertFromElegooPrinterInfo(elinkResult.data.value().printerInfo);
-                return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo,
+                PrinterNetworkInfo boundInfo = printerNetworkInfo;
+                PrinterNetworkInfo resBoundInfo = convertFromElegooPrinterInfo(elinkResult.data.value().printerInfo);
+                boundInfo.serialNumber = resBoundInfo.serialNumber;
+                boundInfo.printerId = resBoundInfo.printerId;
+                boundInfo.printerName = resBoundInfo.printerName;
+                boundInfo.protocolVersion = resBoundInfo.protocolVersion;
+                boundInfo.firmwareVersion = resBoundInfo.firmwareVersion;
+                boundInfo.mainboardId = resBoundInfo.mainboardId;
+                boundInfo.webUrl = resBoundInfo.webUrl;
+                return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, boundInfo,
                                                                 parseUnknownErrorMsg(resultCode, elinkResult.message));
             }
         }
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::bindPrinter: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
     return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo, parseUnknownErrorMsg(resultCode, elinkResult.message));
@@ -395,7 +415,7 @@ PrinterNetworkResult<bool> ElegooLink::disconnectFromPrinter(const std::string& 
         resultCode  = parseElegooResult(elinkResult.code);
 
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::disconnectFromPrinter: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
 
@@ -416,11 +436,15 @@ PrinterNetworkResult<bool> ElegooLink::unbindWANPrinter(const std::string& seria
                                       parseUnknownErrorMsg(resultCode, elinkResult.message));
 }
 
-PrinterNetworkResult<bool> ElegooLink::setRegion(const std::string& region)
+PrinterNetworkResult<bool> ElegooLink::setRegion(const std::string& region, const std::string& iotUrl)
 {
     CHECK_INITIALIZED(false);
     elink::SetRegionParams params;
-    params.region                       = region;
+    params.region  = region;
+    params.baseUrl = iotUrl;
+    std::string caCertDir = resources_dir();
+    std::replace(caCertDir.begin(), caCertDir.end(), '\\', '/');
+    params.caCertPath      =  caCertDir + "/cert/cacert.pem"; // Use system default CA certs
     elink::VoidResult       elinkResult = elink::ElegooLink::getInstance().setRegion(params);
     PrinterNetworkErrorCode resultCode  = parseElegooResult(elinkResult.code);
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS,
@@ -435,7 +459,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
     elink::PrinterDiscoveryResult   elinkResult;
     try {
         elink::PrinterDiscoveryParams discoveryParams;
-        discoveryParams.timeoutMs         = 5 * 1000;
+        discoveryParams.timeoutMs         = 10 * 1000;
         discoveryParams.broadcastInterval = 1000;
         discoveryParams.enableAutoRetry   = true;
         elinkResult                       = elink::ElegooLink::getInstance().startPrinterDiscovery(discoveryParams);
@@ -447,7 +471,7 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
             }
         }
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::discoverPrinters: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
 
@@ -537,7 +561,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintTask(const PrinterNetworkParams&
             resultCode                       = parseElegooResult(elinkResult.code);
         }
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::sendPrintTask: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS,
@@ -573,7 +597,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
 
         resultCode = parseElegooResult(elinkResult.code);
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::sendPrintFile: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS,
@@ -644,7 +668,7 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
             }
         }
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::getPrinterMmsInfo: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
     return PrinterNetworkResult<PrinterMmsGroup>(resultCode, mmsGroup, parseUnknownErrorMsg(resultCode, elinkResult.message));
@@ -670,7 +694,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterAttributes(const 
             }
         }
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::getPrinterAttributes: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
     return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo, parseUnknownErrorMsg(resultCode, elinkResult.message));
@@ -707,7 +731,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::getPrinterStatus(const std:
             }
         }
     } catch (const std::exception& e) {
-        wxLogError("Exception in ElegooLink::getPrinterStatus: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": exception: %s") % e.what();
         resultCode = PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION;
     }
     return PrinterNetworkResult<PrinterNetworkInfo>(resultCode, printerNetworkInfo, parseUnknownErrorMsg(resultCode, elinkResult.message));

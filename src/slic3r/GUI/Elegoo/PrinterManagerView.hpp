@@ -61,8 +61,6 @@ private:
     wxWebView* mBrowser;
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
     std::map<std::string, PrinterWebView*> mPrinterViews;
-    std::atomic<bool> m_isDestroying;
-    std::shared_ptr<bool> m_lifeTracker;
     bool mFirstTabClicked{false};
     std::mutex mUserInfoMutex; // Mutex to protect user info
     UserNetworkInfo mRefreshUserInfo; // User info

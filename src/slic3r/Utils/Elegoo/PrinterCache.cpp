@@ -4,7 +4,8 @@
 #include <boost/nowide/fstream.hpp>
 #include <nlohmann/json.hpp>
 #include <boost/filesystem.hpp>
-#include <wx/log.h>
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 #include <chrono>
 #include <exception>
 #include <cstdint>
@@ -28,7 +29,8 @@ bool PrinterCache::loadPrinterList() {
     // read printer list from file
     boost::nowide::ifstream ifs(printerListPath.string());
     if (!ifs.is_open()) {
-        wxLogError("Failed to open printer list file for reading: %s", printerListPath.string().c_str());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to open printer list file for reading: %s")
+                                              % printerListPath.string();
         return false;
     }
     
@@ -41,7 +43,7 @@ bool PrinterCache::loadPrinterList() {
             mPrinters[printerId] = printerInfo;
         }
     } catch (const std::exception& e) {
-        wxLogError("Failed to load printer list from JSON: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to load printer list from JSON: %s") % e.what();
     }
     return true;
 }

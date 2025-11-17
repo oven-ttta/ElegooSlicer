@@ -11,17 +11,6 @@ ElegooUserNetwork::~ElegooUserNetwork(){
 
 }
 
-void ElegooUserNetwork::uninit()
-{
-   
-}
-
-void ElegooUserNetwork::init()
-{
-    
-}
-
-
 PrinterNetworkResult<UserNetworkInfo> ElegooUserNetwork::connectToIot(const UserNetworkInfo& userInfo)
 {
     UserNetworkInfo userNetworkInfo = userInfo;
@@ -45,14 +34,25 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooUserNetwork::getUser
     return ElegooLink::getInstance()->getUserBoundPrinters();
 }
 
-PrinterNetworkResult<bool> ElegooUserNetwork::setRegion(const std::string& region)
+PrinterNetworkResult<bool> ElegooUserNetwork::setRegion(const std::string& region, const std::string& iotUrl)
 {
-    return ElegooLink::getInstance()->setRegion(region);
+    return ElegooLink::getInstance()->setRegion(region, iotUrl);
 }
 
 PrinterNetworkResult<bool> ElegooUserNetwork::logout()
 {
     return ElegooLink::getInstance()->logout(mUserNetworkInfo);
 }
+
+
+PrinterNetworkResult<PrinterNetworkInfo> ElegooUserNetwork::bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo)
+{
+    return ElegooLink::getInstance()->bindWANPrinter(printerNetworkInfo);
+}
+
+PrinterNetworkResult<bool> ElegooUserNetwork::unbindWANPrinter(const std::string& serialNumber)
+{
+    return ElegooLink::getInstance()->unbindWANPrinter(serialNumber);
+}   
 } // namespace Slic3r 
 

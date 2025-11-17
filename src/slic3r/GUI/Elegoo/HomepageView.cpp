@@ -14,6 +14,8 @@
 #include <slic3r/Utils/Elegoo/UserNetworkManager.hpp>
 #include <slic3r/Utils/Elegoo/ElegooNetworkHelper.hpp>
 #include "slic3r/Utils/JsonUtils.hpp"
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 namespace Slic3r { namespace GUI {
 
 // ============================================================================
@@ -195,7 +197,7 @@ void RecentHomepageView::onWebViewLoaded(wxWebViewEvent& event)
 {
     // IPC is already initialized in constructor
     mIsReady = true;
-    wxLogMessage("RecentHomepageView: WebView loaded successfully");
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": RecentHomepageView WebView loaded successfully";
 }
 
 void RecentHomepageView::onWebViewError(wxWebViewEvent& event)
@@ -249,7 +251,7 @@ void OnlineModelsHomepageView::initUI()
     // Load online models page from remote URL
     std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
     if (!networkHelper) {
-        wxLogError("Could not create network helper");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not create network helper";
         return;
     }
     std::string url = networkHelper->getOnlineModelsUrl();
@@ -310,7 +312,8 @@ void OnlineModelsHomepageView::setupIPCHandlers()
         if (userNetworkInfo.userId.empty() || userNetworkInfo.token.empty() ||
             userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_TOKEN ||
             userNetworkInfo.loginStatus == LOGIN_STATUS_OFFLINE_INVALID_USER) {
-            return webviewIpc::IPCResult::error();
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": OnlineModelsHomepageView user info is invalid, return empty user info";
+            userNetworkInfo = UserNetworkInfo();
         }
         nlohmann::json  data = generateUserInfoData(userNetworkInfo);
         return webviewIpc::IPCResult::success(data);
@@ -381,7 +384,7 @@ void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetw
     mRefreshUserInfo = UserNetworkInfo();
     nlohmann::json data = generateUserInfoData(userNetworkInfo);
     mIpc->sendEvent("client.onUserInfoUpdated", data, mIpc->generateRequestId());
-    wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
+    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": OnlineModelsHomepageView sent user info to WebView";
 }
 
 void OnlineModelsHomepageView::onRegionChanged()
@@ -404,7 +407,7 @@ webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
         nlohmann::json data = generateUserInfoData(mRefreshUserInfo);
         mIpc->sendEvent("client.onUserInfoUpdated", data, mIpc->generateRequestId());
         mRefreshUserInfo = UserNetworkInfo();
-        wxLogMessage("OnlineModelsHomepageView: Sent user info to WebView");
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ": OnlineModelsHomepageView sent user info to WebView";
     }
     return webviewIpc::IPCResult::success();
 }

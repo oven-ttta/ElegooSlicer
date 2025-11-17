@@ -36,14 +36,8 @@ public:
     virtual PrinterNetworkResult<bool>                            sendRtmMessage(const std::string& message)                = 0;
     virtual PrinterNetworkResult<PrinterPrintFileResponse>        getFileDetail(const std::string& fileName)                = 0;
     virtual PrinterNetworkResult<bool>                            updatePrinterName(const std::string& printerName)         = 0;
-    // WAN
-    virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
-    virtual PrinterNetworkResult<bool>               unbindWANPrinter(const std::string& serialNumber)            = 0;
 
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
-
-    static void init();
-    static void uninit();
 
 protected:
     PrinterNetworkInfo mPrinterNetworkInfo;
@@ -60,30 +54,31 @@ public:
     IUserNetwork& operator=(const IUserNetwork&) = delete;
     virtual ~IUserNetwork()                      = default;
 
-    virtual PrinterNetworkResult<bool>                            logout()                                      = 0;
-    virtual PrinterNetworkResult<UserNetworkInfo>                 connectToIot(const UserNetworkInfo& userInfo) = 0;
-    virtual PrinterNetworkResult<UserNetworkInfo>                 getRtcToken()                                 = 0;
-    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters()                        = 0;
-    virtual PrinterNetworkResult<UserNetworkInfo>                 refreshToken(const UserNetworkInfo& userInfo) = 0;
-    virtual PrinterNetworkResult<bool>                            setRegion(const std::string& region)          = 0;
+    virtual PrinterNetworkResult<bool>                            logout()                                                        = 0;
+    virtual PrinterNetworkResult<UserNetworkInfo>                 connectToIot(const UserNetworkInfo& userInfo)                   = 0;
+    virtual PrinterNetworkResult<UserNetworkInfo>                 getRtcToken()                                                   = 0;
+    virtual PrinterNetworkResult<std::vector<PrinterNetworkInfo>> getUserBoundPrinters()                                          = 0;
+    virtual PrinterNetworkResult<UserNetworkInfo>                 refreshToken(const UserNetworkInfo& userInfo)                   = 0;
+    virtual PrinterNetworkResult<bool>                            setRegion(const std::string& region, const std::string& iotUrl) = 0;
 
-    UserNetworkInfo getUserNetworkInfo() const 
-    { 
+    // WAN
+    virtual PrinterNetworkResult<PrinterNetworkInfo> bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo) = 0;
+    virtual PrinterNetworkResult<bool>               unbindWANPrinter(const std::string& serialNumber)            = 0;
+
+    UserNetworkInfo getUserNetworkInfo() const
+    {
         std::lock_guard<std::mutex> lock(mUserNetworkInfoMutex);
-        return mUserNetworkInfo; 
-    }
-    
-    void updateUserNetworkInfo(const UserNetworkInfo& userNetworkInfo) 
-    { 
-        std::lock_guard<std::mutex> lock(mUserNetworkInfoMutex);
-        mUserNetworkInfo = userNetworkInfo; 
+        return mUserNetworkInfo;
     }
 
-    static void init();
-    static void uninit();
+    void updateUserNetworkInfo(const UserNetworkInfo& userNetworkInfo)
+    {
+        std::lock_guard<std::mutex> lock(mUserNetworkInfoMutex);
+        mUserNetworkInfo = userNetworkInfo;
+    }
 
 protected:
-    UserNetworkInfo mUserNetworkInfo;
+    UserNetworkInfo    mUserNetworkInfo;
     mutable std::mutex mUserNetworkInfoMutex;
 };
 
@@ -103,9 +98,6 @@ public:
     virtual PrinterNetworkResult<std::vector<PluginNetworkInfo>> getPluginOldVersions()                       = 0;
 
     const PluginNetworkInfo& getPluginNetworkInfo() const { return mPluginNetworkInfo; }
-
-    static void init();
-    static void uninit();
 
 protected:
     PluginNetworkInfo mPluginNetworkInfo;
@@ -128,11 +120,22 @@ public:
     virtual std::string getAppUpdateUrl()     = 0;
     virtual std::string getPluginUpdateUrl()  = 0;
     virtual std::string getUserAgent()        = 0;
+    virtual std::string getIotUrl()           = 0;
 
     PrintHostType getHostType() const { return mHostType; }
 
+    static void setTestEnvJson(const nlohmann::json& testObj) { testEnvJson = testObj; }
+
 protected:
-    PrintHostType mHostType;
+    PrintHostType         mHostType;
+    static nlohmann::json testEnvJson;
+};
+
+class NetworkInitializer
+{
+public:
+    static void init();
+    static void uninit();
 };
 
 class NetworkFactory

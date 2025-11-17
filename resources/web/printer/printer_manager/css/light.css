@@ -135,7 +135,7 @@ body {
   border-radius: 8px;
   width: 100%;
   box-sizing: border-box;
-  max-height: calc(100vh - 120px);
+  /* max-height: calc(100vh - 120px); */
   overflow-y: auto;
   overflow-x: hidden;
   margin-bottom: 16px;
@@ -477,8 +477,15 @@ body {
 .add-printer-footer {
   display: flex;
   justify-content: space-between;
-  padding: 24px 0px;
+  padding: 24px 48px;
   /* box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); */
+}
+
+.manual-add-note {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  margin-bottom: -8px;
 }
 
 .add-printer-tabs {
@@ -533,6 +540,13 @@ body {
   font-weight: 400;
 }
 
+.manual-add-note {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-weight: 400;
+  text-align: center;
+}
 .form-group-advanced {
   display: flex;
   align-items: center;

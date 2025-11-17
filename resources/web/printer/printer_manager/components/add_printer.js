@@ -59,6 +59,7 @@ const AddPrinterTemplate = /*html*/`
             </el-dialog>
 
             <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">{{ $t('addPrinterDialog.refresh') }}</button>
+            <div class="manual-add-note" v-show="activeTab==='manual'">{{ $t('manualForm.manualAddNote') }}</div>
             <div class="add-printer-footer">
                 <button type="button" class="btn-secondary" @click="closeModal">{{ $t('addPrinterDialog.close') }}</button>   
                 <span class="help-link" v-show="activeTab==='discover'" @click.prevent="showHelp" style="align-self: flex-end;">{{ $t('addPrinterDialog.cannotFindPrinter') }}</span>

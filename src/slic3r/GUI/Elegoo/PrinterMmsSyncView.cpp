@@ -14,14 +14,13 @@
 #include "libslic3r/AppConfig.hpp"
 #include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 #include "slic3r/Utils/Elegoo/PrinterMmsManager.hpp"
+#include <boost/log/trivial.hpp>
+#include <boost/format.hpp>
 
 
 namespace Slic3r { namespace GUI {
 
 PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Synchronize filament list"), _L(""), 0)
-    , m_isDestroying(false)
-    , m_lifeTracker(std::make_shared<bool>(true))
-    , m_asyncOperationInProgress(false)
 {
     const AppConfig* app_config = wxGetApp().app_config;
 
@@ -44,7 +43,7 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
     // DestroyChildren();
     mBrowser = WebView::CreateWebView(this, "");
     if (mBrowser == nullptr) {
-        wxLogError("Could not init m_browser");
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init m_browser";
         return;
     }
 
@@ -75,10 +74,6 @@ PrinterMmsSyncView::PrinterMmsSyncView(wxWindow* parent) : MsgDialog(static_cast
 }
 
 PrinterMmsSyncView::~PrinterMmsSyncView() {
-    m_isDestroying = true;
-    
-    // Reset the life tracker to signal all async operations that this object is being destroyed
-    m_lifeTracker.reset();
 }
 
 void PrinterMmsSyncView::setupIPCHandlers()
@@ -90,7 +85,7 @@ void PrinterMmsSyncView::setupIPCHandlers()
         try {
             return getPrinterList();
         } catch (const std::exception& e) {
-            wxLogError("Error in getPrinterList: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in getPrinterList: %s") % e.what();
             return webviewIpc::IPCResult::error("Failed to get printer list");
         }
     });
@@ -99,67 +94,39 @@ void PrinterMmsSyncView::setupIPCHandlers()
     mIpc->onRequestAsync("getPrinterFilamentInfo", [this](const webviewIpc::IPCRequest& request,
                                                           std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         nlohmann::json params = request.params;
-        
-        // Create a weak reference to track object lifetime
-        std::weak_ptr<bool> life_tracker = m_lifeTracker;
-        
-        // Mark async operation as in progress to prevent window closing
-        m_asyncOperationInProgress = true;
-        
-        // Run the filament info retrieval in a separate thread to avoid blocking the UI
-        std::thread([life_tracker, params, sendResponse, this]() {
-            try {
-                // Check if the object still exists
-                if (auto tracker = life_tracker.lock()) {
-                    webviewIpc::IPCResult response = this->getPrinterFilamentInfo(params);
-                    
-                    // Final check before sending response
-                    if (life_tracker.lock()) {
-                        // Mark async operation as completed
-                        m_asyncOperationInProgress = false;
-                        
-                        sendResponse(response);
-                    }
-                } else {
-                    // Object was destroyed, don't send response
-                    return;
-                }
-            } catch (const std::exception& e) {
-                if (life_tracker.lock()) {
-                    // Mark async operation as completed even on error
-                    m_asyncOperationInProgress = false;
-                    
-                    wxLogError("Error in getPrinterFilamentInfo: %s", e.what());
-                    sendResponse(webviewIpc::IPCResult::error(std::string("Failed to get printer filament info: ") + e.what()));
-                }
-            } catch (...) {
-                if (life_tracker.lock()) {
-                    // Mark async operation as completed even on unknown error
-                    m_asyncOperationInProgress = false;
-                    
-                    wxLogError("Unknown error in getPrinterFilamentInfo");
-                    sendResponse(webviewIpc::IPCResult::error("Failed to get printer filament info: Unknown error"));
-                }
-            }
-        }).detach();
+        try {
+            webviewIpc::IPCResult response = this->getPrinterFilamentInfo(params);
+            sendResponse(response);
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in getPrinterFilamentInfo: %s") % e.what();
+            sendResponse(webviewIpc::IPCResult::error(std::string("Failed to get printer filament info: ") + e.what()));  
+        } catch (...) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": unknown error in getPrinterFilamentInfo";
+            sendResponse(webviewIpc::IPCResult::error("Failed to get printer filament info: Unknown error"));
+        }
     });
 
     // Handle syncMmsFilament
     mIpc->onEvent("syncMmsFilament", [this](const webviewIpc::IPCEvent& event) {
         try {
-            syncMmsFilament(event.data);
-            EndModal(wxID_OK);
+            auto data = event.data;
+            CallAfter([this,data]() {
+                syncMmsFilament(data);
+                EndModal(wxID_OK);
+            });
         } catch (const std::exception& e) {
-            wxLogError("Error in syncMmsFilament: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in syncMmsFilament: %s") % e.what();
         }
     });
 
     // Handle closeDialog
     mIpc->onEvent("closeDialog", [this](const webviewIpc::IPCEvent& event) {
         try {
-            EndModal(wxID_CANCEL);
+            CallAfter([this]() {
+                EndModal(wxID_CANCEL);
+            });
         } catch (const std::exception& e) {
-            wxLogError("Error in closeDialog: %s", e.what());
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in closeDialog: %s") % e.what();
         }
     });
 }
@@ -325,14 +292,14 @@ int PrinterMmsSyncView::ShowModal()
 
 void PrinterMmsSyncView::OnCloseWindow(wxCloseEvent& event)
 {
-    // If async operation is in progress, prevent closing
-    if (m_asyncOperationInProgress && !m_isDestroying) {
-        // Show a message to user that operation is in progress
-        // wxMessageBox(_L("Filament info retrieval is in progress. Please wait..."), 
-        //              _L("Operation in Progress"), wxOK | wxICON_INFORMATION);
-        event.Veto(); // Prevent the window from closing
-        return;
-    }
+    // // If async operation is in progress, prevent closing
+    // if (m_asyncOperationInProgress && !m_isDestroying) {
+    //     // Show a message to user that operation is in progress
+    //     // wxMessageBox(_L("Filament info retrieval is in progress. Please wait..."), 
+    //     //              _L("Operation in Progress"), wxOK | wxICON_INFORMATION);
+    //     event.Veto(); // Prevent the window from closing
+    //     return;
+    // }
     
     // Allow normal close behavior
     event.Skip();

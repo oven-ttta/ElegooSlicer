@@ -3999,11 +3999,13 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                             // context += append;
                             // show_info(q, context, _L("Newer 3mf version"));
 
+                            if(is_elegoo_slicer_3mf){
                             app_version = *(Semver::parse(ELEGOOSLICER_VERSION)); // used to display the current version number
                             wxString text  = wxString::Format(_L("The 3mf's version %s is newer than %s's version %s, Suggest to upgrade your software."),
                             file_version.to_string(), std::string(SLIC3R_APP_FULL_NAME), app_version.to_string());
                             text += "\n";
                             show_info(q, text, _L("Newer 3mf version"));
+                            }
                         }
                         else {
                             //if the minor version is not matched

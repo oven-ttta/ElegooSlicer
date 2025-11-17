@@ -15,6 +15,7 @@ elegooslicer_add_cmake_project(OCCT
     PATCH_COMMAND git apply ${OCCT_DIRECTORY_FLAG} --verbose --ignore-space-change --whitespace=fix ${CMAKE_CURRENT_LIST_DIR}/0001-OCCT-fix.patch
     #DEPENDS dep_Boost
     DEPENDS ${FREETYPE_PKG}
+    FORCE_RELEASE_CONFIG  # OCCT has issues with RelWithDebInfo PDB installation
     CMAKE_ARGS
         -DBUILD_LIBRARY_TYPE=${library_build_type}
         -DUSE_TK=OFF

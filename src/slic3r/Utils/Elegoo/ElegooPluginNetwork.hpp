@@ -19,9 +19,7 @@ public:
     virtual PrinterNetworkResult<bool>        uninstallPlugin() override;
     virtual PrinterNetworkResult<PluginNetworkInfo> getPluginLastestVersion() override;
     virtual PrinterNetworkResult<std::vector<PluginNetworkInfo>> getPluginOldVersions() override;
-  
-    static void init();
-    static void uninit();
+
 };
 
 } // namespace Slic3r
