@@ -26,6 +26,7 @@ if "%1" == "help" (
     echo   debug        - Build in Debug mode
     echo   debuginfo    - Build in RelWithDebInfo mode with debug symbols
     echo   pack         - Pack dependencies into zip file
+    echo   dlweb        - Download web dependencies default: skip download
     echo.
     echo Examples:
     echo   build_release_vs2022_pack_and_sign.bat slicer
@@ -75,6 +76,7 @@ set pack_install=OFF
 set only_pack=OFF
 set only_deps=OFF
 set sign=OFF
+set dlweb=OFF
 set ELEGOO_INTERNAL_TESTING=0
 
 set count=1
@@ -87,6 +89,7 @@ if "%1"=="packinstall" set pack_install=ON
 if "%1"=="onlypack" set only_pack=ON
 if "%1"=="onlydeps" set only_deps=ON
 if "%1"=="sign" set sign=ON
+if "%1"=="dlweb" set dlweb=ON
 if "%1"=="test" set ELEGOO_INTERNAL_TESTING=1
 set /a count+=1
 shift
@@ -105,6 +108,7 @@ echo   Pack Install:        %pack_install%
 echo   Only Pack:           %only_pack%
 echo   Only Deps:           %only_deps%
 echo   Sign Binaries:       %sign%
+echo   Download Web Deps:   %dlweb%
 echo   Internal Testing:    %ELEGOO_INTERNAL_TESTING%
 echo ============================================================================
 echo.
@@ -139,6 +143,37 @@ if exist "%folderPath%" (
     echo [INFO] No previous build folder found, skipping cleanup
 )
 
+
+if "%dlweb%"=="ON" (
+    echo ----------------------------------------------------------------------------
+    echo                     Downloading Web Dependencies
+    echo ----------------------------------------------------------------------------
+    if "%ELEGOO_INTERNAL_TESTING%"=="1" (
+        set TEST_PARAM=test
+        echo [INFO] Downloading INTERNAL TESTING web dependencies...
+    ) else (
+        set TEST_PARAM=
+        echo [INFO] Downloading RELEASE web dependencies...
+    )
+    echo.
+
+    call scripts/download_web_dep.bat %TEST_PARAM%
+    if %ERRORLEVEL% neq 0 (
+        echo.
+        echo [ERROR] Download web dependencies failed. Exiting.
+        exit /b %ERRORLEVEL%
+    )
+    echo.
+    echo [OK] Web dependencies downloaded successfully
+    echo ----------------------------------------------------------------------------
+    echo.
+) else (
+    echo.
+    echo [INFO] Skipping web dependencies download use 'dlweb' parameter to enable
+    echo.
+)
+
+
 setlocal DISABLEDELAYEDEXPANSION 
 cd deps
 mkdir %build_dir% 2>nul
@@ -166,31 +201,6 @@ if "%pack_install%"=="ON" (
     echo.
 )
 
-
-echo ----------------------------------------------------------------------------
-echo                     Downloading Web Dependencies
-echo ----------------------------------------------------------------------------
-if "%ELEGOO_INTERNAL_TESTING%"=="1" (
-    set TEST_PARAM=test
-    echo [INFO] Downloading INTERNAL TESTING web dependencies...
-) else (
-    set TEST_PARAM=
-    echo [INFO] Downloading RELEASE web dependencies...
-)
-echo.
-
-call scripts/download_web_dep.bat %TEST_PARAM%
-if %ERRORLEVEL% neq 0 (
-    echo.
-    echo [ERROR] Download web dependencies failed. Exiting.
-    exit /b %ERRORLEVEL%
-)
-echo.
-echo [OK] Web dependencies downloaded successfully
-echo ----------------------------------------------------------------------------
-echo.
-
-
 echo.
 echo ============================================================================
 echo                    STAGE 1: BUILDING DEPENDENCIES
@@ -200,7 +210,7 @@ echo [INFO] Configuring dependencies with CMake...
 echo.
 
 @echo on
-cmake ../ -G "Visual Studio 17 2022" -A x64 -DDESTDIR="%DEPS%" -DCMAKE_BUILD_TYPE=%build_type% -DDEP_DEBUG=%debug% -DORCA_INCLUDE_DEBUG_INFO=%debuginfo%
+cmake ../ -G "Visual Studio 17 2022" -A x64 -DDESTDIR="%DEPS%" -DCMAKE_BUILD_TYPE=%build_type% -DDEP_DEBUG=%debug% -DORCA_INCLUDE_DEBUG_INFO=%debuginfo% -DELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%
 cmake --build . --config %build_type% --target deps -- -m
 @echo off
 

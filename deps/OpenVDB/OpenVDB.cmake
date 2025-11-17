@@ -16,6 +16,7 @@ elegooslicer_add_cmake_project(OpenVDB
     URL_HASH SHA256=f353e7b99bd0cbfc27ac9082de51acf32a8bc0b3e21ff9661ecca6f205ec1d81
     PATCH_COMMAND git apply ${OPENVDB_DIRECTORY_FLAG} --verbose --ignore-space-change --whitespace=fix ${CMAKE_CURRENT_LIST_DIR}/0001-clang19.patch
     DEPENDS dep_TBB dep_Blosc dep_OpenEXR dep_Boost
+    FORCE_RELEASE_CONFIG
     CMAKE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON 
         -DOPENVDB_BUILD_PYTHON_MODULE=OFF

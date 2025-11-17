@@ -1,6 +1,12 @@
 @echo off
 setlocal enabledelayedexpansion
 
+set GIT_TOKEN=
+set LAN_WEB_URL=
+set CLOUD_WEB_URL=
+set LAN_WEB_NAME=lan_service_web
+set CLOUD_WEB_NAME=cloud_service_web
+
 REM Check parameter and set env file
 set ENV_FILE=.env
 if /i "%1"=="test" (
@@ -18,7 +24,7 @@ if not exist "%ENV_FILE%" (
 
 REM Parse env file, skip empty lines and comments
 for /f "usebackq tokens=1,* delims==" %%a in ("%ENV_FILE%") do (
-    REM Skip lines starting with # (comments)
+    REM Skip lines starting with # comments
     set "line=%%a"
     if not "!line!"=="" (
         if not "!line:~0,1!"=="#" (
@@ -32,6 +38,13 @@ for /f "usebackq tokens=1,* delims==" %%a in ("%ENV_FILE%") do (
 echo download web dependencies
 set LAN_WEB_PATH=resources\plugins\elegoolink\web\%LAN_WEB_NAME%
 set CLOUD_WEB_PATH=resources\plugins\elegoolink\web\%CLOUD_WEB_NAME%
+
+REM Check if LAN_WEB_URL is empty
+if "%LAN_WEB_URL%"=="" (
+    echo WARNING: LAN_WEB_URL is empty, skipping LAN web download.
+    goto skip_lan_download
+)
+
 echo Download %LAN_WEB_URL%
 
 curl -L -H "Authorization: Bearer %GIT_TOKEN%" -o "%LAN_WEB_NAME%.zip" "%LAN_WEB_URL%"
@@ -64,6 +77,14 @@ if !ERRORLEVEL! neq 0 (
     echo WARNING: Failed to delete %LAN_WEB_NAME%.zip
 )
 
+:skip_lan_download
+
+REM Check if CLOUD_WEB_URL is empty
+if "%CLOUD_WEB_URL%"=="" (
+    echo WARNING: CLOUD_WEB_URL is empty, skipping CLOUD web download.
+    goto skip_cloud_download
+)
+
 echo Download %CLOUD_WEB_URL%
 curl -L -H "Authorization: Bearer %GIT_TOKEN%" -o "%CLOUD_WEB_NAME%.zip" "%CLOUD_WEB_URL%"
 if %ERRORLEVEL% neq 0 (
@@ -93,6 +114,8 @@ del "%CLOUD_WEB_NAME%.zip"
 if !ERRORLEVEL! neq 0 (
     echo WARNING: Failed to delete %CLOUD_WEB_NAME%.zip
 )
+
+:skip_cloud_download
 
 echo All downloads and extractions completed successfully!
 exit /b 0
