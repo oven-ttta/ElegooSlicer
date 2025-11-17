@@ -75,13 +75,14 @@ int GUI_Run(GUI_InitParams &params)
             argv_ptrs.push_back(const_cast<char*>(argv_storage.back().c_str()));
         }
         // Always use the converted path to avoid Unicode conversion warnings
-        int argc = 1;
         if (params.argc > 1) {
             // STUDIO-273 wxWidgets report error when opening some files with specific names
             // wxWidgets does not handle parameters, so intercept parameters here, only keep the app name
+            int argc = 1;
             return wxEntry(argc, argv_ptrs.data());
         } else {
-            return wxEntry(argc, argv_ptrs.data());
+
+            return wxEntry(params.argc, argv_ptrs.data());
         }
 #else
         if (params.argc > 1) {
