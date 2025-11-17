@@ -198,12 +198,12 @@
                                     <template #default>
                                         <div>
                                             <div class="mms-header">
-                                                <span class="mms-title">{{ $t(printInfo.mmsInfo.mmsSystemName) }}</span>
+                                                <span class="mms-title">{{ $t(mmsInfo.mmsSystemName) }}</span>
                                                 <div style="border-bottom: 1px solid #DEDEDE; height: 1px; flex: 1;">
                                                 </div>
                                             </div>
                                             <div class="mms-popover-content">
-                                                <div v-for="mms in printInfo.mmsInfo.mmsList" :key="mms.mmsId"
+                                                <div v-for="mms in mmsInfo.mmsList" :key="mms.mmsId"
                                                     class="mms-row">
                                                     <div class="tray-popover-content">
                                                         <div v-for="tray in mms.trayList" :key="tray.trayName"

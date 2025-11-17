@@ -57,6 +57,7 @@ private:
     void setupIPCHandlers();
     webviewIpc::IPCResult getPrinterList();
     webviewIpc::IPCResult preparePrintTask(const std::string &printerId);
+    webviewIpc::IPCResult getPrinterMmsInfo(const std::string &printerId);
     webviewIpc::IPCResult onPrint(const nlohmann::json &printInfo);
     void onCancel();
     std::string getCurrentProjectName(); 
@@ -80,6 +81,8 @@ private:
     std::string mProjectName;
     std::vector<PrintFilamentMmsMapping> mPrintFilamentList;
     bool mHasMms;
+    bool mMmsConnected;
+    PrinterMmsGroup mMmsGroup;
    
 };
 }} // namespace Slic3r::GUI 

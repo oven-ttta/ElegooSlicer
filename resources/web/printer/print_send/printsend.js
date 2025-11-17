@@ -20,24 +20,27 @@ const PrintSendApp = {
                 autoRefill: false,
                 bedType: 'btPTE',
                 currentProjectPrinterModel: '',
-                filamentList: [],
-                mmsInfo: {
-                    mmsList: [
-                        {
-                            mmsId: '',
-                            mmsName: '',
-                            trayList: [
-                                {
-                                    trayId: '',
-                                    trayName: '',
-                                    filamentType: '',
-                                    filamentName: '',
-                                    filamentColor: '',
-                                }
-                            ]
-                        }
-                    ]
-                }
+                filamentList: []
+            },
+
+            // MMS info (separated from printInfo for independent loading)
+            mmsInfo: {
+                mmsSystemName: '',
+                mmsList: [
+                    {
+                        mmsId: '',
+                        mmsName: '',
+                        trayList: [
+                            {
+                                trayId: '',
+                                trayName: '',
+                                filamentType: '',
+                                filamentName: '',
+                                filamentColor: '',
+                            }
+                        ]
+                    }
+                ]
             },
 
             // Printer management
@@ -57,6 +60,7 @@ const PrintSendApp = {
             currentPage: 1,
             pageSize: 5,
             hasMmsInfo: false,
+            mMmsConnected: false,
 
             // UI state
             isEditingName: false,
@@ -101,7 +105,7 @@ const PrintSendApp = {
         },
 
         mmsFilamentList() {
-            return (this.printInfo.mmsInfo && this.printInfo.mmsInfo.mmsList) || [];
+            return (this.mmsInfo && this.mmsInfo.mmsList) || [];
         },
 
         // Check if selected printer model does not match the current project printer model
@@ -147,7 +151,6 @@ const PrintSendApp = {
                 };
                 const response = await this.ipcRequest('request_print_task', params);
                 this.printInfo = { ...this.printInfo, ...response };
-                this.updatePrintInfo();
             } catch (error) {
                 console.error('Failed to request print task:', error);
             } finally {
@@ -155,6 +158,25 @@ const PrintSendApp = {
             }
         },
 
+        async requestMmsInfo() {         
+            const loading = ElLoading.service({
+                lock: true,
+            });
+            try {
+                const params = {
+                    printerId: this.curPrinter.printerId
+                };
+                const response = await this.ipcRequest('request_mms_info', params);
+                this.mmsInfo = response.mmsInfo;
+                this.printInfo.filamentList = response.mappedFilamentList;        
+                return true;
+            } catch (error) {
+                console.error('Failed to request MMS info:', error);
+                return false;  
+            } finally {
+                loading.close();
+            }
+        },
         async requestPrinterList() {
             // const loading = ElLoading.service({
             //     lock: true,
@@ -173,9 +195,9 @@ const PrintSendApp = {
         async resizeWindow() {
             let expand = false;
             if (this.printInfo && this.printInfo.uploadAndPrint &&
-                this.printInfo.mmsInfo &&
-                this.printInfo.mmsInfo.mmsList &&
-                this.printInfo.mmsInfo.mmsList.length > 0
+                this.mmsInfo &&
+                this.mmsInfo.mmsList &&
+                this.mmsInfo.mmsList.length > 0
             ) {
                 expand = true;
             }
@@ -201,25 +223,6 @@ const PrintSendApp = {
 
         async refreshPrinterList() {
             await this.requestPrinterList();
-        },
-
-        updatePrintInfo() {
-            const printInfo = this.printInfo;
-            // Set bed type if provided
-            if (printInfo.bedType) {
-                this.selectedBedTypeValue = printInfo.bedType;
-            }
-
-            // Check for MMS info
-            if (printInfo.mmsInfo && printInfo.mmsInfo.mmsList && printInfo.mmsInfo.mmsList.length > 0) {
-                this.hasMmsInfo = true;
-            } else {
-                this.hasMmsInfo = false;
-            }
-
-            this.$nextTick(() => {
-                this.adjustModelNameWidth();
-            });
         },
 
         async updatePrinterSelection() {
@@ -414,21 +417,33 @@ const PrintSendApp = {
                 this.showStatusTip(this.$t('printSend.printerNotConnected'));
                 return;
             }
-
             // Update task with current UI state
             this.printInfo.selectedPrinterId = this.curPrinter.printerId;
             this.printInfo.bedType = this.selectedBedTypeValue;
 
-            // Validate filament mapping if MMS is present
+            //Validate filament mapping if MMS is present
+            if(this.printInfo.uploadAndPrint && this.curPrinter.systemCapabilities.supportsMultiFilament && !this.mMmsConnected) {
+                this.showStatusTip(this.$t('printSend.printerMmsNotConnected'));
+                return;
+            }
             if (this.hasMmsInfo && this.printInfo.uploadAndPrint && !this.checkFilamentMapping()) {
                 this.showStatusTip(this.$t('printSend.someFilamentsNotMapped'));
                 return;
             }
 
+            const loading = ElLoading.service({
+                lock: true,
+            });
+
             try {
-                nativeIpc.sendEvent('start_upload', this.printInfo);
+                const uploadData = {
+                    ...this.printInfo,
+                };
+                await this.ipcRequest('start_upload', uploadData);
             } catch (error) {
                 console.error('Failed to start upload:', error);
+            } finally {
+                loading.close();
             }
         },
 
@@ -467,6 +482,24 @@ const PrintSendApp = {
             ];
             // Handle printer change logic if needed
             await this.requestPrintTask();
+
+            this.mMmsConnected  = await this.requestMmsInfo();
+         
+            // Set bed type if provided
+            if (this.printInfo.bedType) {
+                this.selectedBedTypeValue = this.printInfo.bedType;
+            }
+
+            // Check for MMS info
+            if (this.mmsInfo && this.mmsInfo.mmsList && this.mmsInfo.mmsList.length > 0) {
+                this.hasMmsInfo = true;
+            } else {
+                this.hasMmsInfo = false;
+            }
+
+            this.$nextTick(() => {
+                this.adjustModelNameWidth();
+            });
         },
 
         onBedTypeChanged(bedType) {
@@ -493,7 +526,7 @@ const PrintSendApp = {
     },
 
     watch: {
-        'printInfo.mmsInfo.mmsList': {
+        'mmsInfo.mmsList': {
             async handler(newValue, oldValue) {
                 this.resizeWindow();
                 this.refreshShowFilamentSection();
