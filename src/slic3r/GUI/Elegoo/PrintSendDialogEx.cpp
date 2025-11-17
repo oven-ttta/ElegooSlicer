@@ -233,17 +233,23 @@ void PrintSendDialogEx::setupIPCHandlers()
         }
     });
 
-    // Handle start_upload
-    mIpc->onEvent("start_upload", [this](const webviewIpc::IPCEvent& event) {
+    mIpc->onRequestAsync("start_upload", [this](const webviewIpc::IPCRequest& request,
+                                                 std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         try {
-            auto result = onPrint(event.data);
+            auto result = onPrint(request.params);
             if (result.code == 0) {
                 wxGetApp().CallAfter([this]() {
                     EndModal(wxID_OK);
                 });
+            } else {
+                sendResponse(result);
             }
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << "Error in start_upload: " << e.what();
+            sendResponse(webviewIpc::IPCResult::error(std::string("Upload failed: ") + e.what()));
+        } catch (...) {
+            BOOST_LOG_TRIVIAL(error) << "Unknown error in start_upload";
+            sendResponse(webviewIpc::IPCResult::error("Upload failed: Unknown error"));
         }
     });
 
@@ -284,6 +290,22 @@ void PrintSendDialogEx::setupIPCHandlers()
         } catch (const std::exception& e) {
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in request_printer_list: %s") % e.what();
             return webviewIpc::IPCResult::error("Failed to get printer list");
+        }
+    });
+
+    // Handle request_mms_info (async due to potentially time-consuming getPrinterMmsInfo operation)
+    mIpc->onRequestAsync("request_mms_info", [this](const webviewIpc::IPCRequest& request,
+                                                     std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        std::string printerId = request.params.value("printerId", "");
+        try {
+            webviewIpc::IPCResult response = this->getPrinterMmsInfo(printerId);
+            sendResponse(response);
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in request_mms_info: %s") % e.what();
+            sendResponse(webviewIpc::IPCResult::error(std::string("MMS info request failed: ") + e.what()));
+        } catch (...) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": unknown error in request_mms_info";
+            sendResponse(webviewIpc::IPCResult::error("MMS info request failed: Unknown error"));
         }
     });
 }
@@ -346,6 +368,7 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
         nameToPreset[preset->name] = preset;
     }
 
+    mMmsGroup = PrinterMmsGroup();
     // get printfilament list
     std::vector<PrintFilamentMmsMapping> projectFilamentList;
     mPrintFilamentList.clear();
@@ -437,37 +460,61 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
         printerModel = printerModelValue->value;
     }
     printInfo["currentProjectPrinterModel"] = printerModel;
-
-    PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
-    PrinterMmsGroup    mmsGroup;
-
-    if (!printerNetworkInfo.printerId.empty() && printerNetworkInfo.systemCapabilities.supportsMultiFilament) {
-        PrinterNetworkResult<PrinterMmsGroup> res = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
-        if (res.isSuccess() && res.hasData()) {
-            mmsGroup = res.data.value();
-        }
-        nlohmann::json mmsInfo = convertPrinterMmsGroupToJson(mmsGroup);
-        printInfo["mmsInfo"]   = mmsInfo;
-        PrinterMmsManager::getInstance()->getFilamentMmsMapping(printerNetworkInfo, mPrintFilamentList, mmsGroup);
-    } else {
-        printInfo["mmsInfo"] = json::object();
-    }
-
-    if (mmsGroup.mmsList.size() == 0) {
-        mHasMms = false;
-    } else {
-        mHasMms = true;
-    }
-
+    mHasMms = false;
+    mMmsConnected = false;
     nlohmann::json filamentList = json::array();
     for (auto& filament : mPrintFilamentList) {
         filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
     }
+
     printInfo["filamentList"] = filamentList;
 
     webviewIpc::IPCResult result;
     result.data    = printInfo;
     result.code    = 0;
+    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
+    return result;
+}
+
+webviewIpc::IPCResult PrintSendDialogEx::getPrinterMmsInfo(const std::string &printerId)
+{
+    webviewIpc::IPCResult result;
+    mMmsGroup = PrinterMmsGroup();
+    PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
+    if(!printerNetworkInfo.systemCapabilities.supportsMultiFilament) {
+        result.data = json::object();
+        result.data["mmsInfo"] = json::object();
+        result.data["mappedFilamentList"] = json::array();
+        result.code = static_cast<int>(PrinterNetworkErrorCode::SUCCESS);
+        result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
+        mMmsConnected = false;
+        return result;
+    }
+    PrinterNetworkResult<PrinterMmsGroup> res = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
+    if (res.isSuccess()) {
+        mMmsConnected = true;
+        mMmsGroup = res.data.value();
+    } else {
+        mMmsConnected = false;
+        return result;
+    }
+    nlohmann::json mmsInfo = convertPrinterMmsGroupToJson(mMmsGroup);
+    if(mMmsGroup.mmsList.size() == 0) {
+        mHasMms = false;
+    } else {
+        mHasMms = true;
+    }
+    
+    PrinterMmsManager::getInstance()->getFilamentMmsMapping(printerNetworkInfo, mPrintFilamentList, mMmsGroup);
+    nlohmann::json filamentList = json::array();
+
+    result.data = json::object();
+    result.data["mmsInfo"] = mmsInfo;
+    for(auto& filament : mPrintFilamentList) {
+        filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
+    }
+    result.data["mappedFilamentList"] = filamentList;
+    result.code = 0;
     result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
     return result;
 }
@@ -529,6 +576,25 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         if (mSelectedPrinterId.empty()) {
             errorCode      = PrinterNetworkErrorCode::PRINTER_NOT_SELECTED;
             result.message = getErrorMessage(errorCode);
+            result.code = static_cast<int>(errorCode);
+            return result;
+        }
+        PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(mSelectedPrinterId);
+        if(printerNetworkInfo.printerId.empty()) {
+            errorCode = PrinterNetworkErrorCode::PRINTER_NOT_FOUND;
+            result.message = getErrorMessage(errorCode);
+            result.code = static_cast<int>(errorCode);
+            return result;
+        }
+        if(uploadAndPrint && printerNetworkInfo.systemCapabilities.supportsMultiFilament && !mMmsConnected) {
+            errorCode = PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED;
+            std::string mmsSystemName = "MMS";
+            if (!mMmsGroup.mmsSystemName.empty()) {
+                mmsSystemName = mMmsGroup.mmsSystemName;
+            }
+            std::string errorMessage = (boost::format(_u8L("%1% connection failed. Please check and try again.")) % mmsSystemName).str();
+            result.message = errorMessage;
+            result.code = static_cast<int>(errorCode);
             return result;
         }
 
@@ -565,6 +631,7 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
                     printFilament.mappedMmsFilament.filamentName.empty() || printFilament.mappedMmsFilament.filamentType.empty()) {
                     errorCode      = PrinterNetworkErrorCode::PRINTER_MMS_FILAMENT_NOT_MAPPED;
                     result.message = getErrorMessage(errorCode);
+                    result.code = static_cast<int>(errorCode);
                     return result;
                 }
             }
@@ -592,9 +659,7 @@ void PrintSendDialogEx::EndModal(int ret)
         app_config->set("recent", CONFIG_KEY_AUTO_REFILL, std::to_string(mAutoRefill));
         app_config->set("recent", CONFIG_KEY_SELECTED_PRINTER_ID, mSelectedPrinterId);
         app_config->set("recent", CONFIG_KEY_SWITCH_TO_DEVICE_TAB, std::to_string(mSwitchToDeviceTab));
-
     }
-
     MsgDialog::EndModal(ret);
 }
 
