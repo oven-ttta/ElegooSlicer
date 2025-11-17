@@ -197,11 +197,12 @@ void UserNetworkManager::checkUserAuthStatus(const UserNetworkInfo& requestUserI
         }
     }
 }
-UserNetworkInfo UserNetworkManager::getUserInfo() const
+UserNetworkInfo UserNetworkManager::getUserInfo()
 {   
     CHECK_INITIALIZED(UserNetworkInfo());
 
     std::lock_guard<std::mutex> userLock(mUserMutex);
+    mUserInfo.loginErrorMessage = getLoginErrorMessage(mUserInfo);
     return mUserInfo;
 }
 

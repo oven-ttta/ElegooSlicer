@@ -22,7 +22,7 @@ public:
     void init();
     void uninit();
     
-    UserNetworkInfo getUserInfo() const;
+    UserNetworkInfo getUserInfo();
     // only can be called by login or logout
     void logout();
     void login(const UserNetworkInfo& userInfo);
