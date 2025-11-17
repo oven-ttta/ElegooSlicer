@@ -16,6 +16,10 @@
 #include <boost/nowide/iostream.hpp>
 #include <boost/nowide/convert.hpp>
 
+#ifdef _WIN32
+    #include <windows.h>
+#endif // _WIN32
+
 #if __APPLE__
     #include <signal.h>
 #endif // __APPLE__
@@ -53,6 +57,33 @@ int GUI_Run(GUI_InitParams &params)
         GUI::GUI_App::SetInstance(gui);
         gui->init_params = &params;
 
+#ifdef _WIN32
+        // On Windows, use GetModuleFileNameW to get the executable path in Unicode,
+        // then convert to UTF-8 to avoid Unicode conversion warnings from wxWidgets
+        // This fixes the warning: "Command line argument 0 couldn't be converted to Unicode and will be ignored."
+        std::vector<std::string> argv_storage; // Store strings to keep pointers valid
+        std::vector<char *> argv_ptrs;
+        
+        wchar_t app_path[MAX_PATH];
+        DWORD path_len = ::GetModuleFileNameW(nullptr, app_path, MAX_PATH);
+        if (path_len > 0 && path_len < MAX_PATH) {
+            argv_storage.emplace_back(boost::nowide::narrow(app_path));
+            argv_ptrs.push_back(const_cast<char*>(argv_storage.back().c_str()));
+        } else {
+            // Fallback to argv[0] if GetModuleFileNameW fails
+            argv_storage.emplace_back(params.argv[0]);
+            argv_ptrs.push_back(const_cast<char*>(argv_storage.back().c_str()));
+        }
+        // Always use the converted path to avoid Unicode conversion warnings
+        int argc = 1;
+        if (params.argc > 1) {
+            // STUDIO-273 wxWidgets report error when opening some files with specific names
+            // wxWidgets does not handle parameters, so intercept parameters here, only keep the app name
+            return wxEntry(argc, argv_ptrs.data());
+        } else {
+            return wxEntry(argc, argv_ptrs.data());
+        }
+#else
         if (params.argc > 1) {
             // STUDIO-273 wxWidgets report error when opening some files with specific names
             // wxWidgets does not handle parameters, so intercept parameters here, only keep the app name
@@ -63,6 +94,7 @@ int GUI_Run(GUI_InitParams &params)
         } else {
             return wxEntry(params.argc, params.argv);
         }
+#endif // _WIN32
     } catch (const Slic3r::Exception &ex) {
         BOOST_LOG_TRIVIAL(error) << ex.what() << std::endl;
         wxMessageBox(boost::nowide::widen(ex.what()), _L("ElegooSlicer GUI initialization failed"), wxICON_STOP);
