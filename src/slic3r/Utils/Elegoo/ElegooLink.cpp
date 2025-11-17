@@ -638,8 +638,14 @@ PrinterNetworkResult<PrinterMmsGroup> ElegooLink::getPrinterMmsInfo(const std::s
                         trayInfo.trayId        = std::to_string(tray.trayId);
                         trayInfo.mmsId         = std::to_string(canvas.canvasId);
                         trayInfo.vendor        = tray.brand;
+                        if(trayInfo.vendor.empty()) {
+                            trayInfo.vendor = "Generic";
+                        }
                         trayInfo.filamentType  = tray.filamentType;
                         trayInfo.filamentName  = tray.filamentName;
+                        if(trayInfo.filamentName.empty()) {
+                            trayInfo.filamentName = tray.filamentType;
+                        }
                         trayInfo.filamentColor = tray.filamentColor;
                         trayInfo.minNozzleTemp = tray.minNozzleTemp;
                         trayInfo.maxNozzleTemp = tray.maxNozzleTemp;
