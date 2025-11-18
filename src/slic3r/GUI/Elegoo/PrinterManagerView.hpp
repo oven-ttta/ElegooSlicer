@@ -56,10 +56,19 @@ private:
     void saveTabState();
     void loadTabState();
     
+    void closeInvalidPrinterTab(std::vector<PrinterNetworkInfo>& printerList);
+    
+    PrinterWebView* findPrinterView(const std::string& printerId);
+    void insertPrinterView(const std::string& printerId, PrinterWebView* view);
+    bool removePrinterView(const std::string& printerId);
+    PrinterWebView* removePrinterViewByWindow(wxWindow* win);
+    void forEachPrinterView(std::function<void(const std::string&, PrinterWebView*)> callback);
+    
 private:
     wxAuiNotebook* mTabBar;
     wxWebView* mBrowser;
     std::unique_ptr<webviewIpc::WebviewIPCManager> mIpc;
+    std::mutex mPrinterViewsMutex;
     std::map<std::string, PrinterWebView*> mPrinterViews;
     bool mFirstTabClicked{false};
     std::mutex mUserInfoMutex; // Mutex to protect user info
