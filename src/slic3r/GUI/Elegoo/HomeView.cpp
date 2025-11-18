@@ -285,16 +285,6 @@ void HomeView::OnNewWindowRequest(wxWebViewEvent& event)
 
 void HomeView::sendRecentList(int images)
 {
-    //     boost::property_tree::wptree req;
-    //     boost::property_tree::wptree data;
-    //     wxGetApp().mainframe->get_recent_projects(data, images);
-    //     req.put(L"sequence_id", "");
-    //     req.put(L"command", L"get_recent_projects");
-    //     req.put_child(L"response", data);
-    //     std::wostringstream oss;
-    //     boost::property_tree::write_json(oss, req, false);
-    //     RunScript(wxString::Format("window.postMessage(%s)", oss.str()));
-    // }
     if( mHomepageViews.find("recent") != mHomepageViews.end() ) {
         RecentHomepageView* recentView = dynamic_cast<RecentHomepageView*>(mHomepageViews["recent"]);
         if (recentView) {

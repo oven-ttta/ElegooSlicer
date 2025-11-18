@@ -37,7 +37,7 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::INVALID_ACCESS_CODE:
             return _u8L("Invalid access code. Please check and try again.");
         case PrinterNetworkErrorCode::INVALID_PIN_CODE:
-            return _u8L("Invalid PIN code. Please check and try again.");
+            return _u8L("Invalid PIN: Please check the printer's region matches your account region, or check that the PIN was entered correctly.");
         case PrinterNetworkErrorCode::PRINTER_CONNECTION_LIMIT_EXCEEDED:
             return _u8L("Connection limit reached. Please check and try again.");
         case PrinterNetworkErrorCode::FILE_TRANSFER_FAILED:

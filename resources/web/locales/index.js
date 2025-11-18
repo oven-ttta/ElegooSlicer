@@ -7,7 +7,7 @@ const langMessages = {
     "confirm": "Confirm",
     "cancel": "Cancel",
     "noPrinterConnected": "No printer connected. Please go to \"Devices\" to discover or add a new printer.",
-    "requestTimeout": "Request timeout, please check your network and try again.",
+    "requestTimeout": "Request timed out. Please check the network connections of your computer and printer.",
     "homepage": {
       "title": "Home",
       "login": "Login",
@@ -215,7 +215,7 @@ const langMessages = {
     "confirm": "确认",
     "cancel": "取消",
     "noPrinterConnected": "未连接任何打印机，请前往\“设备\"发现或添加新打印机",
-    "requestTimeout": "请求超时,请检查网络后重试.",
+    "requestTimeout": "网络请求超时，请检查电脑、打印机的网络连接后重试",
     "homepage": {
       "title": "首页",
       "login": "登录",
