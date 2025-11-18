@@ -392,6 +392,7 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterHost(const std::string& 
         PrinterCache::getInstance()->updatePrinterField(printerId, [&printer](PrinterNetworkInfo& cachedPrinter) {
             cachedPrinter.webUrl             = printer.webUrl;
             cachedPrinter.host               = printer.host;
+            cachedPrinter.printerName        = printer.printerName;
             cachedPrinter.printCapabilities  = printer.printCapabilities;
             cachedPrinter.systemCapabilities = printer.systemCapabilities;
             cachedPrinter.firmwareVersion    = printer.firmwareVersion;
@@ -428,7 +429,12 @@ PrinterNetworkResult<bool> PrinterManager::updatePhysicalPrinter(const std::stri
     if (!v.has_value()) {
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
     }
+    bool isUpdatePrinterName = false;
     PrinterNetworkInfo printer = v.value();
+    if(printer.printerName != printerInfo.printerName) {
+        isUpdatePrinterName = true;
+    }
+
     printer.host               = printerInfo.host;
     printer.webUrl             = printerInfo.webUrl;
     printer.hostType           = printerInfo.hostType;
@@ -445,7 +451,7 @@ PrinterNetworkResult<bool> PrinterManager::updatePhysicalPrinter(const std::stri
         oldNetwork->disconnectFromPrinter();
         deletePrinterNetwork(printerId);
     }
-    PrinterNetworkResult<bool> result = connectToPrinter(printer);
+    PrinterNetworkResult<bool> result = connectToPrinter(printer, isUpdatePrinterName);
     if (result.isSuccess()) {
         PrinterCache::getInstance()->updatePrinterField(printerId, [&printer](PrinterNetworkInfo& cachedPrinter) {
             cachedPrinter.printerName        = printer.printerName;
@@ -537,7 +543,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
         // update the printer network info with the bound printer network info
         printerNetworkInfo.printerId = boundPrinterNetworkInfo.printerId;
     }
-    PrinterNetworkResult<bool> addResult = connectToPrinter(printerNetworkInfo);
+    PrinterNetworkResult<bool> addResult = connectToPrinter(printerNetworkInfo, true);
     if (addResult.isSuccess()) {
         PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
         PrinterCache::getInstance()->savePrinterList();
@@ -1012,6 +1018,7 @@ void PrinterManager::monitorPrinterConnections()
                         cachedPrinter.printCapabilities  = printer.printCapabilities;
                         cachedPrinter.systemCapabilities = printer.systemCapabilities;
                         cachedPrinter.firmwareVersion    = printer.firmwareVersion;
+                        cachedPrinter.printerName        = printer.printerName;
                         cachedPrinter.connectStatus      = PRINTER_CONNECT_STATUS_CONNECTED;
                     });
 
@@ -1072,6 +1079,7 @@ void PrinterManager::monitorWanPrinterConnections()
                         cachedPrinter.printCapabilities  = printer.printCapabilities;
                         cachedPrinter.systemCapabilities = printer.systemCapabilities;
                         cachedPrinter.firmwareVersion    = printer.firmwareVersion;
+                        cachedPrinter.printerName        = printer.printerName;
                         cachedPrinter.connectStatus      = PRINTER_CONNECT_STATUS_CONNECTED;
                     });
                 } else {
@@ -1092,7 +1100,7 @@ void PrinterManager::monitorWanPrinterConnections()
         mLastWanConnectionLoopTime = now;
     }
 }
-PrinterNetworkResult<bool> PrinterManager::connectToPrinter(PrinterNetworkInfo& printer)
+PrinterNetworkResult<bool> PrinterManager::connectToPrinter(PrinterNetworkInfo& printer, bool updatePrinterName)
 {
     if (printer.printerId.empty()) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": connect to printer failed, printer id is empty, printer: %s %s %s")
@@ -1120,10 +1128,6 @@ PrinterNetworkResult<bool> PrinterManager::connectToPrinter(PrinterNetworkInfo& 
     }
 
     auto connectResult = network->connectToPrinter();
-    {
-        std::lock_guard<std::mutex> lock(mPrinterNetworkMutex);
-        mPrinterNetworkConnections[printer.printerId] = network;
-    }
 
     if (!connectResult.isSuccess()) {
         if (connectResult.code == PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD ||
@@ -1137,25 +1141,42 @@ PrinterNetworkResult<bool> PrinterManager::connectToPrinter(PrinterNetworkInfo& 
         printer.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
         return PrinterNetworkResult<bool>(connectResult.code, false, connectResult.message);
     }
-
+    if (updatePrinterName) {
+        auto updateNameResult = network->updatePrinterName(printer.printerName);
+        if (!updateNameResult.isSuccess()) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__
+                                     << boost::format(": failed to update printer name: %s %s %s, error: %s") % printer.host %
+                                            printer.printerName % printer.printerModel % updateNameResult.message;
+            network->disconnectFromPrinter();
+            printer.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
+            return PrinterNetworkResult<bool>(updateNameResult.code, false, updateNameResult.message);
+        }
+    }
     // get the printer attributes
-    auto attributes = network->getPrinterAttributes();
+    PrinterNetworkResult<PrinterNetworkInfo> attributes;
+    for (int i = 0; i < 3; i++) {
+        attributes = network->getPrinterAttributes();
+        if (!attributes.isSuccess()) {
+            BOOST_LOG_TRIVIAL(error)
+                << __FUNCTION__
+                << boost::format(": connect to printer failed, failed to get printer attributes for printer: %s %s %s, error: %s") %
+                       printer.host % printer.printerName % printer.printerModel % attributes.message;
 
-    if (!attributes.isSuccess()) {
+        } else if (!attributes.hasData()) {
+            BOOST_LOG_TRIVIAL(error)
+                << __FUNCTION__
+                << boost::format(
+                       ": connect to printer failed, failed to get printer attributes for printer: %s %s %s attribute data is empty") %
+                       printer.host % printer.printerName % printer.printerModel;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    if(!attributes.isSuccess() || !attributes.hasData()) {
         network->disconnectFromPrinter();
-        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": connect to printer failed, failed to get printer attributes for printer: %s %s %s, error: %s")
-                                 % printer.host % printer.printerName % printer.printerModel % attributes.message;
         printer.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
     }
-    if (!attributes.hasData()) {
-        network->disconnectFromPrinter();
-        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": connect to printer failed, failed to get printer attributes for printer: %s %s %s attribute data is empty")
-                                 % printer.host % printer.printerName % printer.printerModel;
-        printer.connectStatus = PRINTER_CONNECT_STATUS_DISCONNECTED;
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
-    }
-    auto printerAttributes = attributes.data.value();
+    PrinterNetworkInfo printerAttributes = attributes.data.value();
     if ((!printer.mainboardId.empty() && printer.mainboardId != printerAttributes.mainboardId) ||
         (!printer.serialNumber.empty() && printer.serialNumber != printerAttributes.serialNumber) ||
         (printer.printerId != printerAttributes.printerId)) {
@@ -1166,12 +1187,19 @@ PrinterNetworkResult<bool> PrinterManager::connectToPrinter(PrinterNetworkInfo& 
         network->disconnectFromPrinter();
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_HOST_NOT_MATCH, false);
     }
+
+    {
+        std::lock_guard<std::mutex> lock(mPrinterNetworkMutex);
+        mPrinterNetworkConnections[printer.printerId] = network;
+    }
+
     printer.printCapabilities  = printerAttributes.printCapabilities;
     printer.systemCapabilities = printerAttributes.systemCapabilities;
     printer.firmwareVersion    = printerAttributes.firmwareVersion;
     printer.mainboardId        = printerAttributes.mainboardId;
     printer.serialNumber       = printerAttributes.serialNumber;
     printer.webUrl             = printerAttributes.webUrl;
+    printer.printerName        = printerAttributes.printerName;
     printer.connectStatus      = PRINTER_CONNECT_STATUS_CONNECTED;
     network->getPrinterStatus();
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": connected to printer: %s %s %s, firmware version: %s")
