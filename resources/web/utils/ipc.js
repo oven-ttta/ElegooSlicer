@@ -1,7 +1,23 @@
 /**
  * wxWebView IPC Communication Library - JavaScript Side
  * Provides asynchronous request/response and event handling functionality
+ * 
+ * Dependencies:
+ * - This file requires locales/index.js to be loaded before it
+ * - Ensure <script src="locales/index.js"></script> is placed before this script in HTML
  */
+
+// Helper function to get translated text
+function getI18nText(key, fallback) {
+    try {
+        if (typeof i18n !== 'undefined' && i18n && i18n.global) {
+            return i18n.global.t(key);
+        }
+    } catch (error) {
+        console.warn('IPC: Failed to get translation for key:', key, error);
+    }
+    return fallback;
+}
 
 class IPCManager {
     constructor() {
@@ -317,7 +333,8 @@ class IPCManager {
             // Set timeout
             const timeoutId = setTimeout(() => {
                 this.pendingRequests.delete(id);
-                reject(new Error(`Request timeout: ${method}`));
+                console.error('IPC: Request timeout:', method);
+                reject(new Error(getI18nText('requestTimeout', 'Request timeout, please check your network and try again.')));
             }, timeout);
 
             // Store request information
@@ -406,7 +423,8 @@ class IPCManager {
                 if (!isCompleted) {
                     isCompleted = true;
                     this.pendingRequests.delete(id);
-                    reject(new Error(`Request timeout: ${method}`));
+                    console.error('IPC: Request timeout:', method);
+                    reject(new Error(getI18nText('requestTimeout', 'Request timeout, please check your network and try again.')));
                 }
             }, timeout);
 

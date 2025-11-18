@@ -7,6 +7,7 @@ const langMessages = {
     "confirm": "Confirm",
     "cancel": "Cancel",
     "noPrinterConnected": "No printer connected. Please go to \"Devices\" to discover or add a new printer.",
+    "requestTimeout": "Request timeout, please check your network and try again.",
     "homepage": {
       "title": "Home",
       "login": "Login",
@@ -214,6 +215,7 @@ const langMessages = {
     "confirm": "确认",
     "cancel": "取消",
     "noPrinterConnected": "未连接任何打印机，请前往\“设备\"发现或添加新打印机",
+    "requestTimeout": "请求超时,请检查网络后重试.",
     "homepage": {
       "title": "首页",
       "login": "登录",
@@ -449,4 +451,7 @@ const i18n = createI18n({
   messages: langMessages,
 });
 
-
+// Export i18n to global scope for use in non-Vue components
+if (typeof window !== 'undefined') {
+  window.i18n = i18n;
+}
