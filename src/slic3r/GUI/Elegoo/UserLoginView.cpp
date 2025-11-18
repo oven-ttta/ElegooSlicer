@@ -171,6 +171,11 @@ void UserLoginView::setupIPCHandlers()
         }
         return webviewIpc::IPCResult::success();
     });
+    mIpc->onRequest("isLoading", [this](const webviewIpc::IPCRequest& request) {
+        nlohmann::json data = nlohmann::json::object();
+        data["isLoading"] = mIsLoading;
+        return webviewIpc::IPCResult::success(data);
+    });
 }
 
 void UserLoginView::cleanupIPC()

@@ -8,6 +8,7 @@
     <script type="text/javascript" src="../include/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="../include/globalapi.js"></script>
     <script type="text/javascript" src="../data/text.js"></script>
+    <script type="text/javascript" src="../utils/ipc.js"></script>
     <style>
         body,
         html {
@@ -118,6 +119,7 @@
         }
     </style>
     <script>
+        let checkInterval = null;
 
         function reloadPage() {
             var btn = document.querySelector('.reload-button');
@@ -125,20 +127,28 @@
             btn.classList.add('loading');
             btn.disabled = true;
 
-            setTimeout(function() {
-                btn.classList.remove('loading');
-                btn.disabled = false;
-            }, 30000);
-
-            const now = Date.now();
-            if (typeof wx !== 'undefined') {
-                wx.postMessage({ id: "inject_" + now.toString(), type: "request", method: 'reload' });
-            } else {
-                console.error('wx is not defined');
+            if (checkInterval) {
+                clearInterval(checkInterval);
+                checkInterval = null;
             }
+
+            nativeIpc.request("reload",{});
+            checkInterval = setInterval(function() {
+                try {
+                    const ret = nativeIpc.request("isLoading",{});
+                    if(ret&&ret.isLoading===true){
+                        return;
+                    }
+                } catch (error) {
+                    console.error('检查加载状态时出错:', error);
+                }
+                clearInterval(checkInterval);
+                checkInterval = null;
+                btn.classList.remove('loading');
+                btn.disabled = false;      
+            }, 3000);
         }
 
-        // 禁用鼠标右键菜单
         window.addEventListener('contextmenu', function (e) {
             e.preventDefault();
         });
@@ -151,9 +161,9 @@
         <div class="failed">
             <img src="./connection-failed.svg" />
             <div>
-                <div class="message trans" tid="web_load_failed">网络异常，请检查并稍后重试</div>
+                <div class="message trans" tid="web_load_failed">Web content load failed, please try again.</div>
                 <button onclick="reloadPage()" class="reload-button trans" tid="reload_web_page">
-                    重试
+                    Retry
                 </button>
             </div>
         </div>

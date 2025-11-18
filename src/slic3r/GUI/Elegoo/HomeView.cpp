@@ -148,27 +148,15 @@ void HomeView::setupIPCHandlers()
     mIpc->onRequest("getUserInfo", [this](const webviewIpc::IPCRequest& request) { return handleGetUserInfo(); });
     mIpc->onRequestAsync("logout", [this](const webviewIpc::IPCRequest& request,
                                           std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
-        std::weak_ptr<bool> life_tracker = m_lifeTracker;
-        
-        std::thread([life_tracker, sendResponse, this]() {
+
             try {
-                if (auto tracker = life_tracker.lock()) {
-                    auto result = handleLogout();
-                    
-                    if (life_tracker.lock()) {
-                        sendResponse(result);
-                    }
-                }
+                auto result = handleLogout();
+                sendResponse(result);
             } catch (const std::exception& e) {
-                if (life_tracker.lock()) {
                     sendResponse(webviewIpc::IPCResult::error(std::string("Logout failed: ") + e.what()));
-                }
             } catch (...) {
-                if (life_tracker.lock()) {
                     sendResponse(webviewIpc::IPCResult::error("Logout failed: Unknown error"));
-                }
             }
-        }).detach();
     });
     mIpc->onRequest("showLoginDialog", [this](const webviewIpc::IPCRequest& request) { return handleShowLoginDialog(); });
     mIpc->onRequest("checkLoginStatus", [this](const webviewIpc::IPCRequest& request) { return handleCheckLoginStatus(); });
@@ -198,8 +186,9 @@ webviewIpc::IPCResult HomeView::handleNavigateToPage(const nlohmann::json& data)
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": page not found: %s") % wxPageName;
         return webviewIpc::IPCResult::success();
     }
-
-    switchToPage(wxPageName);
+    wxGetApp().CallAfter([this, wxPageName]() {
+        switchToPage(wxPageName);
+    });
     return webviewIpc::IPCResult::success();
 }
 
