@@ -926,6 +926,9 @@ PrinterNetworkResult<bool> ElegooLink::updatePrinterName(const std::string& prin
     params.printerId                   = printerId;
     params.printerName                 = printerName;
     result                             = elink::ElegooLink::getInstance().updatePrinterName(params);
+    if(result.code == elink::ELINK_ERROR_CODE::OPERATION_NOT_IMPLEMENTED) {
+        result.code = elink::ELINK_ERROR_CODE::SUCCESS;
+    }
     PrinterNetworkErrorCode resultCode = parseElegooResult(result.code);
     return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS,
                                       parseUnknownErrorMsg(resultCode, result.message));
