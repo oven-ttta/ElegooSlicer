@@ -83,8 +83,11 @@ private:
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
     void onWebViewError(wxWebViewEvent& event);
+    void OnNavigationRequest(wxWebViewEvent& event);
+    void OnNavigationComplete(wxWebViewEvent& event);
     webviewIpc::IPCResult handleReady();
 
+    void loadUrl(const wxString& url);
     void loadFailedPage();
 private:
     wxWebView* mBrowser;
@@ -92,6 +95,8 @@ private:
     
     std::mutex mUserInfoMutex; // Mutex to protect user info
     UserNetworkInfo mRefreshUserInfo; // User info
+    wxString mCurrentUrl; // Current URL to load
+    bool mIsLoading = false;
     DECLARE_EVENT_TABLE()
 };
 

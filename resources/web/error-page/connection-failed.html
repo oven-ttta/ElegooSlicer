@@ -87,15 +87,62 @@
             font-size: 16px;
             cursor: pointer;
         }
+        .reload-button:hover {
+            background: #0B66E6;
+        }
+        .reload-button:active {
+            background: #0F5CD8;
+        }
+        .reload-button.loading {
+            position: relative;
+            color: transparent !important;
+            pointer-events: none;
+        }
+        .reload-button.loading::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 24px;
+            height: 24px;
+            margin-left: -12px;
+            margin-top: -14px;
+            border: 3px solid #fff;
+            border-top: 3px solid #1677FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
     <script>
+
         function reloadPage() {
+            var btn = document.querySelector('.reload-button');
+            if (btn.classList.contains('loading')) return;
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            setTimeout(function() {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }, 30000);
+
+            const now = Date.now();
             if (typeof wx !== 'undefined') {
-                wx.postMessage({ id: "inject_" + Date.now().toString(), type: "request", method: 'reload' });
+                wx.postMessage({ id: "inject_" + now.toString(), type: "request", method: 'reload' });
             } else {
                 console.error('wx is not defined');
             }
         }
+
+        // 禁用鼠标右键菜单
+        window.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        });
+
     </script>
 </head>
 
