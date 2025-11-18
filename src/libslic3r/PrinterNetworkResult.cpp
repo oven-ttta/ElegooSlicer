@@ -31,9 +31,9 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::NETWORK_ERROR:
             return _u8L("Network error occurred. Please check the network of your computer and the printer, then try again.");
         case PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD:
-            return _u8L("Invalid username or password. Please check and try again.");
+            return _u8L("Unauthorized access, please check your account login status and try again.");
         case PrinterNetworkErrorCode::INVALID_TOKEN:
-            return _u8L("Invalid token. Please check and try again.");
+            return _u8L("Account info has expired, please log in again.");
         case PrinterNetworkErrorCode::INVALID_ACCESS_CODE:
             return _u8L("Invalid access code. Please check and try again.");
         case PrinterNetworkErrorCode::INVALID_PIN_CODE:

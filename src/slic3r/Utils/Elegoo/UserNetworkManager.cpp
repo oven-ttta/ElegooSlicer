@@ -66,14 +66,14 @@ PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
     CHECK_INITIALIZED(PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::NOT_INITIALIZED, UserNetworkInfo()));
     
     std::shared_ptr<IUserNetwork> network = getNetwork();
-    // Record request context before sending request 
-    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();
     if (!network) {
-        if(requestUserInfo.userId.empty()) {
+        if(getUserInfo().userId.empty()) {
             return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, UserNetworkInfo());
         }
         return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::NETWORK_ERROR, UserNetworkInfo());
-    }   
+    }
+    // Record request context before sending request 
+    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();   
 
     PrinterNetworkResult<UserNetworkInfo> rtcTokenResult = network->getRtcToken();
     if (!rtcTokenResult.isSuccess()) {
@@ -87,14 +87,14 @@ PrinterNetworkResult<PrinterNetworkInfo> UserNetworkManager::bindWANPrinter(cons
 {
     CHECK_INITIALIZED(PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::NOT_INITIALIZED, PrinterNetworkInfo()));
     std::shared_ptr<IUserNetwork> network = getNetwork();
-    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();
     if (!network) {
-        if(requestUserInfo.userId.empty()) {
+        if(getUserInfo().userId.empty()) {
             return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, PrinterNetworkInfo());
         }
         return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::NETWORK_ERROR, PrinterNetworkInfo());
     }
     // Record request context before sending request
+    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();
 
     PrinterNetworkResult<PrinterNetworkInfo> result = network->bindWANPrinter(printerNetworkInfo);
     if (!result.isSuccess()) {
@@ -108,13 +108,13 @@ PrinterNetworkResult<bool> UserNetworkManager::unbindWANPrinter(const std::strin
 {
     CHECK_INITIALIZED(PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NOT_INITIALIZED, false));
     std::shared_ptr<IUserNetwork> network = getNetwork();
-    UserNetworkInfo requestUserInfo = getUserInfo();
     if (!network) {
-        if(requestUserInfo.userId.empty()) {
+        if(getUserInfo().userId.empty()) {
             return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, false);
         }
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
     }
+    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();
     PrinterNetworkResult<bool> result = network->unbindWANPrinter(serialNumber);
     if (!result.isSuccess()) {
         // Pass request context for validation
@@ -761,8 +761,7 @@ void UserNetworkManager::loadUserInfo()
         if (!userInfo.userId.empty()) {
             std::lock_guard<std::mutex> lock(mUserMutex);
             if(userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_TOKEN &&
-                userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER &&
-                userInfo.loginStatus != LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
+                userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER) {
                 userInfo.loginStatus = LOGIN_STATUS_NOT_LOGIN;
             }
             mUserInfo               = userInfo;
