@@ -940,6 +940,9 @@ class Print;
         // Unload the current filament into the MK3 MMU2 unit at the end of print.
         void process_M702(const GCodeReader::GCodeLine& line);
 
+        //Used for Elegoo printer to change tool head
+        void process_M6211(const GCodeReader::GCodeLine& line);
+
         // Processes T line (Select Tool)
         void process_T(const GCodeReader::GCodeLine& line);
         void process_T(const std::string_view command);

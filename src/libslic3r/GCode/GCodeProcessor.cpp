@@ -1738,6 +1738,26 @@ void GCodeProcessor::process_gcode_line(const GCodeReader::GCodeLine& line, bool
                     break;
                 }
                 break;
+            case 5:
+                switch (cmd[1]) {
+                case '6':
+                    switch (cmd[2]) {
+                    case '2':
+                        switch (cmd[3]) {
+                        case '1': { 
+                            switch (cmd[4]) {
+                                case '1': process_M6211(line); break;
+                                default: break;
+                            }
+                        }
+                        default: break;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                    break;
+                }   
             default:
                 break;
             }
@@ -3957,6 +3977,45 @@ void GCodeProcessor::process_M702(const GCodeReader::GCodeLine& line)
         m_time_processor.extruder_unloaded = true;
         simulate_st_synchronize(get_filament_unload_time(m_extruder_id));
     }
+}
+
+void GCodeProcessor::process_M6211(const GCodeReader::GCodeLine& line)
+{
+    auto remaining_volume = m_nozzle_volume;
+    // Parse parameters
+    float length = 0.0f;
+    float old_filament_e_feedrate = 0.0f;
+    float new_filament_e_feedrate = 0.0f;
+    
+    if (!line.has_value('L', length) || length <= 0.0f)
+        return;
+    
+    // Calculate filament cross-section area
+    const float filament_diameter = (static_cast<size_t>(m_extruder_id) < m_result.filament_diameters.size()) 
+        ? m_result.filament_diameters[m_extruder_id] 
+        : m_result.filament_diameters.back();
+    const float area_filament_cross_section = static_cast<float>(M_PI) * sqr(0.5f * filament_diameter);
+    const float volume_flushed_filament = area_filament_cross_section * length;
+
+    // Calculate and simulate extrusion time if feedrates are provided
+    if (line.has_value('M', old_filament_e_feedrate) && line.has_value('N', new_filament_e_feedrate)) {
+        const float old_filament_volume = std::min(remaining_volume, volume_flushed_filament);
+        const float new_filament_volume = volume_flushed_filament - old_filament_volume;
+        
+        float total_extrusion_time = 0.0f;
+        if (old_filament_e_feedrate > 0.0f && old_filament_volume > 0.0f)
+            total_extrusion_time += (old_filament_volume / area_filament_cross_section) / old_filament_e_feedrate * 60.0f;
+        if (new_filament_e_feedrate > 0.0f && new_filament_volume > 0.0f)
+            total_extrusion_time += (new_filament_volume / area_filament_cross_section) / new_filament_e_feedrate * 60.0f;
+        
+        if (total_extrusion_time > 0.0f)
+        {
+            m_time_processor.machine_tool_change_time = total_extrusion_time;
+        }
+    }
+
+    // Update filament usage statistics
+    m_used_filaments.update_flush_per_filament(m_last_extruder_id, volume_flushed_filament);
 }
 
 void GCodeProcessor::process_T(const GCodeReader::GCodeLine& line)
