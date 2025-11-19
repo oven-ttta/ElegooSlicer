@@ -1002,6 +1002,15 @@ void MainFrame::shutdown()
     wxGetApp().shutdown();
     // BBS: why clear ?
     //wxGetApp().plater_ = nullptr;
+    if (m_printer_manager_view) {
+        // Remove from tabpanel before deletion to prevent Layout() crash
+        int idx = m_tabpanel->FindPage(m_printer_manager_view);
+        if (idx != wxNOT_FOUND) {
+            m_tabpanel->RemovePage(idx);
+        }
+        delete m_printer_manager_view;
+        m_printer_manager_view = nullptr;
+    }
     PrinterManager::getInstance()->close();
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << "MainFrame::shutdown exit";
 }

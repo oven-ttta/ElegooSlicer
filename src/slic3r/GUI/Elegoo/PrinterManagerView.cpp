@@ -416,6 +416,14 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
 PrinterManagerView::~PrinterManagerView() {
     // Save tab state before destruction
     saveTabState();
+
+    PrinterNetworkEvent::getInstance()->connectStatusChanged.disconnectAll();
+    PrinterNetworkEvent::getInstance()->eventRawChanged.disconnectAll();
+    UserNetworkEvent::getInstance()->rtcTokenChanged.disconnectAll();
+    UserNetworkEvent::getInstance()->rtmMessageChanged.disconnectAll();
+
+    std::lock_guard<std::mutex> lock(mPrinterViewsMutex);
+    mPrinterViews.clear();
 }
 
 void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveState)
