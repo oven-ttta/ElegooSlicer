@@ -1196,6 +1196,8 @@ PrinterNetworkResult<bool> PrinterManager::connectToPrinter(PrinterNetworkInfo& 
                 << boost::format(
                        ": connect to printer failed, failed to get printer attributes for printer: %s %s %s attribute data is empty") %
                        printer.host % printer.printerName % printer.printerModel;
+        } else {
+            break;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
