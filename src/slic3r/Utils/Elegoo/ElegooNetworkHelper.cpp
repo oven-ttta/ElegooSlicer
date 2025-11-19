@@ -22,7 +22,17 @@ std::string getTestEnvUrl(const nlohmann::json& testEnvJson, const char* key, co
 
 std::string buildUrl(const std::string& base, const std::string& language, const std::string& region)
 {
-    return base + "?language=" + language + "&region=" + region;
+    std::string parameters;
+    if(!language.empty()) {
+        parameters += "language=" + language;
+    }
+    if(!region.empty()) {
+        if(!parameters.empty()) {
+            parameters += "&";
+        }
+        parameters += "region=" + region;
+    }
+    return base + (parameters.empty() ? "" : "?" + parameters);
 }
 
 } // namespace
@@ -85,7 +95,7 @@ std::string ElegooNetworkHelper::getPluginUpdateUrl() {
         getTestEnvUrl(testEnvJson,
                       isChina ? "elegoo_china_plugin_update_url" : "elegoo_global_plugin_update_url",
                       isChina ? ELEGOO_CHINA_PLUGIN_UPDATE_URL : ELEGOO_GLOBAL_PLUGIN_UPDATE_URL);
-    return buildUrl(pluginUpdateUrl, language, region);
+    return pluginUpdateUrl;
 }
 
 std::string ElegooNetworkHelper::getIotUrl() {

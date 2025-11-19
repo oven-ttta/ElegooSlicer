@@ -35,7 +35,7 @@
 #ifdef __APPLE__
     #include <CoreFoundation/CoreFoundation.h>
 #endif
-
+#include "slic3r/Utils/Elegoo/PrinterNetwork.hpp"
 #define USE_JSON_CONFIG
 
 using namespace nlohmann;
@@ -52,11 +52,9 @@ static const std::string VERSION_CHECK_URL = "https://api.github.com/repos/ELEGO
 //DEV TEST PROD
 #if ELEGOO_INTERNAL_TESTING
 static const std::string PROFILE_UPDATE_URL = "";
-static const std::string ELEGOO_UPDATE_URL_STABLE = "";
 static const std::string MESSAGE_CHECK_URL = "";
 #else
 static const std::string PROFILE_UPDATE_URL = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer_profiles";
-static const std::string ELEGOO_UPDATE_URL_STABLE = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer/update_config.json";
 static const std::string MESSAGE_CHECK_URL = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer/message.json";
 #endif
 
@@ -1408,17 +1406,25 @@ std::string AppConfig::config_path()
 
 std::string AppConfig::version_check_url() const
 {
-    const std::string from_settings = get("version_check_url");
+
     const std::string country_code = get_country_code();
     const std::string language = get("language");
 
+    // const std::string from_settings = get("version_check_url");
+    // std::string url;
+    // if(country_code == "CN") {
+    //     url = ELEGOO_CHINA_UPDATE_URL;
+    // } else {
+    //     url = ELEGOO_GLOBAL_UPDATE_URL;
+    // }
+    // url = from_settings.empty() ? url : from_settings;
+
     std::string url;
-    if(country_code == "CN") {
-        url = ELEGOO_CHINA_UPDATE_URL;
-    } else {
-        url = ELEGOO_GLOBAL_UPDATE_URL;
+    std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
+    if (networkHelper) {
+        url = networkHelper->getAppUpdateUrl();
     }
-    url = from_settings.empty() ? url : from_settings;
+    
     // Build query parameters
     std::string query_params = std::string("?country=") + (country_code == "CN" ? "china" : "other");
     query_params += std::string("&language=") + (language.find("zh") != std::string::npos ? "zh" : "en");
