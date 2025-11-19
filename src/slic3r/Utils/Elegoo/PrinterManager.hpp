@@ -68,8 +68,8 @@ private:
         ~PrinterLock();
         
     private:
-        std::mutex* mPrinterMutex;
-        static std::map<std::string, std::mutex> sPrinterMutexes;
+        std::recursive_mutex* mPrinterMutex;
+        static std::map<std::string, std::recursive_mutex> sPrinterMutexes;
         static std::mutex sMutex;       
     };
 
