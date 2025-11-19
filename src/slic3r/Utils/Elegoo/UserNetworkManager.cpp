@@ -38,7 +38,6 @@ void UserNetworkManager::init()
 
 
     UserNetworkEvent::getInstance()->loggedInElsewhereChanged.connect([this](const UserLoggedInElsewhereEvent& event) {
-
     });
     UserNetworkEvent::getInstance()->onlineStatusChanged.connect([this](const UserOnlineStatusChangedEvent& event) {
         if(!event.isOnline) {
@@ -59,6 +58,9 @@ void UserNetworkManager::uninit()
         }
     }
     
+    UserNetworkEvent::getInstance()->loggedInElsewhereChanged.disconnectAll();
+    UserNetworkEvent::getInstance()->onlineStatusChanged.disconnectAll();
+
     mRunning.store(false);
     if (mMonitorThread.joinable()) {
         mMonitorThread.join();

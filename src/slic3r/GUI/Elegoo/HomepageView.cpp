@@ -414,7 +414,6 @@ void OnlineModelsHomepageView::onRegionChanged()
             loadUrl(url);
         });
     }
-
 }
 
 webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
@@ -511,6 +510,10 @@ void OnlineModelsHomepageView::loadUrl(const wxString& url){
     if(mBrowser){
         mIsLoading = true;
         mBrowser->LoadURL(url);
+        std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
+        if (networkHelper) {
+            mBrowser->SetUserAgent(networkHelper->getUserAgent());
+        }
     }
 }
 }} // namespace Slic3r::GUI
