@@ -54,31 +54,6 @@ struct PrinterAttributesEvent {
         : printerId(id), networkType(nt), printerInfo(info), timestamp(std::chrono::system_clock::now()) {}
 };
 
-struct PrinterRtcTokenEvent {
-    UserNetworkInfo userInfo;
-    std::chrono::system_clock::time_point timestamp;
-    NetworkType networkType;
-    PrinterRtcTokenEvent(const UserNetworkInfo& userInfo, const NetworkType& nt)
-        : networkType(nt), userInfo(userInfo), timestamp(std::chrono::system_clock::now()) {}
-};
-
-struct PrinterRtmMessageEvent {
-    std::string printerId;
-    std::string message;
-    std::chrono::system_clock::time_point timestamp;
-    NetworkType networkType;
-    PrinterRtmMessageEvent(const std::string& id, const std::string& msg, const NetworkType& nt)
-        : printerId(id), networkType(nt), message(msg), timestamp(std::chrono::system_clock::now()) {}
-};
-
-struct PrinterConnectionStatusEvent {
-    std::string printerId;
-    std::string status;
-    std::chrono::system_clock::time_point timestamp;
-    NetworkType networkType;
-    PrinterConnectionStatusEvent(const std::string& id, const std::string& s, const NetworkType& nt)
-        : printerId(id), networkType(nt), status(s), timestamp(std::chrono::system_clock::now()) {}
-};
 
 struct PrinterEventRawEvent {
     std::string printerId;
@@ -89,17 +64,42 @@ struct PrinterEventRawEvent {
         : printerId(id), networkType(nt), event(e), timestamp(std::chrono::system_clock::now()) {}
 };
 
-
-struct LoggedInElsewhereEvent {
+// User network event(iot)
+struct UserRtcTokenEvent {
+    UserNetworkInfo userInfo;
     std::chrono::system_clock::time_point timestamp;
-    NetworkType networkType;
-    LoggedInElsewhereEvent(const NetworkType& nt)
-        : networkType(nt), timestamp(std::chrono::system_clock::now()) {}
+    UserRtcTokenEvent(const UserNetworkInfo& userInfo)
+        : userInfo(userInfo), timestamp(std::chrono::system_clock::now()) {}
 };
-using PrinterEvent = std::variant<PrinterConnectStatusEvent, PrinterStatusEvent, PrinterPrintTaskEvent, PrinterAttributesEvent, PrinterRtcTokenEvent, PrinterRtmMessageEvent, PrinterConnectionStatusEvent, PrinterEventRawEvent, LoggedInElsewhereEvent>;
+
+
+struct UserRtmMessageEvent {
+    std::string printerId;
+    std::string message;
+    std::chrono::system_clock::time_point timestamp;
+    UserRtmMessageEvent(const std::string& id, const std::string& msg)
+        : printerId(id), message(msg), timestamp(std::chrono::system_clock::now()) {}
+};
+
+struct UserLoggedInElsewhereEvent {   
+    std::chrono::system_clock::time_point timestamp;
+    UserLoggedInElsewhereEvent()
+        : timestamp(std::chrono::system_clock::now()) {}
+};
+
+
+struct UserOnlineStatusChangedEvent {
+    std::chrono::system_clock::time_point timestamp;
+    bool isOnline;
+    UserOnlineStatusChangedEvent(const bool& isOnline)
+        : isOnline(isOnline), timestamp(std::chrono::system_clock::now()) {}
+};
+
+using PrinterEvent = std::variant<PrinterConnectStatusEvent, PrinterStatusEvent, PrinterPrintTaskEvent, PrinterAttributesEvent, PrinterEventRawEvent>;
+using UserEvent = std::variant<UserRtcTokenEvent, UserRtmMessageEvent, UserLoggedInElsewhereEvent, UserOnlineStatusChangedEvent>;
 
 template<typename EventType>
-class PrinterSignal {
+class EventSignal {
 private:
     std::vector<std::function<void(const EventType&)>> mHandlers;
     std::mutex mHandlersMutex;
@@ -144,20 +144,33 @@ public:
     PrinterNetworkEvent& operator=(const PrinterNetworkEvent&) = delete;
     
     // type-safe signal
-    PrinterSignal<PrinterConnectStatusEvent> connectStatusChanged;
-    PrinterSignal<PrinterStatusEvent> statusChanged;
-    PrinterSignal<PrinterPrintTaskEvent> printTaskChanged;
-    PrinterSignal<PrinterAttributesEvent> attributesChanged;
-    PrinterSignal<PrinterRtcTokenEvent> rtcTokenChanged;
-    PrinterSignal<PrinterRtmMessageEvent> rtmMessageChanged;
-    PrinterSignal<PrinterEventRawEvent> eventRawChanged;
-    PrinterSignal<LoggedInElsewhereEvent> loggedInElsewhereChanged;
+    EventSignal<PrinterConnectStatusEvent> connectStatusChanged;
+    EventSignal<PrinterStatusEvent> statusChanged;
+    EventSignal<PrinterPrintTaskEvent> printTaskChanged;
+    EventSignal<PrinterAttributesEvent> attributesChanged;
+    EventSignal<PrinterEventRawEvent> eventRawChanged;
 
 private:
     PrinterNetworkEvent() = default;
     ~PrinterNetworkEvent() = default;
 };
 
+
+class UserNetworkEvent : public Singleton<UserNetworkEvent> {
+    friend class Singleton<UserNetworkEvent>;
+public:
+    UserNetworkEvent(const UserNetworkEvent&) = delete;
+    UserNetworkEvent& operator=(const UserNetworkEvent&) = delete;
+    
+    EventSignal<UserRtcTokenEvent> rtcTokenChanged;
+    EventSignal<UserRtmMessageEvent> rtmMessageChanged;
+    EventSignal<UserLoggedInElsewhereEvent> loggedInElsewhereChanged;
+    EventSignal<UserOnlineStatusChangedEvent> onlineStatusChanged;
+
+private:
+    UserNetworkEvent() = default;
+    ~UserNetworkEvent() = default;
+};
 } // namespace Slic3r
 
 #endif 

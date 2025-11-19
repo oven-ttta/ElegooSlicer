@@ -228,6 +228,7 @@ void ElegooLink::init(const std::string& region, std::string& iotUrl)
                 PrinterConnectStatusEvent(event->connectionStatus.printerId, status, NETWORK_TYPE_LAN));
         });
 
+    // print status and print task changed event
     elink::ElegooLink::getInstance().subscribeEvent<elink::PrinterStatusEvent>([&](const std::shared_ptr<elink::PrinterStatusEvent>& event) {
         PrinterStatus status = parseElegooStatus(event->status.printerStatus.state, event->status.printerStatus.subState);
         PrinterNetworkEvent::getInstance()->statusChanged.emit(PrinterStatusEvent(event->status.printerId, status, NETWORK_TYPE_LAN));
@@ -250,26 +251,32 @@ void ElegooLink::init(const std::string& region, std::string& iotUrl)
                 PrinterAttributesEvent(event->attributes.printerId, info, NETWORK_TYPE_LAN));
         });
 
-    // raw event
+    // web pass-through data
+    elink::ElegooLink::getInstance().subscribeEvent<elink::PrinterEventRawEvent>(
+        [&](const std::shared_ptr<elink::PrinterEventRawEvent>& event) {
+            PrinterNetworkEvent::getInstance()->eventRawChanged.emit(
+                PrinterEventRawEvent(event->rawData.printerId, event->rawData.rawData, NETWORK_TYPE_WAN));
+        });
+    // user network event(iot)
     elink::ElegooLink::getInstance().subscribeEvent<elink::RtmMessageEvent>([&](const std::shared_ptr<elink::RtmMessageEvent>& event) {
-        PrinterNetworkEvent::getInstance()->rtmMessageChanged.emit(
-            PrinterRtmMessageEvent(event->message.printerId, event->message.message, NETWORK_TYPE_WAN));
+        UserNetworkEvent::getInstance()->rtmMessageChanged.emit(
+            UserRtmMessageEvent(event->message.printerId, event->message.message));
     });
     elink::ElegooLink::getInstance().subscribeEvent<elink::RtcTokenEvent>([&](const std::shared_ptr<elink::RtcTokenEvent>& event) {
         UserNetworkInfo userInfo;
         userInfo.userId             = event->token.userId;
         userInfo.rtcToken           = event->token.rtcToken;
         userInfo.rtcTokenExpireTime = event->token.rtcTokenExpireTime;
-        PrinterNetworkEvent::getInstance()->rtcTokenChanged.emit(PrinterRtcTokenEvent(userInfo, NETWORK_TYPE_WAN));
+        UserNetworkEvent::getInstance()->rtcTokenChanged.emit(UserRtcTokenEvent(userInfo));
     });
     elink::ElegooLink::getInstance().subscribeEvent<elink::LoggedInElsewhereEvent>(
         [&](const std::shared_ptr<elink::LoggedInElsewhereEvent>& event) {
-            PrinterNetworkEvent::getInstance()->loggedInElsewhereChanged.emit(LoggedInElsewhereEvent(NETWORK_TYPE_WAN));
+            UserNetworkEvent::getInstance()->loggedInElsewhereChanged.emit(UserLoggedInElsewhereEvent());
         });
-    elink::ElegooLink::getInstance().subscribeEvent<elink::PrinterEventRawEvent>(
-        [&](const std::shared_ptr<elink::PrinterEventRawEvent>& event) {
-            PrinterNetworkEvent::getInstance()->eventRawChanged.emit(
-                PrinterEventRawEvent(event->rawData.printerId, event->rawData.rawData, NETWORK_TYPE_WAN));
+
+    elink::ElegooLink::getInstance().subscribeEvent<elink::OnlineStatusChangedEvent>(
+        [&](const std::shared_ptr<elink::OnlineStatusChangedEvent>& event) {
+            UserNetworkEvent::getInstance()->onlineStatusChanged.emit(UserOnlineStatusChangedEvent(event->isOnline));
         });
 
     mIsInitialized = true;
@@ -328,7 +335,7 @@ PrinterNetworkResult<PrinterNetworkInfo> ElegooLink::connectToPrinter(const Prin
         connectionParams.brand             = printerNetworkInfo.vendor;
         connectionParams.autoReconnect     = true;
         connectionParams.checkConnection   = true;
-        connectionParams.connectionTimeout = 3 * 1000;
+        connectionParams.connectionTimeout = 5 * 1000;
         connectionParams.token             = printerNetworkInfo.token;
         connectionParams.accessCode        = printerNetworkInfo.accessCode;
         connectionParams.pinCode           = printerNetworkInfo.pinCode;

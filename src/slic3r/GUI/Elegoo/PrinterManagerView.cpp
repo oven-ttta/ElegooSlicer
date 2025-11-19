@@ -596,7 +596,7 @@ void PrinterManagerView::setupIPCHandlers()
             auto result = this->discoverPrinter();
             sendResponse(result);
         } catch (const std::exception& e) {
-                sendResponse(webviewIpc::IPCResult::error(std::string("Discovery failed: ") + e.what()));
+            sendResponse(webviewIpc::IPCResult::error(std::string("Discovery failed: ") + e.what()));
         }
     });
 
@@ -646,7 +646,7 @@ void PrinterManagerView::setupIPCHandlers()
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string printerName = params.value("printerName", "");
-        return updatePrinterName(printerId, printerName);;
+        return updatePrinterName(printerId, printerName);
     });
 
     // Handle request_update_physical_printer
@@ -749,7 +749,7 @@ void PrinterManagerView::setupIPCHandlers()
         }
     });
 
-    PrinterNetworkEvent::getInstance()->rtcTokenChanged.connect([this](const PrinterRtcTokenEvent& event) {
+    UserNetworkEvent::getInstance()->rtcTokenChanged.connect([this](const UserRtcTokenEvent& event) {
         nlohmann::json data;
         data["rtcToken"] = event.userInfo.rtcToken;
         data["userId"] = event.userInfo.userId;
@@ -758,7 +758,7 @@ void PrinterManagerView::setupIPCHandlers()
             view->onRtcTokenChanged(data);
         });
     });
-    PrinterNetworkEvent::getInstance()->rtmMessageChanged.connect([this](const PrinterRtmMessageEvent& event) {
+    UserNetworkEvent::getInstance()->rtmMessageChanged.connect([this](const UserRtmMessageEvent& event) {
         PrinterWebView* targetView = findPrinterView(event.printerId);
         if (targetView) {
             nlohmann::json data;
