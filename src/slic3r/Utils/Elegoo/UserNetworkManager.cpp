@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include <boost/nowide/fstream.hpp>
 #include "libslic3r/format.hpp"
+#include "slic3r/Utils/Elegoo/PrinterNetworkEvent.hpp"
 
 #define CHECK_INITIALIZED(returnVal) \
     std::lock_guard<std::recursive_mutex> __initLock(mInitMutex); \
@@ -35,6 +36,15 @@ void UserNetworkManager::init()
     }
     loadUserInfo();
 
+
+    UserNetworkEvent::getInstance()->loggedInElsewhereChanged.connect([this](const UserLoggedInElsewhereEvent& event) {
+
+    });
+    UserNetworkEvent::getInstance()->onlineStatusChanged.connect([this](const UserOnlineStatusChangedEvent& event) {
+        if(!event.isOnline) {
+            updateUserInfoLoginStatus(getUserInfo(), LOGIN_STATUS_OFFLINE);
+        }
+    });
     mRunning.store(true);
     mMonitorThread = std::thread([this]() { monitorUserNetwork(); });
     mIsInitialized.store(true);
