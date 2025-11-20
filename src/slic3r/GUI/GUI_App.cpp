@@ -116,6 +116,7 @@
 #include "PrinterWebView.hpp"
 
 #include "Elegoo/UserLoginView.hpp"
+#include "slic3r/Utils/Elegoo/PrinterNetwork.hpp"
 //#ifdef WIN32
 //#include "BaseException.h"
 //#endif
@@ -4793,9 +4794,12 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
 #endif
 
 #if 1 // Elegoo: use elegoo slicer release
-    AppConfig* app_config = wxGetApp().app_config;
-    auto       version_check_url = app_config->version_check_url();
-    // std::string locale_name = app_config->getSystemLocale();
+
+    std::string version_check_url;
+    std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
+    if (networkHelper) {
+        version_check_url = networkHelper->getAppUpdateUrl();
+    }
     Http::get(version_check_url)
         .on_error([&](std::string body, std::string error, unsigned http_status) {
           (void)body;

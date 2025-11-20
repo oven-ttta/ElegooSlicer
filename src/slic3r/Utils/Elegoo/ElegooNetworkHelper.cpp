@@ -83,7 +83,21 @@ std::string ElegooNetworkHelper::getAppUpdateUrl() {
         getTestEnvUrl(testEnvJson,
                       isChina ? "elegoo_china_app_update_url" : "elegoo_global_app_update_url",
                       isChina ? ELEGOO_CHINA_UPDATE_URL : ELEGOO_GLOBAL_UPDATE_URL);
-    return buildUrl(appUpdateUrl, language, region);
+
+    std::string query_params = std::string("?country=") + (isChina? "china" : "other");
+    query_params += std::string("&language=") + (language.find("zh") != std::string::npos ? "zh" : "en");
+    
+    #ifdef WIN32
+    query_params += "&platform=win64";
+#elif __APPLE__
+#ifdef __x86_64__
+    query_params += "&platform=mac64";
+#elif __aarch64__
+    query_params += "&platform=mac_arm64";
+#endif // __x86_64__
+#endif //  WIN32
+
+    return appUpdateUrl + query_params;
 }
 
 std::string ElegooNetworkHelper::getPluginUpdateUrl() { 

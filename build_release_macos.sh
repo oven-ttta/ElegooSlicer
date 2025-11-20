@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-while getopts ":dpa:snt:xbc:1eh" opt; do
+while getopts ":dpa:snt:xbc:1ehw" opt; do
   case "${opt}" in
     d )
         export BUILD_TARGET="deps"
@@ -40,6 +40,9 @@ while getopts ":dpa:snt:xbc:1eh" opt; do
     e )
         export ELEGOO_INTERNAL_TESTING="1"
         ;;
+    w )
+        export DOWNLOAD_WEB="1"
+        ;;
     h ) echo "Usage: ./build_release_macos.sh [-d]"
         echo "   -d: Build deps only"
         echo "   -a: Set ARCHITECTURE (arm64 or x86_64 or universal)"
@@ -51,6 +54,7 @@ while getopts ":dpa:snt:xbc:1eh" opt; do
         echo "   -c: Set CMake build configuration, default is Release"
         echo "   -1: Use single job for building"
         echo "   -e: Test environment"
+        echo "   -w: Download web dependencies"
         exit 0
         ;;
     * )
@@ -99,7 +103,38 @@ echo " - BUILD_TARGET: $BUILD_TARGET"
 echo " - CMAKE_GENERATOR: $SLICER_CMAKE_GENERATOR for Slicer, $DEPS_CMAKE_GENERATOR for deps"
 echo " - OSX_DEPLOYMENT_TARGET: $OSX_DEPLOYMENT_TARGET"
 echo " - ELEGOO_INTERNAL_TESTING: $ELEGOO_INTERNAL_TESTING"
+echo " - DOWNLOAD_WEB: ${DOWNLOAD_WEB:-0}"
 echo
+
+# Download web dependencies if requested
+if [ "1" == "$DOWNLOAD_WEB" ]; then
+    echo "============================================================================"
+    echo "                     Downloading Web Dependencies"
+    echo "============================================================================"
+    if [ "$ELEGOO_INTERNAL_TESTING" == "1" ]; then
+        TEST_PARAM="test"
+        echo "[INFO] Downloading INTERNAL TESTING web dependencies..."
+    else
+        TEST_PARAM=""
+        echo "[INFO] Downloading RELEASE web dependencies..."
+    fi
+    echo
+
+    ./scripts/download_web_dep.sh $TEST_PARAM
+    if [ $? -ne 0 ]; then
+        echo
+        echo "[ERROR] Download web dependencies failed. Exiting."
+        exit 1
+    fi
+    echo
+    echo "[OK] Web dependencies downloaded successfully"
+    echo "============================================================================"
+    echo
+else
+    echo
+    echo "[INFO] Skipping web dependencies download, use '-w' parameter to enable"
+    echo
+fi
 
 # if which -s brew; then
 # 	brew --prefix libiconv
