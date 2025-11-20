@@ -553,7 +553,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
         // update the printer network info with the bound printer network info
         printerNetworkInfo.printerId = boundPrinterNetworkInfo.printerId;
     }
-    PrinterNetworkResult<bool> addResult = connectToPrinter(printerNetworkInfo, true);
+    PrinterNetworkResult<bool> addResult = connectToPrinter(printerNetworkInfo, printerNetworkInfo.isPhysicalPrinter ? true : false);
     if (addResult.isSuccess()) {
         PrinterCache::getInstance()->addPrinter(printerNetworkInfo);
         PrinterCache::getInstance()->savePrinterList();
