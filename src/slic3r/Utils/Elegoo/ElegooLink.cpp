@@ -466,8 +466,8 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> ElegooLink::discoverPrinte
     elink::PrinterDiscoveryResult   elinkResult;
     try {
         elink::PrinterDiscoveryParams discoveryParams;
-        discoveryParams.timeoutMs         = 10 * 1000;
-        discoveryParams.broadcastInterval = 1000;
+        discoveryParams.timeoutMs         = 8000;
+        discoveryParams.broadcastInterval = 2000;
         discoveryParams.enableAutoRetry   = true;
         elinkResult                       = elink::ElegooLink::getInstance().startPrinterDiscovery(discoveryParams);
         resultCode                        = parseElegooResult(elinkResult.code);
