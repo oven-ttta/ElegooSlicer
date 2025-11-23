@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-18 17:03+0800\n"
+"POT-Creation-Date: 2025-11-23 14:56+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -5900,10 +5900,10 @@ msgstr ""
 "件或者仅导入模型数据？"
 
 msgid "Load Whole File"
-msgstr ""
+msgstr "导入整个文件"
 
 msgid "Load Model Only"
-msgstr ""
+msgstr "仅导入模型"
 
 msgid ""
 "This project was created with an OrcaSlicer 2.3.1-alpha and uses infill "
@@ -16586,6 +16586,11 @@ msgstr ""
 
 msgid "Operation not implemented. Please try again later."
 msgstr ""
+
+msgid ""
+"Operation failed. Please check if multiple clients are open and continue on "
+"the main client."
+msgstr "操作失败，请检查是否已经开启了多个客户端，请在主客户端上继续操作"
 
 msgid "Host/IP/URL"
 msgstr ""
