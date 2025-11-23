@@ -661,6 +661,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/Elegoo/ElegooUserNetwork.cpp
     Utils/Elegoo/ElegooPluginNetwork.hpp
     Utils/Elegoo/ElegooPluginNetwork.cpp
+    Utils/Elegoo/MultiInstanceCoordinator.cpp
+    Utils/Elegoo/MultiInstanceCoordinator.hpp
     GUI/Elegoo/PrintSendDialogEx.cpp
     GUI/Elegoo/PrintSendDialogEx.hpp
     GUI/Elegoo/HomeView.cpp

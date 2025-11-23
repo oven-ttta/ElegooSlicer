@@ -39,7 +39,6 @@ private:
     void onTabChanged(wxAuiNotebookEvent& event);
 
     webviewIpc::IPCResult getPrinterList();
-    webviewIpc::IPCResult getPrinterListStatus();
     webviewIpc::IPCResult discoverPrinter();
     webviewIpc::IPCResult getPrinterModelList();
     webviewIpc::IPCResult addPrinter(const nlohmann::json& printer);

@@ -20,6 +20,7 @@
 #include "libslic3r/PresetBundle.hpp"
 #include "libslic3r/Utils.hpp"
 #include <map>
+#include <set>
 #include <algorithm>
 #include <cctype>
 #include <thread>
@@ -34,6 +35,7 @@
 #include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 #include <boost/log/trivial.hpp>
 #include <boost/format.hpp>
+#include "slic3r/Utils/Elegoo/MultiInstanceCoordinator.hpp"
 
 #define FIRST_TAB_NAME _L("Connected Printer")
 #define TAB_MAX_WIDTH 200
@@ -579,10 +581,6 @@ void PrinterManagerView::setupIPCHandlers()
         return getPrinterModelList();
     });
 
-    // Handle request_printer_list_status
-    mIpc->onRequest("request_printer_list_status", [this](const webviewIpc::IPCRequest& request){
-        return getPrinterListStatus();
-    });
 
     // Handle request_printer_detail
     mIpc->onRequest("request_printer_detail", [this](const webviewIpc::IPCRequest& request){
@@ -774,6 +772,7 @@ void PrinterManagerView::setupIPCHandlers()
             targetView->onRtmMessage(data);
         }
     });
+
 }
 
 webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)
@@ -944,44 +943,47 @@ webviewIpc::IPCResult PrinterManagerView::discoverPrinter()
 webviewIpc::IPCResult PrinterManagerView::getPrinterList()
 {  
     webviewIpc::IPCResult result;
+    // Cache for printer images (printerId -> base64 image data)
+    static std::map<std::string, std::string> printerImageCache;
     auto printerList = PrinterManager::getInstance()->getPrinterList();
+    
+    // Build set of current printer IDs and process printers in one pass
+    std::set<std::string> currentPrinterIds;
     nlohmann::json response = json::array();
+    boost::filesystem::path resources_path(Slic3r::resources_dir());
+    
     for (auto& printer : printerList) {
-        nlohmann::json printer_obj = nlohmann::json::object();
-        printer_obj = convertPrinterNetworkInfoToJson(printer);
-        boost::filesystem::path resources_path(Slic3r::resources_dir());
-        std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
-        printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
-        response.push_back(printer_obj);
-    }
-    result.data = response;
-    result.code = 0;
-    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
-    return result;
-}
-webviewIpc::IPCResult PrinterManagerView::getPrinterListStatus()
-{
-    webviewIpc::IPCResult result;
-    static std::vector<PrinterNetworkInfo> lastPrinterList;
-    std::vector<PrinterNetworkInfo> printerList = PrinterManager::getInstance()->getPrinterList();
-    nlohmann::json response = json::array();
-    for (auto& printer : printerList) {
-        nlohmann::json printer_obj = nlohmann::json::object();
-        printer_obj = convertPrinterNetworkInfoToJson(printer);
-        auto it = std::find_if(lastPrinterList.begin(), lastPrinterList.end(), [&printer](const PrinterNetworkInfo& p) { return p.printerId == printer.printerId; });
-        if(it == lastPrinterList.end()) {
-            if(printer.networkType == NETWORK_TYPE_WAN) {
-                // iot is auto get, need load model image first
-                boost::filesystem::path resources_path(Slic3r::resources_dir());
-                std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
-                printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
-            }
+        currentPrinterIds.insert(printer.printerId);
+        
+        nlohmann::json printer_obj = convertPrinterNetworkInfoToJson(printer);
+        
+        // Check if image is already cached
+        auto cacheIt = printerImageCache.find(printer.printerId);
+        if (cacheIt == printerImageCache.end()) {
+            // Load image and cache it
+            std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
+            printerImageCache[printer.printerId] = PrinterManager::imageFileToBase64DataURI(img_path);
+            cacheIt = printerImageCache.find(printer.printerId);
         }
+        printer_obj["printerImg"] = cacheIt->second;
         response.push_back(printer_obj);
     }
+    
+    // Remove cached images for printers that no longer exist
+    for (auto it = printerImageCache.begin(); it != printerImageCache.end();) {
+        if (currentPrinterIds.find(it->first) == currentPrinterIds.end()) {
+            it = printerImageCache.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
     closeInvalidPrinterTab(printerList);
-    lastPrinterList = printerList;
-    result.data = response;
+    // Return object with printer list and main client status
+    nlohmann::json resultData;
+    resultData["printers"] = response;
+    resultData["isMainClient"] = MultiInstanceCoordinator::getInstance()->isMaster();
+    result.data = resultData;
     result.code = 0;
     result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
     return result;

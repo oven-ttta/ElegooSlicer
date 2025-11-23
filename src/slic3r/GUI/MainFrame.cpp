@@ -72,6 +72,7 @@
 #endif // _WIN32
 #include <slic3r/GUI/CreatePresetsDialog.hpp>
 #include "slic3r/Utils/Elegoo/PrinterManager.hpp"
+#include "slic3r/Utils/Elegoo/MultiInstanceCoordinator.hpp"
 
 
 namespace Slic3r {
@@ -272,6 +273,15 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
     // Load the icon either from the exe, or from the ico file.
     SetIcon(main_frame_icon(wxGetApp().get_app_mode()));
 
+    // Initialize multi-instance coordinator first
+    MultiInstanceCoordinator::getInstance()->init();
+    MultiInstanceCoordinator::getInstance()->registerMasterStatusCallback([this](bool isMaster) {
+        if (isMaster) {
+            wxGetApp().CallAfter([this]() {
+                PrinterManager::getInstance()->init();
+            });
+        }
+    });
     // Initialize printer manager before initializing webview
     PrinterManager::getInstance()->init();
 
@@ -1012,6 +1022,7 @@ void MainFrame::shutdown()
         m_printer_manager_view = nullptr;
     }
     PrinterManager::getInstance()->close();
+    MultiInstanceCoordinator::getInstance()->uninit();
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << "MainFrame::shutdown exit";
 }
 

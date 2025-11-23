@@ -25,6 +25,7 @@ const PrinterManager = {
             this.printerStore.userInfo = data;
             console.log('loginErrorMessage:', this.printerStore.userInfo.loginErrorMessage);
         });
+
         await nativeIpc.request('ready', {});
 
         disableRightClickMenu();
@@ -59,7 +60,11 @@ const PrinterManager = {
 
         // Returns HTML with the login keyword highlighted in primary blue
         getLoginToViewHtml() {
-            const loginWord = `<span class="login-link" onclick="loginLinkClickHandler()">${this.$t("printerManager.login")}</span>`;
+            const isMainClient = this.printerStore.isMainClient;
+            if (!isMainClient) {
+                return this.$t("printerManager.isNotMainClient");
+            }
+            const loginWord = `<span class="login-link" onclick="loginLinkClickHandler()">${this.$t("printerManager.login")}</span>`; 
             // loginToView is expected to contain a {0} placeholder for the login word
             const raw = this.$t("printerManager.loginToView", [loginWord]);
             return raw;

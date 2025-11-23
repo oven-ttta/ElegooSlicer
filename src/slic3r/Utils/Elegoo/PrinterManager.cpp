@@ -25,7 +25,22 @@
 #include "slic3r/GUI/I18N.hpp"
 #include "slic3r/Utils/Elegoo/PrinterPluginManager.hpp"
 #include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
+#include "slic3r/Utils/Elegoo/MultiInstanceCoordinator.hpp"
 #include "libslic3r/format.hpp"
+
+#define CHECK_INITIALIZED(returnValue) \
+    { \
+        std::lock_guard<std::mutex> __initLock(mInitializedMutex); \
+        if(!mIsInitialized.load()) { \
+            using ValueType = std::decay_t<decltype(returnValue)>; \
+            if(MultiInstanceCoordinator::getInstance()->isMaster()) { \
+                return PrinterNetworkResult<ValueType>(PrinterNetworkErrorCode::PRINTER_NETWORK_NOT_INITIALIZED, returnValue); \
+            } else { \
+                return PrinterNetworkResult<ValueType>(PrinterNetworkErrorCode::NOT_MAIN_CLIENT, returnValue); \
+            } \
+        } \
+    }
+
 namespace Slic3r {
 
 namespace fs = boost::filesystem;
@@ -226,10 +241,16 @@ PrinterManager::~PrinterManager() {}
 
 void PrinterManager::init()
 {
+    // Only master instance initializes network components
+    if (!MultiInstanceCoordinator::getInstance()->isMaster()) {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(mInitializedMutex);
     if (mIsInitialized) {
         return;
     }
+     
     // connect status changed event
     PrinterNetworkEvent::getInstance()->connectStatusChanged.connect([this](const PrinterConnectStatusEvent& event) {
         PrinterCache::getInstance()->updatePrinterConnectStatus(event.printerId, event.status);
@@ -494,6 +515,7 @@ PrinterNetworkResult<bool> PrinterManager::updatePhysicalPrinter(const std::stri
 }
 PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printerNetworkInfo)
 {
+    CHECK_INITIALIZED(false);
     // Use a static mutex to serialize printer addition to prevent race conditions
     static std::mutex           addPrinterMutex;
     std::lock_guard<std::mutex> lock(addPrinterMutex);
@@ -580,6 +602,11 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPrinter()
 {
+    CHECK_INITIALIZED(std::vector<PrinterNetworkInfo>());
+    // Use a static mutex to serialize printer discovery to prevent race conditions
+    static std::mutex           discoverPrinterMutex;
+    std::lock_guard<std::mutex> lock(discoverPrinterMutex);
+
     std::vector<PrinterNetworkInfo> discoveredPrinters;
     UserNetworkInfo                 requestUserInfo = UserNetworkManager::getInstance()->getUserInfo();
 

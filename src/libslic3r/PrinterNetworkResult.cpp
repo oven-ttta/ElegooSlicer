@@ -106,6 +106,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Printer not connected to unbind.");
         case PrinterNetworkErrorCode::OPERATION_NOT_IMPLEMENTED:
             return _u8L("Operation not implemented. Please try again later.");
+        case PrinterNetworkErrorCode::NOT_MAIN_CLIENT:
+            return _u8L("Operation failed. Please check if multiple clients are open and continue on the main client.");
         default:
             return _u8L("An unknown error occurred. Please try again later.");
     }
