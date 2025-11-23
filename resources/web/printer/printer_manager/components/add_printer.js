@@ -32,7 +32,7 @@ const AddPrinterTemplate = /*html*/`
                                     <span class="add-printer-host">{{ printer.host }}</span>
                                 </span>
                                 <span>
-                                    <span class="add-printer-status">{{ printer.networkType === 1 ? $t('addPrinterDialog.bindable') : $t('addPrinterDialog.connectable') }}</span>
+                                    <span class="add-printer-status">{{ getPrinterStatusText(printer) }}</span>
                                 </span>
                             </div>
                         </div>
@@ -316,6 +316,22 @@ const AddPrinterComponent = {
                 'add-printer-table-tr': true,
                 'selected': this.selectedPrinterIdx === idx
             };
+        },
+        getPrinterStatusText(printer) {
+            if (printer.isAdded) {
+                if (printer.networkType === 1) {
+                    return this.$t('addPrinterDialog.binded');
+                } else {
+                    return this.$t('addPrinterDialog.connected');
+                }
+            } else {
+                if (printer.networkType === 1) {
+                    return this.$t('addPrinterDialog.bindable');
+                } else {
+                    return this.$t('addPrinterDialog.connectable');
+                }
+            }
+              
         },
         showHelp() {
             this.showHelpDialog = true;

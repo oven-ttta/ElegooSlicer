@@ -958,6 +958,7 @@ webviewIpc::IPCResult PrinterManagerView::discoverPrinter()
     for (auto& printer : printerList) {
         nlohmann::json printer_obj = nlohmann::json::object();
         printer_obj = convertPrinterNetworkInfoToJson(printer);
+        printer_obj["isAdded"] = printer.isAdded;
         boost::filesystem::path resources_path(Slic3r::resources_dir());
         std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
         printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);

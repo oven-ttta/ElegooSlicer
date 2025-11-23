@@ -637,9 +637,23 @@ PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPr
         }
     }
 
+    std::vector<PrinterNetworkInfo> printerList = PrinterCache::getInstance()->getPrinters();
     std::vector<PrinterNetworkInfo> printersToAdd;
     for (auto& discoveredPrinter : discoveredPrinters) {
-        // check if the device is already bound, if it is, check if the ip, firmware version, etc. have changed and update them
+        // check if the device is existing
+        bool isSamePrinter = false;
+        for (auto& p : printerList) {
+            if (!p.mainboardId.empty() && (discoveredPrinter.mainboardId == p.mainboardId) && (discoveredPrinter.networkType == p.networkType)) {
+                isSamePrinter = true;
+            }
+            if (!p.serialNumber.empty() && (discoveredPrinter.serialNumber == p.serialNumber) && (discoveredPrinter.networkType == p.networkType)) {
+                isSamePrinter = true;
+            }
+            if (isSamePrinter) {
+                discoveredPrinter.isAdded = true;
+                break;
+            }
+        }
         PrinterNetworkInfo printerNetworkInfo = discoveredPrinter;
         if (printerNetworkInfo.printerId.empty()) {
             printerNetworkInfo.printerId = boost::uuids::to_string(boost::uuids::random_generator()());
