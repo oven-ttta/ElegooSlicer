@@ -219,8 +219,7 @@ AboutDialog::AboutDialog()
 {
     SetFont(wxGetApp().normal_font());
 	SetBackgroundColour(*wxWHITE);
-
-    wxPanel* m_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(560), FromDIP(125)), wxTAB_TRAVERSAL);
+    wxPanel *m_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(560), FromDIP(237)), wxTAB_TRAVERSAL);
 
     wxBoxSizer *panel_versizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *vesizer  = new wxBoxSizer(wxVERTICAL);
@@ -233,12 +232,10 @@ AboutDialog::AboutDialog()
     main_sizer->Add(m_panel, 1, wxEXPAND | wxALL, 0);
     main_sizer->Add(ver_sizer, 0, wxEXPAND | wxALL, 0);
 
-	bool is_dark = wxGetApp().app_config->get("dark_color_mode") == "1";
-
     // logo
     m_logo_bitmap = ScalableBitmap(this, "ElegooSlicer_about", 250);
     m_logo = new wxStaticBitmap(this, wxID_ANY, m_logo_bitmap.bmp(), wxDefaultPosition,wxDefaultSize, 0);
-    
+    m_logo->SetSizer(vesizer);
 
     panel_versizer->Add(m_logo, 1, wxALL | wxEXPAND, 0);
 
@@ -250,20 +247,21 @@ AboutDialog::AboutDialog()
         version_string += " (Test)";
         #endif
         wxStaticText* version = new wxStaticText(this, wxID_ANY, version_string.c_str(), wxDefaultPosition, wxDefaultSize);
-        wxStaticText* bs_version = new wxStaticText(this, wxID_ANY, wxString::Format(_L("Based on OrcaSlicer")), wxDefaultPosition, wxDefaultSize);
+        wxStaticText* bs_version = new wxStaticText(this, wxID_ANY, wxString::Format("Based on OrcaSlicer"), wxDefaultPosition, wxDefaultSize);
         bs_version->SetFont(Label::Body_12);
         wxFont version_font = GetFont();
         #ifdef __WXMSW__
-			version_font.SetPointSize(version_font.GetPointSize()-1);
+        version_font.SetPointSize(version_font.GetPointSize()-1);
         #else
             version_font.SetPointSize(11);
         #endif
-        version_font.SetPointSize(20);
+        version_font.SetPointSize(FromDIP(16));
         version->SetFont(version_font);
         version->SetForegroundColour(wxColour("#FFFFFD"));
         bs_version->SetForegroundColour(wxColour("#FFFFFD"));
         version->SetBackgroundColour(wxColour(14,119,184));
         bs_version->SetBackgroundColour(wxColour(14,119,184));
+
 
         vesizer->Add(version, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, FromDIP(5));
         vesizer->Add(bs_version, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, FromDIP(5));
@@ -276,7 +274,6 @@ AboutDialog::AboutDialog()
 // #endif
         vesizer->Add(0, 0, 1, wxEXPAND, FromDIP(5));
     }
-    m_logo->SetSizer(vesizer);
 
     wxBoxSizer *text_sizer_horiz = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer *text_sizer = new wxBoxSizer(wxVERTICAL);
@@ -375,6 +372,7 @@ AboutDialog::AboutDialog()
     Fit();
     CenterOnParent();
 }
+
 
 void AboutDialog::on_dpi_changed(const wxRect &suggested_rect)
 {
