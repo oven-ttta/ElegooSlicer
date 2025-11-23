@@ -164,7 +164,7 @@ const usePrinterStore = defineStore('printer', {
         // }
         // Show error notification using Element Plus message component
         // code === 5 means the request is cancelled
-        if (code !== 5) {
+        if (error.code !== 5) {
           if (window.ElementPlus && window.ElementPlus.ElMessage) {
             window.ElementPlus.ElMessage.error({
               message: message,

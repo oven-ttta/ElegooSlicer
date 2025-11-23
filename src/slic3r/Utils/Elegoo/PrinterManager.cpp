@@ -534,7 +534,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
                                               localPrinter.mainboardId;
             std::string errorMessage = getErrorMessage(PrinterNetworkErrorCode::PRINTER_ALREADY_EXISTS);
 
-            if (!localPrinter.networkType == NETWORK_TYPE_WAN) {
+            if (localPrinter.networkType == NETWORK_TYPE_WAN) {
                 errorMessage += _u8L("Name") + ":" + localPrinter.printerName + ", " + _u8L("SN") + ":" + localPrinter.serialNumber;
             } else {
                 errorMessage += _u8L("Name") + ":" + localPrinter.printerName + ", " + _u8L("Host/IP/URL") + ":" + localPrinter.host;
