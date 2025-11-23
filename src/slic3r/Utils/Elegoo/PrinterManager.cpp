@@ -600,6 +600,14 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
     return addResult;
 }
 
+PrinterNetworkResult<bool> PrinterManager::cancelBindPrinter(const PrinterNetworkInfo& printerNetworkInfo)
+{
+    std::shared_ptr<IPrinterNetwork> network = NetworkFactory::createPrinterNetwork(printerNetworkInfo);
+    if (!network) {
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
+    }
+    return network->cancelBindPrinter(printerNetworkInfo.serialNumber);
+}
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> PrinterManager::discoverPrinter()
 {
     CHECK_INITIALIZED(std::vector<PrinterNetworkInfo>());

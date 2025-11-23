@@ -27,7 +27,8 @@ public:
     virtual PrinterNetworkResult<bool> sendRtmMessage(const std::string& message) override;
     virtual PrinterNetworkResult<PrinterPrintFileResponse> getFileDetail(const std::string& fileName) override;
     virtual PrinterNetworkResult<bool> updatePrinterName(const std::string& printerName) override;
-    
+    virtual PrinterNetworkResult<bool> cancelBindPrinter(const std::string& serialNumber) override;
+
     static void init(const std::string& region, std::string& iotUrl);
     static void uninit();
 };

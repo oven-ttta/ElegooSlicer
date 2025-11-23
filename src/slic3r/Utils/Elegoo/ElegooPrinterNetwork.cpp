@@ -89,5 +89,10 @@ PrinterNetworkResult<bool> ElegooPrinterNetwork::sendRtmMessage(const std::strin
 {
     return ElegooLink::getInstance()->sendRtmMessage(mPrinterNetworkInfo.printerId, message);
 }
+
+PrinterNetworkResult<bool> ElegooPrinterNetwork::cancelBindPrinter(const std::string& serialNumber)
+{
+    return ElegooLink::getInstance()->cancelBindPrinter(serialNumber);
+}
 } // namespace Slic3r 
 

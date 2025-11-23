@@ -941,6 +941,18 @@ PrinterNetworkResult<bool> ElegooLink::updatePrinterName(const std::string& prin
                                       parseUnknownErrorMsg(resultCode, result.message));
 }
 
+PrinterNetworkResult<bool> ElegooLink::cancelBindPrinter(const std::string& serialNumber)
+{
+    CHECK_INITIALIZED(false);
+    PrinterNetworkErrorCode resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
+    elink::VoidResult              result;
+    elink::CancelBindPrinterParams params;
+    params.serialNumber = serialNumber;
+    result = elink::ElegooLink::getInstance().cancelBindPrinter(params);
+    resultCode = parseElegooResult(result.code);
+    return PrinterNetworkResult<bool>(resultCode, resultCode == PrinterNetworkErrorCode::SUCCESS,
+                                      parseUnknownErrorMsg(resultCode, result.message));
+}   
 PrinterNetworkResult<UserNetworkInfo> ElegooLink::getRtcToken()
 {
     CHECK_INITIALIZED(UserNetworkInfo());

@@ -626,6 +626,24 @@ void PrinterManagerView::setupIPCHandlers()
         }
     });
 
+    // Handle request_cancel_add_printer
+    mIpc->onRequestAsync("request_cancel_bind_printer", [this](const webviewIpc::IPCRequest& request,
+                                                                 std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        auto params = request.params;
+        if (!params.contains("printer")) {
+            sendResponse(webviewIpc::IPCResult::error("Missing printer parameter"));
+            return;
+        }
+        nlohmann::json printer = params["printer"];
+        try {
+            auto result = cancelBindPrinter(printer);
+            sendResponse(result);
+        } catch (const std::exception& e) {
+            sendResponse(webviewIpc::IPCResult::error(std::string("Cancel bind printer failed: ") + e.what()));
+        } catch (...) {
+            sendResponse(webviewIpc::IPCResult::error("Cancel bind printer failed: Unknown error"));
+        }
+    });
     // Handle request_add_physical_printer (async)
     mIpc->onRequestAsync("request_add_physical_printer", [this](const webviewIpc::IPCRequest& request,
                                                                  std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
@@ -916,6 +934,16 @@ webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::jso
         result.message = getErrorMessage(errorCode);
     }
     result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
+    return result;
+}
+
+webviewIpc::IPCResult PrinterManagerView::cancelBindPrinter(const nlohmann::json& printer)
+{
+    webviewIpc::IPCResult result;
+    PrinterNetworkInfo printerInfo = convertJsonToPrinterNetworkInfo(printer);
+    auto networkResult = PrinterManager::getInstance()->cancelBindPrinter(printerInfo);
+    result.message = networkResult.message;
+    result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
     return result;
 }
 webviewIpc::IPCResult PrinterManagerView::discoverPrinter()

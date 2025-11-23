@@ -39,6 +39,7 @@ public:
     PrinterNetworkResult<bool> upload(PrinterNetworkParams& params);
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinter();
     PrinterNetworkResult<bool> addPrinter(PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<bool> cancelBindPrinter(const PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> updatePrinterName(const std::string& printerId, const std::string& name);
     PrinterNetworkResult<bool> updatePrinterHost(const std::string& printerId, const std::string& host);
     PrinterNetworkResult<bool> updatePhysicalPrinter(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
