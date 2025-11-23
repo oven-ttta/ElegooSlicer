@@ -59,7 +59,7 @@
             </template>
             <div style="padding: 18px;">
                 <div v-if="printerStore.networkPrinters.length === 0 || !printerStore.isLoggedIn">
-                    <div v-if="printerStore.userInfo.loginStatus === -1" class="no-login">
+                    <div v-if="printerStore.userInfo.loginStatus === -1 " class="no-login">
                         <div v-html="getLoginToViewHtml()"></div>
                     </div>
                     <div v-else-if="printerStore.networkPrinters.length === 0">

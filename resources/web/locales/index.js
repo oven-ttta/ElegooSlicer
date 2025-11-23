@@ -71,6 +71,7 @@ const langMessages = {
       "addPrinterSuccess": "Printer added successfully.",
       "modifySuccess": "Modified successfully.",
       "loginToView": "Please {0} to view",
+      "isNotMainClient": "Please check if multiple clients are open and continue on the main client.",
       "login": "login",
     },
     "addPrinterDialog": {
@@ -279,6 +280,7 @@ const langMessages = {
       "addPrinterSuccess": "添加打印机成功",
       "modifySuccess": "修改成功",
       "loginToView": "请{0}账号后查看",
+      "isNotMainClient": "请检查是否已经开启了多个客户端，请在主客户端上继续操作",
       "login": "登录",
     },
     "addPrinterDialog": {
