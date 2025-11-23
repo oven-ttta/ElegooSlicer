@@ -163,14 +163,16 @@ const usePrinterStore = defineStore('printer', {
         message = `${error.message || 'Unknown error occurred'}`
         // }
         // Show error notification using Element Plus message component
-        if (window.ElementPlus && window.ElementPlus.ElMessage) {
-          window.ElementPlus.ElMessage.error({
-            message: message,
-            duration: 5000,
-            showClose: true
-          });
+        // code === 5 means the request is cancelled
+        if (code !== 5) {
+          if (window.ElementPlus && window.ElementPlus.ElMessage) {
+            window.ElementPlus.ElMessage.error({
+              message: message,
+              duration: 5000,
+              showClose: true
+            });
+          }
         }
-
         throw error;
       }
     },
@@ -251,14 +253,17 @@ const usePrinterStore = defineStore('printer', {
       }
     },
 
-    async requestAddPrinter(printer) {
-      const loading = ElLoading.service({
-        lock: true,
-      });
-      try {
+    async requestAddPrinter(printer, showLoading = true, timeout = 60 * 1000) {
 
+      let loading;
+      if (showLoading) {
+        loading = ElLoading.service({
+          lock: true,
+        });
+      }
+      try {
         await new Promise(resolve => setTimeout(resolve, 500));
-        await this.ipcRequest('request_add_printer', { printer }, 60 * 1000);
+        await this.ipcRequest('request_add_printer', { printer }, timeout);
         this.requestPrinterList();
         ElementPlus.ElMessage.success({
           message: i18n.global.t("printerManager.addPrinterSuccess"),
@@ -268,23 +273,45 @@ const usePrinterStore = defineStore('printer', {
         console.error('Failed to add printer:', error);
         throw error;
       } finally {
-        loading.close();
+        if (loading) {
+          loading.close();
+        }
       }
     },
 
-
-    async requestAddPhysicalPrinter(printer) {
-      const loading = ElLoading.service({
-        lock: true,
-      });
+    async requestAddPhysicalPrinter(printer, showLoading = true, timeout = 60 * 1000) {
+      let loading;
+      if (showLoading) {
+        loading = ElLoading.service({
+          lock: true,
+        });
+      }
       try {
         await new Promise(resolve => setTimeout(resolve, 500));
-        await this.ipcRequest('request_add_physical_printer', { printer }, 60 * 1000);
+        await this.ipcRequest('request_add_physical_printer', { printer }, timeout);
         this.requestPrinterList();
       } catch (error) {
         console.error('Failed to add physical printer:', error);
         throw error;
       } finally {
+        if (loading) {
+          loading.close();
+        }
+      }
+    },
+
+    async requestCancelAddPrinter(printer) {
+      const loading = ElLoading.service({
+        lock: true,
+      });
+      try {
+        await this.ipcRequest('request_cancel_add_printer', { printer }, 10 * 1000);
+        console.log('Cancelled printer connection:', printer);
+      } catch (error) {
+        console.error('Failed to cancel add printer:', error);
+        // Don't throw error - cancellation is best-effort
+      }
+      finally {
         loading.close();
       }
     },

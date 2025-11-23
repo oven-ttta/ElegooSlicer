@@ -627,7 +627,7 @@ void PrinterManagerView::setupIPCHandlers()
     });
 
     // Handle request_cancel_add_printer
-    mIpc->onRequestAsync("request_cancel_bind_printer", [this](const webviewIpc::IPCRequest& request,
+    mIpc->onRequestAsync("request_cancel_add_printer", [this](const webviewIpc::IPCRequest& request,
                                                                  std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
         auto params = request.params;
         if (!params.contains("printer")) {

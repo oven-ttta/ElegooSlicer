@@ -93,7 +93,9 @@ const langMessages = {
       "help": "Help",
       "helpMessage": "{'Please make sure the printer is connected to the network and is on the same network as the current software. If you still cannot find it after refreshing, you can try manual addition.'}",
       "ok": "OK",
-      "pleaseSelectPrinter": "Please select a printer"
+      "pleaseSelectPrinter": "Please select a printer",
+      "bindingInProgress": "Binding in progress...",
+      "bindingInProgressTip": "If there's no response for a long time, please go to the printer to complete the binding confirmation."
     },
     "manualForm": {
       "printerModel": "Printer Model",
@@ -302,7 +304,9 @@ const langMessages = {
       "help": "帮助",
       "helpMessage": "请确保打印机已经联网，并且与当前软件处于同一个网络，如果刷新后依旧无法发现，可尝试进行手动添加",
       "ok": "确定",
-      "pleaseSelectPrinter": "请选择一台打印机"
+      "pleaseSelectPrinter": "请选择一台打印机",
+      "bindingInProgress": "正在绑定中...",
+      "bindingInProgressTip": "如果长时间未响应,请前往打印机完成绑定确认"
     },
     "manualForm": {
       "printerModel": "打印机型号",
