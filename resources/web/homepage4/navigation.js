@@ -25,9 +25,6 @@ const Navigation = {
             } catch (error) {
                 console.error('Failed to get user info:', error);
             }
-            
-            // Navigate to online-models page by default
-            await this.navigateToPage('online-models');
         },
         async navigateToPage(pageName) {
             console.log('Navigate to page method called:', pageName);
