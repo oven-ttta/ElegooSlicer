@@ -178,8 +178,8 @@ void GPUColorPicker::render_for_picking(const std::vector<Slic3r::GLVolume*>& vo
 
     for (size_t i = 0; i < volumes.size(); ++i) {
         Slic3r::GLVolume* volume = volumes[i];
-        if (volume->is_wipe_tower)
-            continue;
+        // if (!volume->is_wipe_tower)
+        //     continue;
         if (!volume->model.is_initialized())
             continue;
 

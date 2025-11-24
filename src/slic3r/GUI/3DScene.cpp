@@ -819,6 +819,7 @@ void GLVolumeCollection::load_object_auxiliary(
         v.model.init_from(mesh);
         v.model.set_color((milestone == slaposPad) ? GLVolume::SLA_PAD_COLOR : GLVolume::SLA_SUPPORT_COLOR);
         v.mesh_raycaster = std::make_unique<GUI::MeshRaycaster>(std::make_shared<const TriangleMesh>(mesh));
+        v.raycaster_ready = true;
 #endif // ENABLE_SMOOTH_NORMALS
         v.composite_id = GLVolume::CompositeID(obj_idx, -int(milestone), (int)instance_idx.first);
         v.geometry_id = std::pair<size_t, size_t>(timestamp, model_instance.id().id);
@@ -871,6 +872,7 @@ int GLVolumeCollection::load_wipe_tower_preview(
     }
     v.model.init_from(wipe_tower_shell);
     v.mesh_raycaster = std::make_unique<GUI::MeshRaycaster>(std::make_shared<const TriangleMesh>(wipe_tower_shell));
+    v.raycaster_ready = true;
     v.set_convex_hull(wipe_tower_shell);
     v.set_volume_offset(Vec3d(pos_x, pos_y, 0.0));
     v.set_volume_rotation(Vec3d(0., 0., (M_PI / 180.) * rotation_angle));
