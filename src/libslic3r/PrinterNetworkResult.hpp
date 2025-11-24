@@ -80,6 +80,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_SERIAL_NUMBER_EMPTY = 10012, // Printer serial number empty
     PRINTER_NOT_CONNECTED_TO_UNBIND = 10013, // Printer not connected to unbind
     NOT_MAIN_CLIENT = 10014, // Not main client
+    FILE_TOO_LARGE = 10015, // File too large
 };
 
 

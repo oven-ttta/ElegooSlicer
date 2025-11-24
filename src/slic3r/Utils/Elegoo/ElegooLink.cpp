@@ -580,6 +580,7 @@ PrinterNetworkResult<bool> ElegooLink::sendPrintFile(const PrinterNetworkParams&
     CHECK_INITIALIZED(false);
     PrinterNetworkErrorCode           resultCode = PrinterNetworkErrorCode::UNKNOWN_ERROR;
     elink::FileUploadCompletionResult elinkResult;
+  
     try {
         PrinterStatus status;
         if (isBusy(params.printerId, status, 1)) {

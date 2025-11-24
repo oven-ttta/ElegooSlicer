@@ -27,6 +27,7 @@
 #include "slic3r/Utils/Elegoo/UserNetworkManager.hpp"
 #include "slic3r/Utils/Elegoo/MultiInstanceCoordinator.hpp"
 #include "libslic3r/format.hpp"
+#include "libslic3r/Utils.hpp"
 
 #define CHECK_INITIALIZED(returnValue) \
     { \
@@ -700,6 +701,22 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
             result.code = PrinterNetworkErrorCode::PRINTER_CONNECTION_ERROR;
             break;
         }
+        if(printer.value().networkType == NETWORK_TYPE_WAN) {
+           try {
+               // Use encode_path to handle Chinese and special characters in file path
+               std::string encodedPath = encode_path(params.filePath.c_str());
+               boost::filesystem::path filePath(encodedPath);
+               if(boost::filesystem::file_size(filePath) > 500 * 1024 * 1024) {
+                   result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::FILE_TOO_LARGE, false);
+                   break;
+               }
+           } catch (const boost::filesystem::filesystem_error& e) {
+               BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to get file size, path: %s, error: %s") % params.filePath % e.what();
+               result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::FILE_NOT_FOUND, false);
+               break;
+           }
+        }
+
         std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(params.printerId);
         if (!network) {
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": no network connection for printer: %s") % params.printerId;
@@ -774,14 +791,9 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
     PrinterNetworkResult<PrinterMmsGroup> result          = network->getPrinterMmsInfo();
     checkUserAuthStatus(printer.value(), result, requestUserInfo);
     if (result.isSuccess() && result.hasData()) {
-        if (!result.data.value().connected) {
-            std::string mmsSystemName = "MMS";
-            if (!result.data.value().mmsSystemName.empty()) {
-                mmsSystemName = result.data.value().mmsSystemName;
-            }
-            std::string errorMessage = (boost::format(_u8L("%1% connection failed. Please check and try again.")) % mmsSystemName).str();
-            return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED, PrinterMmsGroup(),
-                                                         errorMessage);
+        std::string mmsSystemName = "MMS";
+        if (!result.data.value().mmsSystemName.empty()) {
+            mmsSystemName = result.data.value().mmsSystemName;
         }
         return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::SUCCESS, result.data.value());
     }
