@@ -62,60 +62,48 @@ const usePrinterStore = defineStore('printer', {
       }
 
       const trimmedValue = value.trim();
+      const portPattern = /:([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
 
-      // Helper function to validate IPv4 address
-      const isValidIPv4 = (ip) => {
-        // Must match pattern: number.number.number.number
-        const ipPattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-        const match = ip.match(ipPattern);
-
-        if (!match) {
-          return { valid: false, error: i18n.global.t('printerSetting.pleaseEnterValidHostNameIpUrl') };
-        }
-
-        // Check each segment is between 0-255
+      // Check IP address (IPv4 or IPv6) with optional port
+      // IPv4: 192.168.1.1 or 192.168.1.1:8080
+      const ipv4Match = trimmedValue.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(:([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5]))?$/);
+      if (ipv4Match) {
         for (let i = 1; i <= 4; i++) {
-          const segment = parseInt(match[i], 10);
-          if (segment < 0 || segment > 255) {
-            return { valid: false, error: i18n.global.t('printerSetting.pleaseEnterValidHostNameIpUrl') };
+          if (parseInt(ipv4Match[i], 10) > 255) {
+            callback(new Error(i18n.global.t('printerSetting.pleaseEnterValidHostNameIpUrl')));
+            return;
           }
         }
+        callback();
+        return;
+      }
 
-        return { valid: true };
-      };
-
-      // Helper function to validate URL
-      const isValidURL = (url) => {
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          return false;
-        }
-        return url.length >= 10; // Basic length check
-      };
-
-      const isValidHostname = (hostname) => {
-        const hostnamePattern = /^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$/;
-        return hostnamePattern.test(hostname);
-      };
-
-      // Validation logic
-      if (/^\d+\./.test(trimmedValue)) {
-        // Starts with number + dot - check if it's a valid IPv4
-        const ipValidation = isValidIPv4(trimmedValue);
-        if (!ipValidation.valid) {
-          callback(new Error(ipValidation.error));
+      // IPv6: [2001:db8::1] or [2001:db8::1]:8080 or 2001:db8::1
+      const ipv6Match = trimmedValue.match(/^(\[([0-9a-fA-F:]+)\]|([0-9a-fA-F:]+))(:([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5]))?$/);
+      if (ipv6Match) {
+        const ip = ipv6Match[2] || ipv6Match[3];
+        const segments = ip.split(':');
+        if (segments.length <= 8 && segments.every(s => s === '' || /^[0-9a-fA-F]{1,4}$/i.test(s))) {
+          callback();
           return;
         }
-        callback(); // IPv4 is valid
-        return;
       }
 
-      if (isValidURL(trimmedValue)) {
-        callback(); // URL is valid
-        return;
+      // Check URL
+      if (/^https?:\/\/.+/.test(trimmedValue)) {
+        try {
+          new URL(trimmedValue);
+          callback();
+          return;
+        } catch (e) {
+          callback(new Error(i18n.global.t('printerSetting.pleaseEnterValidHostNameIpUrl')));
+          return;
+        }
       }
 
-      if (isValidHostname(trimmedValue)) {
-        callback(); // Hostname is valid
+      // Check hostname with optional port
+      if (/^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9](:([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5]))?$/.test(trimmedValue)) {
+        callback();
         return;
       }
 
