@@ -10,7 +10,7 @@ const Navigation = {
                 avatar: '',
                 loginStatus: 0
             },
-            currentPage: 'online-models',
+            currentPage: 'recent',
         }
     },
     methods: {
@@ -25,17 +25,11 @@ const Navigation = {
             } catch (error) {
                 console.error('Failed to get user info:', error);
             }
+            await this.navigateToPage('recent');
         },
         async navigateToPage(pageName) {
-            console.log('Navigate to page method called:', pageName);
             this.currentPage = pageName;
-
             await this.ipcRequest('navigateToPage', { page: pageName });
-        },
-
-        async beginDownloadNetworkPlugin() {
-            console.log('Download network plugin clicked');
-            await this.ipcRequest('downloadNetworkPlugin', {});
         },
 
         // IPC Communication methods
@@ -98,25 +92,22 @@ const Navigation = {
 
     computed: {
         userName(){
-
             const loginStatus = this.userInfo ? this.userInfo.loginStatus : -1;
             if (loginStatus === -1) {
                 return "";//this.$t('homepage.login')+' / '+this.$t('homepage.register');
-            } else if (loginStatus === 1) {
+            } else {
                 return this.userInfo.nickname || this.userInfo.email.split('@')[0] || this.userInfo.phone;
-            }
-            else {
-                const text = this.userInfo.nickname || this.userInfo.email.split('@')[0] || this.userInfo.phone;
-                return text;
             }
         },
         loginStatusStyle() {
-            const status = this.userInfo ? this.userInfo.loginStatus : 0;
+            const status = this.userInfo ? this.userInfo.loginStatus : -1;
              if (status === 1) {
                 return { color: '#4FD22A' };
-            }  else {
+            } else if (status == -1 || status === 3 || status === 4) {
                 return { color: '#BBBBBB' };
-            }
+            }else {
+                return { color: '#FFA500' };
+            } 
         }
     },
 

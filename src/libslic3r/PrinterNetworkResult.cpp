@@ -108,6 +108,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("Operation not implemented. Please try again later.");
         case PrinterNetworkErrorCode::NOT_MAIN_CLIENT:
             return _u8L("Operation failed. Please check if multiple clients are open and continue on the main client.");
+        case PrinterNetworkErrorCode::FILE_TOO_LARGE:
+            return _u8L("The file is too large to upload. Please try another way to start the transfer or print.");
         default:
             return _u8L("An unknown error occurred. Please try again later.");
     }

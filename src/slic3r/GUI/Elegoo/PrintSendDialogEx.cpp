@@ -461,7 +461,6 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
     }
     printInfo["currentProjectPrinterModel"] = printerModel;
     mHasMms = false;
-    mMmsConnected = false;
     nlohmann::json filamentList = json::array();
     for (auto& filament : mPrintFilamentList) {
         filamentList.push_back(convertPrintFilamentMmsMappingToJson(filament));
@@ -487,19 +486,17 @@ webviewIpc::IPCResult PrintSendDialogEx::getPrinterMmsInfo(const std::string &pr
         result.data["mappedFilamentList"] = json::array();
         result.code = static_cast<int>(PrinterNetworkErrorCode::SUCCESS);
         result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
-        mMmsConnected = false;
         return result;
     }
     PrinterNetworkResult<PrinterMmsGroup> res = PrinterMmsManager::getInstance()->getPrinterMmsInfo(printerId);
     if (res.isSuccess()) {
-        mMmsConnected = true;
         mMmsGroup = res.data.value();
     } else {
-        mMmsConnected = false;
+        BOOST_LOG_TRIVIAL(error) << "PrintSendDialogEx::getPrinterMmsInfo: failed to get printer mms info";
         return result;
     }
     nlohmann::json mmsInfo = convertPrinterMmsGroupToJson(mMmsGroup);
-    if(mMmsGroup.mmsList.size() == 0) {
+    if(mMmsGroup.mmsList.size() == 0 || !mMmsGroup.connected) {
         mHasMms = false;
     } else {
         mHasMms = true;
@@ -576,24 +573,6 @@ webviewIpc::IPCResult PrintSendDialogEx::onPrint(const nlohmann::json& printInfo
         if (mSelectedPrinterId.empty()) {
             errorCode      = PrinterNetworkErrorCode::PRINTER_NOT_SELECTED;
             result.message = getErrorMessage(errorCode);
-            result.code = static_cast<int>(errorCode);
-            return result;
-        }
-        PrinterNetworkInfo printerNetworkInfo = PrinterManager::getInstance()->getPrinterNetworkInfo(mSelectedPrinterId);
-        if(printerNetworkInfo.printerId.empty()) {
-            errorCode = PrinterNetworkErrorCode::PRINTER_NOT_FOUND;
-            result.message = getErrorMessage(errorCode);
-            result.code = static_cast<int>(errorCode);
-            return result;
-        }
-        if(uploadAndPrint && printerNetworkInfo.systemCapabilities.supportsMultiFilament && !mMmsConnected) {
-            errorCode = PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED;
-            std::string mmsSystemName = "MMS";
-            if (!mMmsGroup.mmsSystemName.empty()) {
-                mmsSystemName = mMmsGroup.mmsSystemName;
-            }
-            std::string errorMessage = (boost::format(_u8L("%1% connection failed. Please check and try again.")) % mmsSystemName).str();
-            result.message = errorMessage;
             result.code = static_cast<int>(errorCode);
             return result;
         }

@@ -55,13 +55,10 @@ const PrintSendApp = {
             ],
             selectedBedTypeValue: 'btPTE',
             bedDropdownOpen: false,
-
+            hasMmsInfo: false,
             // Filament management
             currentPage: 1,
             pageSize: 5,
-            hasMmsInfo: false,
-            mMmsConnected: false,
-
             // UI state
             isEditingName: false,
             showFilamentSection: false,
@@ -152,6 +149,8 @@ const PrintSendApp = {
                 const response = await this.ipcRequest('request_print_task', params);
                 this.printInfo = { ...this.printInfo, ...response };
             } catch (error) {
+                // Failure: set to null to indicate request failed (not a valid state)
+                this.printInfo = null;
                 console.error('Failed to request print task:', error);
             } finally {
                 loading.close();
@@ -162,17 +161,17 @@ const PrintSendApp = {
             const loading = ElLoading.service({
                 lock: true,
             });
-            try {
+            try {  
                 const params = {
                     printerId: this.curPrinter.printerId
                 };
                 const response = await this.ipcRequest('request_mms_info', params);
-                this.mmsInfo = response.mmsInfo;
-                this.printInfo.filamentList = response.mappedFilamentList;        
-                return true;
+                this.mmsInfo = response.mmsInfo || null;
+                this.printInfo.filamentList = response.mappedFilamentList || [];        
             } catch (error) {
                 console.error('Failed to request MMS info:', error);
-                return false;  
+                // Failure: set to null to indicate request failed (not a valid state)
+                this.mmsInfo = null;
             } finally {
                 loading.close();
             }
@@ -417,16 +416,21 @@ const PrintSendApp = {
                 this.showStatusTip(this.$t('printSend.printerNotConnected'));
                 return;
             }
+            // Check if print task data is available
+            if(this.printInfo === null) {
+                this.showStatusTip(this.$t('printSend.printerNotConnected'));
+                return;
+            }
+            //Validate filament mapping if MMS is present
+            if (this.printInfo.uploadAndPrint && this.curPrinter.systemCapabilities.supportsMultiFilament && this.mmsInfo === null) {
+                this.showStatusTip(this.$t('printSend.printerNotConnected'));
+                return;
+            }             
             // Update task with current UI state
             this.printInfo.selectedPrinterId = this.curPrinter.printerId;
             this.printInfo.bedType = this.selectedBedTypeValue;
 
-            //Validate filament mapping if MMS is present
-            if(this.printInfo.uploadAndPrint && this.curPrinter.systemCapabilities.supportsMultiFilament && !this.mMmsConnected) {
-                this.showStatusTip(this.$t('printSend.printerMmsNotConnected'));
-                return;
-            }
-            if (this.hasMmsInfo && this.printInfo.uploadAndPrint && !this.checkFilamentMapping()) {
+            if (this.printInfo.uploadAndPrint && this.hasMmsInfo && !this.checkFilamentMapping()) {
                 this.showStatusTip(this.$t('printSend.someFilamentsNotMapped'));
                 return;
             }
@@ -483,7 +487,9 @@ const PrintSendApp = {
             // Handle printer change logic if needed
             await this.requestPrintTask();
 
-            this.mMmsConnected  = await this.requestMmsInfo();
+            if(this.curPrinter.systemCapabilities.supportsMultiFilament) {
+               await this.requestMmsInfo();
+            } 
          
             // Set bed type if provided
             if (this.printInfo.bedType) {
@@ -491,7 +497,11 @@ const PrintSendApp = {
             }
 
             // Check for MMS info
-            if (this.mmsInfo && this.mmsInfo.mmsList && this.mmsInfo.mmsList.length > 0) {
+            if (this.curPrinter.systemCapabilities.supportsMultiFilament &&
+                this.mmsInfo &&
+                this.mmsInfo.connected &&
+                this.mmsInfo.mmsList &&
+                this.mmsInfo.mmsList.length > 0) {
                 this.hasMmsInfo = true;
             } else {
                 this.hasMmsInfo = false;

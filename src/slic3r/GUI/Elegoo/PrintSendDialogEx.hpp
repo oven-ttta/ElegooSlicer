@@ -81,7 +81,6 @@ private:
     std::string mProjectName;
     std::vector<PrintFilamentMmsMapping> mPrintFilamentList;
     bool mHasMms;
-    bool mMmsConnected;
     PrinterMmsGroup mMmsGroup;
    
 };
