@@ -17,21 +17,21 @@ target_compile_features(stb_dxt INTERFACE cxx_std_11)
 # Create an alias for consistent naming
 add_library(stb_dxt::stb_dxt ALIAS stb_dxt)
 
-# Install headers if needed
-install(FILES 
-    stb_dxt.h
-    DESTINATION include/stb_dxt
-)
+# # Install headers if needed
+# install(FILES 
+#     stb_dxt.h
+#     DESTINATION include/stb_dxt
+# )
 
-# Install the interface library
-install(TARGETS stb_dxt
-    EXPORT stb_dxtTargets
-    INCLUDES DESTINATION include
-)
+# # Install the interface library
+# install(TARGETS stb_dxt
+#     EXPORT stb_dxtTargets
+#     INCLUDES DESTINATION include
+# )
 
-# Export the targets
-install(EXPORT stb_dxtTargets
-    FILE stb_dxtTargets.cmake
-    NAMESPACE stb_dxt::
-    DESTINATION lib/cmake/stb_dxt
-)
+# # Export the targets
+# install(EXPORT stb_dxtTargets
+#     FILE stb_dxtTargets.cmake
+#     NAMESPACE stb_dxt::
+#     DESTINATION lib/cmake/stb_dxt
+# )

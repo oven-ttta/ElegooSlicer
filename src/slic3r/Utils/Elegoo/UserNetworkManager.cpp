@@ -13,11 +13,20 @@
 #include <nlohmann/json.hpp>
 #include <boost/nowide/fstream.hpp>
 #include "libslic3r/format.hpp"
+#include "slic3r/Utils/Elegoo/PrinterNetworkEvent.hpp"
+#include "slic3r/Utils/Elegoo/MultiInstanceCoordinator.hpp"
 
 #define CHECK_INITIALIZED(returnVal) \
-    std::lock_guard<std::recursive_mutex> __initLock(mInitMutex); \
-    if(!mIsInitialized.load()) { \
-        return returnVal; \
+    { \
+        std::lock_guard<std::recursive_mutex> __initLock(mInitMutex); \
+        if(!mIsInitialized.load()) { \
+            using ValueType = std::decay_t<decltype(returnVal)>; \
+            if(MultiInstanceCoordinator::getInstance()->isMaster()) { \
+                return PrinterNetworkResult<ValueType>(PrinterNetworkErrorCode::PRINTER_NETWORK_NOT_INITIALIZED, returnVal); \
+            } else { \
+                return PrinterNetworkResult<ValueType>(PrinterNetworkErrorCode::NOT_MAIN_CLIENT, returnVal); \
+            } \
+        } \
     }
 namespace Slic3r {
 
@@ -34,7 +43,14 @@ void UserNetworkManager::init()
         return;
     }
     loadUserInfo();
-
+    
+    UserNetworkEvent::getInstance()->loggedInElsewhereChanged.connect([this](const UserLoggedInElsewhereEvent& event) {
+    });
+    UserNetworkEvent::getInstance()->onlineStatusChanged.connect([this](const UserOnlineStatusChangedEvent& event) {
+        if(!event.isOnline) {
+            updateUserInfoLoginStatus(getUserInfo(), LOGIN_STATUS_OFFLINE);
+        }
+    });
     mRunning.store(true);
     mMonitorThread = std::thread([this]() { monitorUserNetwork(); });
     mIsInitialized.store(true);
@@ -49,6 +65,9 @@ void UserNetworkManager::uninit()
         }
     }
     
+    UserNetworkEvent::getInstance()->loggedInElsewhereChanged.disconnectAll();
+    UserNetworkEvent::getInstance()->onlineStatusChanged.disconnectAll();
+
     mRunning.store(false);
     if (mMonitorThread.joinable()) {
         mMonitorThread.join();
@@ -56,6 +75,7 @@ void UserNetworkManager::uninit()
     
     {
         std::lock_guard<std::recursive_mutex> lock(mInitMutex);
+        mUserInfo = UserNetworkInfo();
         setNetwork(nullptr);
         mIsInitialized.store(false);
     } 
@@ -63,17 +83,17 @@ void UserNetworkManager::uninit()
 
 PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
 {
-    CHECK_INITIALIZED(PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::NOT_INITIALIZED, UserNetworkInfo()));
+    CHECK_INITIALIZED(UserNetworkInfo());
     
     std::shared_ptr<IUserNetwork> network = getNetwork();
-    // Record request context before sending request 
-    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();
     if (!network) {
-        if(requestUserInfo.userId.empty()) {
+        if(getUserInfo().userId.empty()) {
             return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, UserNetworkInfo());
         }
         return PrinterNetworkResult<UserNetworkInfo>(PrinterNetworkErrorCode::NETWORK_ERROR, UserNetworkInfo());
-    }   
+    }
+    // Record request context before sending request 
+    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();   
 
     PrinterNetworkResult<UserNetworkInfo> rtcTokenResult = network->getRtcToken();
     if (!rtcTokenResult.isSuccess()) {
@@ -85,16 +105,16 @@ PrinterNetworkResult<UserNetworkInfo> UserNetworkManager::getRtcToken()
 
 PrinterNetworkResult<PrinterNetworkInfo> UserNetworkManager::bindWANPrinter(const PrinterNetworkInfo& printerNetworkInfo)
 {
-    CHECK_INITIALIZED(PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::NOT_INITIALIZED, PrinterNetworkInfo()));
+    CHECK_INITIALIZED(PrinterNetworkInfo());
     std::shared_ptr<IUserNetwork> network = getNetwork();
-    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();
     if (!network) {
-        if(requestUserInfo.userId.empty()) {
+        if(getUserInfo().userId.empty()) {
             return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, PrinterNetworkInfo());
         }
         return PrinterNetworkResult<PrinterNetworkInfo>(PrinterNetworkErrorCode::NETWORK_ERROR, PrinterNetworkInfo());
     }
     // Record request context before sending request
+    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();
 
     PrinterNetworkResult<PrinterNetworkInfo> result = network->bindWANPrinter(printerNetworkInfo);
     if (!result.isSuccess()) {
@@ -106,15 +126,15 @@ PrinterNetworkResult<PrinterNetworkInfo> UserNetworkManager::bindWANPrinter(cons
 }
 PrinterNetworkResult<bool> UserNetworkManager::unbindWANPrinter(const std::string& serialNumber)
 {
-    CHECK_INITIALIZED(PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NOT_INITIALIZED, false));
+    CHECK_INITIALIZED(false);
     std::shared_ptr<IUserNetwork> network = getNetwork();
-    UserNetworkInfo requestUserInfo = getUserInfo();
     if (!network) {
-        if(requestUserInfo.userId.empty()) {
+        if(getUserInfo().userId.empty()) {
             return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::INVALID_USERNAME_OR_PASSWORD, false);
         }
         return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
     }
+    UserNetworkInfo requestUserInfo = network->getUserNetworkInfo();
     PrinterNetworkResult<bool> result = network->unbindWANPrinter(serialNumber);
     if (!result.isSuccess()) {
         // Pass request context for validation
@@ -125,7 +145,7 @@ PrinterNetworkResult<bool> UserNetworkManager::unbindWANPrinter(const std::strin
 
 PrinterNetworkResult<std::vector<PrinterNetworkInfo>> UserNetworkManager::getUserBoundPrinters()
 {
-    CHECK_INITIALIZED(PrinterNetworkResult<std::vector<PrinterNetworkInfo>>(PrinterNetworkErrorCode::NOT_INITIALIZED, std::vector<PrinterNetworkInfo>()));
+    CHECK_INITIALIZED(std::vector<PrinterNetworkInfo>());
 
     std::unique_lock<std::timed_mutex> lock(mMonitorMutex, std::defer_lock);
     if (!lock.try_lock_for(std::chrono::seconds(3))) {
@@ -199,8 +219,6 @@ void UserNetworkManager::checkUserAuthStatus(const UserNetworkInfo& requestUserI
 }
 UserNetworkInfo UserNetworkManager::getUserInfo()
 {   
-    CHECK_INITIALIZED(UserNetworkInfo());
-
     std::lock_guard<std::mutex> userLock(mUserMutex);
     mUserInfo.loginErrorMessage = getLoginErrorMessage(mUserInfo);
     return mUserInfo;
@@ -332,7 +350,7 @@ void UserNetworkManager::notifyUserInfoUpdated()
 
 PrinterNetworkResult<bool> UserNetworkManager::checkUserNeedReLogin()
 {
-    CHECK_INITIALIZED(PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NOT_INITIALIZED, false));
+    CHECK_INITIALIZED(false);
     UserNetworkInfo currentUserInfo = getUserInfo();
     if (needReLogin(currentUserInfo)) {
         //need re-login
@@ -463,8 +481,12 @@ bool UserNetworkManager::checkNeedRefreshToken(const UserNetworkInfo& userInfo)
 
 UserNetworkInfo UserNetworkManager::refreshToken(const UserNetworkInfo& userInfo)
 {
-    CHECK_INITIALIZED(UserNetworkInfo());
-
+    {
+        std::lock_guard<std::recursive_mutex> lock(mInitMutex);
+        if(!mIsInitialized.load()) {
+            return UserNetworkInfo();
+        }
+    }
     std::lock_guard<std::timed_mutex> monitorLock(mMonitorMutex);
 
     UserNetworkInfo currentUserInfo = getUserInfo();
@@ -761,8 +783,7 @@ void UserNetworkManager::loadUserInfo()
         if (!userInfo.userId.empty()) {
             std::lock_guard<std::mutex> lock(mUserMutex);
             if(userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_TOKEN &&
-                userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER &&
-                userInfo.loginStatus != LOGIN_STATUS_OFFLINE_TOKEN_EXPIRED) {
+                userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER) {
                 userInfo.loginStatus = LOGIN_STATUS_NOT_LOGIN;
             }
             mUserInfo               = userInfo;

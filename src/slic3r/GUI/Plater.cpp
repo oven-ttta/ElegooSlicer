@@ -3881,7 +3881,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                             show_info(q, _L("The 3mf is not supported by ElegooSlicer, load geometry data only."), _L("Load 3mf"));
                     }
                     else if(load_config && !is_elegoo_slicer_3mf) {
-                        MessageDialog msg_window(q, _L("The imported 3mf file may have some incompatibilities, continuing to import may cause some issues. Do you want to continue importing the whole file or only import the model data?"),
+                        MessageDialog msg_window(q, _L("The 3MF file you are importing may be incompatible, continuing could cause errors. Would you like to import the entire file or just the model data?"),
                                                     _L("Load 3mf"), wxYES_NO | wxCANCEL | wxCENTRE);
                         msg_window.SetButtonLabel(wxID_YES, _L("Load Whole File"));
                         msg_window.SetButtonLabel(wxID_NO, _L("Load Model Only"));

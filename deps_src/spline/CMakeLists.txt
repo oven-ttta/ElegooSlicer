@@ -17,21 +17,21 @@ target_compile_features(spline INTERFACE cxx_std_11)
 # Create an alias for consistent naming
 add_library(spline::spline ALIAS spline)
 
-# Install headers if needed
-install(FILES 
-    spline.h
-    DESTINATION include/spline
-)
+# # Install headers if needed
+# install(FILES 
+#     spline.h
+#     DESTINATION include/spline
+# )
 
-# Install the interface library
-install(TARGETS spline
-    EXPORT splineTargets
-    INCLUDES DESTINATION include
-)
+# # Install the interface library
+# install(TARGETS spline
+#     EXPORT splineTargets
+#     INCLUDES DESTINATION include
+# )
 
-# Export the targets
-install(EXPORT splineTargets
-    FILE splineTargets.cmake
-    NAMESPACE spline::
-    DESTINATION lib/cmake/spline
-)
+# # Export the targets
+# install(EXPORT splineTargets
+#     FILE splineTargets.cmake
+#     NAMESPACE spline::
+#     DESTINATION lib/cmake/spline
+# )

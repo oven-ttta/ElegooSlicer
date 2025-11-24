@@ -217,6 +217,8 @@ const ManualFormComponent = {
 
     data() {
         return {
+            // Priority printer models list (in order)
+            priorityModels: ['Elegoo Centauri Carbon 2','Elegoo Centauri Carbon'],
             formData: {
                 vendor: '',
                 printerModel: '',
@@ -419,10 +421,13 @@ const ManualFormComponent = {
             if (selectedVendor && this.printerModelList) {
                 const vendorData = this.printerModelList.find(vendor => vendor.vendor === selectedVendor);
                 if (vendorData) {
-                    this.availableModels = (vendorData.models || []).map(model => ({
+                    const models = (vendorData.models || []).map(model => ({
                         ...model,
                         supportWanNetwork: !!model.supportWanNetwork
                     }));
+                    
+                    // Sort models by priority
+                    this.availableModels = this.sortModelsByPriority(models);
 
                     if (this.availableModels.length > 0 && !this.formData.printerModel) {
                         this.formData.printerModel = this.availableModels[0].modelName;
@@ -467,6 +472,34 @@ const ManualFormComponent = {
                 return !!this.wanCapabilityMap[key];
             }
             return false;
+        },
+
+        sortModelsByPriority(models) {
+            if (!models || models.length === 0) {
+                return [];
+            }
+
+            const prioritySet = new Set(this.priorityModels.map(m => m.toLowerCase()));
+            const priorityModels = [];
+            const otherModels = [];
+
+            models.forEach(model => {
+                const modelName = model.modelName || '';
+                if (prioritySet.has(modelName.toLowerCase())) {
+                    priorityModels.push(model);
+                } else {
+                    otherModels.push(model);
+                }
+            });
+
+            // Sort priority models according to the order in priorityModels list
+            priorityModels.sort((a, b) => {
+                const indexA = this.priorityModels.findIndex(m => m.toLowerCase() === (a.modelName || '').toLowerCase());
+                const indexB = this.priorityModels.findIndex(m => m.toLowerCase() === (b.modelName || '').toLowerCase());
+                return indexA - indexB;
+            });
+
+            return [...priorityModels, ...otherModels];
         },
 
         ensureNetworkTypeState() {
@@ -621,7 +654,7 @@ const ManualFormComponent = {
                             accessCode,
                             pinCode,
                             password,
-                            extraInfo: JSON.stringify(extraInfo)
+                            extraInfo: JSON.stringify(extraInfo),
                         };
                         resolve(printer);
                     } else {

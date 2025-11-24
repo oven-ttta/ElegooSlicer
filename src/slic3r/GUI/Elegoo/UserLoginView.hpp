@@ -26,6 +26,8 @@ private:
     // Event handlers
     void onWebViewLoaded(wxWebViewEvent& event);
     void onWebViewError(wxWebViewEvent& event);
+    void OnNavigationRequest(wxWebViewEvent& event);
+    void OnNavigationComplete(wxWebViewEvent& event);
     void onClose(wxCloseEvent& event);
 
 private:
@@ -36,7 +38,7 @@ private:
     std::string mRegion;
     
     static std::atomic<bool> s_isShown;
-    
+    bool mIsLoading=false;
     DECLARE_EVENT_TABLE()
 };
 

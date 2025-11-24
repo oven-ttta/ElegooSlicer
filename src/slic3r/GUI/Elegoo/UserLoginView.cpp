@@ -159,6 +159,9 @@ void UserLoginView::setupIPCHandlers()
     });
 
     mIpc->onRequest("reload", [this](const webviewIpc::IPCRequest& request) {
+        if(mIsLoading){
+          return webviewIpc::IPCResult::success();
+        }
         std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
         if (networkHelper) {
             std::string url = networkHelper->getLoginUrl();
@@ -168,18 +171,29 @@ void UserLoginView::setupIPCHandlers()
         }
         return webviewIpc::IPCResult::success();
     });
+    mIpc->onRequest("isLoading", [this](const webviewIpc::IPCRequest& request) {
+        nlohmann::json data = nlohmann::json::object();
+        data["isLoading"] = mIsLoading;
+        return webviewIpc::IPCResult::success(data);
+    });
 }
 
 void UserLoginView::cleanupIPC()
 {
 }
-void UserLoginView::onWebViewLoaded(wxWebViewEvent& event)
-{
-    // WebView loaded successfully
-    if (mIpc) {
-        mIpc->initialize();
-    }
+
+void UserLoginView::onWebViewLoaded(wxWebViewEvent& event) {
+    mIsLoading = false;
 }
+void UserLoginView::OnNavigationRequest(wxWebViewEvent& evt){
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
+    mIsLoading = true;
+}
+void UserLoginView::OnNavigationComplete(wxWebViewEvent& evt){
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
+    mIsLoading = false;
+}
+
 #define FAILED_URL_SUFFIX "/web/error-page/connection-failed.html"
 void UserLoginView::onWebViewError(wxWebViewEvent& evt)
 {
@@ -201,17 +215,25 @@ void UserLoginView::onWebViewError(wxWebViewEvent& evt)
     std::string target  = evt.GetTarget().ToStdString();
     std::string error   = e;
     std::string message = evt.GetString().ToStdString();
+    mIsLoading = false;
+    if(url.find(FAILED_URL_SUFFIX)!=std::string::npos){
+        return;
+    }
 
-    auto path = resources_dir() + FAILED_URL_SUFFIX;
-    #if WIN32
-        std::replace(path.begin(), path.end(), '/', '\\');
-    #endif
 
     auto code = evt.GetInt();
     if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST) {
-
-        auto failedUrl = wxString::Format("file:///%s", from_u8(path));
-        mBrowser->LoadURL(failedUrl);
+        std::thread([this]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                wxGetApp().CallAfter([this]() {
+                    auto path = resources_dir() + FAILED_URL_SUFFIX;
+                    #if WIN32
+                        std::replace(path.begin(), path.end(), '/', '\\');
+                    #endif
+                    auto failedUrl = wxString::Format("file:///%s", from_u8(path));
+                    mBrowser->LoadURL(failedUrl);
+                });
+        }).detach();
     }
 }
 

@@ -20,6 +20,7 @@
 #include "libslic3r/PresetBundle.hpp"
 #include "libslic3r/Utils.hpp"
 #include <map>
+#include <set>
 #include <algorithm>
 #include <cctype>
 #include <thread>
@@ -34,6 +35,7 @@
 #include "slic3r/Utils/Elegoo/PrinterManager.hpp"
 #include <boost/log/trivial.hpp>
 #include <boost/format.hpp>
+#include "slic3r/Utils/Elegoo/MultiInstanceCoordinator.hpp"
 
 #define FIRST_TAB_NAME _L("Connected Printer")
 #define TAB_MAX_WIDTH 200
@@ -416,13 +418,21 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
 PrinterManagerView::~PrinterManagerView() {
     // Save tab state before destruction
     saveTabState();
+
+    PrinterNetworkEvent::getInstance()->connectStatusChanged.disconnectAll();
+    PrinterNetworkEvent::getInstance()->eventRawChanged.disconnectAll();
+    UserNetworkEvent::getInstance()->rtcTokenChanged.disconnectAll();
+    UserNetworkEvent::getInstance()->rtmMessageChanged.disconnectAll();
+
+    std::lock_guard<std::mutex> lock(mPrinterViewsMutex);
+    mPrinterViews.clear();
 }
 
 void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveState)
 {
-    auto it = mPrinterViews.find(printerId);
-    if (it != mPrinterViews.end()) {
-        int idx = mTabBar->GetPageIndex(it->second);
+    PrinterWebView* existingView = findPrinterView(printerId);
+    if (existingView) {
+        int idx = mTabBar->GetPageIndex(existingView);
         if (idx != wxNOT_FOUND) {
             mTabBar->SetSelection(idx);
             Layout();
@@ -477,7 +487,7 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
         mTabBar->AddPage(view, from_u8(printerInfo.printerName));
     }
     mTabBar->SetSelection(mTabBar->GetPageCount() - 1);
-    mPrinterViews[printerId] = view;
+    insertPrinterView(printerId, view);
     Layout();
     
     // Update tab state after adding new tab
@@ -510,13 +520,10 @@ void PrinterManagerView::onClosePrinterTab(wxAuiNotebookEvent& event)
     if (page == wxNOT_FOUND) return;
 
     wxWindow* win = mTabBar->GetPage(page);
-    for (auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
-        if (it->second == win) {
-            it->second->OnClose(wxCloseEvent());
-            mPrinterViews.erase(it);
-            mTabBar->SetSelection(0);
-            break;
-        }
+    PrinterWebView* viewToClose = removePrinterViewByWindow(win);
+    if (viewToClose) {
+        viewToClose->OnClose(wxCloseEvent());
+        mTabBar->SetSelection(0);
     }
     
     // Update tab state after closing tab
@@ -588,10 +595,6 @@ void PrinterManagerView::setupIPCHandlers()
         return getPrinterModelList();
     });
 
-    // Handle request_printer_list_status
-    mIpc->onRequest("request_printer_list_status", [this](const webviewIpc::IPCRequest& request){
-        return getPrinterListStatus();
-    });
 
     // Handle request_printer_detail
     mIpc->onRequest("request_printer_detail", [this](const webviewIpc::IPCRequest& request){
@@ -613,7 +616,7 @@ void PrinterManagerView::setupIPCHandlers()
             auto result = this->discoverPrinter();
             sendResponse(result);
         } catch (const std::exception& e) {
-                sendResponse(webviewIpc::IPCResult::error(std::string("Discovery failed: ") + e.what()));
+            sendResponse(webviewIpc::IPCResult::error(std::string("Discovery failed: ") + e.what()));
         }
     });
 
@@ -637,6 +640,24 @@ void PrinterManagerView::setupIPCHandlers()
         }
     });
 
+    // Handle request_cancel_add_printer
+    mIpc->onRequestAsync("request_cancel_add_printer", [this](const webviewIpc::IPCRequest& request,
+                                                                 std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        auto params = request.params;
+        if (!params.contains("printer")) {
+            sendResponse(webviewIpc::IPCResult::error("Missing printer parameter"));
+            return;
+        }
+        nlohmann::json printer = params["printer"];
+        try {
+            auto result = cancelBindPrinter(printer);
+            sendResponse(result);
+        } catch (const std::exception& e) {
+            sendResponse(webviewIpc::IPCResult::error(std::string("Cancel bind printer failed: ") + e.what()));
+        } catch (...) {
+            sendResponse(webviewIpc::IPCResult::error("Cancel bind printer failed: Unknown error"));
+        }
+    });
     // Handle request_add_physical_printer (async)
     mIpc->onRequestAsync("request_add_physical_printer", [this](const webviewIpc::IPCRequest& request,
                                                                  std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
@@ -663,7 +684,7 @@ void PrinterManagerView::setupIPCHandlers()
         auto params = request.params;
         std::string printerId = params.value("printerId", "");
         std::string printerName = params.value("printerName", "");
-        return updatePrinterName(printerId, printerName);;
+        return updatePrinterName(printerId, printerName);
     });
 
     // Handle request_update_physical_printer
@@ -750,62 +771,53 @@ void PrinterManagerView::setupIPCHandlers()
     });
     
     PrinterNetworkEvent::getInstance()->connectStatusChanged.connect([this](const PrinterConnectStatusEvent& event) {
-        // RTC token change handled by network layer
-        for(auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
-            if(it->first == event.printerId) {
-                nlohmann::json data;
-                data["status"] = event.status;
-                it->second->onConnectionStatus(data);
-                break;
-            }
+        PrinterWebView* targetView = findPrinterView(event.printerId);
+        if (targetView) {
+            nlohmann::json data;
+            data["status"] = event.status;
+            targetView->onConnectionStatus(data);
         }
     });
     PrinterNetworkEvent::getInstance()->eventRawChanged.connect([this](const PrinterEventRawEvent& event) {
-        // Event raw change handled by network layer
-        for(auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
-            if(it->first == event.printerId) {
-                nlohmann::json data;
-                data["event"] = event.event;
-                it->second->onPrinterEventRaw(data);
-                break;
-            }
+        PrinterWebView* targetView = findPrinterView(event.printerId);
+        if (targetView) {
+            nlohmann::json data;
+            data["event"] = event.event;
+            targetView->onPrinterEventRaw(data);
         }
     });
 
-    PrinterNetworkEvent::getInstance()->rtcTokenChanged.connect([this](const PrinterRtcTokenEvent& event) {
-        // RTC token change handled by network layer
-        for(auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
+    UserNetworkEvent::getInstance()->rtcTokenChanged.connect([this](const UserRtcTokenEvent& event) {
+        nlohmann::json data;
+        data["rtcToken"] = event.userInfo.rtcToken;
+        data["userId"] = event.userInfo.userId;
+        data["rtcTokenExpireTime"] = event.userInfo.rtcTokenExpireTime;
+        forEachPrinterView([&data](const std::string&, PrinterWebView* view) {
+            view->onRtcTokenChanged(data);
+        });
+    });
+    UserNetworkEvent::getInstance()->rtmMessageChanged.connect([this](const UserRtmMessageEvent& event) {
+        PrinterWebView* targetView = findPrinterView(event.printerId);
+        if (targetView) {
             nlohmann::json data;
-            data["rtcToken"] = event.userInfo.rtcToken;
-            data["userId"] = event.userInfo.userId;
-            data["rtcTokenExpireTime"] = event.userInfo.rtcTokenExpireTime;
-            it->second->onRtcTokenChanged(data);          
+            data["message"] = event.message;
+            targetView->onRtmMessage(data);
         }
     });
-    PrinterNetworkEvent::getInstance()->rtmMessageChanged.connect([this](const PrinterRtmMessageEvent& event) {
-        // RTM message change handled by network layer
-        for(auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
-            if(it->first == event.printerId) {
-                nlohmann::json data;
-                data["message"] = event.message;
-                it->second->onRtmMessage(data);
-                break;
-            }
-        }
-    });
+
 }
 
 webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)
 { 
     webviewIpc::IPCResult result;
-    auto it = mPrinterViews.find(printerId);
-    if (it != mPrinterViews.end()) {
-        int page = mTabBar->GetPageIndex(it->second);
+    PrinterWebView* view = findPrinterView(printerId);
+    if (view) {
+        int page = mTabBar->GetPageIndex(view);
         if (page != wxNOT_FOUND) {
             mTabBar->DeletePage(page);
         }
-        it->second->OnClose(wxCloseEvent());
-        mPrinterViews.erase(it);
+        view->OnClose(wxCloseEvent());
+        removePrinterView(printerId);
         mTabBar->SetSelection(0);
     }
     auto networkResult = PrinterManager::getInstance()->deletePrinter(printerId);
@@ -813,12 +825,35 @@ webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& print
     result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
     return result;
 }
+void PrinterManagerView::closeInvalidPrinterTab(std::vector<PrinterNetworkInfo>& printerList)
+{
+    std::vector<std::string> printersToRemove;
+    std::vector<PrinterWebView*> viewsToClose;
+    
+    forEachPrinterView([&printerList, &printersToRemove, &viewsToClose](const std::string& printerId, PrinterWebView* view) {
+        auto it = std::find_if(printerList.begin(), printerList.end(), 
+                              [&printerId](const PrinterNetworkInfo& p) { return p.printerId == printerId; });
+        if (it == printerList.end()) {
+            printersToRemove.push_back(printerId);
+            viewsToClose.push_back(view);
+        }
+    });
+    
+    for (size_t i = 0; i < printersToRemove.size(); ++i) {
+        int page = mTabBar->GetPageIndex(viewsToClose[i]);
+        if (page != wxNOT_FOUND) {
+            mTabBar->DeletePage(page);
+        }
+        viewsToClose[i]->OnClose(wxCloseEvent());
+        removePrinterView(printersToRemove[i]);
+    }
+}
 webviewIpc::IPCResult PrinterManagerView::updatePrinterName(const std::string& printerId, const std::string& printerName)
 {
     webviewIpc::IPCResult result;
-    auto it = mPrinterViews.find(printerId);
-    if (it != mPrinterViews.end()) {
-        int page = mTabBar->GetPageIndex(it->second);
+    PrinterWebView* view = findPrinterView(printerId);
+    if (view) {
+        int page = mTabBar->GetPageIndex(view);
         if (page != wxNOT_FOUND) {
             mTabBar->SetPageText(page, from_u8(printerName));
         }
@@ -843,11 +878,11 @@ webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& p
             std::string accessCode = printerInfo.accessCode;
             url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber) + "&access_code=" + accessCode;
         }
-        auto it = mPrinterViews.find(printerId);
-        if (it != mPrinterViews.end()) {
-            int page = mTabBar->GetPageIndex(it->second);
+        PrinterWebView* view = findPrinterView(printerId);
+        if (view) {
+            int page = mTabBar->GetPageIndex(view);
             if (page != wxNOT_FOUND) {
-                it->second->load_url(url);
+                view->load_url(url);
             }
         }
     }
@@ -872,14 +907,14 @@ webviewIpc::IPCResult PrinterManagerView::updatePhysicalPrinter(const std::strin
     
     if (result.code == 0 && (oldPrinter.host != printerInfo.host || oldPrinter.webUrl != printerInfo.webUrl)) {
         PrinterNetworkInfo updatedPrinter = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
-        auto it = mPrinterViews.find(printerId);
-        if (it != mPrinterViews.end()) {
-            int page = mTabBar->GetPageIndex(it->second);
+        PrinterWebView* view = findPrinterView(printerId);
+        if (view) {
+            int page = mTabBar->GetPageIndex(view);
             if (page != wxNOT_FOUND) {
                 mTabBar->SetPageText(page, from_u8(updatedPrinter.printerName));
                 wxString url = updatedPrinter.webUrl;
-                it->second->load_url(url);
-                it->second->reload();
+                view->load_url(url);
+                view->reload();
             }
         }
     }
@@ -915,6 +950,16 @@ webviewIpc::IPCResult PrinterManagerView::addPhysicalPrinter(const nlohmann::jso
     result.code = errorCode == PrinterNetworkErrorCode::SUCCESS ? 0 : static_cast<int>(errorCode);
     return result;
 }
+
+webviewIpc::IPCResult PrinterManagerView::cancelBindPrinter(const nlohmann::json& printer)
+{
+    webviewIpc::IPCResult result;
+    PrinterNetworkInfo printerInfo = convertJsonToPrinterNetworkInfo(printer);
+    auto networkResult = PrinterManager::getInstance()->cancelBindPrinter(printerInfo);
+    result.message = networkResult.message;
+    result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
+    return result;
+}
 webviewIpc::IPCResult PrinterManagerView::discoverPrinter()
 {
     webviewIpc::IPCResult result;
@@ -927,6 +972,7 @@ webviewIpc::IPCResult PrinterManagerView::discoverPrinter()
     for (auto& printer : printerList) {
         nlohmann::json printer_obj = nlohmann::json::object();
         printer_obj = convertPrinterNetworkInfoToJson(printer);
+        printer_obj["isAdded"] = printer.isAdded;
         boost::filesystem::path resources_path(Slic3r::resources_dir());
         std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
         printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
@@ -940,44 +986,47 @@ webviewIpc::IPCResult PrinterManagerView::discoverPrinter()
 webviewIpc::IPCResult PrinterManagerView::getPrinterList()
 {  
     webviewIpc::IPCResult result;
+    // Cache for printer images (printerId -> base64 image data)
+    static std::map<std::string, std::string> printerImageCache;
     auto printerList = PrinterManager::getInstance()->getPrinterList();
+    
+    // Build set of current printer IDs and process printers in one pass
+    std::set<std::string> currentPrinterIds;
     nlohmann::json response = json::array();
+    boost::filesystem::path resources_path(Slic3r::resources_dir());
+    
     for (auto& printer : printerList) {
-        nlohmann::json printer_obj = nlohmann::json::object();
-        printer_obj = convertPrinterNetworkInfoToJson(printer);
-        boost::filesystem::path resources_path(Slic3r::resources_dir());
-        std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
-        printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
-        response.push_back(printer_obj);
-    }
-    result.data = response;
-    result.code = 0;
-    result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
-    return result;
-}
-webviewIpc::IPCResult PrinterManagerView::getPrinterListStatus()
-{
-    webviewIpc::IPCResult result;
-    static std::vector<PrinterNetworkInfo> lastPrinterList;
-    std::vector<PrinterNetworkInfo> printerList = PrinterManager::getInstance()->getPrinterList();
-    nlohmann::json response = json::array();
-    for (auto& printer : printerList) {
-        nlohmann::json printer_obj = nlohmann::json::object();
-        printer_obj = convertPrinterNetworkInfoToJson(printer);
-        auto it = std::find_if(lastPrinterList.begin(), lastPrinterList.end(), [&printer](const PrinterNetworkInfo& p) { return p.printerId == printer.printerId; });
-        if(it == lastPrinterList.end()) {
-            if(printer.networkType == NETWORK_TYPE_WAN) {
-                // iot is auto get, need load model image first
-                boost::filesystem::path resources_path(Slic3r::resources_dir());
-                std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
-                printer_obj["printerImg"] = PrinterManager::imageFileToBase64DataURI(img_path);
-            }
+        currentPrinterIds.insert(printer.printerId);
+        
+        nlohmann::json printer_obj = convertPrinterNetworkInfoToJson(printer);
+        
+        // Check if image is already cached
+        auto cacheIt = printerImageCache.find(printer.printerId);
+        if (cacheIt == printerImageCache.end()) {
+            // Load image and cache it
+            std::string img_path = resources_path.string() + "/profiles/" + printer.vendor + "/" + printer.printerModel + "_cover.png";
+            printerImageCache[printer.printerId] = PrinterManager::imageFileToBase64DataURI(img_path);
+            cacheIt = printerImageCache.find(printer.printerId);
         }
+        printer_obj["printerImg"] = cacheIt->second;
         response.push_back(printer_obj);
     }
     
-    lastPrinterList = printerList;
-    result.data = response;
+    // Remove cached images for printers that no longer exist
+    for (auto it = printerImageCache.begin(); it != printerImageCache.end();) {
+        if (currentPrinterIds.find(it->first) == currentPrinterIds.end()) {
+            it = printerImageCache.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
+    closeInvalidPrinterTab(printerList);
+    // Return object with printer list and main client status
+    nlohmann::json resultData;
+    resultData["printers"] = response;
+    resultData["isMainClient"] = MultiInstanceCoordinator::getInstance()->isMaster();
+    result.data = resultData;
     result.code = 0;
     result.message = getErrorMessage(PrinterNetworkErrorCode::SUCCESS);
     return result;
@@ -1082,15 +1131,14 @@ void PrinterManagerView::saveTabState()
             wxWindow* page = mTabBar->GetPage(i);
             if (page) {
                 // Find the printer ID for this page
-                for (const auto& pair : mPrinterViews) {
-                    if (pair.second == page) {
+                forEachPrinterView([&page, &tabs, this, i](const std::string& printerId, PrinterWebView* view) {
+                    if (view == page) {
                         nlohmann::json tabInfo;
-                        tabInfo["printerId"] = pair.first;
+                        tabInfo["printerId"] = printerId;
                         tabInfo["tabName"] = mTabBar->GetPageText(i).ToStdString();
                         tabs.push_back(tabInfo);
-                        break;
                     }
-                }
+                });
             }
         }
         
@@ -1164,6 +1212,47 @@ void PrinterManagerView::loadTabState()
         }
     } catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": failed to load tab state: %s") % e.what();
+    }
+}
+
+
+PrinterWebView* PrinterManagerView::findPrinterView(const std::string& printerId)
+{
+    std::lock_guard<std::mutex> lock(mPrinterViewsMutex);
+    auto it = mPrinterViews.find(printerId);
+    return (it != mPrinterViews.end()) ? it->second : nullptr;
+}
+
+void PrinterManagerView::insertPrinterView(const std::string& printerId, PrinterWebView* view)
+{
+    std::lock_guard<std::mutex> lock(mPrinterViewsMutex);
+    mPrinterViews[printerId] = view;
+}
+
+bool PrinterManagerView::removePrinterView(const std::string& printerId)
+{
+    std::lock_guard<std::mutex> lock(mPrinterViewsMutex);
+    return mPrinterViews.erase(printerId) > 0;
+}
+
+PrinterWebView* PrinterManagerView::removePrinterViewByWindow(wxWindow* win)
+{
+    std::lock_guard<std::mutex> lock(mPrinterViewsMutex);
+    for (auto it = mPrinterViews.begin(); it != mPrinterViews.end(); ++it) {
+        if (it->second == win) {
+            PrinterWebView* view = it->second;
+            mPrinterViews.erase(it);
+            return view;
+        }
+    }
+    return nullptr;
+}
+
+void PrinterManagerView::forEachPrinterView(std::function<void(const std::string&, PrinterWebView*)> callback)
+{
+    std::lock_guard<std::mutex> lock(mPrinterViewsMutex);
+    for (const auto& pair : mPrinterViews) {
+        callback(pair.first, pair.second);
     }
 }
 

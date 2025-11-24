@@ -10,11 +10,12 @@ const Navigation = {
                 avatar: '',
                 loginStatus: 0
             },
-            currentPage: 'recent',
+            currentPage: 'online-models',
         }
     },
     methods: {
         async init() {
+            console.log('Init method called');
             try {
                 const response = await this.ipcRequest('getUserInfo', {});
                 console.log('getUserInfo response:', response);
@@ -23,15 +24,6 @@ const Navigation = {
                 }
             } catch (error) {
                 console.error('Failed to get user info:', error);
-            }
-            
-            try {
-                this.currentPage = 'online-models';
-                await this.ipcRequest('navigateToPage', { page: 'online-models' });
-                console.log('Navigated to online-models');               
-                
-            } catch (error) {
-                console.error('Failed to navigate to online-models:', error);
             }
         },
         async navigateToPage(pageName) {
@@ -135,6 +127,10 @@ const Navigation = {
         nativeIpc.on('onUserInfoUpdated', (data) => {
             console.log('Received user info update event from backend:', data);
             this.userInfo = data;
+        });
+
+        nativeIpc.on('onRegionChanged', () => {
+            this.init();  
         });
         
         window.addEventListener('blur', () => {

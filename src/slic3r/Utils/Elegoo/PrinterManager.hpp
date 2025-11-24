@@ -39,6 +39,7 @@ public:
     PrinterNetworkResult<bool> upload(PrinterNetworkParams& params);
     PrinterNetworkResult<std::vector<PrinterNetworkInfo>> discoverPrinter();
     PrinterNetworkResult<bool> addPrinter(PrinterNetworkInfo& printerNetworkInfo);
+    PrinterNetworkResult<bool> cancelBindPrinter(const PrinterNetworkInfo& printerNetworkInfo);
     PrinterNetworkResult<bool> updatePrinterName(const std::string& printerId, const std::string& name);
     PrinterNetworkResult<bool> updatePrinterHost(const std::string& printerId, const std::string& host);
     PrinterNetworkResult<bool> updatePhysicalPrinter(const std::string& printerId, const PrinterNetworkInfo& printerInfo);
@@ -68,14 +69,14 @@ private:
         ~PrinterLock();
         
     private:
-        std::mutex* mPrinterMutex;
-        static std::map<std::string, std::mutex> sPrinterMutexes;
+        std::recursive_mutex* mPrinterMutex;
+        static std::map<std::string, std::recursive_mutex> sPrinterMutexes;
         static std::mutex sMutex;       
     };
 
     std::mutex mPrinterNetworkMutex;
     std::map<std::string, std::shared_ptr<IPrinterNetwork>> mPrinterNetworkConnections;
-    PrinterNetworkResult<bool> connectToPrinter(PrinterNetworkInfo& printer);
+    PrinterNetworkResult<bool> connectToPrinter(PrinterNetworkInfo& printer, bool updatePrinterName = false);
     bool deletePrinterNetwork(const std::string& printerId);
     std::shared_ptr<IPrinterNetwork> getPrinterNetwork(const std::string& printerId);
      

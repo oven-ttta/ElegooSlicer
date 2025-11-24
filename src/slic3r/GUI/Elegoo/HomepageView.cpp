@@ -173,7 +173,9 @@ webviewIpc::IPCResult RecentHomepageView::handleOpenFileInExplorer(const nlohman
         // 打开文件夹
         wxFileName fileName(wxFilePathStr);
         wxString dirPath = fileName.GetPath();
-        wxLaunchDefaultBrowser("file://" + dirPath);
+        wxGetApp().CallAfter([this, dirPath]() {
+            wxLaunchDefaultBrowser("file://" + dirPath);
+        });
     }
     return webviewIpc::IPCResult::success();
 }
@@ -237,7 +239,8 @@ void OnlineModelsHomepageView::initUI()
 
     // Remove WebView border completely
     mBrowser->SetWindowStyleFlag(wxNO_BORDER);
-
+    Bind(wxEVT_WEBVIEW_NAVIGATING, &OnlineModelsHomepageView::OnNavigationRequest, this);
+    Bind(wxEVT_WEBVIEW_NAVIGATED, &OnlineModelsHomepageView::OnNavigationComplete, this);
     // Set up layout
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(mBrowser, 1, wxEXPAND, 0);
@@ -351,25 +354,36 @@ void OnlineModelsHomepageView::setupIPCHandlers()
     mIpc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request) {
         auto        params = request.params;
         std::string url    = params.value("url", "");
-
-        GUI::wxGetApp().request_model_download(wxString(url));
-
+        wxGetApp().CallAfter([this, url]() {
+            GUI::wxGetApp().request_model_download(wxString(url));
+        });
         return webviewIpc::IPCResult::success();
     });
     mIpc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request) {
         auto        params = request.params;
         std::string url    = params.value("url", "");
-        wxLaunchDefaultBrowser(url);
+         wxGetApp().CallAfter([this, url]() {
+            wxLaunchDefaultBrowser(url);
+        });
         return webviewIpc::IPCResult::success();
     });
     mIpc->onRequest("reload", [this](const webviewIpc::IPCRequest& request) {
         std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
         if (networkHelper) {
-            std::string url = networkHelper->getOnlineModelsUrl();
-            mBrowser->SetUserAgent(networkHelper->getUserAgent());
-            mBrowser->LoadURL(url);
+            wxString url = from_u8(networkHelper->getOnlineModelsUrl());
+            wxGetApp().CallAfter([this, url]() {
+                if(mIsLoading){
+                    return;
+                }
+                loadUrl(url);
+            });
         }
         return webviewIpc::IPCResult::success();
+    });
+    mIpc->onRequest("isLoading", [this](const webviewIpc::IPCRequest& request) {
+        nlohmann::json data = nlohmann::json::object();
+        data["isLoading"] = mIsLoading;
+        return webviewIpc::IPCResult::success(data);
     });
 }
 void OnlineModelsHomepageView::onUserInfoUpdated(const UserNetworkInfo& userNetworkInfo)
@@ -393,9 +407,12 @@ void OnlineModelsHomepageView::onRegionChanged()
     //reload online models page
     mIsReady = false;
     mRefreshUserInfo = UserNetworkInfo();
-    initUI();
-    if(mBrowser) {
-        mBrowser->Reload();
+    std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
+    if (networkHelper) {
+        wxString url = from_u8(networkHelper->getOnlineModelsUrl());
+        wxGetApp().CallAfter([this, url]() {
+            loadUrl(url);
+        });
     }
 }
 
@@ -411,8 +428,19 @@ webviewIpc::IPCResult OnlineModelsHomepageView::handleReady()
     }
     return webviewIpc::IPCResult::success();
 }
-void OnlineModelsHomepageView::onWebViewLoaded(wxWebViewEvent& event) {}
 
+void OnlineModelsHomepageView::onWebViewLoaded(wxWebViewEvent& event) {
+    mIsLoading = false;
+}
+void OnlineModelsHomepageView::OnNavigationRequest(wxWebViewEvent& evt){
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
+    mIsLoading = true;
+}
+void OnlineModelsHomepageView::OnNavigationComplete(wxWebViewEvent& evt){
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << ": " << evt.GetTarget().ToUTF8().data();
+    mIsLoading = false;
+}
+#define FAILED_URL_SUFFIX "/web/error-page/connection-failed.html"
 void OnlineModelsHomepageView::onWebViewError(wxWebViewEvent& evt)
 {
     auto e = "unknown error";
@@ -433,20 +461,59 @@ void OnlineModelsHomepageView::onWebViewError(wxWebViewEvent& evt)
     std::string target  = evt.GetTarget().ToStdString();
     std::string error   = e;
     std::string message = evt.GetString().ToStdString();
+    mIsLoading = false;
+    if(url.find(FAILED_URL_SUFFIX)!=std::string::npos){
+        return;
+    }
+
+    // if (message == "COREWEBVIEW2_WEB_ERROR_STATUS_CONNECTION_ABORTED") {
+    //     return;
+    // }
+
 
     auto code = evt.GetInt();
     if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST) {
-        loadFailedPage();
+        std::thread([this, url, target, error, message]() {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                wxGetApp().CallAfter([this]() {
+                    loadFailedPage();
+                });
+        }).detach();
     }
 }
-#define FAILED_URL_SUFFIX "/web/error-page/connection-failed.html"
+
 void OnlineModelsHomepageView::loadFailedPage()
 {
     auto path = resources_dir() + FAILED_URL_SUFFIX;
     #if WIN32
-        std::replace(path.begin(), path.end(), '/', '\\');
+        std::replace(path.begin(), path.end(), '\\', '/');
     #endif
+
+    if(!boost::filesystem::exists(path)){
+        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": Failed page not found: " << path;
+        return;
+    }
+
     auto failedUrl = wxString::Format("file:///%s", from_u8(path));
-    mBrowser->LoadURL(failedUrl);
+    loadUrl(failedUrl);
+
+}
+void OnlineModelsHomepageView::loadUrl(const wxString& url){
+    if(url.empty()){
+        return;
+    }
+    wxString currentUrl = mBrowser->GetCurrentURL();
+    if(url == currentUrl){
+        return;
+    }
+    mCurrentUrl = url;
+    if(mBrowser){
+        mIsLoading = true;
+        mBrowser->LoadURL(url);
+        std::shared_ptr<INetworkHelper> networkHelper = NetworkFactory::createNetworkHelper(PrintHostType::htElegooLink);
+        if (networkHelper) {
+            mBrowser->SetUserAgent(networkHelper->getUserAgent());
+        }
+    }
 }
 }} // namespace Slic3r::GUI

@@ -7,6 +7,7 @@ const langMessages = {
     "confirm": "Confirm",
     "cancel": "Cancel",
     "noPrinterConnected": "No printer connected. Please go to \"Devices\" to discover or add a new printer.",
+    "requestTimeout": "Request timed out. Please check the network connections of your computer and printer.",
     "homepage": {
       "title": "Home",
       "login": "Login",
@@ -70,6 +71,7 @@ const langMessages = {
       "addPrinterSuccess": "Printer added successfully.",
       "modifySuccess": "Modified successfully.",
       "loginToView": "Please {0} to view",
+      "isNotMainClient": "Please check if multiple clients are open and continue on the main client.",
       "login": "login",
     },
     "addPrinterDialog": {
@@ -82,6 +84,8 @@ const langMessages = {
       "noDevicesFound": "No Devices Found",
       "connectable": "Connectable",
       "bindable": "Bindable",
+      "connected": "Connected",
+      "binded": "Binded",
       "connectToPrinter": "Connect to Printer",
       "bindPrinter": "Bind Printer",
       "refresh": "Refresh",
@@ -91,7 +95,9 @@ const langMessages = {
       "help": "Help",
       "helpMessage": "{'Please make sure the printer is connected to the network and is on the same network as the current software. If you still cannot find it after refreshing, you can try manual addition.'}",
       "ok": "OK",
-      "pleaseSelectPrinter": "Please select a printer"
+      "pleaseSelectPrinter": "Please select a printer",
+      "bindingInProgress": "Binding in progress...",
+      "bindingInProgressTip": "If there's no response for a long time, please go to the printer to complete the binding confirmation."
     },
     "manualForm": {
       "printerModel": "Printer Model",
@@ -214,6 +220,7 @@ const langMessages = {
     "confirm": "确认",
     "cancel": "取消",
     "noPrinterConnected": "未连接任何打印机，请前往\“设备\"发现或添加新打印机",
+    "requestTimeout": "网络请求超时，请检查电脑、打印机的网络连接后重试",
     "homepage": {
       "title": "首页",
       "login": "登录",
@@ -277,6 +284,7 @@ const langMessages = {
       "addPrinterSuccess": "添加打印机成功",
       "modifySuccess": "修改成功",
       "loginToView": "请{0}账号后查看",
+      "isNotMainClient": "请检查是否已经开启了多个客户端，请在主客户端上继续操作",
       "login": "登录",
     },
     "addPrinterDialog": {
@@ -288,7 +296,9 @@ const langMessages = {
       "status": "状态",
       "noDevicesFound": "未找到设备",
       "connectable": "可连接",
+      "connected": "已连接",
       "bindable": "可绑定",
+      "binded": "已绑定",
       "connectToPrinter": "连接到打印机",
       "bindPrinter": "绑定打印机",
       "refresh": "刷新",
@@ -298,7 +308,9 @@ const langMessages = {
       "help": "帮助",
       "helpMessage": "请确保打印机已经联网，并且与当前软件处于同一个网络，如果刷新后依旧无法发现，可尝试进行手动添加",
       "ok": "确定",
-      "pleaseSelectPrinter": "请选择一台打印机"
+      "pleaseSelectPrinter": "请选择一台打印机",
+      "bindingInProgress": "正在绑定中...",
+      "bindingInProgressTip": "如果长时间未响应,请前往打印机完成绑定确认"
     },
     "manualForm": {
       "printerModel": "打印机型号",
@@ -449,4 +461,7 @@ const i18n = createI18n({
   messages: langMessages,
 });
 
-
+// Export i18n to global scope for use in non-Vue components
+if (typeof window !== 'undefined') {
+  window.i18n = i18n;
+}

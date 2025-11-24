@@ -196,6 +196,7 @@ nlohmann::json convertPrinterNetworkInfoToJson(const PrinterNetworkInfo& printer
     systemCapabilitiesJson["canGetDiskInfo"]        = printerNetworkInfo.systemCapabilities.canGetDiskInfo;
     systemCapabilitiesJson["canSetPrinterName"]     = printerNetworkInfo.systemCapabilities.canSetPrinterName;
     json["systemCapabilities"]                      = systemCapabilitiesJson;
+    json["isAdded"]                                 = printerNetworkInfo.isAdded;
     return json;
 }
 

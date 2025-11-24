@@ -36,6 +36,7 @@ public:
     virtual PrinterNetworkResult<bool>                            sendRtmMessage(const std::string& message)                = 0;
     virtual PrinterNetworkResult<PrinterPrintFileResponse>        getFileDetail(const std::string& fileName)                = 0;
     virtual PrinterNetworkResult<bool>                            updatePrinterName(const std::string& printerName)         = 0;
+    virtual PrinterNetworkResult<bool>                            cancelBindPrinter(const std::string& serialNumber)        = 0;
 
     const PrinterNetworkInfo& getPrinterNetworkInfo() const { return mPrinterNetworkInfo; }
 

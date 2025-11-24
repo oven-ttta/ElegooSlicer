@@ -32,7 +32,7 @@ const AddPrinterTemplate = /*html*/`
                                     <span class="add-printer-host">{{ printer.host }}</span>
                                 </span>
                                 <span>
-                                    <span class="add-printer-status">{{ printer.networkType === 1 ? $t('addPrinterDialog.bindable') : $t('addPrinterDialog.connectable') }}</span>
+                                    <span class="add-printer-status">{{ getPrinterStatusText(printer) }}</span>
                                 </span>
                             </div>
                         </div>
@@ -56,6 +56,10 @@ const AddPrinterTemplate = /*html*/`
             <el-dialog v-model="showPrinterPinAuth" :title="$t('addPrinterDialog.bindPrinter')" width="600" center>
                 <printer-pin-auth-component ref="printerPinAuthComponent" :printer="pendingPinAuthPrinter" @close-modal="clearPinAuthData"
                     @add-printer="connectPrinterAuth"></printer-pin-auth-component>
+            </el-dialog>
+
+            <el-dialog v-model="showPinAuthLoading" :title="$t('addPrinterDialog.bindPrinter')" width="600" center @close="handleCancelPinAuth">
+                <pin-auth-loading-component></pin-auth-loading-component>
             </el-dialog>
 
             <button type="button" :disabled="isLoading" v-show="activeTab==='discover'" class="btn-primary" style=" position: absolute; right: 0px; top: 0px;" @click="requestDiscoverPrinters">{{ $t('addPrinterDialog.refresh') }}</button>
@@ -106,7 +110,10 @@ const AddPrinterComponent = {
             showPrinterPinAuth: false,
             pendingAccessAuthPrinter: null,
             pendingPinAuthPrinter: null,
-            showHelpDialog: false
+            showHelpDialog: false,
+            showPinAuthLoading: false,
+            userCancelledPinAuth: false,
+            currentConnectingPrinter: null
         };
     },
 
@@ -146,6 +153,8 @@ const AddPrinterComponent = {
         clearPinAuthData() {
             this.pendingPinAuthPrinter = null;
             this.showPrinterPinAuth = false;
+            this.showPinAuthLoading = false;
+            this.currentConnectingPrinter = null;
             this.$nextTick(() => {
                 if (this.$refs.printerPinAuthComponent) {
                     this.$refs.printerPinAuthComponent.pinCodes = ["", "", "", "", "", ""];
@@ -206,9 +215,36 @@ const AddPrinterComponent = {
                     if (this.$refs.manualFormComponent) {
                         const printer = await this.$refs.manualFormComponent.getFormData();
                         if (printer) {
-                            await this.printerStore.requestAddPhysicalPrinter(printer);
-                            this.$refs.manualFormComponent.resetForm();
-                            this.closeModal();
+                            // Check if this is cloud connect (networkType === 1)
+                            const isCloudConnect = printer.networkType === 1;
+                            
+                            if (isCloudConnect) {
+                                // Show loading dialog for cloud connect
+                                this.showPinAuthLoading = true;
+                                this.userCancelledPinAuth = false;
+                                this.currentConnectingPrinter = printer;
+                            }
+                            
+                            try {
+                                await this.printerStore.requestAddPhysicalPrinter(printer, !isCloudConnect, isCloudConnect ? 4 * 60 * 1000 :  60 * 1000);
+                                
+                                // Success: close all dialogs and reset form
+                                this.$refs.manualFormComponent.resetForm();
+                                this.clearPinAuthData();
+                                this.closeModal();
+                                
+                            } catch (error) {
+                                if (isCloudConnect) {
+                                    // Hide loading dialog
+                                    this.showPinAuthLoading = false;
+                                    
+                                    // Only clear if user didn't cancel
+                                    if (this.userCancelledPinAuth) {
+                                        this.clearPinAuthData();
+                                    }
+                                }
+                                throw error;
+                            }
                         }
                     }
                 }
@@ -220,11 +256,50 @@ const AddPrinterComponent = {
 
         async connectPrinterAuth(printer) {
             try {
-                await this.printerStore.requestAddPrinter(printer);
+                // Check if this is PIN auth (networkType === 1)
+                const isCloudConnect = printer.networkType === 1;
+
+                if (isCloudConnect) {
+                    // Show loading dialog and hide auth dialog for PIN auth
+                    this.showPrinterPinAuth = false;
+                    this.showPinAuthLoading = true;
+                    this.userCancelledPinAuth = false;
+                    this.currentConnectingPrinter = printer;
+                }
+
+                // Attempt to connect
+                await this.printerStore.requestAddPrinter(printer, !isCloudConnect, isCloudConnect ? 4 * 60 * 1000 :  60 * 1000);
+
+                // Success: close all dialogs and clear auth info
                 this.clearAccessAuthData();
                 this.clearPinAuthData();
+
             } catch (error) {
                 console.error('Failed to connect printer:', error);
+
+                // Check if this is Cloud Connect
+                const isCloudConnect = printer.networkType === 1;
+
+                if (isCloudConnect) {
+                    // Hide loading dialog
+                    this.showPinAuthLoading = false;
+
+                    // Only re-show auth dialog if user didn't cancel
+                    if (!this.userCancelledPinAuth) {
+                        this.showPrinterPinAuth = true;
+                        this.$nextTick(() => {
+                            if (this.$refs.printerPinAuthComponent) {
+                                this.$refs.printerPinAuthComponent.focusFirstInput();
+                            }
+                        });
+                    } else {
+                        // User cancelled, clear everything
+                        this.clearPinAuthData();
+                    }
+                } else {
+                    // For access code auth, just clear
+                    this.clearAccessAuthData();
+                }
             }
         },
 
@@ -242,8 +317,46 @@ const AddPrinterComponent = {
                 'selected': this.selectedPrinterIdx === idx
             };
         },
+        getPrinterStatusText(printer) {
+            if (printer.isAdded) {
+                if (printer.networkType === 1) {
+                    return this.$t('addPrinterDialog.binded');
+                } else {
+                    return this.$t('addPrinterDialog.connected');
+                }
+            } else {
+                if (printer.networkType === 1) {
+                    return this.$t('addPrinterDialog.bindable');
+                } else {
+                    return this.$t('addPrinterDialog.connectable');
+                }
+            }
+              
+        },
         showHelp() {
             this.showHelpDialog = true;
+        },
+
+        async handleCancelPinAuth() {
+            if(!this.showPinAuthLoading){
+                return;
+            }
+
+            // User closed the loading dialog - mark as cancelled
+            this.userCancelledPinAuth = true;
+            try {
+                // Send cancel request to backend
+                if (this.currentConnectingPrinter) {
+                    await this.printerStore.requestCancelAddPrinter(this.currentConnectingPrinter);
+                }
+            } catch (error) {
+                console.error('Failed to cancel add printer:', error);
+            }
+
+
+            this.showPinAuthLoading = false;
+            // Clear all auth-related data
+            this.clearPinAuthData();
         }
     }
 };

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-12 16:50+0800\n"
+"POT-Creation-Date: 2025-11-23 17:32+0800\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6000,9 +6000,8 @@ msgid "Load 3mf"
 msgstr "3mf betöltése"
 
 msgid ""
-"The imported 3mf file may have some incompatibilities, continuing to import "
-"may cause some issues. Do you want to continue importing the whole file or "
-"only import the model data?"
+"The 3MF file you are importing may be incompatible, continuing could cause "
+"errors. Would you like to import the entire file or just the model data?"
 msgstr ""
 
 msgid "Load Whole File"
@@ -16678,16 +16677,19 @@ msgid ""
 "printer, then try again."
 msgstr ""
 
-msgid "Invalid username or password. Please check and try again."
+msgid ""
+"Unauthorized access, please check your account login status and try again."
 msgstr ""
 
-msgid "Invalid token. Please check and try again."
+msgid "Account info has expired, please log in again."
 msgstr ""
 
 msgid "Invalid access code. Please check and try again."
 msgstr ""
 
-msgid "Invalid PIN code. Please check and try again."
+msgid ""
+"Invalid PIN: Please check the printer's region matches your account region, "
+"or check that the PIN was entered correctly."
 msgstr ""
 
 msgid "Connection limit reached. Please check and try again."
@@ -16774,10 +16776,6 @@ msgstr ""
 msgid "RTM client not connected or not logged in. Please try again later."
 msgstr ""
 
-msgid ""
-"Unauthorized access, please check your account login status and try again."
-msgstr ""
-
 msgid "Forbidden access. Please try again later."
 msgstr ""
 
@@ -16791,6 +16789,11 @@ msgid "Printer not connected to unbind."
 msgstr ""
 
 msgid "Operation not implemented. Please try again later."
+msgstr ""
+
+msgid ""
+"Operation failed. Please check if multiple clients are open and continue on "
+"the main client."
 msgstr ""
 
 msgid "Host/IP/URL"

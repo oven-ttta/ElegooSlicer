@@ -8,6 +8,7 @@ const usePrinterStore = defineStore('printer', {
     printers: [],
     printerModelList: null,
     statusUpdateInterval: null,
+    isMainClient: true,
     userInfo: {
       userId: null,
       nickname: null,
@@ -162,14 +163,16 @@ const usePrinterStore = defineStore('printer', {
         message = `${error.message || 'Unknown error occurred'}`
         // }
         // Show error notification using Element Plus message component
-        if (window.ElementPlus && window.ElementPlus.ElMessage) {
-          window.ElementPlus.ElMessage.error({
-            message: message,
-            duration: 5000,
-            showClose: true
-          });
+        // code === 5 means the request is cancelled
+        if (error.code !== 5) {
+          if (window.ElementPlus && window.ElementPlus.ElMessage) {
+            window.ElementPlus.ElMessage.error({
+              message: message,
+              duration: 5000,
+              showClose: true
+            });
+          }
         }
-
         throw error;
       }
     },
@@ -177,7 +180,13 @@ const usePrinterStore = defineStore('printer', {
     async requestPrinterList() {
       try {
         const response = await this.ipcRequest('request_printer_list', {});
-        this.printers = response || [];
+        // Update printers list and main client status
+        if (response && typeof response === 'object') {
+          this.printers = Array.isArray(response.printers) ? response.printers : [];
+          if (typeof response.isMainClient === 'boolean') {
+            this.isMainClient = response.isMainClient;
+          }
+        }
       } catch (error) {
         console.error('Failed to request printer list:', error);
       }
@@ -191,8 +200,7 @@ const usePrinterStore = defineStore('printer', {
 
       this.statusUpdateInterval = setInterval(async () => {
         try {
-          const response = await this.ipcRequest('request_printer_list_status', {});
-          this.updatePrinterListStatus(response || []);
+          await this.requestPrinterList();
         } catch (error) {
           console.error('Failed to update printer status:', error);
         }
@@ -245,14 +253,17 @@ const usePrinterStore = defineStore('printer', {
       }
     },
 
-    async requestAddPrinter(printer) {
-      const loading = ElLoading.service({
-        lock: true,
-      });
-      try {
+    async requestAddPrinter(printer, showLoading = true, timeout = 60 * 1000) {
 
+      let loading;
+      if (showLoading) {
+        loading = ElLoading.service({
+          lock: true,
+        });
+      }
+      try {
         await new Promise(resolve => setTimeout(resolve, 500));
-        await this.ipcRequest('request_add_printer', { printer }, 60 * 1000);
+        await this.ipcRequest('request_add_printer', { printer }, timeout);
         this.requestPrinterList();
         ElementPlus.ElMessage.success({
           message: i18n.global.t("printerManager.addPrinterSuccess"),
@@ -262,22 +273,45 @@ const usePrinterStore = defineStore('printer', {
         console.error('Failed to add printer:', error);
         throw error;
       } finally {
-        loading.close();
+        if (loading) {
+          loading.close();
+        }
       }
     },
 
-    async requestAddPhysicalPrinter(printer) {
-      const loading = ElLoading.service({
-        lock: true,
-      });
+    async requestAddPhysicalPrinter(printer, showLoading = true, timeout = 60 * 1000) {
+      let loading;
+      if (showLoading) {
+        loading = ElLoading.service({
+          lock: true,
+        });
+      }
       try {
         await new Promise(resolve => setTimeout(resolve, 500));
-        await this.ipcRequest('request_add_physical_printer', { printer }, 60 * 1000);
+        await this.ipcRequest('request_add_physical_printer', { printer }, timeout);
         this.requestPrinterList();
       } catch (error) {
         console.error('Failed to add physical printer:', error);
         throw error;
       } finally {
+        if (loading) {
+          loading.close();
+        }
+      }
+    },
+
+    async requestCancelAddPrinter(printer) {
+      const loading = ElLoading.service({
+        lock: true,
+      });
+      try {
+        await this.ipcRequest('request_cancel_add_printer', { printer }, 10 * 1000);
+        console.log('Cancelled printer connection:', printer);
+      } catch (error) {
+        console.error('Failed to cancel add printer:', error);
+        // Don't throw error - cancellation is best-effort
+      }
+      finally {
         loading.close();
       }
     },
@@ -372,28 +406,6 @@ const usePrinterStore = defineStore('printer', {
       }
     },
 
-    updatePrinterListStatus(printers) {
-      // Get list of printer IDs from server
-      const serverPrinterIds = new Set(printers.map(p => p.printerId));
-
-      // Remove printers that no longer exist on the server
-      this.printers = this.printers.filter(p => serverPrinterIds.has(p.printerId));
-
-      // Update existing printers and add new ones
-      printers.forEach((statusPrinter) => {
-        const printerIndex = this.printers.findIndex(p => p.printerId === statusPrinter.printerId);
-        if (printerIndex !== -1) {
-          // Update specific properties without replacing the entire printer object
-          this.printers[printerIndex] = {
-            ...this.printers[printerIndex],
-            ...statusPrinter
-          };
-        } else {
-          // Add new printer if it doesn't exist
-          this.printers.push(statusPrinter);
-        }
-      });
-    },
 
     // Helper method for closing modals (to be implemented by UI components)
     closeModals() {

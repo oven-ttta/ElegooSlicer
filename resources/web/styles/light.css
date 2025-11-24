@@ -373,3 +373,16 @@ body {
 .toggle-switch input:checked + .toggle-slider:before {
   transform: translateX(24px);
 }
+
+/* ElMessage error message style - ensure long messages are fully displayed */
+.el-message {
+  max-width: 90vw !important;
+  min-width: 300px;
+}
+
+.el-message__content {
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
+  overflow: visible;
+}

@@ -17,14 +17,15 @@
     <script type="text/javascript" src="../../thirdparty/vue/vue-i18n.global.prod.js"></script>
     <script type="text/javascript" src="../../thirdparty/element-plus/index.full.min.js"></script>
     <script type="text/javascript" src="../../utils/util.js"></script>
-    <script type="text/javascript" src="../../utils/ipc.js"></script>
     <script type="text/javascript" src="../../locales/index.js"></script>
+    <script type="text/javascript" src="../../utils/ipc.js"></script>
 
     <script type="text/javascript" src="./store/printer.js"></script>
     <script type="text/javascript" src="./components/add_printer.js"></script>
     <script type="text/javascript" src="./components/manual_form.js"></script>
     <script type="text/javascript" src="./components/printer_access_auth.js"></script>
     <script type="text/javascript" src="./components/printer_pin_auth.js"></script>
+    <script type="text/javascript" src="./components/pin_auth_loading.js"></script>
     <script type="text/javascript" src="./components/printer_setting_physical.js"></script>
     <script type="text/javascript" src="./components/printer_setting.js"></script>
     <script type="text/javascript" src="./components/printer-card.js"></script>
@@ -59,7 +60,7 @@
             </template>
             <div style="padding: 18px;">
                 <div v-if="printerStore.networkPrinters.length === 0 || !printerStore.isLoggedIn">
-                    <div v-if="printerStore.userInfo.loginStatus === -1" class="no-login">
+                    <div v-if="printerStore.userInfo.loginStatus === -1 " class="no-login">
                         <div v-html="getLoginToViewHtml()"></div>
                     </div>
                     <div v-else-if="printerStore.networkPrinters.length === 0">
@@ -216,6 +217,7 @@
         app.component('manual-form-component', ManualFormComponent);
         app.component('printer-access-auth-component', PrinterAccessAuthComponent);
         app.component('printer-pin-auth-component', PrinterPinAuthComponent);
+        app.component('pin-auth-loading-component', PinAuthLoadingComponent);
         app.component('printer-setting-physical-component', PrinterSettingPhysicalComponent);
         app.component('printer-setting-component', PrinterSettingComponent);
         app.component('printer-card-component', PrinterCardComponent);

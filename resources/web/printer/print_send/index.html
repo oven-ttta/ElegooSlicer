@@ -82,7 +82,7 @@
                                             <img :src="printer.printerImg" alt="" class="dropdown-item-icon" />
                                             <div class="dropdown-item-content">
                                                 <div class="dropdown-item-title">{{ printer.printerName }}</div>
-                                                <div v-if="printer.host" class="dropdown-item-subtitle">{{
+                                                <div class="dropdown-item-subtitle">{{
                                                     printer.networkType===0 ? printer.host : "SN: " +
                                                     printer.serialNumber }}</div>
                                             </div>

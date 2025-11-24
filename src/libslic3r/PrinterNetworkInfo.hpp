@@ -224,6 +224,7 @@ struct PrinterNetworkInfo
     PrinterPrintTask     printTask;
     PrinterConnectStatus connectStatus{PRINTER_CONNECT_STATUS_DISCONNECTED};
     PrinterStatus        printerStatus{PRINTER_STATUS_IDLE};
+    bool                 isAdded{false}; //only used for frontend to show the printer is added or not when discover printers
 };
 
 enum LoginStatus {

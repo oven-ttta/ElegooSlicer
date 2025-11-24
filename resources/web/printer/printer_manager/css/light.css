@@ -63,6 +63,15 @@ body {
   max-width: 400px;
 }
 
+.tip-text {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+  text-align: center;
+  max-width: 400px;
+}
+
 .access-code-inputs, .pin-code-inputs {
   display: flex;
   gap: 8px;

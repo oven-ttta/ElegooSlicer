@@ -1220,7 +1220,9 @@ wxWindow* PreferencesDialog::create_general_page()
     auto item_calc_in_long_retract = create_item_checkbox(_L("Flushing volumes: Auto-calculate every time when the filament is changed."), page, _L("If enabled, auto-calculate every time when filament is changed"), 50, "auto_calculate_when_filament_change");
     auto item_remember_printer_config = create_item_checkbox(_L("Remember printer configuration"), page, _L("If enabled, ElegooSlicer will remember and switch filament/process configuration for each printer automatically."), 50, "remember_printer_config");
     auto item_step_mesh_setting = create_item_checkbox(_L("Show the step mesh parameter setting dialog."), page, _L("If enabled,a parameter settings dialog will appear during STEP file import."), 50, "enable_step_mesh_setting");
+#if 0
     auto item_multi_machine = create_item_checkbox(_L("Multi-device Management(Take effect after restarting ElegooSlicer)."), page, _L("With this option enabled, you can send a task to multiple devices at the same time and manage multiple devices."), 50, "enable_multi_machine");
+#endif
     auto item_auto_arrange  = create_item_checkbox(_L("Auto arrange plate after cloning"), page, _L("Auto arrange plate after object cloning"), 50, "auto_arrange");
     auto title_presets = create_item_title(_L("Presets"), page, _L("Presets"));
     // auto title_network = create_item_title(_L("Network"), page, _L("Network"));
@@ -1307,7 +1309,9 @@ wxWindow* PreferencesDialog::create_general_page()
     sizer_page->Add(item_hints, 0, wxTOP, FromDIP(3));
 #endif
     sizer_page->Add(item_calc_in_long_retract, 0, wxTOP, FromDIP(3));
+#if 0   
     sizer_page->Add(item_multi_machine, 0, wxTOP, FromDIP(3));
+#endif
     sizer_page->Add(item_step_mesh_setting, 0, wxTOP, FromDIP(3));
     sizer_page->Add(item_auto_arrange, 0, wxTOP, FromDIP(3));
     sizer_page->Add(title_presets, 0, wxTOP | wxEXPAND, FromDIP(20));
