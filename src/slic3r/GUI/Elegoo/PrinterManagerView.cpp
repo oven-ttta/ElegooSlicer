@@ -454,6 +454,20 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
         url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber) + "&access_code=" + accessCode;
     }
 
+    // Get the login region option and add it to the URL parameters
+    std::string region = wxGetApp().app_config->get("region");
+    if (!region.empty()) {
+        // Convert region value to URL encoded format
+        std::string region_encoded = wxGetApp().url_encode(region);
+        
+        // Check if the URL already contains parameters
+        if (url.Contains("?")) {
+            url += "&region=" + from_u8(region_encoded);
+        } else {
+            url += "?region=" + from_u8(region_encoded);
+        }
+    }
+
     view->load_url(url);
     // Local network shows IP address, cloud printing shows printer name
     if(printerInfo.networkType==0)
