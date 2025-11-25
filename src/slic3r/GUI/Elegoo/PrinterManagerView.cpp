@@ -511,7 +511,7 @@ void PrinterManagerView::refreshUserInfo()
 
 void PrinterManagerView::onClose(wxCloseEvent& evt)
 {
-    this->Hide();
+    // this->Hide();
 }
 
 void PrinterManagerView::onClosePrinterTab(wxAuiNotebookEvent& event)
@@ -810,19 +810,21 @@ void PrinterManagerView::setupIPCHandlers()
 webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)
 { 
     webviewIpc::IPCResult result;
-    PrinterWebView* view = findPrinterView(printerId);
-    if (view) {
-        int page = mTabBar->GetPageIndex(view);
-        if (page != wxNOT_FOUND) {
-            mTabBar->DeletePage(page);
-        }
-        view->OnClose(wxCloseEvent());
-        removePrinterView(printerId);
-        mTabBar->SetSelection(0);
-    }
     auto networkResult = PrinterManager::getInstance()->deletePrinter(printerId);
     result.message = networkResult.message;
     result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
+    wxGetApp().CallAfter([this, printerId]() {
+        PrinterWebView* view = findPrinterView(printerId);
+        if (view) {
+            int page = mTabBar->GetPageIndex(view);
+            if (page != wxNOT_FOUND) {
+                mTabBar->DeletePage(page);
+            }
+            view->OnClose(wxCloseEvent());
+            removePrinterView(printerId);
+            mTabBar->SetSelection(0);
+        }
+    });
     return result;
 }
 void PrinterManagerView::closeInvalidPrinterTab(std::vector<PrinterNetworkInfo>& printerList)
@@ -839,25 +841,30 @@ void PrinterManagerView::closeInvalidPrinterTab(std::vector<PrinterNetworkInfo>&
         }
     });
     
-    for (size_t i = 0; i < printersToRemove.size(); ++i) {
-        int page = mTabBar->GetPageIndex(viewsToClose[i]);
-        if (page != wxNOT_FOUND) {
-            mTabBar->DeletePage(page);
+    wxGetApp().CallAfter([this, printersToRemove, viewsToClose]() {
+        for (size_t i = 0; i < printersToRemove.size(); ++i) {
+            int page = mTabBar->GetPageIndex(viewsToClose[i]);
+            if (page != wxNOT_FOUND) {
+                mTabBar->DeletePage(page);
+            }
+            viewsToClose[i]->OnClose(wxCloseEvent());
+            removePrinterView(printersToRemove[i]);
         }
-        viewsToClose[i]->OnClose(wxCloseEvent());
-        removePrinterView(printersToRemove[i]);
-    }
+    });
+
 }
 webviewIpc::IPCResult PrinterManagerView::updatePrinterName(const std::string& printerId, const std::string& printerName)
 {
     webviewIpc::IPCResult result;
-    PrinterWebView* view = findPrinterView(printerId);
-    if (view) {
-        int page = mTabBar->GetPageIndex(view);
-        if (page != wxNOT_FOUND) {
-            mTabBar->SetPageText(page, from_u8(printerName));
+    wxGetApp().CallAfter([this, printerId, printerName]() {
+        PrinterWebView* view = findPrinterView(printerId);
+        if (view) {
+            int page = mTabBar->GetPageIndex(view);
+            if (page != wxNOT_FOUND) {
+                mTabBar->SetPageText(page, from_u8(printerName));
+            }
         }
-    }
+    });
     auto networkResult = PrinterManager::getInstance()->updatePrinterName(printerId, printerName);
     result.message = networkResult.message;
     result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
@@ -878,13 +885,15 @@ webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& p
             std::string accessCode = printerInfo.accessCode;
             url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber) + "&access_code=" + accessCode;
         }
-        PrinterWebView* view = findPrinterView(printerId);
-        if (view) {
-            int page = mTabBar->GetPageIndex(view);
-            if (page != wxNOT_FOUND) {
-                view->load_url(url);
+        wxGetApp().CallAfter([this, printerId, url]() {
+            PrinterWebView* view = findPrinterView(printerId);
+            if (view) {
+                int page = mTabBar->GetPageIndex(view);
+                if (page != wxNOT_FOUND) {
+                    view->load_url(url);
+                }
             }
-        }
+        });
     }
     return result;
 }
@@ -907,16 +916,18 @@ webviewIpc::IPCResult PrinterManagerView::updatePhysicalPrinter(const std::strin
     
     if (result.code == 0 && (oldPrinter.host != printerInfo.host || oldPrinter.webUrl != printerInfo.webUrl)) {
         PrinterNetworkInfo updatedPrinter = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
-        PrinterWebView* view = findPrinterView(printerId);
-        if (view) {
-            int page = mTabBar->GetPageIndex(view);
-            if (page != wxNOT_FOUND) {
-                mTabBar->SetPageText(page, from_u8(updatedPrinter.printerName));
-                wxString url = updatedPrinter.webUrl;
-                view->load_url(url);
-                view->reload();
+        wxGetApp().CallAfter([this, printerId, updatedPrinter]() {
+            PrinterWebView* view = findPrinterView(printerId);
+            if (view) {
+                int page = mTabBar->GetPageIndex(view);
+                if (page != wxNOT_FOUND) {
+                    mTabBar->SetPageText(page, from_u8(updatedPrinter.printerName));
+                    wxString url = updatedPrinter.webUrl;
+                    view->load_url(url);
+                    view->reload();
+                }
             }
-        }
+        });
     }
     return result;
 }

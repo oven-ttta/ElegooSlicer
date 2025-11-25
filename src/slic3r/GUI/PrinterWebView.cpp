@@ -156,7 +156,7 @@ void PrinterWebView::UpdateState()
     // SetTitle(m_browser->GetCurrentTitle());
 }
 
-void PrinterWebView::OnClose(const wxCloseEvent& evt) { this->Hide(); }
+void PrinterWebView::OnClose(const wxCloseEvent& evt) {  }
 
 void PrinterWebView::SendAPIKey()
 {
