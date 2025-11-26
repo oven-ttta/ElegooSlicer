@@ -434,7 +434,7 @@ void Http::priv::http_perform()
 	::curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, headers_cb);
 
 	::curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-#if LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 32
+#if (LIBCURL_VERSION_MAJOR == 7 && LIBCURL_VERSION_MINOR >= 32) || LIBCURL_VERSION_MAJOR > 7
 	::curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xfercb);
 	::curl_easy_setopt(curl, CURLOPT_XFERINFODATA, static_cast<void*>(this));
 #ifndef _WIN32
