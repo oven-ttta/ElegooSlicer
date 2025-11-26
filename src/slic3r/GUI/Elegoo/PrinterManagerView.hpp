@@ -29,6 +29,9 @@ public:
     void onClose(wxCloseEvent& evt);
     void openPrinterTab(const std::string& printerId, bool saveState = true);
     void refreshUserInfo();
+    
+    // Initialize WebView after window is shown (fixes macOS multi-display rendering issue)
+    void initializeWebView();
 
 private:
     void setupIPCHandlers();
@@ -74,5 +77,6 @@ private:
     std::mutex mUserInfoMutex; // Mutex to protect user info
     UserNetworkInfo mRefreshUserInfo; // User info
     std::atomic<bool> mIsReady{false};
+    std::atomic<bool> mWebViewInitialized{false};
 };
 }} // namespace Slic3r::GUI 

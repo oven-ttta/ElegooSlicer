@@ -363,17 +363,53 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     wxAuiManager *m = (wxAuiManager*)&mTabBar->GetAuiManager();
     m->GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
 
-    mBrowser = WebView::CreateWebView(mTabBar, "");
-    if (mBrowser == nullptr) {
-        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init mBrowser";
+    // Delay creating and loading WebView until window is shown
+    // This fixes macOS multi-display rendering issue where WKWebView fails to render
+    // on extended displays if loaded before the window is fully displayed
+    // The WebView will be created and loaded by calling initializeWebView() after window is shown
+    mBrowser = nullptr;
+    // Note: loadTabState() will be called in initializeWebView() after WebView is created
+
+    Bind(wxEVT_CLOSE_WINDOW, &PrinterManagerView::onClose, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &PrinterManagerView::onClosePrinterTab, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_BEGIN_DRAG, &PrinterManagerView::onTabBeginDrag, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_DRAG_MOTION, &PrinterManagerView::onTabDragMotion, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_END_DRAG, &PrinterManagerView::onTabEndDrag, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &PrinterManagerView::onTabChanged, this);
+}
+
+void PrinterManagerView::initializeWebView()
+{
+    // Only initialize once
+    bool expected = false;
+    if (!mWebViewInitialized.compare_exchange_strong(expected, true)) {
         return;
     }
     
-    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
-    setupIPCHandlers();
+    // Create WebView if not already created
+    if (!mBrowser) {
+        mBrowser = WebView::CreateWebView(mTabBar, "");
+        if (mBrowser == nullptr) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init mBrowser";
+            // Reset flag on failure to allow retry
+            mWebViewInitialized = false;
+            return;
+        }
+        
+        mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
+        setupIPCHandlers();
+        
+        // Check if page already exists in tab bar to avoid duplicate addition
+        int pageIndex = mTabBar->GetPageIndex(mBrowser);
+        if (pageIndex == wxNOT_FOUND) {
+            mTabBar->AddPage(mBrowser, FIRST_TAB_NAME);
+        }
+    }
     
-    mTabBar->AddPage(mBrowser, FIRST_TAB_NAME);
+    // Configure and load URL
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
+    
+    // Load URL
     auto _dir = resources_dir();
     std::replace(_dir.begin(), _dir.end(), '\\', '/');
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/printer_manager/printer.html").make_preferred().string());
@@ -386,7 +422,7 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     }  
     mBrowser->LoadURL(TargetUrl);
     
-    // 设置 ElegooSlicer UserAgent
+    // Set ElegooSlicer UserAgent
     wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
 #ifdef __WIN32__
     mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
@@ -404,15 +440,8 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
 
     // Load saved tab state
     loadTabState();
-
-    Bind(wxEVT_CLOSE_WINDOW, &PrinterManagerView::onClose, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &PrinterManagerView::onClosePrinterTab, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_BEGIN_DRAG, &PrinterManagerView::onTabBeginDrag, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_DRAG_MOTION, &PrinterManagerView::onTabDragMotion, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_END_DRAG, &PrinterManagerView::onTabEndDrag, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &PrinterManagerView::onTabChanged, this);
-
-
+    
+    Layout();
 }
 
 PrinterManagerView::~PrinterManagerView() {

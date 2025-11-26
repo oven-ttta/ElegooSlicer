@@ -549,6 +549,27 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
             m_plater->on_activate();
         event.Skip();
     });
+    
+    // Fix macOS multi-display WebView rendering issue
+    // Initialize HomeView's navigation WebView after window is shown
+    // This ensures WKWebView is initialized after the window is fully displayed on the correct display
+    // Check WebView's own initialization state instead of using static variable to support GUI recreation (e.g., language switching)
+    Bind(wxEVT_SHOW, [this](wxShowEvent& event) {
+        event.Skip();
+        if (event.IsShown()) {
+            // Delay initialization slightly to ensure window is fully displayed on the correct display
+            wxGetApp().CallAfter([this]() {
+                // Initialize HomeView's WebView (HomeView is created in MainFrame constructor)
+                if (m_home_view) {
+                    m_home_view->initializeNavigationWebView();
+                }
+                // Initialize PrinterManagerView's WebView if it exists (handles GUI recreation and runtime creation)
+                if (m_printer_manager_view) {
+                    m_printer_manager_view->initializeWebView();
+                }
+            });
+        }
+    });
 
 // OSX specific issue:
 // When we move application between Retina and non-Retina displays, The legend on a canvas doesn't redraw
@@ -1205,6 +1226,19 @@ void MainFrame::init_tabpanel() {
     }
 }
 
+// Helper function to initialize PrinterManagerView WebView after window is shown
+static void initializePrinterManagerViewWebView(MainFrame* frame, PrinterManagerView* view)
+{
+    if (!view || !frame) return;
+    if (frame->IsShown()) {
+        wxGetApp().CallAfter([view]() {
+            if (view) {
+                view->initializeWebView();
+            }
+        });
+    }
+}
+
 // SoftFever
 void MainFrame::show_device(bool bBBLPrinter) 
 {
@@ -1237,6 +1271,8 @@ void MainFrame::show_device(bool bBBLPrinter)
             m_printer_manager_view->Show(false);
             m_tabpanel->InsertPage(tpMonitor, m_printer_manager_view, _L("Device"), 
                                 std::string("tab_monitor_active"), std::string("tab_monitor_active"));
+            // Initialize WebView after window is shown (fixes macOS multi-display rendering issue)
+            initializePrinterManagerViewWebView(this, m_printer_manager_view);
         }
 
         // Add Calibration if needed
@@ -1273,6 +1309,8 @@ void MainFrame::show_device(bool bBBLPrinter)
             m_printer_manager_view->Show(false);
             m_tabpanel->InsertPage(tpMonitor, m_printer_manager_view, _L("Device"), 
                                 std::string("tab_monitor_active"), std::string("tab_monitor_active"));
+            // Initialize WebView after window is shown (fixes macOS multi-display rendering issue)
+            initializePrinterManagerViewWebView(this, m_printer_manager_view);
         }
     } 
     else {

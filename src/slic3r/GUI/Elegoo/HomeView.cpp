@@ -83,17 +83,15 @@ void HomeView::initUI()
     mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mNavigationBrowser);
     setupIPCHandlers();
 
-    // Create homepage views
-    createHomepageViews();
-
-    // Load navigation page (left side) - only navigation bar
-    wxString navUrl = wxString::Format("file://%s/web/homepage4/navigation.html", from_u8(resources_dir()));
-    mNavigationBrowser->LoadURL(navUrl);
-
+    // Delay creating homepage views until window is shown
+    // This fixes macOS multi-display rendering issue where WKWebView fails to render
+    // on extended displays if created before the window is fully displayed
+    // Homepage views will be created by calling initializeNavigationWebView() after window is shown
+    
     mNavigationBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
-
-    // Show default page
-    showPage("recent");
+    
+    // Hide WebView temporarily to avoid rendering issues on extended displays
+    mNavigationBrowser->Hide();
 }
 
 void HomeView::createHomepageViews()
@@ -366,6 +364,36 @@ void HomeView::onRegionChanged()
     }
     
     refreshUserInfo();
+}
+
+void HomeView::initializeNavigationWebView()
+{
+    // Only initialize once
+    bool expected = false;
+    if (!mNavigationWebViewInitialized.compare_exchange_strong(expected, true)) {
+        return;
+    }
+    
+    if (!mNavigationBrowser) {
+        return;
+    }
+    
+    // Create homepage views first (they also contain WebViews that need to be created after window is shown)
+    if (mHomepageViews.empty()) {
+        createHomepageViews();
+    }
+    
+    // Load navigation page (left side) - only navigation bar
+    wxString navUrl = wxString::Format("file://%s/web/homepage4/navigation.html", from_u8(resources_dir()));
+    mNavigationBrowser->LoadURL(navUrl);
+    
+    // Show WebView after loading URL
+    mNavigationBrowser->Show();
+    
+    // Show default page
+    showPage("recent");
+    
+    Layout();
 }
 
 }} // namespace Slic3r::GUI
