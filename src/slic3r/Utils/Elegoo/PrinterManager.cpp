@@ -364,7 +364,7 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterName(const std::string& 
     }
     std::shared_ptr<IPrinterNetwork> printerNetwork = getPrinterNetwork(printerId);
     if (!printerNetwork) {
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
     }
 
     UserNetworkInfo requestUserInfo  = UserNetworkManager::getInstance()->getUserInfo();
@@ -720,7 +720,7 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
         std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(params.printerId);
         if (!network) {
             BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": no network connection for printer: %s") % params.printerId;
-            result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+            result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
             break;
         }
 
@@ -784,7 +784,7 @@ PrinterNetworkResult<PrinterMmsGroup> PrinterManager::getPrinterMmsInfo(const st
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerId);
     if (!network) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": no network connection for printer: %s") % printerId;
-        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterMmsGroup());
+        return PrinterNetworkResult<PrinterMmsGroup>(PrinterNetworkErrorCode::NETWORK_ERROR, PrinterMmsGroup());
     }
 
     UserNetworkInfo                       requestUserInfo = UserNetworkManager::getInstance()->getUserInfo();
@@ -945,7 +945,7 @@ PrinterNetworkResult<PrinterPrintFileResponse> PrinterManager::getFileList(const
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerId);
     if (!network) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": no network connection for printer: %s") % printerId;
-        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterPrintFileResponse());
+        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::NETWORK_ERROR, PrinterPrintFileResponse());
     }
 
     UserNetworkInfo requestUserInfo = UserNetworkManager::getInstance()->getUserInfo();
@@ -969,7 +969,7 @@ PrinterNetworkResult<PrinterPrintFileResponse> PrinterManager::getFileDetail(con
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerId);
     if (!network) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": no network connection for printer: %s") % printerId;
-        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterPrintFileResponse());
+        return PrinterNetworkResult<PrinterPrintFileResponse>(PrinterNetworkErrorCode::NETWORK_ERROR, PrinterPrintFileResponse());
     }
 
     UserNetworkInfo requestUserInfo = UserNetworkManager::getInstance()->getUserInfo();
@@ -992,7 +992,7 @@ PrinterNetworkResult<PrinterPrintTaskResponse> PrinterManager::getPrintTaskList(
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerId);
     if (!network) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": no network connection for printer: %s") % printerId;
-        return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, PrinterPrintTaskResponse());
+        return PrinterNetworkResult<PrinterPrintTaskResponse>(PrinterNetworkErrorCode::NETWORK_ERROR, PrinterPrintTaskResponse());
     }
 
     UserNetworkInfo requestUserInfo = UserNetworkManager::getInstance()->getUserInfo();
@@ -1015,7 +1015,7 @@ PrinterNetworkResult<bool> PrinterManager::deletePrintTasks(const std::string& p
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerId);
     if (!network) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": no network connection for printer: %s") % printerId;
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
     }
 
     UserNetworkInfo requestUserInfo = UserNetworkManager::getInstance()->getUserInfo();
@@ -1038,7 +1038,7 @@ PrinterNetworkResult<bool> PrinterManager::sendRtmMessage(const std::string& pri
     std::shared_ptr<IPrinterNetwork> network = getPrinterNetwork(printerId);
     if (!network) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": no network connection for printer: %s") % printerId;
-        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::PRINTER_NOT_FOUND, false);
+        return PrinterNetworkResult<bool>(PrinterNetworkErrorCode::NETWORK_ERROR, false);
     }
 
     UserNetworkInfo requestUserInfo = UserNetworkManager::getInstance()->getUserInfo();
