@@ -385,7 +385,10 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, BORDERLESS_FRAME_
     
     // Bind user login event
     Bind(EVT_USER_LOGIN, [this](wxCommandEvent&) {
-        wxGetApp().ShowUserLogin(true);
+        wxGetApp().CallAfter([this]() {
+            wxGetApp().ShowUserLogin(true);
+        });
+
     });
     Bind(EVT_REGION_CHANGED, [this](wxCommandEvent&) {
         wxGetApp().CallAfter([this]() {
