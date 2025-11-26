@@ -421,6 +421,7 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
 
         double wipe_tower_volume_mm3 = 0.0;
         double support_volume_mm3    = 0.0;
+        double flush_per_filament    = 0.0;
 
         auto current_plate = mPlater->get_partplate_list().get_curr_plate();
         if (current_plate && current_plate->get_slice_result()) {
@@ -435,8 +436,13 @@ webviewIpc::IPCResult PrintSendDialogEx::preparePrintTask(const std::string& pri
             if (support_it != gcode_stats.support_volumes_per_extruder.end()) {
                 support_volume_mm3 = support_it->second;
             }
+
+            auto flush_per_filament_it = gcode_stats.flush_per_filament.find(extruderIdx);
+            if (flush_per_filament_it != gcode_stats.flush_per_filament.end()) {
+                flush_per_filament = flush_per_filament_it->second;
+            }
         }
-        double total_volume_mm3 = model_volume_mm3 + wipe_tower_volume_mm3 + support_volume_mm3;
+        double total_volume_mm3 = model_volume_mm3 + wipe_tower_volume_mm3 + support_volume_mm3 + flush_per_filament;
 
         if (total_volume_mm3 > 0) {
             double raw_weight = total_volume_mm3 * info.filamentDensity * 0.001;
