@@ -354,7 +354,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
     mIpc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request) {
         auto        params = request.params;
         std::string url    = params.value("url", "");
-        wxGetApp().CallAfter([this, url]() {
+        wxGetApp().CallAfter([url]() {
             GUI::wxGetApp().request_model_download(wxString(url));
         });
         return webviewIpc::IPCResult::success();
@@ -362,7 +362,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
     mIpc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request) {
         auto        params = request.params;
         std::string url    = params.value("url", "");
-         wxGetApp().CallAfter([this, url]() {
+         wxGetApp().CallAfter([url]() {
             wxLaunchDefaultBrowser(url);
         });
         return webviewIpc::IPCResult::success();
@@ -472,7 +472,8 @@ void OnlineModelsHomepageView::onWebViewError(wxWebViewEvent& evt)
 
 
     auto code = evt.GetInt();
-    if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST) {
+    // if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST|| message == "wxWEBVIEW_NAV_ERR_AUTH") 
+    {
         std::thread([this, url, target, error, message]() {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 wxGetApp().CallAfter([this]() {
