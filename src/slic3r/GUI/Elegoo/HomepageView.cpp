@@ -205,7 +205,8 @@ void RecentHomepageView::onWebViewLoaded(wxWebViewEvent& event)
 void RecentHomepageView::onWebViewError(wxWebViewEvent& event)
 {
     wxString error = event.GetString();
-    wxMessageBox("WebView Error: " + error, "Error", wxOK | wxICON_ERROR);
+    BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": WebView Error: " << error.ToUTF8().data();
+    // wxMessageBox("WebView Error: " + error, "Error", wxOK | wxICON_ERROR);
 }
 
 // ============================================================================
