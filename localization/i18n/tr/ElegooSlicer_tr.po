@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: 2024-07-11 00:22+0300\n"
 "Last-Translator: Olcay ÖREN\n"
 "Language-Team: \n"
@@ -3807,7 +3807,7 @@ msgstr ""
 "gerekir.\n"
 "0 a sıfırla."
 
-#, c-format, boost-format
+#, fuzzy, c-format, boost-format
 msgid ""
 "Lock depth should smaller than skin depth.\n"
 "Reset to 50% of skin depth."
@@ -12307,7 +12307,7 @@ msgstr "İlk katmana pütürlü yüzey uygulanıp uygulanmayacağı."
 msgid "Fuzzy skin generator mode"
 msgstr "Pütürlü yüzey oluşturma modu"
 
-#, c-format, boost-format
+#, fuzzy, c-format, boost-format
 msgid ""
 "Fuzzy skin generation mode. Works only with Arachne!\n"
 "Displacement: Сlassic mode when the pattern is formed by shifting the nozzle "
@@ -18582,10 +18582,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

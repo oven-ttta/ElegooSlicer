@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: 2023-09-30 15:15+0200\n"
 "Last-Translator: René Mošner <Renemosner@seznam.cz>\n"
 "Language-Team: \n"
@@ -6222,6 +6222,7 @@ msgstr "Byl detekován objekt s více částmi"
 msgid "The file does not contain any geometry data."
 msgstr "Soubor neobsahuje žádná geometrická data."
 
+#, fuzzy
 msgid ""
 "Your object appears to be too large, do you want to scale it down to fit the "
 "print bed automatically?"
@@ -7166,6 +7167,7 @@ msgid ""
 msgstr ""
 "Předvolba \"%1%\" již existuje a není kompatibilní s aktuální tiskárnou."
 
+#, fuzzy
 msgid "Please note that saving will overwrite this preset."
 msgstr "Upozorňujeme, že akce uložení nahradí toto přednastavení"
 
@@ -13653,6 +13655,7 @@ msgstr "Povolit podpěry"
 msgid "Enable support generation."
 msgstr "Povolit generování podpěr."
 
+#, fuzzy
 msgid ""
 "Normal (auto) and Tree (auto) are used to generate support automatically. If "
 "Normal (manual) or Tree (manual) is selected, only support enforcers are "
@@ -14389,6 +14392,7 @@ msgstr ""
 msgid "X-Y hole compensation"
 msgstr "X-Y Kompenzace otvoru"
 
+#, fuzzy
 msgid ""
 "Holes in objects will expand or contract in the XY plane by the configured "
 "value. Positive values make holes bigger, negative values make holes "
@@ -14402,6 +14406,7 @@ msgstr ""
 msgid "X-Y contour compensation"
 msgstr "X-Y Kompenzace obrysu"
 
+#, fuzzy
 msgid ""
 "Contours of objects will expand or contract in the XY plane by the "
 "configured value. Positive values make contours bigger, negative values make "
@@ -17356,10 +17361,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: 2024-06-01 21:51-0300\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese, Brazilian\n"
@@ -3850,7 +3850,7 @@ msgstr ""
 "seam_slope_start_height precisa ser menor que layer_height.\n"
 "Redefinir para 0."
 
-#, c-format, boost-format
+#, fuzzy, c-format, boost-format
 msgid ""
 "Lock depth should smaller than skin depth.\n"
 "Reset to 50% of skin depth."
@@ -18783,10 +18783,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

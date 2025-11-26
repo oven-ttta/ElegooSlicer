@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -7013,6 +7013,7 @@ msgid ""
 "Preset \"%1%\" already exists and is incompatible with the current printer."
 msgstr "プリセット\"%1%\"は既に存在し、また互換性がありません。"
 
+#, fuzzy
 msgid "Please note that saving will overwrite this preset."
 msgstr "注意：現在のプリセットを上書きされます。"
 
@@ -13928,6 +13929,7 @@ msgstr ""
 msgid "X-Y hole compensation"
 msgstr "ホール補正 X-Y"
 
+#, fuzzy
 msgid ""
 "Holes in objects will expand or contract in the XY plane by the configured "
 "value. Positive values make holes bigger, negative values make holes "
@@ -13940,6 +13942,7 @@ msgstr ""
 msgid "X-Y contour compensation"
 msgstr "輪郭補正 X-Y"
 
+#, fuzzy
 msgid ""
 "Contours of objects will expand or contract in the XY plane by the "
 "configured value. Positive values make contours bigger, negative values make "
@@ -16897,10 +16900,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

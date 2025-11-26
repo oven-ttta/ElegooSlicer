@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: 2024-05-31 23:33+0900\n"
 "Last-Translator: Hotsolidinfill <138652683+Hotsolidinfill@users.noreply."
 "github.com>, crwusiz <crwusiz@gmail.com>\n"
@@ -3982,6 +3982,7 @@ msgstr "사용자 지정 G코드 편집 (%1%)"
 msgid "Built-in placeholders (Double click item to add to G-code)"
 msgstr "기본 제공 플레이스홀더 (항목을 두 번 클릭하여 G코드에 추가)"
 
+#, fuzzy
 msgid "Search G-code placeholders"
 msgstr "Gcode 자리 표시자 검색"
 
@@ -5417,6 +5418,7 @@ msgstr "레이어: %s"
 msgid "Layer: %d/%d"
 msgstr "레이어: %d/%d"
 
+#, fuzzy
 msgid ""
 "Please heat the nozzle to above 170°C before loading or unloading filament."
 msgstr ""
@@ -7118,6 +7120,7 @@ msgid ""
 "Preset \"%1%\" already exists and is incompatible with the current printer."
 msgstr "%1% 사전 설정이 이미 있으며 현재 프린터와 호환되지 않습니다."
 
+#, fuzzy
 msgid "Please note that saving will overwrite this preset."
 msgstr "저장 작업이 이 사전 설정을 대체합니다"
 
@@ -11098,7 +11101,7 @@ msgstr ""
 msgid "Adaptive pressure advance measurements (beta)"
 msgstr "적응형 압력 사전 측정(베타)"
 
-#, no-c-format, no-boost-format
+#, fuzzy, no-c-format, no-boost-format
 msgid ""
 "Add sets of pressure advance (PA) values, the volumetric flow speeds and "
 "accelerations they were measured at, separated by a comma. One set of values "
@@ -12839,6 +12842,7 @@ msgstr ""
 msgid "Extrusion rate smoothing"
 msgstr "유연한 압출 유량"
 
+#, fuzzy
 msgid ""
 "This parameter smooths out sudden extrusion rate changes that happen when "
 "the printer transitions from printing a high flow (high speed/larger width) "
@@ -14752,6 +14756,7 @@ msgstr ""
 msgid "X-Y hole compensation"
 msgstr "X-Y 구멍 보정"
 
+#, fuzzy
 msgid ""
 "Holes in objects will expand or contract in the XY plane by the configured "
 "value. Positive values make holes bigger, negative values make holes "
@@ -14765,6 +14770,7 @@ msgstr ""
 msgid "X-Y contour compensation"
 msgstr "X-Y 윤곽 보상"
 
+#, fuzzy
 msgid ""
 "Contours of objects will expand or contract in the XY plane by the "
 "configured value. Positive values make contours bigger, negative values make "
@@ -15250,6 +15256,7 @@ msgstr "출력에 타임랩스 활성화"
 msgid "If enabled, this slicing will be considered using timelapse."
 msgstr "활성화하면 타임랩스를 사용하여 이 슬라이싱을 고려합니다"
 
+#, fuzzy
 msgid "Load custom G-code"
 msgstr "사용자 정의 Gcode 불러오기"
 
@@ -17844,10 +17851,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

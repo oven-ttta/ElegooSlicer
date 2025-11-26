@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: 2024-06-30 23:05+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -2801,9 +2801,11 @@ msgstr ""
 msgid "An SD card needs to be inserted before printing via LAN."
 msgstr "Перед друком через локальну мережу необхідно вставити картку SD."
 
+#, fuzzy
 msgid "Sending G-code file over LAN"
 msgstr "Надсилання файлу gcode по локальній мережі"
 
+#, fuzzy
 msgid "Sending G-code file to SD card"
 msgstr "Надсилання файлу gcode на карту SD"
 
@@ -3368,7 +3370,7 @@ msgstr "Файл G-коду експортується до %1%"
 msgid "Unknown error when exporting G-code."
 msgstr "Невідома помилка під час експорту G-коду."
 
-#, boost-format
+#, fuzzy, boost-format
 msgid ""
 "Failed to save G-code file.\n"
 "Error message: %1%.\n"
@@ -5547,6 +5549,7 @@ msgstr "Шар: %s"
 msgid "Layer: %d/%d"
 msgstr "Шар: %d/%d"
 
+#, fuzzy
 msgid ""
 "Please heat the nozzle to above 170°C before loading or unloading filament."
 msgstr ""
@@ -5906,6 +5909,7 @@ msgstr "ПОПЕРЕДЖЕННЯ:"
 msgid "Your model needs support! Please enable support material."
 msgstr "Вашій моделі потрібна підтримка! Увімкніть допоміжний матеріал."
 
+#, fuzzy
 msgid "G-code path overlap"
 msgstr "Перекриття шляху G-code"
 
@@ -6501,6 +6505,7 @@ msgstr "Імпорт SLА-архіву"
 msgid "The selected file"
 msgstr "Вибраний файл"
 
+#, fuzzy
 msgid "does not contain valid G-code."
 msgstr "не містить дійсний gcode."
 
@@ -7296,6 +7301,7 @@ msgid ""
 "Preset \"%1%\" already exists and is incompatible with the current printer."
 msgstr "Предустановка \\%1%\\ вже існує і несумісна з поточним принтером."
 
+#, fuzzy
 msgid "Please note that saving will overwrite this preset."
 msgstr "Зверніть увагу, що дія збереження замінить цей пресет"
 
@@ -11361,6 +11367,7 @@ msgstr "Зміщення екструдера"
 msgid "Flow ratio"
 msgstr "Коефіцієнт потоку"
 
+#, fuzzy
 msgid ""
 "The material may have volumetric change after switching between molten and "
 "crystalline states. This setting changes all extrusion flow of this filament "
@@ -11374,6 +11381,7 @@ msgstr ""
 "0,95 до 1,05. Можливо, ви можете налаштувати це значення, щоб отримати "
 "хорошу плоску поверхню, коли є невелике переповнення або недолив"
 
+#, fuzzy
 msgid ""
 "The material may have volumetric change after switching between molten and "
 "crystalline states. This setting changes all extrusion flow of this filament "
@@ -11671,6 +11679,7 @@ msgstr ""
 "машин з підтримкою кількох матеріалів зазвичай становить 0. Використовується "
 "лише для статистики"
 
+#, fuzzy
 msgid ""
 "Filament diameter is used to calculate extrusion in G-code, so it is "
 "important and should be accurate."
@@ -12609,6 +12618,7 @@ msgstr ""
 "Увімкніть цю опцію, якщо принтер має вентилятор охолодження допоміжної "
 "частини. Команда G-коду: M106 P2 S(0-255)."
 
+#, fuzzy
 msgid ""
 "Start the fan this number of seconds earlier than its target start time (you "
 "can use fractional seconds). It assumes infinite acceleration for this time "
@@ -13110,6 +13120,7 @@ msgstr ""
 "Цей параметр буде проігноровано, якщо у параметрах g-коду встановлено "
 "значення Klipper."
 
+#, fuzzy
 msgid ""
 "This G-code will be used as a code for the pause print. Users can insert "
 "pause G-code in the G-code viewer."
@@ -13284,6 +13295,7 @@ msgstr ""
 msgid "Extrusion rate smoothing"
 msgstr "Вирівнювання швидкості екструзії"
 
+#, fuzzy
 msgid ""
 "This parameter smooths out sudden extrusion rate changes that happen when "
 "the printer transitions from printing a high flow (high speed/larger width) "
@@ -13343,6 +13355,7 @@ msgstr ""
 msgid "Smoothing segment length"
 msgstr "Довжина сегмента згладжування"
 
+#, fuzzy
 msgid ""
 "A lower value results in smoother extrusion rate transitions. However, this "
 "results in a significantly larger G-code file and more instructions for the "
@@ -13665,6 +13678,7 @@ msgstr ""
 "Об'єкт буде піднятий такою кількістю опорних шарів. Використовуйте цю "
 "функцію, щоб уникнути обтікання під час друку ABS"
 
+#, fuzzy
 msgid ""
 "The G-code path is generated after simplifying the contour of models to "
 "avoid too many points and G-code lines. Smaller value means higher "
@@ -15287,6 +15301,7 @@ msgstr ""
 msgid "X-Y hole compensation"
 msgstr "Компенсація отвору XY"
 
+#, fuzzy
 msgid ""
 "Holes in objects will expand or contract in the XY plane by the configured "
 "value. Positive values make holes bigger, negative values make holes "
@@ -15301,6 +15316,7 @@ msgstr ""
 msgid "X-Y contour compensation"
 msgstr "Компенсація контуру XY"
 
+#, fuzzy
 msgid ""
 "Contours of objects will expand or contract in the XY plane by the "
 "configured value. Positive values make contours bigger, negative values make "
@@ -15612,6 +15628,7 @@ msgstr "максимальний час нарізки на стіл у секу
 msgid "No check"
 msgstr "Без перевірки"
 
+#, fuzzy
 msgid "Do not run any validity checks, such as G-code path conflicts check."
 msgstr ""
 "Не виконуйте перевірки дійсності, наприклад, перевірку конфліктів шляхуgcode."
@@ -15791,9 +15808,11 @@ msgstr "Увімкнути таймлапс для друку"
 msgid "If enabled, this slicing will be considered using timelapse."
 msgstr "Якщо ввімкнено, це нарізання враховуватиме використання таймлапсу"
 
+#, fuzzy
 msgid "Load custom G-code"
 msgstr "Завантажити користувацький gcode"
 
+#, fuzzy
 msgid "Load custom G-code from json."
 msgstr "Завантажити користувацький код з json"
 
@@ -18488,10 +18507,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

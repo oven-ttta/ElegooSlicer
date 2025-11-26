@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Carlos Fco. Caruncho Serrano <puzzlero@gmail.com>\n"
 "Language-Team: \n"
@@ -5693,6 +5693,7 @@ msgstr "Carga fallida\n"
 msgid "obtaining instance_id failed\n"
 msgstr "Error al obtener instance_id \n"
 
+#, fuzzy
 msgid ""
 "Your comment result cannot be uploaded due to the following reasons:\n"
 "\n"
@@ -6289,6 +6290,7 @@ msgid ""
 "The 3mf has the following modified G-code in filament or printer presets:"
 msgstr ""
 
+#, fuzzy
 msgid ""
 "Please confirm that all modified G-code is safe to prevent any damage to the "
 "machine!"
@@ -6302,6 +6304,7 @@ msgstr "G-Code modificado"
 msgid "The 3mf has the following customized filament or printer presets:"
 msgstr ""
 
+#, fuzzy
 msgid ""
 "Please confirm that the G-code within these presets is safe to prevent any "
 "damage to the machine!"
@@ -6368,6 +6371,7 @@ msgstr "Se ha detectado un objeto con varias piezas"
 msgid "The file does not contain any geometry data."
 msgstr "El archivo no contiene ninguna información geométrica."
 
+#, fuzzy
 msgid ""
 "Your object appears to be too large, do you want to scale it down to fit the "
 "print bed automatically?"
@@ -7346,6 +7350,7 @@ msgid ""
 "Preset \"%1%\" already exists and is incompatible with the current printer."
 msgstr "El perfil \"%1%\" ya existe y es incompatible con la impresora actual."
 
+#, fuzzy
 msgid "Please note that saving will overwrite this preset."
 msgstr "Tenga en cuenta que la acción de guardar reemplazará este perfil"
 
@@ -8925,6 +8930,7 @@ msgstr ""
 "hay objetos seleccionados, sólo orienta los seleccionados. En caso "
 "contrario, orientará todos los objetos del proyecto actual."
 
+#, fuzzy
 msgid "Auto orients all objects on the active plate."
 msgstr "Orienta automáticamente todos los objetos de la placa actual."
 
@@ -14469,6 +14475,7 @@ msgstr "Habilitar los soportes"
 msgid "Enable support generation."
 msgstr "Habilitar la generación de soportes."
 
+#, fuzzy
 msgid ""
 "Normal (auto) and Tree (auto) are used to generate support automatically. If "
 "Normal (manual) or Tree (manual) is selected, only support enforcers are "
@@ -15293,6 +15300,7 @@ msgstr ""
 msgid "X-Y hole compensation"
 msgstr "Compensación de huecos X-Y"
 
+#, fuzzy
 msgid ""
 "Holes in objects will expand or contract in the XY plane by the configured "
 "value. Positive values make holes bigger, negative values make holes "
@@ -15308,6 +15316,7 @@ msgstr ""
 msgid "X-Y contour compensation"
 msgstr "Compensación de contornos X-Y"
 
+#, fuzzy
 msgid ""
 "Contours of objects will expand or contract in the XY plane by the "
 "configured value. Positive values make contours bigger, negative values make "
@@ -18534,10 +18543,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

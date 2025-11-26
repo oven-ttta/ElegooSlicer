@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Heiko Liebscher <hliebschergmail.com>\n"
 "Language-Team: \n"
@@ -3893,7 +3893,7 @@ msgstr ""
 "seam_slope_start_height muss kleiner als layer_height sein.\n"
 "auf 0 gesetzt"
 
-#, c-format, boost-format
+#, fuzzy, c-format, boost-format
 msgid ""
 "Lock depth should smaller than skin depth.\n"
 "Reset to 50% of skin depth."
@@ -5731,6 +5731,7 @@ msgstr "Hochladen fehlgeschlagen\n"
 msgid "obtaining instance_id failed\n"
 msgstr "Abrufen der Instanz-ID fehlgeschlagen\n"
 
+#, fuzzy
 msgid ""
 "Your comment result cannot be uploaded due to the following reasons:\n"
 "\n"
@@ -6332,6 +6333,7 @@ msgid ""
 "The 3mf has the following modified G-code in filament or printer presets:"
 msgstr ""
 
+#, fuzzy
 msgid ""
 "Please confirm that all modified G-code is safe to prevent any damage to the "
 "machine!"
@@ -6345,6 +6347,7 @@ msgstr "Modifizierte G-Codes"
 msgid "The 3mf has the following customized filament or printer presets:"
 msgstr ""
 
+#, fuzzy
 msgid ""
 "Please confirm that the G-code within these presets is safe to prevent any "
 "damage to the machine!"
@@ -10801,7 +10804,7 @@ msgstr ""
 msgid "Slow down for curled perimeters"
 msgstr "Langsamer Druck für gekrümmte Umfänge"
 
-#, no-c-format, no-boost-format
+#, fuzzy, no-c-format, no-boost-format
 msgid ""
 "Enable this option to slow down printing in areas where perimeters may have "
 "curled upwards. For example, additional slowdown will be applied when "
@@ -13603,6 +13606,7 @@ msgstr ""
 msgid "Extrusion rate smoothing"
 msgstr "Glättung der Extrusionsrate"
 
+#, fuzzy
 msgid ""
 "This parameter smooths out sudden extrusion rate changes that happen when "
 "the printer transitions from printing a high flow (high speed/larger width) "
@@ -15697,6 +15701,7 @@ msgstr ""
 msgid "X-Y hole compensation"
 msgstr "X-Y-Loch-Kompensation"
 
+#, fuzzy
 msgid ""
 "Holes in objects will expand or contract in the XY plane by the configured "
 "value. Positive values make holes bigger, negative values make holes "
@@ -15711,6 +15716,7 @@ msgstr ""
 msgid "X-Y contour compensation"
 msgstr "X-Y-Konturkompensation"
 
+#, fuzzy
 msgid ""
 "Contours of objects will expand or contract in the XY plane by the "
 "configured value. Positive values make contours bigger, negative values make "
@@ -19016,10 +19022,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

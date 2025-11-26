@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -5422,6 +5422,7 @@ msgstr "Layer: %s"
 msgid "Layer: %d/%d"
 msgstr "Layer: %d/%d"
 
+#, fuzzy
 msgid ""
 "Please heat the nozzle to above 170°C before loading or unloading filament."
 msgstr ""
@@ -6173,6 +6174,7 @@ msgstr "Több részből álló objektumot észleltünk"
 msgid "The file does not contain any geometry data."
 msgstr "A fájl nem tartalmaz geometriai adatokat."
 
+#, fuzzy
 msgid ""
 "Your object appears to be too large, do you want to scale it down to fit the "
 "print bed automatically?"
@@ -7121,6 +7123,7 @@ msgid ""
 "Preset \"%1%\" already exists and is incompatible with the current printer."
 msgstr "A(z) \"%1%\" már létezik és nem kompatibilis a jelenlegi nyomtatóval."
 
+#, fuzzy
 msgid "Please note that saving will overwrite this preset."
 msgstr "Figyelem, a mentési művelet lecseréli ezt a beállítást"
 
@@ -13475,6 +13478,7 @@ msgstr "Támasz engedélyezése"
 msgid "Enable support generation."
 msgstr "Engedélyezi a támasz generálását."
 
+#, fuzzy
 msgid ""
 "Normal (auto) and Tree (auto) are used to generate support automatically. If "
 "Normal (manual) or Tree (manual) is selected, only support enforcers are "
@@ -14192,6 +14196,7 @@ msgstr ""
 msgid "X-Y hole compensation"
 msgstr "X-Y furatkompenzáció"
 
+#, fuzzy
 msgid ""
 "Holes in objects will expand or contract in the XY plane by the configured "
 "value. Positive values make holes bigger, negative values make holes "
@@ -14207,6 +14212,7 @@ msgstr ""
 msgid "X-Y contour compensation"
 msgstr "X-Y körvonal kompenzáció"
 
+#, fuzzy
 msgid ""
 "Contours of objects will expand or contract in the XY plane by the "
 "configured value. Positive values make contours bigger, negative values make "
@@ -17172,10 +17178,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

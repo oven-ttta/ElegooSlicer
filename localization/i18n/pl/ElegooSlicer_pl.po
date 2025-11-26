@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer 2.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Krzysztof Morga <tlumaczeniebs@gmail.com>\n"
 "Language-Team: \n"
@@ -15693,6 +15693,7 @@ msgstr "maksymalny czas slicowania na podłoże w sekundach."
 msgid "No check"
 msgstr "Brak sprawdzania"
 
+#, fuzzy
 msgid "Do not run any validity checks, such as G-code path conflicts check."
 msgstr ""
 "Nie uruchamiaj żadnych testów poprawności, takich jak sprawdzanie konfliktów "
@@ -18578,10 +18579,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

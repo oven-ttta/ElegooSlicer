@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 18:40+0800\n"
+"POT-Creation-Date: 2025-11-26 11:57+0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Guislain Cyril, Thomas Lété\n"
@@ -6308,6 +6308,7 @@ msgstr ""
 "Le 3mf a les G-codes modifiés suivants dans le filament ou les préréglages "
 "de l'imprimante :"
 
+#, fuzzy
 msgid ""
 "Please confirm that all modified G-code is safe to prevent any damage to the "
 "machine!"
@@ -6322,6 +6323,7 @@ msgid "The 3mf has the following customized filament or printer presets:"
 msgstr ""
 "Le 3mf dispose de filaments personnalisés ou de préréglages d'imprimante :"
 
+#, fuzzy
 msgid ""
 "Please confirm that the G-code within these presets is safe to prevent any "
 "damage to the machine!"
@@ -7389,6 +7391,7 @@ msgstr ""
 "Le préréglage \"%1%\" existe déjà et est incompatible avec l'imprimante "
 "actuelle."
 
+#, fuzzy
 msgid "Please note that saving will overwrite this preset."
 msgstr "Veuillez noter que l'action d'enregistrement remplacera ce préréglage"
 
@@ -9012,6 +9015,7 @@ msgstr "Rotation de la vue"
 msgid "Zoom View"
 msgstr "Vue agrandie"
 
+#, fuzzy
 msgid ""
 "Auto orients selected objects or all objects. If there are selected objects, "
 "it just orients the selected ones. Otherwise, it will orient all objects in "
@@ -11809,6 +11813,7 @@ msgstr ""
 msgid "Don't slow down outer walls"
 msgstr "Ne pas ralentir sur les parois extérieures"
 
+#, fuzzy
 msgid ""
 "If enabled, this setting will ensure external perimeters are not slowed down "
 "to meet the minimum layer time. This is particularly helpful in the below "
@@ -15465,6 +15470,7 @@ msgstr ""
 msgid "Maximum wipe tower print speed"
 msgstr "Vitesse maximale d’impression de la tour d’essuyage"
 
+#, fuzzy
 msgid ""
 "The maximum print speed when purging in the wipe tower and printing the wipe "
 "tower sparse layers. When purging, if the sparse infill speed or calculated "
@@ -15629,6 +15635,7 @@ msgstr ""
 msgid "X-Y hole compensation"
 msgstr "Compensation de trou X-Y"
 
+#, fuzzy
 msgid ""
 "Holes in objects will expand or contract in the XY plane by the configured "
 "value. Positive values make holes bigger, negative values make holes "
@@ -15643,6 +15650,7 @@ msgstr ""
 msgid "X-Y contour compensation"
 msgstr "Compensation de contour X-Y"
 
+#, fuzzy
 msgid ""
 "Contours of objects will expand or contract in the XY plane by the "
 "configured value. Positive values make contours bigger, negative values make "
@@ -18951,10 +18959,6 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
-msgstr ""
-
-#, boost-format
-msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]
