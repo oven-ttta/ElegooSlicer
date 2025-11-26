@@ -762,9 +762,21 @@ void PrinterManagerView::setupIPCHandlers()
         return deletePrinter(printerId);
     });
 
-    // Handle request_browse_ca_file
-    mIpc->onRequest("request_browse_ca_file", [this](const webviewIpc::IPCRequest& request){
-        return browseCAFile();
+    // Handle request_browse_ca_file (async because it shows a file dialog)
+    mIpc->onRequestAsync("request_browse_ca_file", [this](const webviewIpc::IPCRequest& request,
+                                                          std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        wxGetApp().CallAfter([this, sendResponse]() {
+            try {
+                webviewIpc::IPCResult result = browseCAFile();
+                sendResponse(result);
+            } catch (const std::exception& e) {
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in browseCAFile: %s") % e.what();
+                sendResponse(webviewIpc::IPCResult::error(std::string("Failed to browse CA file: ") + e.what()));
+            } catch (...) {
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": unknown error in browseCAFile";
+                sendResponse(webviewIpc::IPCResult::error("Failed to browse CA file: Unknown error"));
+            }
+        });
     });
 
     // Handle request_refresh_printers

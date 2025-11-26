@@ -140,7 +140,9 @@ webviewIpc::IPCResult RecentHomepageView::handleGetRecentFiles(const nlohmann::j
 
 webviewIpc::IPCResult RecentHomepageView::handleClearRecentFiles(const nlohmann::json& data)
 {
-    wxGetApp().request_remove_project("");
+    wxGetApp().CallAfter([]() {
+        wxGetApp().request_remove_project("");
+    });
     return webviewIpc::IPCResult::success();
 }
 
@@ -148,20 +150,27 @@ webviewIpc::IPCResult RecentHomepageView::handleOpenFile(const nlohmann::json& d
 {
     std::string filePath = data.value("path", "");
     if (!filePath.empty()) {
-        wxGetApp().request_open_project(filePath);
+        wxGetApp().CallAfter([filePath]() {
+            wxGetApp().request_open_project(filePath);
+        });
     }
     return webviewIpc::IPCResult::success();
 }
 
 webviewIpc::IPCResult RecentHomepageView::handleCreateNewProject(const nlohmann::json& data)
 {
-    wxGetApp().request_open_project("<new>");
+    // Use CallAfter to ensure this is executed in the main thread and after any pending UI operations
+    wxGetApp().CallAfter([]() {
+        wxGetApp().request_open_project("<new>");
+    });
     return webviewIpc::IPCResult::success();
 }
 
 webviewIpc::IPCResult RecentHomepageView::handleOpenProject(const nlohmann::json& data)
 {
-    wxGetApp().request_open_project({});
+    wxGetApp().CallAfter([]() {
+        wxGetApp().request_open_project({});
+    });
     return webviewIpc::IPCResult::success();
 }
 
@@ -184,7 +193,9 @@ webviewIpc::IPCResult RecentHomepageView::handleRemoveFromRecent(const nlohmann:
 {
     std::string filePath = data.value("path", "");
     if (!filePath.empty()) {
-        wxGetApp().request_remove_project(filePath);
+        wxGetApp().CallAfter([filePath]() {
+            wxGetApp().request_remove_project(filePath);
+        });
     }
     return webviewIpc::IPCResult::success();
 }
