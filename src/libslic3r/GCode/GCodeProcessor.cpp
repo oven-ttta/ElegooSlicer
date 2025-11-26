@@ -3982,17 +3982,29 @@ void GCodeProcessor::process_M702(const GCodeReader::GCodeLine& line)
 void GCodeProcessor::process_M6211(const GCodeReader::GCodeLine& line)
 {
     auto remaining_volume = m_nozzle_volume;
+    if(remaining_volume <= 0.0f){
+        if(m_print!= nullptr) {
+            remaining_volume = m_print->config().nozzle_volume.getFloat();
+            m_nozzle_volume = remaining_volume;
+        }
+    }
     // Parse parameters
     float length = 0.0f;
     float old_filament_e_feedrate = 0.0f;
     float new_filament_e_feedrate = 0.0f;
-    
+    int extruder_id =-1;
     if (!line.has_value('L', length) || length <= 0.0f)
         return;
+
+    float t=-1.0f;
+    if (!line.has_value('T', t) || t < 0)
+        return;
     
+    extruder_id = static_cast<int>(std::round(t));
+
     // Calculate filament cross-section area
-    const float filament_diameter = (static_cast<size_t>(m_extruder_id) < m_result.filament_diameters.size()) 
-        ? m_result.filament_diameters[m_extruder_id] 
+    const float filament_diameter = (static_cast<size_t>(extruder_id) < m_result.filament_diameters.size()) 
+        ? m_result.filament_diameters[extruder_id] 
         : m_result.filament_diameters.back();
     const float area_filament_cross_section = static_cast<float>(M_PI) * sqr(0.5f * filament_diameter);
     const float volume_flushed_filament = area_filament_cross_section * length;
@@ -4014,8 +4026,25 @@ void GCodeProcessor::process_M6211(const GCodeReader::GCodeLine& line)
         }
     }
 
-    // Update filament usage statistics
-    m_used_filaments.update_flush_per_filament(m_last_extruder_id, volume_flushed_filament);
+    bool isFisrtExtrusion = (m_last_extruder_id == 0 && m_extruder_id == 0);
+
+    process_T("T" + std::to_string(extruder_id));
+
+    if(volume_flushed_filament >= remaining_volume)
+    {
+        //At the beginning of the print, it is impossible to know which filament is remaining in the nozzle, so we skip the first extrusion statistics here.
+        if(!isFisrtExtrusion)
+        {
+            m_used_filaments.update_flush_per_filament(m_last_extruder_id, remaining_volume);
+        }
+        
+        m_used_filaments.update_flush_per_filament(m_extruder_id, volume_flushed_filament - remaining_volume);
+    }
+    else
+    {
+        m_used_filaments.update_flush_per_filament(m_extruder_id, volume_flushed_filament);
+    }
+    
 }
 
 void GCodeProcessor::process_T(const GCodeReader::GCodeLine& line)
