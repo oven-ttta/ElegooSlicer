@@ -1,6 +1,8 @@
 #include "Http.hpp"
 
 #include <cstdlib>
+#include <cctype>
+#include <algorithm>
 #include <functional>
 #include <thread>
 #include <deque>
@@ -251,11 +253,79 @@ int Http::priv::xfercb(void *userp, curl_off_t dltotal, curl_off_t dlnow, curl_o
 	bool cb_cancel = false;
 
 	if (self->progressfn) {
-		double speed;
-        curl_easy_getinfo(self->curl, CURLINFO_SPEED_UPLOAD, &speed);
-		if (speed > 0.01)
-			speed = speed;
-		Progress progress(dltotal, dlnow, ultotal, ulnow, self->buffer, speed);
+		curl_off_t actual_dltotal = dltotal;
+		
+		// When dltotal is 0 but we're downloading, try to get file size from headers
+		// This handles the case where server sends both Content-Length and Transfer-Encoding: chunked
+		// (non-compliant but common), causing curl to ignore Content-Length per HTTP/1.1 spec
+		if (dltotal == 0 && dlnow > 0 && !self->headers.empty()) {
+			// First try curl's API
+			curl_off_t content_length = -1;
+			if (curl_easy_getinfo(self->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &content_length) == CURLE_OK) {
+				if (content_length > 0) {
+					actual_dltotal = content_length;
+				}
+			}
+			
+			// If still 0, parse Content-Length from response headers manually
+			if (actual_dltotal == 0) {
+				std::string headers_lower = self->headers;
+				std::transform(headers_lower.begin(), headers_lower.end(), headers_lower.begin(), ::tolower);
+				
+				// Try Content-Length first
+				size_t length_pos = headers_lower.find("content-length:");
+				if (length_pos != std::string::npos) {
+					size_t start = length_pos + 15;
+					while (start < headers_lower.length() && (headers_lower[start] == ' ' || headers_lower[start] == '\t')) {
+						start++;
+					}
+					size_t line_end = headers_lower.find_first_of("\r\n", start);
+					if (line_end == std::string::npos) {
+						line_end = headers_lower.length();
+					}
+					std::string length_str = self->headers.substr(start, line_end - start);
+					char* end_ptr = nullptr;
+					curl_off_t total_size = std::strtoll(length_str.c_str(), &end_ptr, 10);
+					if (end_ptr != length_str.c_str() && total_size > 0) {
+						actual_dltotal = total_size;
+					}
+				} else {
+					// Try Content-Range as fallback (for Range requests)
+					size_t range_pos = headers_lower.find("content-range:");
+					if (range_pos != std::string::npos) {
+						size_t start = range_pos + 13;
+						while (start < headers_lower.length() && (headers_lower[start] == ' ' || headers_lower[start] == '\t')) {
+							start++;
+						}
+						size_t slash_pos = headers_lower.find('/', start);
+						if (slash_pos != std::string::npos) {
+							size_t end = slash_pos + 1;
+							while (end < headers_lower.length() && (headers_lower[end] == ' ' || headers_lower[end] == '\t')) {
+								end++;
+							}
+							size_t line_end = headers_lower.find_first_of("\r\n", end);
+							if (line_end == std::string::npos) {
+								line_end = headers_lower.length();
+							}
+							std::string total_str = self->headers.substr(end, line_end - end);
+							char* end_ptr = nullptr;
+							curl_off_t total_size = std::strtoll(total_str.c_str(), &end_ptr, 10);
+							if (end_ptr != total_str.c_str() && total_size > 0) {
+								actual_dltotal = total_size;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		double speed = 0.0;
+		if (actual_dltotal > 0 || dlnow > 0) {
+			curl_easy_getinfo(self->curl, CURLINFO_SPEED_DOWNLOAD, &speed);
+		} else if (ultotal > 0 || ulnow > 0) {
+			curl_easy_getinfo(self->curl, CURLINFO_SPEED_UPLOAD, &speed);
+		}
+		Progress progress(actual_dltotal, dlnow, ultotal, ulnow, self->buffer, speed);
 		self->progressfn(progress, cb_cancel);
 	}
 

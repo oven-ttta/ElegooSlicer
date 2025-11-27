@@ -28,7 +28,7 @@ namespace Slic3r {
 namespace GUI {
 
 const size_t DOWNLOAD_MAX_CHUNK_SIZE	= 10 * 1024 * 1024;
-const size_t DOWNLOAD_SIZE_LIMIT		= 1024 * 1024 * 1024;
+const size_t DOWNLOAD_SIZE_LIMIT		= 5 * 1024 * 1024 * 1024;
 
 
 std::string FileGet::escape_url(const std::string& unescaped)

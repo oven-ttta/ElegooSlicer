@@ -518,8 +518,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
 {
     CHECK_INITIALIZED(false);
     // Use a static mutex to serialize printer addition to prevent race conditions
-    static std::mutex           addPrinterMutex;
-    std::lock_guard<std::mutex> lock(addPrinterMutex);
+    std::lock_guard<std::mutex> lock(mAddPrinterMutex);
 
     // only generate a unique id for the printer when adding a printer
     // the printer info is from the UI, the UI info is from the discover device or manual add
@@ -816,6 +815,9 @@ void PrinterManager::refreshWanPrinters()
             return;
         }
     }
+    // After binding succeeds in the add printer interface, online printers will be queried from IoT.
+    // Both places executing cache addition will cause issues, so mutex lock is needed.
+    std::lock_guard<std::mutex> addPrinterLock(mAddPrinterMutex);
 
     std::vector<PrinterNetworkInfo> wanPrinters;
     if (printersResult.isSuccess() && printersResult.hasData()) {
@@ -851,7 +853,12 @@ void PrinterManager::refreshWanPrinters()
                 // // update the printer info if the printer is already exists
                 PrinterCache::getInstance()->updatePrinterField(localPrinter.printerId, [wanPrinter](PrinterNetworkInfo& cachedPrinter) {
                     if (cachedPrinter.printerName != wanPrinter.printerName) {
-                        cachedPrinter.printerName = wanPrinter.printerName;
+                        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                        // Only update printerName if more than 60 seconds have passed since addition,
+                        // as device info may not have been synced to IoT yet
+                        if (now - cachedPrinter.addTime >= 60) {
+                            cachedPrinter.printerName = wanPrinter.printerName;
+                        }
                     }
                 });
                 break;
@@ -877,8 +884,17 @@ void PrinterManager::refreshWanPrinters()
             deletePrinterNetwork(localPrinter.printerId);
         }
     }
+
+    std::vector<std::future<void>> addWanPrinterFutures;
     for (auto& wanPrinter : wanPrintersToAdd) {
-        PrinterCache::getInstance()->addPrinter(wanPrinter);     
+        auto future = std::async(std::launch::async, [this, &wanPrinter]() {
+            connectToPrinter(wanPrinter);
+            PrinterCache::getInstance()->addPrinter(wanPrinter);
+        });
+        addWanPrinterFutures.push_back(std::move(future));
+    }
+    for (auto& future : addWanPrinterFutures) {
+        future.wait();
     }
 }
 
