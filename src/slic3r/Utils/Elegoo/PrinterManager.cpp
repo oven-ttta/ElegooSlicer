@@ -1073,7 +1073,7 @@ std::string PrinterManager::generatePrinterId() { return boost::uuids::to_string
 
 void PrinterManager::monitorPrinterConnections()
 {
-    int loopIntervalSeconds = 3;
+    int loopIntervalSeconds = 10;
     mLastConnectionLoopTime = std::chrono::steady_clock::now() - std::chrono::seconds(loopIntervalSeconds);
     while (monitorPrinterConnectionsRunning) {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
