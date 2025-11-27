@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/convert.hpp>
+#include <boost/nowide/cstdio.hpp>
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/algorithm/string.hpp>
@@ -206,9 +207,9 @@ void FileGet::priv::get_perform()
 	FILE* file;
 	// open file for writting
 	if (m_written == 0)
-		file = fopen(temp_path_wstring.c_str(), "wb");
+		file = boost::nowide::fopen(m_tmp_path.string().c_str(), "wb");
 	else 
-		file = fopen(temp_path_wstring.c_str(), "ab");
+		file = boost::nowide::fopen(m_tmp_path.string().c_str(), "ab");
 
 	//assert(file != NULL);
 	if (file == NULL) {

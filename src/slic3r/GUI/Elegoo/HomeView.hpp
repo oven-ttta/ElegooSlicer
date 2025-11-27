@@ -29,6 +29,9 @@ public:
     void refreshUserInfo();
     void onRegionChanged();
     
+    // Initialize navigation WebView after window is shown (fixes macOS multi-display rendering issue)
+    void initializeNavigationWebView();
+    
 private:
     void initUI();
     void setupIPCHandlers();
@@ -68,6 +71,7 @@ private:
     
 
     std::atomic<bool> mIsReady{false};
+    std::atomic<bool> mNavigationWebViewInitialized{false};
     std::mutex mUserInfoMutex; // Mutex to protect user info
     UserNetworkInfo mRefreshUserInfo; // User info
     std::shared_ptr<bool> m_lifeTracker; // Lifetime tracker for async operations

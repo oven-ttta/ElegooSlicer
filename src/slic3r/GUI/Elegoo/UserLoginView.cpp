@@ -222,7 +222,8 @@ void UserLoginView::onWebViewError(wxWebViewEvent& evt)
 
 
     auto code = evt.GetInt();
-    if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST) {
+    // if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST) 
+    {
         std::thread([this]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 wxGetApp().CallAfter([this]() {

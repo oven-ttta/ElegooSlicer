@@ -140,7 +140,9 @@ webviewIpc::IPCResult RecentHomepageView::handleGetRecentFiles(const nlohmann::j
 
 webviewIpc::IPCResult RecentHomepageView::handleClearRecentFiles(const nlohmann::json& data)
 {
-    wxGetApp().request_remove_project("");
+    wxGetApp().CallAfter([]() {
+        wxGetApp().request_remove_project("");
+    });
     return webviewIpc::IPCResult::success();
 }
 
@@ -148,20 +150,27 @@ webviewIpc::IPCResult RecentHomepageView::handleOpenFile(const nlohmann::json& d
 {
     std::string filePath = data.value("path", "");
     if (!filePath.empty()) {
-        wxGetApp().request_open_project(filePath);
+        wxGetApp().CallAfter([filePath]() {
+            wxGetApp().request_open_project(filePath);
+        });
     }
     return webviewIpc::IPCResult::success();
 }
 
 webviewIpc::IPCResult RecentHomepageView::handleCreateNewProject(const nlohmann::json& data)
 {
-    wxGetApp().request_open_project("<new>");
+    // Use CallAfter to ensure this is executed in the main thread and after any pending UI operations
+    wxGetApp().CallAfter([]() {
+        wxGetApp().request_open_project("<new>");
+    });
     return webviewIpc::IPCResult::success();
 }
 
 webviewIpc::IPCResult RecentHomepageView::handleOpenProject(const nlohmann::json& data)
 {
-    wxGetApp().request_open_project({});
+    wxGetApp().CallAfter([]() {
+        wxGetApp().request_open_project({});
+    });
     return webviewIpc::IPCResult::success();
 }
 
@@ -184,7 +193,9 @@ webviewIpc::IPCResult RecentHomepageView::handleRemoveFromRecent(const nlohmann:
 {
     std::string filePath = data.value("path", "");
     if (!filePath.empty()) {
-        wxGetApp().request_remove_project(filePath);
+        wxGetApp().CallAfter([filePath]() {
+            wxGetApp().request_remove_project(filePath);
+        });
     }
     return webviewIpc::IPCResult::success();
 }
@@ -205,7 +216,8 @@ void RecentHomepageView::onWebViewLoaded(wxWebViewEvent& event)
 void RecentHomepageView::onWebViewError(wxWebViewEvent& event)
 {
     wxString error = event.GetString();
-    wxMessageBox("WebView Error: " + error, "Error", wxOK | wxICON_ERROR);
+    BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": WebView Error: " << error.ToUTF8().data();
+    // wxMessageBox("WebView Error: " + error, "Error", wxOK | wxICON_ERROR);
 }
 
 // ============================================================================
@@ -354,7 +366,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
     mIpc->onRequest("report.slicerOpen", [this](const webviewIpc::IPCRequest& request) {
         auto        params = request.params;
         std::string url    = params.value("url", "");
-        wxGetApp().CallAfter([this, url]() {
+        wxGetApp().CallAfter([url]() {
             GUI::wxGetApp().request_model_download(wxString(url));
         });
         return webviewIpc::IPCResult::success();
@@ -362,7 +374,7 @@ void OnlineModelsHomepageView::setupIPCHandlers()
     mIpc->onRequest("report.websiteOpen", [this](const webviewIpc::IPCRequest& request) {
         auto        params = request.params;
         std::string url    = params.value("url", "");
-         wxGetApp().CallAfter([this, url]() {
+         wxGetApp().CallAfter([url]() {
             wxLaunchDefaultBrowser(url);
         });
         return webviewIpc::IPCResult::success();
@@ -472,7 +484,8 @@ void OnlineModelsHomepageView::onWebViewError(wxWebViewEvent& evt)
 
 
     auto code = evt.GetInt();
-    if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST) {
+    // if (code == wxWEBVIEW_NAV_ERR_CONNECTION || code == wxWEBVIEW_NAV_ERR_NOT_FOUND || code == wxWEBVIEW_NAV_ERR_REQUEST|| message == "wxWEBVIEW_NAV_ERR_AUTH") 
+    {
         std::thread([this, url, target, error, message]() {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 wxGetApp().CallAfter([this]() {

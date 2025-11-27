@@ -363,17 +363,53 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     wxAuiManager *m = (wxAuiManager*)&mTabBar->GetAuiManager();
     m->GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
 
-    mBrowser = WebView::CreateWebView(mTabBar, "");
-    if (mBrowser == nullptr) {
-        BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init mBrowser";
+    // Delay creating and loading WebView until window is shown
+    // This fixes macOS multi-display rendering issue where WKWebView fails to render
+    // on extended displays if loaded before the window is fully displayed
+    // The WebView will be created and loaded by calling initializeWebView() after window is shown
+    mBrowser = nullptr;
+    // Note: loadTabState() will be called in initializeWebView() after WebView is created
+
+    Bind(wxEVT_CLOSE_WINDOW, &PrinterManagerView::onClose, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &PrinterManagerView::onClosePrinterTab, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_BEGIN_DRAG, &PrinterManagerView::onTabBeginDrag, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_DRAG_MOTION, &PrinterManagerView::onTabDragMotion, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_END_DRAG, &PrinterManagerView::onTabEndDrag, this);
+    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &PrinterManagerView::onTabChanged, this);
+}
+
+void PrinterManagerView::initializeWebView()
+{
+    // Only initialize once
+    bool expected = false;
+    if (!mWebViewInitialized.compare_exchange_strong(expected, true)) {
         return;
     }
     
-    mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
-    setupIPCHandlers();
+    // Create WebView if not already created
+    if (!mBrowser) {
+        mBrowser = WebView::CreateWebView(mTabBar, "");
+        if (mBrowser == nullptr) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": could not init mBrowser";
+            // Reset flag on failure to allow retry
+            mWebViewInitialized = false;
+            return;
+        }
+        
+        mIpc = std::make_unique<webviewIpc::WebviewIPCManager>(mBrowser);
+        setupIPCHandlers();
+        
+        // Check if page already exists in tab bar to avoid duplicate addition
+        int pageIndex = mTabBar->GetPageIndex(mBrowser);
+        if (pageIndex == wxNOT_FOUND) {
+            mTabBar->AddPage(mBrowser, FIRST_TAB_NAME);
+        }
+    }
     
-    mTabBar->AddPage(mBrowser, FIRST_TAB_NAME);
+    // Configure and load URL
     mBrowser->EnableAccessToDevTools(wxGetApp().app_config->get_bool("developer_mode"));
+    
+    // Load URL
     auto _dir = resources_dir();
     std::replace(_dir.begin(), _dir.end(), '\\', '/');
     wxString TargetUrl = from_u8((boost::filesystem::path(resources_dir()) / "web/printer/printer_manager/printer.html").make_preferred().string());
@@ -386,7 +422,7 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
     }  
     mBrowser->LoadURL(TargetUrl);
     
-    // 设置 ElegooSlicer UserAgent
+    // Set ElegooSlicer UserAgent
     wxString theme = wxGetApp().dark_mode() ? "dark" : "light";
 #ifdef __WIN32__
     mBrowser->SetUserAgent(wxString::Format("ElegooSlicer/%s (%s) Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
@@ -404,15 +440,8 @@ PrinterManagerView::PrinterManagerView(wxWindow *parent)
 
     // Load saved tab state
     loadTabState();
-
-    Bind(wxEVT_CLOSE_WINDOW, &PrinterManagerView::onClose, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &PrinterManagerView::onClosePrinterTab, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_BEGIN_DRAG, &PrinterManagerView::onTabBeginDrag, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_DRAG_MOTION, &PrinterManagerView::onTabDragMotion, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_END_DRAG, &PrinterManagerView::onTabEndDrag, this);
-    mTabBar->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &PrinterManagerView::onTabChanged, this);
-
-
+    
+    Layout();
 }
 
 PrinterManagerView::~PrinterManagerView() {
@@ -511,7 +540,7 @@ void PrinterManagerView::refreshUserInfo()
 
 void PrinterManagerView::onClose(wxCloseEvent& evt)
 {
-    this->Hide();
+    // this->Hide();
 }
 
 void PrinterManagerView::onClosePrinterTab(wxAuiNotebookEvent& event)
@@ -733,9 +762,21 @@ void PrinterManagerView::setupIPCHandlers()
         return deletePrinter(printerId);
     });
 
-    // Handle request_browse_ca_file
-    mIpc->onRequest("request_browse_ca_file", [this](const webviewIpc::IPCRequest& request){
-        return browseCAFile();
+    // Handle request_browse_ca_file (async because it shows a file dialog)
+    mIpc->onRequestAsync("request_browse_ca_file", [this](const webviewIpc::IPCRequest& request,
+                                                          std::function<void(const webviewIpc::IPCResult&)> sendResponse) {
+        wxGetApp().CallAfter([this, sendResponse]() {
+            try {
+                webviewIpc::IPCResult result = browseCAFile();
+                sendResponse(result);
+            } catch (const std::exception& e) {
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << boost::format(": error in browseCAFile: %s") % e.what();
+                sendResponse(webviewIpc::IPCResult::error(std::string("Failed to browse CA file: ") + e.what()));
+            } catch (...) {
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": unknown error in browseCAFile";
+                sendResponse(webviewIpc::IPCResult::error("Failed to browse CA file: Unknown error"));
+            }
+        });
     });
 
     // Handle request_refresh_printers
@@ -810,19 +851,21 @@ void PrinterManagerView::setupIPCHandlers()
 webviewIpc::IPCResult PrinterManagerView::deletePrinter(const std::string& printerId)
 { 
     webviewIpc::IPCResult result;
-    PrinterWebView* view = findPrinterView(printerId);
-    if (view) {
-        int page = mTabBar->GetPageIndex(view);
-        if (page != wxNOT_FOUND) {
-            mTabBar->DeletePage(page);
-        }
-        view->OnClose(wxCloseEvent());
-        removePrinterView(printerId);
-        mTabBar->SetSelection(0);
-    }
     auto networkResult = PrinterManager::getInstance()->deletePrinter(printerId);
     result.message = networkResult.message;
     result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
+    wxGetApp().CallAfter([this, printerId]() {
+        PrinterWebView* view = findPrinterView(printerId);
+        if (view) {
+            int page = mTabBar->GetPageIndex(view);
+            if (page != wxNOT_FOUND) {
+                mTabBar->DeletePage(page);
+            }
+            view->OnClose(wxCloseEvent());
+            removePrinterView(printerId);
+            mTabBar->SetSelection(0);
+        }
+    });
     return result;
 }
 void PrinterManagerView::closeInvalidPrinterTab(std::vector<PrinterNetworkInfo>& printerList)
@@ -839,25 +882,30 @@ void PrinterManagerView::closeInvalidPrinterTab(std::vector<PrinterNetworkInfo>&
         }
     });
     
-    for (size_t i = 0; i < printersToRemove.size(); ++i) {
-        int page = mTabBar->GetPageIndex(viewsToClose[i]);
-        if (page != wxNOT_FOUND) {
-            mTabBar->DeletePage(page);
+    wxGetApp().CallAfter([this, printersToRemove, viewsToClose]() {
+        for (size_t i = 0; i < printersToRemove.size(); ++i) {
+            int page = mTabBar->GetPageIndex(viewsToClose[i]);
+            if (page != wxNOT_FOUND) {
+                mTabBar->DeletePage(page);
+            }
+            viewsToClose[i]->OnClose(wxCloseEvent());
+            removePrinterView(printersToRemove[i]);
         }
-        viewsToClose[i]->OnClose(wxCloseEvent());
-        removePrinterView(printersToRemove[i]);
-    }
+    });
+
 }
 webviewIpc::IPCResult PrinterManagerView::updatePrinterName(const std::string& printerId, const std::string& printerName)
 {
     webviewIpc::IPCResult result;
-    PrinterWebView* view = findPrinterView(printerId);
-    if (view) {
-        int page = mTabBar->GetPageIndex(view);
-        if (page != wxNOT_FOUND) {
-            mTabBar->SetPageText(page, from_u8(printerName));
+    wxGetApp().CallAfter([this, printerId, printerName]() {
+        PrinterWebView* view = findPrinterView(printerId);
+        if (view) {
+            int page = mTabBar->GetPageIndex(view);
+            if (page != wxNOT_FOUND) {
+                mTabBar->SetPageText(page, from_u8(printerName));
+            }
         }
-    }
+    });
     auto networkResult = PrinterManager::getInstance()->updatePrinterName(printerId, printerName);
     result.message = networkResult.message;
     result.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
@@ -878,13 +926,15 @@ webviewIpc::IPCResult PrinterManagerView::updatePrinterHost(const std::string& p
             std::string accessCode = printerInfo.accessCode;
             url = url + wxString("?id=") + from_u8(printerInfo.printerId) + "&ip=" + printerInfo.host +"&sn=" + from_u8(printerInfo.serialNumber) + "&access_code=" + accessCode;
         }
-        PrinterWebView* view = findPrinterView(printerId);
-        if (view) {
-            int page = mTabBar->GetPageIndex(view);
-            if (page != wxNOT_FOUND) {
-                view->load_url(url);
+        wxGetApp().CallAfter([this, printerId, url]() {
+            PrinterWebView* view = findPrinterView(printerId);
+            if (view) {
+                int page = mTabBar->GetPageIndex(view);
+                if (page != wxNOT_FOUND) {
+                    view->load_url(url);
+                }
             }
-        }
+        });
     }
     return result;
 }
@@ -907,16 +957,18 @@ webviewIpc::IPCResult PrinterManagerView::updatePhysicalPrinter(const std::strin
     
     if (result.code == 0 && (oldPrinter.host != printerInfo.host || oldPrinter.webUrl != printerInfo.webUrl)) {
         PrinterNetworkInfo updatedPrinter = PrinterManager::getInstance()->getPrinterNetworkInfo(printerId);
-        PrinterWebView* view = findPrinterView(printerId);
-        if (view) {
-            int page = mTabBar->GetPageIndex(view);
-            if (page != wxNOT_FOUND) {
-                mTabBar->SetPageText(page, from_u8(updatedPrinter.printerName));
-                wxString url = updatedPrinter.webUrl;
-                view->load_url(url);
-                view->reload();
+        wxGetApp().CallAfter([this, printerId, updatedPrinter]() {
+            PrinterWebView* view = findPrinterView(printerId);
+            if (view) {
+                int page = mTabBar->GetPageIndex(view);
+                if (page != wxNOT_FOUND) {
+                    mTabBar->SetPageText(page, from_u8(updatedPrinter.printerName));
+                    wxString url = updatedPrinter.webUrl;
+                    view->load_url(url);
+                    view->reload();
+                }
             }
-        }
+        });
     }
     return result;
 }

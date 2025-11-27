@@ -128,28 +128,37 @@ class TranslationSyncer:
         return translations
     
     def parse_orca_po_file(self, file_path):
-        """Parse OrcaSlicer PO file - get all translations for lookup"""
+        """Parse OrcaSlicer PO file - get all translations for lookup, including comment lines"""
         translations = {}
+        comment_lines = {}  # Store comment lines (like #, fuzzy, c-format) for each msgid
         
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
             
-            # Pre-filter: remove empty lines and comment lines
-            lines = [line.strip() for line in lines if line.strip() and not line.strip().startswith('#~')]
-            
             i = 0
             while i < len(lines):
-                line = lines[i]
+                line_stripped = lines[i].strip()
                 
-                if line.startswith('msgid '):
+                # Look for comment lines before msgid (like #, fuzzy, c-format)
+                comment_line = None
+                if line_stripped.startswith('#,') and not line_stripped.startswith('#~'):
+                    comment_line = lines[i]  # Keep original format with newline
+                    i += 1
+                    # Skip empty lines after comment
+                    while i < len(lines) and not lines[i].strip():
+                        i += 1
+                
+                if i < len(lines) and lines[i].strip().startswith('msgid '):
                     # Read msgid content
-                    msgid_content = line[line.find('"'):].strip()
+                    msgid_line = lines[i].strip()
+                    msgid_content = msgid_line[msgid_line.find('"'):].strip()
                     i += 1
                     
                     # Read multi-line msgid
-                    while i < len(lines) and lines[i].startswith('"'):
-                        msgid_content += "\n" + lines[i]
+                    while i < len(lines) and (lines[i].strip().startswith('"') or not lines[i].strip()):
+                        if lines[i].strip() and not lines[i].strip().startswith('#~'):
+                            msgid_content += "\n" + lines[i].strip()
                         i += 1
                     
                     # Skip empty msgid
@@ -157,32 +166,35 @@ class TranslationSyncer:
                         continue
 
                     # Read msgstr content
-                    if i < len(lines) and lines[i].startswith('msgstr '):
+                    if i < len(lines) and lines[i].strip().startswith('msgstr '):
                         msgstr_content = lines[i][lines[i].find('"'):].strip()
                         i += 1
                         
                         # Read multi-line msgstr
-                        while i < len(lines) and lines[i].startswith('"'):
-                            msgstr_content += "\n" + lines[i]
+                        while i < len(lines) and (lines[i].strip().startswith('"') or not lines[i].strip()):
+                            if lines[i].strip() and not lines[i].strip().startswith('#~'):
+                                msgstr_content += "\n" + lines[i].strip()
                             i += 1
                         
-                        # Save translation
+                        # Save translation and comment line
                         if msgstr_content == '""' or not msgstr_content or 'orca' in msgstr_content.lower():
                             continue
                         translations[msgid_content] = msgstr_content
+                        if comment_line:
+                            comment_lines[msgid_content] = comment_line
                     else:
                         # No msgstr found - skip this entry
-                        continue
+                        i += 1
                 else:
                     i += 1
                     
         except Exception as e:
             print(f"Error parsing {file_path}: {e}")
             
-        return translations
+        return translations, comment_lines
     
-    def update_elegoo_po_file(self, po_file_path, elegoo_translations, orca_translations):
-        """Update ElegooSlicer PO file with translations from OrcaSlicer"""
+    def update_elegoo_po_file(self, po_file_path, elegoo_translations, orca_translations, orca_comment_lines):
+        """Update ElegooSlicer PO file with translations from OrcaSlicer, including comment lines"""
         updated_count = 0
         changes = []  # 记录修改的详细信息
         
@@ -196,10 +208,21 @@ class TranslationSyncer:
             while i < len(lines):
                 line = lines[i].strip()
                 
-                # Skip empty lines and comments
+                # Skip empty lines and obsolete comments
                 if not line or line.startswith('#~'):
                     i += 1
                     continue
+                
+                # Look for comment line before msgid (like #, fuzzy, c-format)
+                comment_line_idx = None
+                if line.startswith('#,'):
+                    comment_line_idx = i
+                    i += 1
+                    # Skip empty lines after comment
+                    while i < len(lines) and not lines[i].strip():
+                        i += 1
+                    if i < len(lines):
+                        line = lines[i].strip()
                 
                 if line.startswith('msgid '):
                     # Read msgid content
@@ -242,6 +265,28 @@ class TranslationSyncer:
                                         'msgid': msgid_content,
                                         'translation': orca_msgstr
                                     })
+                                    
+                                    # Update or add/remove comment line based on OrcaSlicer
+                                    if msgid_content in orca_comment_lines:
+                                        # OrcaSlicer has comment line - sync it
+                                        orca_comment = orca_comment_lines[msgid_content]
+                                        if comment_line_idx is not None:
+                                            # Update existing comment line
+                                            lines[comment_line_idx] = orca_comment
+                                        else:
+                                            # Add new comment line before msgid
+                                            lines.insert(i, orca_comment)
+                                            j += 1  # Adjust j since we inserted a line
+                                    else:
+                                        # OrcaSlicer has no comment line - remove ElegooSlicer's if exists
+                                        if comment_line_idx is not None:
+                                            # Remove the comment line
+                                            del lines[comment_line_idx]
+                                            # Adjust indices since we removed a line
+                                            if comment_line_idx < i:
+                                                i -= 1
+                                            if comment_line_idx < j:
+                                                j -= 1
                                     
                                     # Update the msgstr line in original file
                                     lines[j] = f'msgstr {orca_msgstr}\n'
@@ -312,7 +357,7 @@ class TranslationSyncer:
                 continue
             
             # Parse OrcaSlicer PO file
-            orca_translations = self.parse_orca_po_file(orca_po_file)
+            orca_translations, orca_comment_lines = self.parse_orca_po_file(orca_po_file)
             print(f"  OrcaSlicer: {len(orca_translations)} translations")
             
             # Count translations that can be updated
@@ -349,7 +394,7 @@ class TranslationSyncer:
             print(f"  Can update: {need_update} translations")
             
             # Update translations
-            updated_count, changes = self.update_elegoo_po_file(po_file, elegoo_translations, orca_translations)
+            updated_count, changes = self.update_elegoo_po_file(po_file, elegoo_translations, orca_translations, orca_comment_lines)
             total_updated += updated_count
             print(f"  Actually updated: {updated_count} translations")
             
