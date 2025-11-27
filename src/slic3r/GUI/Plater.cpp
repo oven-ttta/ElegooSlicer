@@ -9310,12 +9310,6 @@ void Plater::load_project(wxString const& filename2,
 
     wxGetApp().params_panel()->switch_to_object_if_has_object_configs();
 
-    // Fix for wipe tower position after 3MF project loading(this is a temporary solution, magic beats magic)
-    // Simulate an instance moved event to trigger wipe tower position recalculation
-    if (p->view3D != nullptr && p->view3D->get_canvas3d() != nullptr) {
-        p->view3D->get_canvas3d()->do_move("");
-    }
-    
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << __LINE__ << " load project done";
     m_loading_project = false;
 }
