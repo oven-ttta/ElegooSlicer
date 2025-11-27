@@ -703,10 +703,9 @@ PrinterNetworkResult<bool> PrinterManager::upload(PrinterNetworkParams& params)
         }
         if(printer.value().networkType == NETWORK_TYPE_WAN) {
            try {
-               // Use encode_path to handle Chinese and special characters in file path
-               std::string encodedPath = encode_path(params.filePath.c_str());
-               boost::filesystem::path filePath(encodedPath);
-               if(boost::filesystem::file_size(filePath) > 500 * 1024 * 1024) {
+               boost::filesystem::path filePath(params.filePath);
+               boost::uintmax_t fileSize = boost::filesystem::file_size(filePath);
+               if(fileSize > 500 * 1024 * 1024) {
                    result = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::FILE_TOO_LARGE, false);
                    break;
                }
@@ -878,17 +877,8 @@ void PrinterManager::refreshWanPrinters()
             deletePrinterNetwork(localPrinter.printerId);
         }
     }
-
-    std::vector<std::future<void>> addWanPrinterFutures;
     for (auto& wanPrinter : wanPrintersToAdd) {
-        auto future = std::async(std::launch::async, [this, &wanPrinter]() {
-            connectToPrinter(wanPrinter);
-            PrinterCache::getInstance()->addPrinter(wanPrinter);
-        });
-        addWanPrinterFutures.push_back(std::move(future));
-    }
-    for (auto& future : addWanPrinterFutures) {
-        future.wait();
+        PrinterCache::getInstance()->addPrinter(wanPrinter);     
     }
 }
 

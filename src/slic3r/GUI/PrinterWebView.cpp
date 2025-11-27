@@ -381,18 +381,20 @@ void PrinterWebView::setupIPCHandlers()
 
             // set upload status
             m_uploadInProgress = true;
-            bool ret = false;
+            PrinterNetworkResult<bool> networkResult;
             try {
-                auto networkResult = PrinterManager::getInstance()->upload(networkParams);
-                ret                = networkResult.isSuccess();
+                networkResult = PrinterManager::getInstance()->upload(networkParams);
             } catch (...) {
-                ret = false;
+                networkResult = PrinterNetworkResult<bool>(PrinterNetworkErrorCode::UNKNOWN_ERROR, false);
             }
 
             // reset upload status
             m_uploadInProgress = false;
             // send response in main thread
-            auto response = ret ? webviewIpc::IPCResult::success() : webviewIpc::IPCResult::error("Upload failed");
+            webviewIpc::IPCResult response;
+            response.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
+            response.message = networkResult.message;
+            response.data = networkResult.data.has_value() ? networkResult.data.value() : nlohmann::json::object();
             sendResponse(response);
         } catch (...) {
             m_uploadInProgress = false;
