@@ -507,6 +507,16 @@ void PrinterManagerView::openPrinterTab(const std::string& printerId, bool saveS
         }
     }
 
+    // Add current language parameter
+    wxString lang = wxGetApp().current_language_code_safe();
+    if (!lang.empty()) {
+        if (url.Contains("?")) {
+            url += "&lang=" + lang;
+        } else {
+            url += "?lang=" + lang;
+        }
+    }
+
     view->load_url(url);
     // Local network shows IP address, cloud printing shows printer name
     if(printerInfo.networkType==0)
