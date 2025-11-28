@@ -950,7 +950,9 @@ public:
 	// Set speed factor override percentage.
 	WipeTowerWriter2& speed_override(int speed)
 	{
-        m_gcode += "M220 S" + std::to_string(speed) + "\n";
+        //This instruction is removed because some printers do not support saving and restoring the original speed, 
+        // and setting it here will affect the printing speed.
+        // m_gcode += "M220 S" + std::to_string(speed) + "\n";
 		return *this;
     }
 
