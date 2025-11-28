@@ -376,8 +376,6 @@ body {
 
 /* ElMessage error message style - ensure long messages are fully displayed */
 .el-message {
-  max-width: 90vw !important;
-  min-width: 300px;
 }
 
 .el-message__content {
