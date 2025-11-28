@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-26 11:57+0800\n"
+"POT-Creation-Date: 2025-11-28 10:24+0800\n"
 "PO-Revision-Date: 2023-09-30 15:15+0200\n"
 "Last-Translator: René Mošner <Renemosner@seznam.cz>\n"
 "Language-Team: \n"
@@ -17267,6 +17267,9 @@ msgid "Operation failed. Please try again later."
 msgstr ""
 
 msgid "Printer already connected"
+msgstr ""
+
+msgid "Printer error. Please try again later."
 msgstr ""
 
 msgid "Invalid printer parameter. Please check and try again."

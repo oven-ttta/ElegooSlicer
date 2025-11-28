@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-26 11:57+0800\n"
+"POT-Creation-Date: 2025-11-28 10:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16038,6 +16038,9 @@ msgid "Operation failed. Please try again later."
 msgstr ""
 
 msgid "Printer already connected"
+msgstr ""
+
+msgid "Printer error. Please try again later."
 msgstr ""
 
 msgid "Invalid printer parameter. Please check and try again."

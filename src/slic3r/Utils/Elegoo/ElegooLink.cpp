@@ -90,6 +90,7 @@ PrinterStatus parseElegooStatus(elink::PrinterState mainStatus, elink::PrinterSu
     case elink::PrinterState::VIDEO_COMPOSING: printerStatus = PRINTER_STATUS_VIDEO_COMPOSING; break;
     case elink::PrinterState::EMERGENCY_STOP: printerStatus = PRINTER_STATUS_EMERGENCY_STOP; break;
     case elink::PrinterState::POWER_LOSS_RECOVERY: printerStatus = PRINTER_STATUS_POWER_LOSS_RECOVERY; break;
+    case elink::PrinterState::INITIALIZING: printerStatus = PRINTER_STATUS_INITIALIZING; break;
     default: printerStatus = PRINTER_STATUS_UNKNOWN; break;
     }
 
@@ -299,7 +300,8 @@ void ElegooLink::uninit()
 
 std::string parseUnknownErrorMsg(PrinterNetworkErrorCode resultCode, const std::string& msg)
 {
-    if (resultCode == PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR) {
+    if (resultCode == PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR || resultCode == PrinterNetworkErrorCode::SERVER_UNKNOWN_ERROR ||
+        resultCode == PrinterNetworkErrorCode::UNKNOWN_ERROR) {
         if (msg.find("[ErrorCode:") != std::string::npos) {
             return getErrorMessage(resultCode) + "(" +
                    msg.substr(msg.find("[ErrorCode:") + 11, msg.find("]") - msg.find("[ErrorCode:") - 11) + ")";

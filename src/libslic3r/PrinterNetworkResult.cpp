@@ -55,7 +55,7 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
         case PrinterNetworkErrorCode::PRINTER_ALREADY_CONNECTED:
             return _u8L("Printer already connected");
         case PrinterNetworkErrorCode::PRINTER_UNKNOWN_ERROR:
-            return _u8L("An unknown error occurred. Please try again later.");
+            return _u8L("Printer error. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_INVALID_PARAMETER:
             return _u8L("Invalid printer parameter. Please check and try again.");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_EXCEPTION:

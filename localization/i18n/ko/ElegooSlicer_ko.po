@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-26 11:57+0800\n"
+"POT-Creation-Date: 2025-11-28 10:24+0800\n"
 "PO-Revision-Date: 2024-05-31 23:33+0900\n"
 "Last-Translator: Hotsolidinfill <138652683+Hotsolidinfill@users.noreply."
 "github.com>, crwusiz <crwusiz@gmail.com>\n"
@@ -17757,6 +17757,9 @@ msgid "Operation failed. Please try again later."
 msgstr ""
 
 msgid "Printer already connected"
+msgstr ""
+
+msgid "Printer error. Please try again later."
 msgstr ""
 
 msgid "Invalid printer parameter. Please check and try again."

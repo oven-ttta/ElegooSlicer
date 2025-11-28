@@ -103,6 +103,7 @@ const PrinterManager = {
                 [18]: this.$t("printerManager.videoComposing"),
                 [19]: this.$t("printerManager.emergencyStop"),
                 [20]: this.$t("printerManager.powerLossRecovery"),
+                [21]: this.$t("printerManager.initializing"),
                 [998]: this.$t("printerManager.busy"),
                 [999]: this.$t("printerManager.error"),
                 [1000]: this.$t("printerManager.idNotMatch"),

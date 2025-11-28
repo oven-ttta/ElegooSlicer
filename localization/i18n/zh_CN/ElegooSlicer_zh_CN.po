@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Slic3rPE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-26 11:57+0800\n"
+"POT-Creation-Date: 2025-11-28 10:24+0800\n"
 "PO-Revision-Date: 2023-04-01 13:21+0800\n"
 "Last-Translator: ELEGOOTechSupport <softfeverever@gmail.com>\n"
 "Language-Team: \n"
@@ -16977,6 +16977,9 @@ msgstr "操作失败，请稍后重试"
 
 msgid "Printer already connected"
 msgstr "打印机已存在"
+
+msgid "Printer error. Please try again later."
+msgstr "打印机异常，请稍后重试"
 
 msgid "Invalid printer parameter. Please check and try again."
 msgstr ""

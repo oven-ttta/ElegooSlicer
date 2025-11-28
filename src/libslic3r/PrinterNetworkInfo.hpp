@@ -38,7 +38,7 @@ enum PrinterStatus {
     PRINTER_STATUS_VIDEO_COMPOSING     = 18, // Video composing
     PRINTER_STATUS_EMERGENCY_STOP      = 19, // Emergency stop
     PRINTER_STATUS_POWER_LOSS_RECOVERY = 20, // Power loss recover
-
+    PRINTER_STATUS_INITIALIZING        = 21, // Initializing
     PRINTER_STATUS_BUSY   = 998,  // Device busy
     PRINTER_STATUS_ERROR   = 999,  // Device exception status
     PRINTER_STATUS_ID_NOT_MATCH = 1000, // local mainboard or serial number not match with the remote printer

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ElegooSlicer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-26 11:57+0800\n"
+"POT-Creation-Date: 2025-11-28 10:24+0800\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17084,6 +17084,9 @@ msgid "Operation failed. Please try again later."
 msgstr ""
 
 msgid "Printer already connected"
+msgstr ""
+
+msgid "Printer error. Please try again later."
 msgstr ""
 
 msgid "Invalid printer parameter. Please check and try again."
