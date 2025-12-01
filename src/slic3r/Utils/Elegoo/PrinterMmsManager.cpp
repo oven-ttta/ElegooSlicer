@@ -12,6 +12,7 @@
 #include <mutex>
 #include <cmath>
 #include <algorithm>
+#include <limits>
 
 namespace Slic3r {
 
@@ -21,31 +22,82 @@ struct StandardColor
     std::string colorHex;
 };
 
-struct RgbColor {
-    int r, g, b;
-    RgbColor(int red = 0, int green = 0, int blue = 0) : r(red), g(green), b(blue) {}
+
+struct LabColor {
+    double l, a, b;
+    LabColor(double lVal = 0, double aVal = 0, double bVal = 0) : l(lVal), a(aVal), b(bVal) {}
 };
 
-static RgbColor hexToRgb(const std::string& hex)
-{
-    std::string h = hex;
-    if (!h.empty() && h[0] == '#')
-        h = h.substr(1);
-    
-    if (h.length() == 6) {
-        int r = std::stoi(h.substr(0, 2), nullptr, 16);
-        int g = std::stoi(h.substr(2, 2), nullptr, 16);
-        int b = std::stoi(h.substr(4, 2), nullptr, 16);
-        return RgbColor(r, g, b);
-    }
-    
-    return RgbColor(0, 0, 0);
-}
 
 struct XyzColor {
     double x, y, z;
     XyzColor(double xVal = 0, double yVal = 0, double zVal = 0) : x(xVal), y(yVal), z(zVal) {}
 };
+
+
+static LabColor xyzToLab(const XyzColor& xyz)
+{
+    // D65 illuminant
+    const double xn = 95.047;
+    const double yn = 100.000;
+    const double zn = 108.883;
+    
+    double fx = (xyz.x / xn > 0.008856) ? pow(xyz.x / xn, 1.0/3.0) : (7.787 * xyz.x / xn + 16.0/116.0);
+    double fy = (xyz.y / yn > 0.008856) ? pow(xyz.y / yn, 1.0/3.0) : (7.787 * xyz.y / yn + 16.0/116.0);
+    double fz = (xyz.z / zn > 0.008856) ? pow(xyz.z / zn, 1.0/3.0) : (7.787 * xyz.z / zn + 16.0/116.0);
+    
+    double l = 116 * fy - 16;
+    double a = 500 * (fx - fy);
+    double b = 200 * (fy - fz);
+    
+    return LabColor(l, a, b);
+}
+struct StandardColorLab
+{
+    StandardColor color;
+    LabColor lab;
+};
+
+struct RgbColor {
+    int r, g, b;
+    RgbColor(int red = 0, int green = 0, int blue = 0) : r(red), g(green), b(blue) {}
+};
+
+static bool isValidHex6(const std::string& h)
+{
+    if (h.length() != 6) {
+        return false;
+    }
+    for (char c : h) {
+        if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static RgbColor hexToRgb(const std::string& hex)
+{
+    std::string h = hex;
+    if (!h.empty() && h[0] == '#') {
+        h = h.substr(1);
+    }
+    
+    if (isValidHex6(h)) {
+        try {
+            int r = std::stoi(h.substr(0, 2), nullptr, 16);
+            int g = std::stoi(h.substr(2, 2), nullptr, 16);
+            int b = std::stoi(h.substr(4, 2), nullptr, 16);
+            return RgbColor(r, g, b);
+        } catch (...) {
+            // Invalid hex format, return black as fallback
+            return RgbColor(0, 0, 0);
+        }
+    }
+    
+    // Invalid hex format, return black as fallback
+    return RgbColor(0, 0, 0);
+}
 
 static XyzColor rgbToXyz(const RgbColor& rgb)
 {
@@ -67,86 +119,104 @@ static XyzColor rgbToXyz(const RgbColor& rgb)
     return XyzColor(x * 100, y * 100, z * 100);
 }
 
-struct LabColor {
-    double l, a, b;
-    LabColor(double lVal = 0, double aVal = 0, double bVal = 0) : l(lVal), a(aVal), b(bVal) {}
-};
-
-static LabColor xyzToLab(const XyzColor& xyz)
-{
-    // D65 illuminant
-    const double xn = 95.047;
-    const double yn = 100.000;
-    const double zn = 108.883;
-    
-    double fx = (xyz.x / xn > 0.008856) ? pow(xyz.x / xn, 1.0/3.0) : (7.787 * xyz.x / xn + 16.0/116.0);
-    double fy = (xyz.y / yn > 0.008856) ? pow(xyz.y / yn, 1.0/3.0) : (7.787 * xyz.y / yn + 16.0/116.0);
-    double fz = (xyz.z / zn > 0.008856) ? pow(xyz.z / zn, 1.0/3.0) : (7.787 * xyz.z / zn + 16.0/116.0);
-    
-    double l = 116 * fy - 16;
-    double a = 500 * (fx - fy);
-    double b = 200 * (fy - fz);
-    
-    return LabColor(l, a, b);
-}
-
 // Delta E 2000 calculation
 static double deltaE2000(const LabColor& lab1, const LabColor& lab2)
 {
-    // Calculate C* and h
-    double c1 = sqrt(lab1.a * lab1.a + lab1.b * lab1.b);
-    double c2 = sqrt(lab2.a * lab2.a + lab2.b * lab2.b);
+    // Step 1: Calculate C1, C2
+    double c1 = std::sqrt(lab1.a * lab1.a + lab1.b * lab1.b);
+    double c2 = std::sqrt(lab2.a * lab2.a + lab2.b * lab2.b);
     double cBar = (c1 + c2) / 2.0;
-    
-    // Calculate G factor
-    double g = 0.5 * (1 - sqrt(pow(cBar, 7) / (pow(cBar, 7) + pow(25, 7))));
-    
-    // Calculate a' and C'
-    double a1Prime = (1 + g) * lab1.a;
-    double a2Prime = (1 + g) * lab2.a;
-    double c1Prime = sqrt(a1Prime * a1Prime + lab1.b * lab1.b);
-    double c2Prime = sqrt(a2Prime * a2Prime + lab2.b * lab2.b);
-    
-    // Calculate h'
-    double h1Prime = atan2(lab1.b, a1Prime) * 180.0 / M_PI;
-    double h2Prime = atan2(lab2.b, a2Prime) * 180.0 / M_PI;
-    if (h1Prime < 0) h1Prime += 360;
-    if (h2Prime < 0) h2Prime += 360;
-    
-    // Calculate ΔL', ΔC', ΔH'
-    double deltaL = lab2.l - lab1.l;
-    double deltaC = c2Prime - c1Prime;
-    double deltaH = h2Prime - h1Prime;
-    if (deltaH > 180) deltaH -= 360;
-    if (deltaH < -180) deltaH += 360;
-    double deltaHPrime = 2 * sqrt(c1Prime * c2Prime) * sin(deltaH * M_PI / 360.0);
-    
-    // Calculate weighting functions
-    double lBar = (lab1.l + lab2.l) / 2.0;
+
+    // Step 2: G factor
+    double cBar7 = std::pow(cBar, 7);
+    double g = 0.5 * (1.0 - std::sqrt(cBar7 / (cBar7 + std::pow(25.0, 7))));
+
+    // Step 3: a'1, a'2
+    double a1Prime = (1.0 + g) * lab1.a;
+    double a2Prime = (1.0 + g) * lab2.a;
+
+    // Step 4: C'1, C'2
+    double c1Prime = std::sqrt(a1Prime * a1Prime + lab1.b * lab1.b);
+    double c2Prime = std::sqrt(a2Prime * a2Prime + lab2.b * lab2.b);
+
+    // Step 5: h'1, h'2 (in degrees)
+    auto calcHuePrime = [](double a, double b) {
+        double h = std::atan2(b, a) * 180.0 / M_PI;
+        return (h < 0) ? (h + 360.0) : h;
+    };
+
+    double h1Prime = calcHuePrime(a1Prime, lab1.b);
+    double h2Prime = calcHuePrime(a2Prime, lab2.b);
+
+    // Step 6: ΔL', ΔC'
+    double deltaLPrime = lab2.l - lab1.l;
+    double deltaCPrime = c2Prime - c1Prime;
+
+    // Step 7: Δh'
+    double deltahPrime = 0.0;
+    double hDiff = h2Prime - h1Prime;
+    if (c1Prime * c2Prime == 0) {
+        deltahPrime = 0;
+    } else {
+        if (std::fabs(hDiff) <= 180.0) {
+            deltahPrime = hDiff;
+        } else if (hDiff > 180.0) {
+            deltahPrime = hDiff - 360.0;
+        } else {
+            deltahPrime = hDiff + 360.0;
+        }
+    }
+
+    // Step 8: ΔH'
+    double deltaHPrime = 2.0 * std::sqrt(c1Prime * c2Prime) *
+                         std::sin((deltahPrime * M_PI) / 360.0);
+
+    // Step 9: L', C', h' averages
+    double lBarPrime = (lab1.l + lab2.l) / 2.0;
     double cBarPrime = (c1Prime + c2Prime) / 2.0;
-    double hBarPrime = (h1Prime + h2Prime) / 2.0;
-    if (abs(h1Prime - h2Prime) > 180) hBarPrime += 180;
-    if (hBarPrime > 360) hBarPrime -= 360;
-    
-    double t = 1 - 0.17 * cos((hBarPrime - 30) * M_PI / 180.0) + 
-               0.24 * cos((2 * hBarPrime) * M_PI / 180.0) +
-               0.32 * cos((3 * hBarPrime + 6) * M_PI / 180.0) -
-               0.20 * cos((4 * hBarPrime - 63) * M_PI / 180.0);
-    
-    double deltaTheta = 30 * exp(-pow((hBarPrime - 275) / 25, 2));
-    double rC = 2 * sqrt(pow(cBarPrime, 7) / (pow(cBarPrime, 7) + pow(25, 7)));
-    double sL = 1 + (0.015 * pow(lBar - 50, 2)) / sqrt(20 + pow(lBar - 50, 2));
-    double sC = 1 + 0.045 * cBarPrime;
-    double sH = 1 + 0.015 * cBarPrime * t;
-    double rT = -sin(2 * deltaTheta * M_PI / 180.0) * rC;
-    
-    double kL = 1, kC = 1, kH = 1; // Standard observer
-    
-    double deltaE = sqrt(pow(deltaL / (kL * sL), 2) + 
-                         pow(deltaC / (kC * sC), 2) + 
-                         pow(deltaHPrime / (kH * sH), 2) + 
-                         rT * (deltaC / (kC * sC)) * (deltaHPrime / (kH * sH)));
-    
+    double hBarPrime = 0.0;
+    if (c1Prime * c2Prime == 0) {
+        hBarPrime = h1Prime + h2Prime;
+    } else {
+        if (std::fabs(hDiff) <= 180.0) {
+            hBarPrime = (h1Prime + h2Prime) / 2.0;
+        } else {
+            hBarPrime = (h1Prime + h2Prime + 360.0) / 2.0;
+        }
+    }
+    if (hBarPrime >= 360.0) hBarPrime -= 360.0;
+
+    // Step 10: T
+    double T = 1.0 - 0.17 * std::cos((hBarPrime - 30.0) * M_PI / 180.0)
+                  + 0.24 * std::cos((2.0 * hBarPrime) * M_PI / 180.0)
+                  + 0.32 * std::cos((3.0 * hBarPrime + 6.0) * M_PI / 180.0)
+                  - 0.20 * std::cos((4.0 * hBarPrime - 63.0) * M_PI / 180.0);
+
+    // Step 11: Δθ
+    double deltaTheta = 30.0 * std::exp(-std::pow((hBarPrime - 275.0) / 25.0, 2.0));
+
+    // Step 12: R_C
+    double cBarPrime7 = std::pow(cBarPrime, 7);
+    double rC = 2.0 * std::sqrt(cBarPrime7 / (cBarPrime7 + std::pow(25.0, 7)));
+
+    // Step 13: S_L, S_C, S_H
+    double sL = 1.0 + (0.015 * std::pow(lBarPrime - 50.0, 2.0)) /
+                        std::sqrt(20.0 + std::pow(lBarPrime - 50.0, 2.0));
+    double sC = 1.0 + 0.045 * cBarPrime;
+    double sH = 1.0 + 0.015 * cBarPrime * T;
+
+    // Step 14: R_T
+    double rT = -std::sin((2.0 * deltaTheta) * M_PI / 180.0) * rC;
+
+    // Step 15: ΔE00
+    double kL = 1.0, kC = 1.0, kH = 1.0; // Standard observer
+    double deltaE = std::sqrt(
+        std::pow(deltaLPrime / (kL * sL), 2.0) +
+        std::pow(deltaCPrime / (kC * sC), 2.0) +
+        std::pow(deltaHPrime / (kH * sH), 2.0) +
+        rT * (deltaCPrime / (kC * sC)) * (deltaHPrime / (kH * sH))
+    );
+
     return deltaE;
 }
 
@@ -175,6 +245,18 @@ static const std::vector<StandardColor> standardColors = {{"white", "#FFFFFF"},
                                                           {"light_gray", "#BCBCBC"},
                                                           {"black", "#000000"}};
 
+// Pre-compute Lab values for all standard colors to improve performance
+static const std::vector<StandardColorLab> standardColorLabs = []() {
+    std::vector<StandardColorLab> v;
+    v.reserve(standardColors.size());
+    for (const auto& sc : standardColors) {
+        RgbColor rgb = hexToRgb(sc.colorHex);
+        LabColor lab = xyzToLab(rgbToXyz(rgb));
+        v.push_back({sc, lab});
+    }
+    return v;
+}();
+
 // ΔE2000 (CIEDE2000) color match
 // 0-1 barely noticeable to the human eye
 // 1-2 noticeable only when compared closely
@@ -184,37 +266,31 @@ static const std::vector<StandardColor> standardColors = {{"white", "#FFFFFF"},
 
 static StandardColor getStandardColor(const std::string& hex)
 {
-    // Convert input color to LAB
+    // Convert input to Lab
     RgbColor rgb = hexToRgb(hex);
     XyzColor xyz = rgbToXyz(rgb);
-    LabColor lab = xyzToLab(xyz);
+    LabColor inputLab = xyzToLab(xyz);
     
-    double minDeltaE = 1000.0; // Large initial value
-    StandardColor bestMatch = {"", ""};
+    double minDeltaE = std::numeric_limits<double>::max();
+    const StandardColor* bestMatch = nullptr;
     
-    // Calculate ΔE2000 with each standard color
-    for (const auto& color : standardColors) {
-        RgbColor standardRgb = hexToRgb(color.colorHex);
-        XyzColor standardXyz = rgbToXyz(standardRgb);
-        LabColor standardLab = xyzToLab(standardXyz);
+    // Iterate through pre-computed standard color Labs
+    for (const auto& sc : standardColorLabs) {
+        double dE = deltaE2000(inputLab, sc.lab);
         
-        // Calculate ΔE2000
-        double deltaE = deltaE2000(lab, standardLab);
-        
-        // Find the closest match
-        if (deltaE < minDeltaE) {
-            minDeltaE = deltaE;
-            bestMatch = color;
+        if (dE < minDeltaE) {
+            minDeltaE = dE;
+            bestMatch = &sc.color;
         }
     }
     
-    // Return the closest match if ΔE < 50 (reasonable threshold)
-    if (minDeltaE < 50.0) {
-        return bestMatch;
-    }
-    
-    // If no good match found, return empty
-    return StandardColor{"", ""};
+    // Always return the best match, regardless of ΔE value
+    // ΔE can be used as confidence indicator:
+    // - deltaE < 2: barely noticeable
+    // - deltaE < 10: noticeable to average person
+    // - deltaE >= 30: obviously different
+    // - deltaE >= 50: completely different
+    return bestMatch != nullptr ? *bestMatch : StandardColor{"", ""};
 }
 
 PrinterMmsManager::PrinterMmsManager() {}
@@ -852,3 +928,4 @@ void PrinterMmsManager::removeFilamentMmsMapping(const std::string& filamentType
 }
 
 } // namespace Slic3r
+
