@@ -37,11 +37,9 @@ if not defined WindowsSDKVersion (
 
 :validate_version
 if not exist "%WindowsSdkDir%Include\%WindowsSDKVersion%\" (
-    echo ERROR: SDK path invalid: "%WindowsSdkDir%Include\%WindowsSDKVersion%\"!
+    echo ERROR: SDK path invalid: "%WindowsSdkDir%Include\%WindowsSDKVersion%\"
     exit /b 1
 )
 
-@REM echo WindowsSdkDir=%WindowsSdkDir%
-@REM echo WindowsSDKVersion=%WindowsSDKVersion%
-
 exit /b 0
+

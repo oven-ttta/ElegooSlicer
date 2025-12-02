@@ -38,6 +38,7 @@ src/ElegooSlicer-doc/
 **/.flatpak-builder/
 resources/profiles/user/default
 CMakePresets.json
+compile_commands.json
 *.env
 *.code-workspace
 resources/web/elegoo-fdm-web/

@@ -1,8 +1,11 @@
 @echo off
 set WP=%CD%
 
+set "VS_GENERATOR=Visual Studio 17 2022"
+set "PACK_SUFFIX=vs2022"
+
 if not defined WindowsSdkDir (
-    call scripts/get_vs2022_sdk.bat
+    call scripts/get_windows_sdk.bat
 )
 
 echo WindowsSdkDir=%WindowsSdkDir%
@@ -11,10 +14,10 @@ echo WindowsSDKVersion=%WindowsSDKVersion%
 if "%1" == "help" (
     echo.
     echo ============================================================================
-    echo ElegooSlicer Build Script for Windows - VS2022
+    echo ElegooSlicer Build Script for Windows
     echo ============================================================================
     echo.
-    echo Usage: build_release_vs2022_pack_and_sign.bat [parameters]
+    echo Usage: build_release_windows.bat [parameters]
     echo.
     echo Parameters:
     echo   slicer       - Only compile the slicer, skip dependencies build
@@ -27,12 +30,14 @@ if "%1" == "help" (
     echo   debuginfo    - Build in RelWithDebInfo mode with debug symbols
     echo   pack         - Pack dependencies into zip file
     echo   dlweb        - Download web dependencies default: skip download
+    echo   vs2019       - Select Visual Studio vs2019 toolchain
+    echo   vs2026       - Select Visual Studio vs2026 toolchain default is vs2022
     echo.
     echo Examples:
-    echo   build_release_vs2022_pack_and_sign.bat slicer
-    echo   build_release_vs2022_pack_and_sign.bat packinstall sign
-    echo   build_release_vs2022_pack_and_sign.bat test slicer
-    echo   build_release_vs2022_pack_and_sign.bat only_deps
+    echo   build_release_windows.bat slicer
+    echo   build_release_windows.bat vs2019 packinstall sign
+    echo   build_release_windows.bat test slicer
+    echo   build_release_windows.bat only_deps
     echo.
     echo ============================================================================
     echo.
@@ -48,7 +53,7 @@ if "%1"=="pack" (
     setlocal ENABLEDELAYEDEXPANSION 
     cd %WP%/deps/build
     for /f "tokens=2-4 delims=/ " %%a in ('date /t') do set build_date=%%c%%b%%a
-    set PACK_NAME=ElegooSlicer_dep_win64_!build_date!_vs2022.zip
+    set PACK_NAME=ElegooSlicer_dep_win64_!build_date!_%PACK_SUFFIX%.zip
     
     echo [INFO] Creating dependency package: !PACK_NAME!
     echo [INFO] Compressing with 7-Zip...
@@ -82,6 +87,18 @@ set ELEGOO_INTERNAL_TESTING=0
 set count=1
 :loop
 if "%1"=="" goto end
+if /I "%1"=="vs2019" (
+    set "VS_GENERATOR=Visual Studio 16 2019"
+    set "PACK_SUFFIX=vs2019"
+    shift
+    goto loop
+)
+if /I "%1"=="vs2026" (
+    set "VS_GENERATOR=Visual Studio 17 2022"
+    set "PACK_SUFFIX=vs2026"
+    shift
+    goto loop
+)
 if "%1"=="debug" set debug=ON
 if "%1"=="debuginfo" set debuginfo=ON
 if "%1"=="slicer" set only_slicer=ON
@@ -101,6 +118,7 @@ echo.
 echo ============================================================================
 echo                      BUILD CONFIGURATION
 echo ============================================================================
+echo   VS Toolchain:        %VS_GENERATOR%
 echo   Debug Mode:          %debug%
 echo   Debug Info:          %debuginfo%
 echo   Only Slicer:         %only_slicer%
@@ -210,7 +228,7 @@ echo [INFO] Configuring dependencies with CMake...
 echo.
 
 @echo on
-cmake ../ -G "Visual Studio 17 2022" -A x64 -DDESTDIR="%DEPS%" -DCMAKE_BUILD_TYPE=%build_type% -DDEP_DEBUG=%debug% -DORCA_INCLUDE_DEBUG_INFO=%debuginfo% -DELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%
+cmake ../ -G "%VS_GENERATOR%" -A x64 -DDESTDIR="%DEPS%" -DCMAKE_BUILD_TYPE=%build_type% -DDEP_DEBUG=%debug% -DORCA_INCLUDE_DEBUG_INFO=%debuginfo% -DELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%
 cmake --build . --config %build_type% --target deps -- -m
 @echo off
 
@@ -244,7 +262,7 @@ mkdir %build_dir% 2>nul
 cd %build_dir%
 
 @echo on
-cmake .. -G "Visual Studio 17 2022" -A x64 -DELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%  -DBBL_RELEASE_TO_PUBLIC=1 -DCMAKE_PREFIX_PATH="%DEPS%/usr/local" -DCMAKE_INSTALL_PREFIX="./ElegooSlicer" -DCMAKE_BUILD_TYPE=%build_type% -DWIN10SDK_PATH="%WindowsSdkDir%Include\%WindowsSDKVersion%\"
+cmake .. -G "%VS_GENERATOR%" -A x64 -DELEGOO_INTERNAL_TESTING=%ELEGOO_INTERNAL_TESTING%  -DBBL_RELEASE_TO_PUBLIC=1 -DCMAKE_PREFIX_PATH="%DEPS%/usr/local" -DCMAKE_INSTALL_PREFIX="./ElegooSlicer" -DCMAKE_BUILD_TYPE=%build_type% -DWIN10SDK_PATH="%WindowsSdkDir%Include\%WindowsSDKVersion%\"
 cmake --build . --config %build_type% --target ALL_BUILD -- -m
 @echo off
 
