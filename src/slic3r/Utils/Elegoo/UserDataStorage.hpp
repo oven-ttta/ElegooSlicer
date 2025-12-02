@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#if !defined(_WIN32) && !defined(__APPLE__)
+#if !defined(_WIN32)
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #endif
@@ -23,14 +23,7 @@ private:
 #if defined(_WIN32)
     bool encryptWindows(const std::string& plain, std::vector<uint8_t>& encrypted);
     bool decryptWindows(const std::vector<uint8_t>& encrypted, std::string& plain);
-#endif
-
-#if defined(__APPLE__)
-    bool encryptMac(const std::string& plain, std::vector<uint8_t>& encrypted);
-    bool decryptMac(const std::vector<uint8_t>& encrypted, std::string& plain);
-#endif
-
-#if !defined(_WIN32) && !defined(__APPLE__)
+#else
     bool encryptAES(const std::string& plain, std::vector<uint8_t>& encrypted);
     bool decryptAES(const std::vector<uint8_t>& encrypted, std::string& plain);
 #endif

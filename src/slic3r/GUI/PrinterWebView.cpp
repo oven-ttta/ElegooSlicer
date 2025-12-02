@@ -394,7 +394,11 @@ void PrinterWebView::setupIPCHandlers()
             webviewIpc::IPCResult response;
             response.code = networkResult.isSuccess() ? 0 : static_cast<int>(networkResult.code);
             response.message = networkResult.message;
-            response.data = networkResult.data.has_value() ? networkResult.data.value() : nlohmann::json::object();
+            if (networkResult.data.has_value()) {
+                response.data = networkResult.data.value();
+            } else {
+                response.data = nlohmann::json::object();
+            }
             sendResponse(response);
         } catch (...) {
             m_uploadInProgress = false;

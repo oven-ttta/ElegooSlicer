@@ -7,14 +7,7 @@
 #include <windows.h>
 #include <wincrypt.h>
 #pragma comment(lib, "crypt32.lib")
-#endif
-
-#if defined(__APPLE__)
-#include <Security/Security.h>
-#include <CoreFoundation/CoreFoundation.h>
-#endif
-
-#if !defined(_WIN32) && !defined(__APPLE__)
+#else
 #include <cstring>
 #endif
 
@@ -57,73 +50,7 @@ bool UserDataStorage::decryptWindows(const std::vector<uint8_t>& encrypted, std:
 
 #endif
 
-#if defined(__APPLE__)
-
-bool UserDataStorage::encryptMac(const std::string& plain, std::vector<uint8_t>& encrypted) {
-    const char* service = "ElegooSlicerUserData";
-    const char* account = "userdata";
-    
-    SecKeychainItemRef itemRef = nullptr;
-    OSStatus status = SecKeychainFindGenericPassword(
-        nullptr,
-        static_cast<UInt32>(strlen(service)), service,
-        static_cast<UInt32>(strlen(account)), account,
-        nullptr, nullptr,
-        &itemRef
-    );
-
-    if (status == errSecSuccess && itemRef) {
-        status = SecKeychainItemModifyContent(itemRef, nullptr, 
-            static_cast<UInt32>(plain.length()), plain.data());
-        CFRelease(itemRef);
-    } else {
-        status = SecKeychainAddGenericPassword(
-            nullptr,
-            static_cast<UInt32>(strlen(service)), service,
-            static_cast<UInt32>(strlen(account)), account,
-            static_cast<UInt32>(plain.length()),
-            plain.data(),
-            nullptr
-        );
-    }
-
-    if (status != errSecSuccess) {
-        BOOST_LOG_TRIVIAL(error) << "failed to save data to Keychain, error: " << status;
-        return false;
-    }
-    return true;
-}
-
-bool UserDataStorage::decryptMac(const std::vector<uint8_t>&, std::string& plain) {
-    const char* service = "ElegooSlicerUserData";
-    const char* account = "userdata";
-    
-    void* data = nullptr;
-    UInt32 len = 0;
-    OSStatus status = SecKeychainFindGenericPassword(
-        nullptr,
-        static_cast<UInt32>(strlen(service)), service,
-        static_cast<UInt32>(strlen(account)), account,
-        &len,
-        &data,
-        nullptr
-    );
-
-    if (status != errSecSuccess) {
-        if (status != errSecItemNotFound) {
-            BOOST_LOG_TRIVIAL(error) << "failed to load data from Keychain, error: " << status;
-        }
-        return false;
-    }
-
-    plain.assign((char*)data, len);
-    SecKeychainItemFreeContent(nullptr, data);
-    return true;
-}
-
-#endif
-
-#if !defined(_WIN32) && !defined(__APPLE__)
+#if !defined(_WIN32)
 
 static const unsigned int AES_KEY_LEN = 32;
 static const unsigned int AES_IV_LEN = 16;
@@ -236,20 +163,13 @@ bool UserDataStorage::save(const std::string& jsonString) {
         BOOST_LOG_TRIVIAL(error) << "failed to encrypt user data on Windows";
         return false;
     }
-#elif defined(__APPLE__)
-    if (!encryptMac(jsonString, encrypted)) {
-        BOOST_LOG_TRIVIAL(error) << "failed to encrypt user data on macOS";
-        return false;
-    }
-    return true;
 #else
     if (!encryptAES(jsonString, encrypted)) {
-        BOOST_LOG_TRIVIAL(error) << "failed to encrypt user data on Linux";
+        BOOST_LOG_TRIVIAL(error) << "failed to encrypt user data";
         return false;
     }
 #endif
 
-#if !defined(__APPLE__)
     boost::nowide::ofstream f(mFilePath, std::ios::binary);
     if (!f.is_open()) {
         BOOST_LOG_TRIVIAL(error) << "failed to open file for writing: " << mFilePath;
@@ -261,20 +181,11 @@ bool UserDataStorage::save(const std::string& jsonString) {
         return false;
     }
     f.close();
-#endif
 
     return true;
 }
 
 std::string UserDataStorage::load() {
-#if defined(__APPLE__)
-    std::string plain;
-    if (!decryptMac({}, plain)) {
-        return {};
-    }
-    return plain;
-#endif
-
     boost::nowide::ifstream f(mFilePath, std::ios::binary);
     if (!f.is_open()) {
         return {};
@@ -301,7 +212,7 @@ std::string UserDataStorage::load() {
     }
 #else
     if (!decryptAES(encrypted, plain)) {
-        BOOST_LOG_TRIVIAL(error) << "failed to decrypt user data on Linux";
+        BOOST_LOG_TRIVIAL(error) << "failed to decrypt user data";
         return {};
     }
 #endif
