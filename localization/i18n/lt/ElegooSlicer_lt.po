@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-28 10:24+0800\n"
+"POT-Creation-Date: 2025-12-02 16:33+0800\n"
 "PO-Revision-Date: 2025-03-21 21:00+0200\n"
 "Last-Translator: Gintaras Kučinskas <sharanchius@gmail.com>\n"
 "Language-Team: \n"
@@ -18604,6 +18604,9 @@ msgstr ""
 msgid "Printer is offline. Please try again later."
 msgstr ""
 
+msgid "No filament detected. Please load filament before printing."
+msgstr ""
+
 msgid "Printer network not initialized. Please try again later."
 msgstr ""
 
@@ -18654,6 +18657,10 @@ msgid "Send print task failed"
 msgstr ""
 
 msgid "Send print file failed"
+msgstr ""
+
+#, boost-format
+msgid "%1% connection failed. Please check and try again."
 msgstr ""
 
 #: resources/data/hints.ini: [hint:G-code window]

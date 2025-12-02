@@ -53,6 +53,7 @@ enum class PrinterNetworkErrorCode
     PRINTER_MISSING_BED_LEVELING_DATA = 1010, // Printer missing bed leveling data
     PRINTER_PRINT_FILE_NOT_FOUND = 1011,       // Printer print file not found
     PRINTER_OFFLINE = 1012,                    // Printer offline
+    PRINTER_FILAMENT_RUNOUT = 1013,            // Printer filament runout
 
     // 2000-2999 Server business errors
     SERVER_UNKNOWN_ERROR = 2000,     // Server error

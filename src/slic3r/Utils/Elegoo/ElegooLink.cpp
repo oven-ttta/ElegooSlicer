@@ -56,6 +56,7 @@ PrinterNetworkErrorCode parseElegooResult(elink::ELINK_ERROR_CODE code)
     case elink::ELINK_ERROR_CODE::PRINTER_PRINT_FILE_NOT_FOUND: return PrinterNetworkErrorCode::PRINTER_PRINT_FILE_NOT_FOUND;
     case elink::ELINK_ERROR_CODE::PRINTER_MISSING_BED_LEVELING_DATA: return PrinterNetworkErrorCode::PRINTER_MISSING_BED_LEVELING_DATA;
     case elink::ELINK_ERROR_CODE::PRINTER_OFFLINE: return PrinterNetworkErrorCode::PRINTER_OFFLINE;
+    case elink::ELINK_ERROR_CODE::PRINTER_FILAMENT_RUNOUT: return PrinterNetworkErrorCode::PRINTER_FILAMENT_RUNOUT;
     case elink::ELINK_ERROR_CODE::SERVER_UNKNOWN_ERROR: return PrinterNetworkErrorCode::SERVER_UNKNOWN_ERROR;
     case elink::ELINK_ERROR_CODE::SERVER_INVALID_RESPONSE: return PrinterNetworkErrorCode::SERVER_INVALID_RESPONSE;
     case elink::ELINK_ERROR_CODE::SERVER_TOO_MANY_REQUESTS: return PrinterNetworkErrorCode::SERVER_TOO_MANY_REQUESTS;

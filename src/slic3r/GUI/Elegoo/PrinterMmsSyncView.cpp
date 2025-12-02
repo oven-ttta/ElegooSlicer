@@ -190,6 +190,13 @@ webviewIpc::IPCResult PrinterMmsSyncView::getPrinterFilamentInfo(const nlohmann:
         result.message = mmsGroupResult.message;
         return result;
     }
+    if(!mmsGroupResult.data.value().connected) {
+        result.code = static_cast<int>(PrinterNetworkErrorCode::PRINTER_MMS_NOT_CONNECTED);
+        std::string mmsSystemName = mmsGroupResult.data.value().mmsSystemName;
+        std::string errorMessage = (boost::format(_u8L("%1% connection failed. Please check and try again.")) % mmsSystemName).str();
+        result.message = errorMessage;
+        return result;
+    }
     PrinterMmsGroup mmsGroup = mmsGroupResult.data.value();
     nlohmann::json mmsInfo = convertPrinterMmsGroupToJson(mmsGroup);
     printerFilamentInfo["mmsInfo"] = mmsInfo;

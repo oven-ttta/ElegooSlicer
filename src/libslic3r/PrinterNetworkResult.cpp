@@ -82,6 +82,8 @@ std::string getErrorMessage(PrinterNetworkErrorCode error)
             return _u8L("The IP address does not match the printer's information. Please remove the printer and add it again.");
         case PrinterNetworkErrorCode::PRINTER_OFFLINE:
             return _u8L("Printer is offline. Please try again later.");
+        case PrinterNetworkErrorCode::PRINTER_FILAMENT_RUNOUT:
+            return _u8L("No filament detected. Please load filament before printing.");
         case PrinterNetworkErrorCode::PRINTER_NETWORK_NOT_INITIALIZED:
             return _u8L("Printer network not initialized. Please try again later.");
         case PrinterNetworkErrorCode::PRINTER_PLUGIN_NOT_INSTALLED:
