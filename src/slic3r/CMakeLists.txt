@@ -647,6 +647,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/Elegoo/PrinterPluginManager.hpp
     Utils/Elegoo/UserNetworkManager.cpp
     Utils/Elegoo/UserNetworkManager.hpp
+    Utils/Elegoo/UserDataStorage.cpp
+    Utils/Elegoo/UserDataStorage.hpp
     Utils/Elegoo/PrinterNetwork.cpp
     Utils/Elegoo/PrinterNetwork.hpp
     Utils/Elegoo/PrinterNetworkEvent.cpp

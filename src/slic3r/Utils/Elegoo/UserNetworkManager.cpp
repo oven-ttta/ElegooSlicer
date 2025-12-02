@@ -1,6 +1,7 @@
 #include "UserNetworkManager.hpp"
 #include "PrinterCache.hpp"
 #include "JsonUtils.hpp"
+#include "UserDataStorage.hpp"
 #include "slic3r/GUI/GUI_App.hpp"
 #include "slic3r/GUI/MainFrame.hpp"
 #include "libslic3r/Utils.hpp"
@@ -743,17 +744,29 @@ void UserNetworkManager::monitorUserNetwork()
 void UserNetworkManager::saveUserInfo(const UserNetworkInfo& userInfo)
 {
     try {
-        fs::path path = fs::path(Slic3r::data_dir()) / "user" / "user_info.json";
-
-        if (!fs::exists(path.parent_path())) {
-            fs::create_directories(path.parent_path());
+        fs::path userDir = fs::path(Slic3r::data_dir()) / "user";
+        if (!fs::exists(userDir)) {
+            fs::create_directories(userDir);
         }
 
+        std::string jsonString = convertUserNetworkInfoToJson(userInfo).dump(4);
+
+#if ELEGOO_INTERNAL_TESTING
+        fs::path path = userDir / "user_info.json";
         boost::nowide::ofstream file(path.string());
         if (file.is_open()) {
-            file << convertUserNetworkInfoToJson(userInfo).dump(4);
+            file << jsonString;
             file.close();
+        } else {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": failed to open file for writing";
         }
+#else
+        fs::path path = userDir / "user_info";
+        UserDataStorage storage(path.string());
+        if (!storage.save(jsonString)) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ": failed to save encrypted user info";
+        }
+#endif
     } catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__
                                  << boost::format(": failed to save user info: %s") % e.what();
@@ -763,30 +776,40 @@ void UserNetworkManager::saveUserInfo(const UserNetworkInfo& userInfo)
 void UserNetworkManager::loadUserInfo()
 {
     try {
-        fs::path path = fs::path(Slic3r::data_dir()) / "user" / "user_info.json";
+        fs::path userDir = fs::path(Slic3r::data_dir()) / "user";
+        std::string jsonString;
 
-        if (!fs::exists(path)) {
-            return;
-        }
-
-        boost::nowide::ifstream file(path.string());
-        if (!file.is_open()) {
-            return;
-        }
-
-        nlohmann::json json;
-        file >> json;
-        file.close();
-
-        UserNetworkInfo userInfo = convertJsonToUserNetworkInfo(json);
-
-        if (!userInfo.userId.empty()) {
-            std::lock_guard<std::mutex> lock(mUserMutex);
-            if(userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_TOKEN &&
-                userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER) {
-                userInfo.loginStatus = LOGIN_STATUS_NOT_LOGIN;
+#if ELEGOO_INTERNAL_TESTING
+        fs::path path = userDir / "user_info.json";
+        if (fs::exists(path)) {
+            boost::nowide::ifstream file(path.string());
+            if (file.is_open()) {
+                nlohmann::json json;
+                file >> json;
+                file.close();
+                jsonString = json.dump();
             }
-            mUserInfo               = userInfo;
+        }
+#else
+        fs::path path = userDir / "user_info";
+        if (fs::exists(path)) {
+            UserDataStorage storage(path.string());
+            jsonString = storage.load();
+        }
+#endif
+
+        if (!jsonString.empty()) {
+            nlohmann::json json = nlohmann::json::parse(jsonString);
+            UserNetworkInfo userInfo = convertJsonToUserNetworkInfo(json);
+
+            if (!userInfo.userId.empty()) {
+                std::lock_guard<std::mutex> lock(mUserMutex);
+                if(userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_TOKEN &&
+                    userInfo.loginStatus != LOGIN_STATUS_OFFLINE_INVALID_USER) {
+                    userInfo.loginStatus = LOGIN_STATUS_NOT_LOGIN;
+                }
+                mUserInfo = userInfo;
+            }
         }
     } catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << __FUNCTION__
