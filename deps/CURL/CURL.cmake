@@ -17,23 +17,25 @@ set(_curl_platform_flags
   -DCURL_DISABLE_MQTT:BOOL=ON
   #-DHTTP_ONLY=ON
 
-  -DCMAKE_USE_GSSAPI:BOOL=OFF
-  -DCMAKE_USE_LIBSSH2:BOOL=OFF
+  -DCURL_USE_GSSAPI:BOOL=OFF
+  -DCURL_USE_LIBSSH2:BOOL=OFF
   -DUSE_RTMP:BOOL=OFF
   -DUSE_NGHTTP2:BOOL=OFF
   -DUSE_MBEDTLS:BOOL=OFF
+  -DUSE_LIBIDN2:BOOL=OFF
+  -DCURL_USE_LIBPSL:BOOL=OFF
 )
 
 if (WIN32)
-  #set(_curl_platform_flags  ${_curl_platform_flags} -DCMAKE_USE_SCHANNEL=ON)
-  set(_curl_platform_flags  ${_curl_platform_flags} -DCMAKE_USE_OPENSSL=ON -DCURL_CA_PATH:STRING=none)
+  set(_curl_platform_flags  ${_curl_platform_flags} -DCURL_USE_SCHANNEL=ON)
+  # set(_curl_platform_flags  ${_curl_platform_flags} -DCURL_USE_OPENSSL=ON -DCURL_CA_PATH:STRING=none)
 elseif (APPLE)
   set(_curl_platform_flags 
     
     ${_curl_platform_flags}
 
-    #-DCMAKE_USE_SECTRANSP:BOOL=ON 
-    -DCMAKE_USE_OPENSSL:BOOL=ON
+    -DCURL_USE_SECTRANSP:BOOL=ON 
+    -DCURL_USE_OPENSSL:BOOL=OFF
 
     -DCURL_CA_PATH:STRING=none
   )
@@ -42,7 +44,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
     ${_curl_platform_flags}
 
-    -DCMAKE_USE_OPENSSL:BOOL=ON
+    -DCURL_USE_OPENSSL:BOOL=ON
 
     -DCURL_CA_PATH:STRING=none
     -DCURL_CA_BUNDLE:STRING=none
@@ -59,8 +61,11 @@ endif()
 elegooslicer_add_cmake_project(CURL
   # GIT_REPOSITORY      https://github.com/curl/curl.git
   # GIT_TAG             curl-7_75_0
-  URL                 https://github.com/curl/curl/archive/refs/tags/curl-7_75_0.zip
-  URL_HASH            SHA256=a63ae025bb0a14f119e73250f2c923f4bf89aa93b8d4fafa4a9f5353a96a765a
+  # URL                 https://github.com/curl/curl/archive/refs/tags/curl-7_75_0.zip
+  # URL_HASH            SHA256=a63ae025bb0a14f119e73250f2c923f4bf89aa93b8d4fafa4a9f5353a96a765a
+
+  URL                 https://github.com/curl/curl/archive/refs/tags/curl-8_14_1.zip
+  URL_HASH            SHA256=b44dd3ec8b7e225fd0b4c39fc9673453ee941a2849cf40362104de1aeee2abcf
   DEPENDS             ${ZLIB_PKG}
   # PATCH_COMMAND       ${GIT_EXECUTABLE} checkout -f -- . && git clean -df && 
   #                     ${GIT_EXECUTABLE} apply --whitespace=fix ${CMAKE_CURRENT_LIST_DIR}/curl-mods.patch
@@ -72,10 +77,12 @@ elegooslicer_add_cmake_project(CURL
     ${_curl_platform_flags}
 )
 
-if(NOT OPENSSL_FOUND)
-  # (openssl may or may not be built)
-  add_dependencies(dep_CURL ${OPENSSL_PKG})
-endif()
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if(NOT OPENSSL_FOUND)
+    # (openssl may or may not be built)
+    add_dependencies(dep_CURL ${OPENSSL_PKG})
+  endif()
+endif ()
 
 if (MSVC)
     add_debug_dep(dep_CURL)

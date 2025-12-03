@@ -3,6 +3,8 @@
 #include <thread>
 #include <curl/curl.h>
 #include <boost/nowide/fstream.hpp>
+#include <boost/nowide/convert.hpp>
+#include <boost/nowide/cstdio.hpp>
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/algorithm/string.hpp>
@@ -26,7 +28,7 @@ namespace Slic3r {
 namespace GUI {
 
 const size_t DOWNLOAD_MAX_CHUNK_SIZE	= 10 * 1024 * 1024;
-const size_t DOWNLOAD_SIZE_LIMIT		= 1024 * 1024 * 1024;
+const size_t DOWNLOAD_SIZE_LIMIT		= 5 * 1024 * 1024 * 1024;
 
 
 std::string FileGet::escape_url(const std::string& unescaped)
@@ -205,9 +207,9 @@ void FileGet::priv::get_perform()
 	FILE* file;
 	// open file for writting
 	if (m_written == 0)
-		file = fopen(temp_path_wstring.c_str(), "wb");
+		file = boost::nowide::fopen(m_tmp_path.string().c_str(), "wb");
 	else 
-		file = fopen(temp_path_wstring.c_str(), "ab");
+		file = boost::nowide::fopen(m_tmp_path.string().c_str(), "ab");
 
 	//assert(file != NULL);
 	if (file == NULL) {
@@ -575,8 +577,15 @@ string FileGet::filename_from_url(const string& url)
     string content_disp_value;
 
     for (const auto& param : query_params) {
-        if (param.first == "filename") {
-            filename_from_query = url_decode(param.second, true);
+        if (param.first == "filename" || param.first == "file_name") {
+            string decoded_value = url_decode(param.second, true);
+            // Replace directory separators with underscores to match browser behavior
+            for (char& c : decoded_value) {
+                if (c == '/' || c == '\\') {
+                    c = '_';
+                }
+            }
+            filename_from_query = decoded_value;
 
         } else if (param.first == "response-content-disposition") {
             content_disp_value = url_decode(param.second, true);

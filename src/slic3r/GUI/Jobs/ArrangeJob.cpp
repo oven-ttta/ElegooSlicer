@@ -18,6 +18,7 @@
 
 #define SAVE_ARRANGE_POLY 0
 
+#define ARRANGE_LOG(level) BOOST_LOG_TRIVIAL(level) << "arrange: "
 namespace Slic3r { namespace GUI {
     using ArrangePolygon = arrangement::ArrangePolygon;
 
@@ -171,7 +172,7 @@ void ArrangeJob::prepare_selected() {
             m_selected.swap(m_unselected);
         else {
             m_plater->get_notification_manager()->push_notification(NotificationType::BBLPlateInfo,
-                NotificationManager::NotificationLevel::WarningNotificationLevel, into_u8(_L("All the selected objects are on the locked plate,\nWe can not do auto-arrange on these objects.")));
+                NotificationManager::NotificationLevel::WarningNotificationLevel, into_u8(_L("All the selected objects are on a locked plate.\nCannot auto-arrange these objects.")));
             }
         }
 
@@ -241,7 +242,7 @@ void ArrangeJob::prepare_all() {
         }
         else {
             m_plater->get_notification_manager()->push_notification(NotificationType::BBLPlateInfo,
-                NotificationManager::NotificationLevel::WarningNotificationLevel, into_u8(_L("All the selected objects are on the locked plate,\nWe can not do auto-arrange on these objects.")));
+                NotificationManager::NotificationLevel::WarningNotificationLevel, into_u8(_L("All the selected objects are on a locked plate.\nCannot auto-arrange these objects.")));
         }
     }
 
@@ -270,12 +271,12 @@ arrangement::ArrangePolygon estimate_wipe_tower_info(int plate_index, std::set<i
 // 1. 以下几种情况不需要料塔：
 //    1）料塔被禁用，
 //    2）逐件打印，
-//    3）不允许不同材料落在相同盘，且没有多色对象
+//    3）不允许不同耗材落在相同盘，且没有多色对象
 // 2. 以下情况需要料塔：
 //    1）某对象是多色对象；
-//    2）打开了支撑，且支撑体与接触面使用的是不同材料
-//    3）允许不同材料落在相同盘，且所有选定对象中使用了多种热床温度相同的材料
-//     （所有对象都是单色的，但不同对象的材料不同，例如：对象A使用红色PLA，对象B使用白色PLA）
+//    2）打开了支撑，且支撑体与接触面使用的是不同耗材
+//    3）允许不同耗材落在相同盘，且所有选定对象中使用了多种热床温度相同的耗材
+//     （所有对象都是单色的，但不同对象的耗材不同，例如：对象A使用红色PLA，对象B使用白色PLA）
 void ArrangeJob::prepare_wipe_tower()
 {
     bool need_wipe_tower = false;
@@ -304,7 +305,7 @@ void ArrangeJob::prepare_wipe_tower()
     }
 
     // if multile extruders have same bed temp, we need wipe tower
-    // 允许不同材料落在相同盘，且所有选定对象中使用了多种热床温度相同的材料
+    // 允许不同耗材落在相同盘，且所有选定对象中使用了多种热床温度相同的耗材
     if (params.allow_multi_materials_on_same_plate) {
         std::map<int, std::set<int>> bedTemp2extruderIds;
         for (const auto& item : m_selected)
@@ -379,7 +380,7 @@ void ArrangeJob::prepare_partplate() {
 
     if (plate->is_locked()) {
         m_plater->get_notification_manager()->push_notification(NotificationType::BBLPlateInfo,
-            NotificationManager::NotificationLevel::WarningNotificationLevel, into_u8(_L("This plate is locked,\nWe can not do auto-arrange on this plate.")));
+            NotificationManager::NotificationLevel::WarningNotificationLevel, into_u8(_L("This plate is locked.\nCannot auto-arrange on this plate.")));
         return;
     }
 
@@ -423,6 +424,103 @@ void ArrangeJob::prepare_partplate() {
     plate_list.preprocess_exclude_areas(m_unselected, current_plate_index + 1);
 }
 
+
+void ArrangeJob::prepare_outside_plate() {
+    clear_input();
+    typedef std::tuple<int, int, int>         obj_inst_plate_t;
+    std::map<std::pair<int,int>,int>        all_inside_objects;
+    std::map<std::pair<int, int>, int>      all_outside_objects;
+
+    Model         &model      = m_plater->model();
+    PartPlateList &plate_list = m_plater->get_partplate_list();
+    //collect all the objects outside
+    for (int plate_idx = 0; plate_idx < plate_list.get_plate_count(); plate_idx++) {
+        PartPlate *plate = plate_list.get_plate(plate_idx);
+        assert(plate != nullptr);
+        std::set<std::pair<int, int>>& plate_objects = plate->get_obj_and_inst_set();
+        std::set<std::pair<int, int>>& plate_outside_objects = plate->get_obj_and_inst_outside_set();
+        if (plate_objects.empty()) {
+            // no instances on this plate
+            ARRANGE_LOG(info) << __FUNCTION__ << format(": no instances in plate %d!", plate_idx);
+            continue;
+        }
+
+        for (auto &obj_inst : plate_objects) { all_inside_objects[obj_inst] = plate_idx; }
+        for (auto &obj_inst : plate_outside_objects) { all_outside_objects[obj_inst] = plate_idx; }
+
+        if (plate->is_locked()) {
+            ARRANGE_LOG(info) << __FUNCTION__ << format(": skip locked plate %d!", plate_idx);
+            continue;
+        }
+
+        // if there are objects inside the plate, lock the plate and don't put new objects in it
+        //if (plate_objects.size() > plate_outside_objects.size()) {
+        //    plate->lock(true);
+        //    m_uncompatible_plates.push_back(plate_idx);
+        //    ARRANGE_LOG(info) << __FUNCTION__ << format(": lock plate %d because there are objects inside!", plate_idx);
+        //}
+    }
+
+    std::set<int> locked_plates;
+    for (int obj_idx = 0; obj_idx < model.objects.size(); obj_idx++) {
+        ModelObject *object = model.objects[obj_idx];
+        for (size_t inst_idx = 0; inst_idx < object->instances.size(); ++inst_idx) {
+            ModelInstance * instance = object->instances[inst_idx];
+
+            auto iter1 = all_inside_objects.find(std::pair(obj_idx, inst_idx));
+            auto iter2 = all_outside_objects.find(std::pair(obj_idx, inst_idx));
+            bool outside_plate = false;
+            PartPlate *plate_locked         = nullptr;
+            if (iter1 == all_inside_objects.end()) {
+                continue;
+            } else {
+                int plate_idx = iter1->second;
+                if (plate_list.get_plate(plate_idx)->is_locked()) {
+                    plate_locked = plate_list.get_plate(plate_idx);
+                    locked_plates.insert(plate_idx);
+                }
+            }
+            if (iter2 != all_outside_objects.end()) {
+                outside_plate = true;
+                ARRANGE_LOG(debug) << object->name << " is outside!";
+            }
+            ArrangePolygon&& ap = prepare_arrange_polygon(instance);
+            ArrangePolygons &cont = !instance->printable ? m_unprintable : plate_locked ? m_locked : outside_plate ? m_selected : m_unselected;
+            ap.itemid                      = cont.size();
+            if (!outside_plate) {
+                plate_list.preprocess_arrange_polygon(obj_idx, inst_idx, ap, false);
+                ap.bed_idx      = iter1->second;
+                ap.locked_plate = iter1->second;
+            }
+            cont.emplace_back(std::move(ap));
+        }
+    }
+
+    if (!locked_plates.empty()) {
+        std::sort(m_unselected.begin(), m_unselected.end(), [](auto &ap1, auto &ap2) { return ap1.bed_idx < ap2.bed_idx; });
+        for (auto &ap : m_unselected) {
+            int locked_plate_count = 0;
+            for (auto &plate_idx : locked_plates) {
+                if (plate_idx < ap.bed_idx)
+                    locked_plate_count++;
+                else
+                    break;
+            }
+            ap.bed_idx -= locked_plate_count;
+        }
+    }
+
+    prepare_wipe_tower();
+
+    const DynamicPrintConfig &current_config  = wxGetApp().preset_bundle->prints.get_edited_preset().config;
+    //bool enable_wrapping = current_config.option<ConfigOptionBool>("enable_wrapping_detection")->value;
+    bool enable_wrapping = false;
+    // add the virtual object into unselect list if has
+    plate_list.preprocess_exclude_areas(m_unselected, enable_wrapping, current_plate_index + 1);
+}
+
+
+
 //BBS: add partplate logic
 void ArrangeJob::prepare()
 {
@@ -449,6 +547,9 @@ void ArrangeJob::prepare()
     else if (state == Job::JobPrepareState::PREPARE_STATE_MENU) {
         only_on_partplate = true;   // only arrange items on current plate
         prepare_partplate();
+    } else if (state == Job::JobPrepareState::PREPARE_STATE_OUTSIDE_BED) {
+        only_on_partplate = false;
+        prepare_outside_plate();
     }
 
 
@@ -458,17 +559,7 @@ void ArrangeJob::prepare()
         auto& print = wxGetApp().plater()->get_partplate_list().get_current_fff_print();
         auto print_config = print.config();
         bed_poly.points = get_bed_shape(*m_plater->config());
-        Pointfs excluse_area_points = print_config.bed_exclude_area.values;
-        Polygons exclude_polys;
-        Polygon exclude_poly;
-        for (int i = 0; i < excluse_area_points.size(); i++) {
-            auto pt = excluse_area_points[i];
-            exclude_poly.points.emplace_back(scale_(pt.x()), scale_(pt.y()));
-            if (i % 4 == 3) {  // exclude areas are always rectangle
-                exclude_polys.push_back(exclude_poly);
-                exclude_poly.points.clear();
-            }
-        }
+        Polygons exclude_polys = get_bed_excluded_area(print_config);
         bed_poly = diff({ bed_poly }, exclude_polys)[0];
     }
 
@@ -775,7 +866,6 @@ arrangement::ArrangeParams init_arrange_params(Plater *p)
     params.printable_height                    = print_config.printable_height.value;
     params.allow_rotations                     = settings.enable_rotation;
     params.nozzle_height                       = print_config.nozzle_height.value;
-    params.all_objects_are_short               = print.is_all_objects_are_short();
     params.align_center                        = print_config.best_object_pos.value;
     params.allow_multi_materials_on_same_plate = settings.allow_multi_materials_on_same_plate;
     params.avoid_extrusion_cali_region         = settings.avoid_extrusion_cali_region;

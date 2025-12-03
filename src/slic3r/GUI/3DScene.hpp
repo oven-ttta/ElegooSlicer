@@ -17,6 +17,8 @@
 
 #include <functional>
 #include <optional>
+#include <atomic>
+#include <memory>
 
 #ifndef NDEBUG
 #define HAS_GLSAFE
@@ -41,6 +43,7 @@ extern Slic3r::ColorRGBA              adjust_color_for_rendering(const Slic3r::C
 namespace Slic3r {
 namespace GUI {
     class Size;
+    extern std::atomic<bool> g_need_refresh_raycasters;
 }
 
 class SLAPrintObject;
@@ -61,6 +64,8 @@ using ModelObjectPtrs = std::vector<ModelObject*>;
 
 // Return appropriate color based on the ModelVolume.
 extern ColorRGBA color_from_model_volume(const ModelVolume& model_volume);
+
+struct AsyncRaycasterToken;
 
 class GLVolume {
 public:
@@ -94,7 +99,7 @@ public:
 
     GLVolume(float r = 1.f, float g = 1.f, float b = 1.f, float a = 1.f);
     GLVolume(const ColorRGBA& color) : GLVolume(color.r(), color.g(), color.b(), color.a()) {}
-    virtual ~GLVolume() = default;
+    virtual ~GLVolume();
 
     // BBS
 protected:
@@ -209,6 +214,12 @@ public:
     GUI::GLModel            model;
     // raycaster used for picking
     std::unique_ptr<GUI::MeshRaycaster> mesh_raycaster;
+
+    // async MeshRaycaster build support
+    std::atomic<bool> raycaster_ready{false};  // MeshRaycaster is ready
+    int async_build_task_id{-1};               // async build task ID (-1 means no task)
+    std::shared_ptr<AsyncRaycasterToken> raycaster_token;
+    
     // BBS
     mutable std::vector<GUI::GLModel> mmuseg_models;
     mutable ObjectBase::Timestamp       mmuseg_ts;
@@ -372,6 +383,11 @@ typedef std::vector<GLVolume*> GLVolumePtrs;
 typedef std::pair<GLVolume*, std::pair<unsigned int, double>> GLVolumeWithIdAndZ;
 typedef std::vector<GLVolumeWithIdAndZ> GLVolumeWithIdAndZList;
 
+struct AsyncRaycasterToken
+{
+    std::atomic<GLVolume*> volume{ nullptr };
+};
+
 class GLVolumeCollection
 {
 public:
@@ -439,7 +455,8 @@ public:
         int                      obj_idx,
         const std::vector<int>	&instance_idxs,
         const std::string 		&color_by,
-        bool 					 opengl_initialized);
+        bool 					 opengl_initialized,
+        bool                     need_raycaster = true);
 
     int load_object_volume(
         const ModelObject *model_object,
@@ -449,7 +466,8 @@ public:
         const std::string &color_by,
         bool 			   opengl_initialized,
         bool               in_assemble_view = false,
-        bool               use_loaded_id = false);
+        bool               use_loaded_id = false,
+        bool               need_raycaster = true);
     // Load SLA auxiliary GLVolumes (for support trees or pad).
     void load_object_auxiliary(
         const SLAPrintObject           *print_object,
@@ -469,8 +487,14 @@ public:
     int get_selection_support_threshold_angle(bool&) const;
     // Render the volumes by OpenGL.
     //BBS: add outline drawing logic
-    void render(ERenderType type, bool disable_cullface, const Transform3d& view_matrix, const Transform3d& projection_matrix, const GUI::Size& cnv_size,
-                std::function<bool(const GLVolume &)> filter_func  = std::function<bool(const GLVolume &)>()) const;
+    void render(ERenderType                           type,
+                bool                                  disable_cullface,
+                const Transform3d &                   view_matrix,
+                const Transform3d&                    projection_matrix,
+                const GUI::Size&                      cnv_size,
+                std::function<bool(const GLVolume &)> filter_func   = std::function<bool(const GLVolume &)>(),
+                bool                                  partly_inside_enable =true
+           ) const;
 
     // Clear the geometry
     void clear() { for (auto *v : volumes) delete v; volumes.clear(); }

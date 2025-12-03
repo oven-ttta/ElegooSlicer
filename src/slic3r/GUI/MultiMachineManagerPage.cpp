@@ -186,7 +186,7 @@ void MultiMachineItem::doRender(wxDC& dc)
         }
         else if (state_device > 2 && state_device < 7) {
             dc.SetFont(Label::Body_12);
-            dc.SetTextForeground(wxColour(0, 120, 189));
+            dc.SetTextForeground(wxColour(22, 119, 255));
             if (obj_->get_curr_stage().IsEmpty() && obj_->subtask_) {
                 //wxString layer_info = wxString::Format(_L("Layer: %d/%d"), obj_->curr_layer, obj_->total_layers);
                 wxString progress_info = wxString::Format("%d", obj_->subtask_->task_progress);
@@ -199,8 +199,8 @@ void MultiMachineItem::doRender(wxDC& dc)
                 dc.SetBrush(wxBrush(wxColour(233,233,233)));
                 dc.DrawRoundedRectangle(left, FromDIP(30), FromDIP(DEVICE_LEFT_PRO_INFO), FromDIP(10), 2);
 
-                dc.SetPen(wxPen(wxColour(0, 120, 189)));
-                dc.SetBrush(wxBrush(wxColour(0, 120, 189)));
+                dc.SetPen(wxPen(wxColour(22, 119, 255)));
+                dc.SetBrush(wxBrush(wxColour(22, 119, 255)));
                 dc.DrawRoundedRectangle(left, FromDIP(30), FromDIP(DEVICE_LEFT_PRO_INFO) * (static_cast<float>(obj_->subtask_->task_progress) / 100.0f), FromDIP(10), 2);
             }
             else {
@@ -226,7 +226,7 @@ void MultiMachineItem::doRender(wxDC& dc)
     }
 
     if (m_hover) {
-        dc.SetPen(wxPen(wxColour(0, 120, 189)));
+        dc.SetPen(wxPen(wxColour(22, 119, 255)));
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.DrawRoundedRectangle(0, 0, size.x, size.y, 3);
     }
@@ -282,8 +282,8 @@ MultiMachineManagerPage::MultiMachineManagerPage(wxWindow* parent)
     //edit prints
     auto m_btn_bg_enable = StateColor(
         std::pair<wxColour, int>(wxColour(0, 102, 153), StateColor::Pressed),
-        std::pair<wxColour, int>(wxColour(51, 102, 153), StateColor::Hovered),
-        std::pair<wxColour, int>(wxColour(0, 120, 189), StateColor::Normal)
+        std::pair<wxColour, int>(wxColour(0, 86, 179), StateColor::Hovered),
+        std::pair<wxColour, int>(wxColour(22, 119, 255), StateColor::Normal)
     );
 
 

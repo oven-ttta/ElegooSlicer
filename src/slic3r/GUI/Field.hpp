@@ -189,6 +189,8 @@ public:
     /// Call the attached m_fn_edit_value method.
 	void			on_edit_value();
 
+    virtual void propagate_value(){}
+
 public:
     /// parent wx item, opportunity to refactor (probably not necessary - data duplication)
     wxWindow*		m_parent {nullptr};
@@ -316,7 +318,7 @@ public:
     void BUILD() override;
     bool value_was_changed();
     // Propagate value from field to the OptionGroupe and Config after kill_focus/ENTER
-    void propagate_value();
+    virtual void propagate_value() override;
     wxWindow* window {nullptr};
 
     void	set_value(const std::string& value, bool change_event = false) {
@@ -468,6 +470,7 @@ class ColourPicker : public Field {
 	using Field::Field;
 
     void            set_undef_value(wxColourPickerCtrl* field);
+    void            draw_bmp_btn(wxColourPickerCtrl* field, wxColour color);
 public:
 	ColourPicker(const ConfigOptionDef& opt, const t_config_option_key& id) : Field(opt, id) {}
 	ColourPicker(wxWindow* parent, const ConfigOptionDef& opt, const t_config_option_key& id) : Field(parent, opt, id) {}

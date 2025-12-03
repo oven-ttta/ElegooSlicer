@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo RAPID PETG @EN2 Series",
-    "inherits": "Elegoo RAPID PETG @base",
+    "inherits": "Elegoo PETG @base",
     "from": "system",
     "setting_id": "ERPETGEN2",
     "instantiation": "true",
@@ -19,6 +19,9 @@
     ],
     "fan_min_speed": [
         "50"
+    ],
+    "filament_density": [
+        "1.26"
     ],
     "compatible_printers": [
         "Elegoo Neptune 0.4 nozzle",

@@ -1,6 +1,6 @@
 {
     "name": "Wanhao",
-    "version": "01.01.08.01",
+    "version": "01.03.00.06",
     "force_update": "0",
     "description": "Wanhao configurations",
     "machine_model_list": [
@@ -19,7 +19,7 @@
             "sub_path": "process/fdm_process_wanhao_common.json"
         },
         {
-            "name": "0.12mm Fine @Wanhao D12-300",
+            "name": "0.12mm Fine @Wanhao D12-400",
             "sub_path": "process/0.12mm Fine @Wanhao D12-300.json"
         },
         {
@@ -35,36 +35,7 @@
             "sub_path": "process/0.24mm Draft @Wanhao D12-300.json"
         }
     ],
-    "filament_list": [
-        {
-            "name": "fdm_filament_common",
-            "sub_path": "filament/fdm_filament_common.json"
-        },
-        {
-            "name": "fdm_filament_pet",
-            "sub_path": "filament/fdm_filament_pet.json"
-        },
-        {
-            "name": "fdm_filament_pla",
-            "sub_path": "filament/fdm_filament_pla.json"
-        },
-        {
-            "name": "fdm_filament_tpu",
-            "sub_path": "filament/fdm_filament_tpu.json"
-        },
-        {
-            "name": "Wanhao Generic PETG",
-            "sub_path": "filament/Wanhao Generic PETG.json"
-        },
-        {
-            "name": "Wanhao Generic PLA",
-            "sub_path": "filament/Wanhao Generic PLA.json"
-        },
-        {
-            "name": "Wanhao Generic TPU",
-            "sub_path": "filament/Wanhao Generic TPU.json"
-        }
-    ],
+    "filament_list": [],
     "machine_list": [
         {
             "name": "fdm_machine_common",

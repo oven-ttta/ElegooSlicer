@@ -30,6 +30,10 @@ if (APPLE)
 
 endif ()
 
+if(POLICY CMP0135) # DOWNLOAD_EXTRACT_TIMESTAMP
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 project(ElegooSlicer-deps)
 
 include(ExternalProject)
@@ -41,7 +45,7 @@ if (NPROC EQUAL 0)
 endif ()
 
 set(DESTDIR "${CMAKE_CURRENT_BINARY_DIR}/destdir" CACHE PATH "Destination directory")
-set(DEP_DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/../DL_CACHE CACHE PATH "Path for downloaded source packages.")
+set(DEP_DOWNLOAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DL_CACHE CACHE PATH "Path for downloaded source packages.")
 set(FLATPAK FALSE CACHE BOOL "Toggles various build settings for flatpak, like /usr/local in DESTDIR or not building wxwidgets")
 if (NOT FLATPAK)
     set(DESTDIR "${DESTDIR}/usr/local/")
@@ -51,15 +55,11 @@ get_property(_is_multi GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
 if (_is_multi)
     option(DEP_DEBUG "Build debug variants (only applicable on Windows)" OFF)
-    option(ELEGOO_INCLUDE_DEBUG_INFO "Includes debug information in a release build (like RelWithDebInfo) in a way that works with multi-configuration generators and incompatible dependencies. DEP_DEBUG option takes priority over this." OFF)
+    option(ORCA_INCLUDE_DEBUG_INFO "Includes debug information in a release build (like RelWithDebInfo) in a way that works with multi-configuration generators and incompatible dependencies. DEP_DEBUG option takes priority over this." OFF)
 endif ()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(DEP_WX_GTK3 "Build wxWidgets against GTK3" OFF)
-else() 
-    if(POLICY CMP0135) # DOWNLOAD_EXTRACT_TIMESTAMP
-        cmake_policy(SET CMP0135 NEW)
-    endif()
 endif()
 
 set(IS_CROSS_COMPILE FALSE)
@@ -88,7 +88,7 @@ endif ()
 # option(DEP_BUILD_IGL_STATIC "Build IGL as a static library. Might cause link errors and increase binary size." OFF)
 
 message(STATUS "ElegooSlicer deps DESTDIR: ${DESTDIR}")
-message(STATUS "ElegooSlicer dowload dir for source packages: ${DEP_DOWNLOAD_DIR}")
+message(STATUS "ElegooSlicer download dir for source packages: ${DEP_DOWNLOAD_DIR}")
 message(STATUS "ElegooSlicer deps debug build: ${DEP_DEBUG}")
 
 find_package(Git REQUIRED)
@@ -102,11 +102,11 @@ if (NOT _is_multi AND NOT CMAKE_BUILD_TYPE)
 endif ()
 
 function(elegooslicer_add_cmake_project projectname)
-    cmake_parse_arguments(P_ARGS "" "INSTALL_DIR;BUILD_COMMAND;INSTALL_COMMAND" "CMAKE_ARGS" ${ARGN})
+    cmake_parse_arguments(P_ARGS "FORCE_RELEASE_CONFIG" "INSTALL_DIR;BUILD_COMMAND;INSTALL_COMMAND" "CMAKE_ARGS" ${ARGN})
 
     set(_configs_line -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE})
     if (_is_multi OR MSVC)
-        if (ELEGOO_INCLUDE_DEBUG_INFO AND NOT DEP_DEBUG)
+        if (ORCA_INCLUDE_DEBUG_INFO AND NOT DEP_DEBUG AND NOT P_ARGS_FORCE_RELEASE_CONFIG)
             set(_configs_line "-DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELWITHDEBINFO} -DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
         else ()
             set(_configs_line "")
@@ -119,6 +119,21 @@ function(elegooslicer_add_cmake_project projectname)
         set(_gen CMAKE_GENERATOR "${DEP_MSVC_GEN}" CMAKE_GENERATOR_PLATFORM "${DEP_PLATFORM}")
         set(_build_j "/m")
     endif ()
+
+    # Determine build config for dependencies
+    set(_dep_build_config "${CMAKE_BUILD_TYPE}")
+    if (_is_multi OR MSVC)
+        if (DEP_DEBUG)
+            set(_dep_build_config "Debug")
+        elseif (ORCA_INCLUDE_DEBUG_INFO AND NOT P_ARGS_FORCE_RELEASE_CONFIG)
+            set(_dep_build_config "RelWithDebInfo")
+        else ()
+            set(_dep_build_config "Release")
+        endif ()
+    endif ()
+
+    message(STATUS "[${projectname}] _configs_line: ${_configs_line}")
+    message(STATUS "[${projectname}] _dep_build_config: ${_dep_build_config}")
 
 if (NOT IS_CROSS_COMPILE OR NOT APPLE)
     ExternalProject_Add(
@@ -141,8 +156,8 @@ if (NOT IS_CROSS_COMPILE OR NOT APPLE)
             ${DEP_CMAKE_OPTS}
             ${P_ARGS_CMAKE_ARGS}
        ${P_ARGS_UNPARSED_ARGUMENTS}
-       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release -- ${_build_j}
-       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
+       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${_dep_build_config} -- ${_build_j}
+       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${_dep_build_config}
     )
 elseif(FLATPAK)
     # the only reason this is here is because of the HACK at the bottom for ci
@@ -170,8 +185,8 @@ elseif(FLATPAK)
             ${DEP_CMAKE_OPTS}
             ${P_ARGS_CMAKE_ARGS}
        ${P_ARGS_UNPARSED_ARGUMENTS}
-       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release -- ${_build_j}
-       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
+       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${_dep_build_config} -- ${_build_j}
+       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${_dep_build_config}
        # HACK: save space after each compile job, because CI
        # reasoning: cmake changes directory after this command, so just keep only the folders
        # so that it can navigate out
@@ -193,8 +208,8 @@ else()
             ${DEP_CMAKE_OPTS}
             ${P_ARGS_CMAKE_ARGS}
        ${P_ARGS_UNPARSED_ARGUMENTS}
-       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release -- ${_build_j}
-       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config Release 
+       BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${_dep_build_config} -- ${_build_j}
+       INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${_dep_build_config} 
     )
 
 endif()
@@ -203,13 +218,13 @@ endfunction(elegooslicer_add_cmake_project)
 
 
 if (MSVC)
-    if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        message(STATUS "\nDetected 64-bit compiler => building 64-bit deps bundle\n")
-        set(DEPS_BITS 64)
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "AMD64")
+        message(STATUS "\nDetected X64 compiler => building X64 deps bundle\n")
+        set(DEPS_ARCH "x64")
         include("deps-windows.cmake")
-    elseif ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
-        message(STATUS "\nDetected 32-bit compiler => building 32-bit deps bundle\n")
-        set(DEPS_BITS 32)
+    elseif ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "X86")
+        message(STATUS "\nDetected X86 compiler => building X86 deps bundle\n")
+        set(DEPS_ARCH "x86")
         include("deps-windows.cmake")
     else ()
         message(FATAL_ERROR "Unable to detect architecture")
@@ -248,7 +263,6 @@ if(FLATPAK)
     find_package(EXPAT)
     find_package(CURL)
     find_package(JPEG)
-    find_package(TIFF)
     find_package(Freetype)
     find_package(OpenSSL 1.1...<3.2)
     find_package(CURL)
@@ -293,7 +307,7 @@ include(MPFR/MPFR.cmake)
 include(CGAL/CGAL.cmake)
 
 include(NLopt/NLopt.cmake)
-
+include(libnoise/libnoise.cmake)
 
 # I *think* 1.1 is used for *just* md5 hashing?
 # 3.1 has everything in the right place, but the md5 funcs used are deprecated
@@ -320,12 +334,6 @@ if (NOT JPEG_FOUND)
     set(JPEG_PKG dep_JPEG)
 endif()
 
-set(TIFF_PKG "")
-if (NOT TIFF_FOUND)
-    include(TIFF/TIFF.cmake)
-    set(TIFF_PKG "dep_TIFF")
-endif()
-
 # flatpak builds wxwidgets separately 
 set(WXWIDGETS_PKG "")
 if (NOT FLATPAK)
@@ -339,8 +347,26 @@ if(NOT FREETYPE_FOUND)
     set(FREETYPE_PKG "dep_FREETYPE") 
 endif()
 
+execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --is-inside-work-tree
+    RESULT_VARIABLE REV_PARSE_RESULT
+    OUTPUT_VARIABLE REV_PARSE_OUTPUT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Will output "true" and have a 0 return code if within a git repo
+if((REV_PARSE_RESULT EQUAL 0) AND (REV_PARSE_OUTPUT STREQUAL "true"))
+    set(IN_GIT_REPO TRUE)
+    # Find relative path from root to source used for adjusting patch command
+    file(RELATIVE_PATH BINARY_DIR_REL  ${CMAKE_SOURCE_DIR}/.. ${CMAKE_BINARY_DIR})
+endif ()
+
 include(OCCT/OCCT.cmake)
 include(OpenCV/OpenCV.cmake)
+
+include(ixwebsocket/ixwebsocket.cmake)
+include(PahoMqttCpp/PahoMqttCpp.cmake)
+include(elegoolink/elegoolink.cmake)
 
 set(_dep_list
     dep_Boost
@@ -360,6 +386,10 @@ set(_dep_list
     ${PNG_PKG}
     ${ZLIB_PKG}
     ${EXPAT_PKG}
+    dep_libnoise
+    dep_ixwebsocket
+    dep_PahoMqttCpp
+    dep_elegoolink
     )
 
 if (MSVC)

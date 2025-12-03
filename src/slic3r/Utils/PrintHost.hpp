@@ -11,7 +11,8 @@
 
 #include <libslic3r/enum_bitmask.hpp>
 #include "Http.hpp"
-
+#include "libslic3r/Preset.hpp"
+#include <map>
 class wxArrayString;
 
 namespace Slic3r {
@@ -38,8 +39,8 @@ struct PrintHostUpload
 
     PrintHostPostUploadAction post_action { PrintHostPostUploadAction::None };
 
-    //ELE
-    std::any other;
+    // Some extended parameters for different upload methods.
+    std::map<std::string, std::string> extended_info;
 };
 
 class PrintHost
@@ -73,6 +74,10 @@ public:
     virtual bool get_storage(wxArrayString& /*storage_path*/, wxArrayString& /*storage_name*/) const { return false; }
 
     static PrintHost* get_print_host(DynamicPrintConfig *config);
+    static PrintHostType get_print_host_type(const DynamicPrintConfig &config);
+    static bool support_device_list_management(const DynamicPrintConfig &config);
+    static PrintHostType get_print_host_type(const std::string &host_type_str);
+    static std::string get_print_host_type_str(const PrintHostType host_type);
 
     //Support for cloud webui login
     virtual bool is_cloud() const { return false; }
@@ -144,5 +149,5 @@ private:
 
 
 }
-
 #endif
+

@@ -107,6 +107,15 @@ using ColorEvent = Event<wxColour>;
 wxDECLARE_EVENT(EVT_ADD_CUSTOM_FILAMENT, ColorEvent);
 const wxString DEFAULT_PROJECT_NAME = "Untitled";
 
+class SidebarProps
+{
+public:
+    static int TitlebarMargin();
+    static int ContentMargin();
+    static int IconSpacing();
+    static int ElementSpacing();
+};
+
 class Sidebar : public wxPanel
 {
     ConfigOptionMode    m_mode;
@@ -147,6 +156,9 @@ public:
     void on_bed_type_change(BedType bed_type);
     void load_ams_list(std::string const & device, MachineObject* obj);
     std::map<int, DynamicPrintConfig> build_filament_ams_list(MachineObject* obj);
+
+    bool load_mms_list();
+
     void sync_ams_list();
     // Orca
     void show_SEMM_buttons(bool bshow);
@@ -189,6 +201,8 @@ public:
     std::vector<PlaterPresetComboBox*>&   combos_filament();
     Search::OptionsSearcher&        get_searcher();
     std::string&                    get_search_line();
+
+    void update_bed_list_text();
 
 private:
     struct priv;
@@ -264,6 +278,9 @@ public:
     void calib_max_vol_speed(const Calib_Params& params);
     void calib_retraction(const Calib_Params& params);
     void calib_VFA(const Calib_Params& params);
+    void calib_input_shaping_freq(const Calib_Params& params);
+    void calib_input_shaping_damp(const Calib_Params& params);
+    void calib_junction_deviation(const Calib_Params& params);
 
     BuildVolume_Type get_build_volume_type() const;
 
@@ -614,6 +631,7 @@ public:
     bool show_publish_dialog(bool show = true);
     //BBS: post process string object exception strings by warning types
     void post_process_string_object_exception(StringObjectException &err);
+    void update_objects_position_when_select_preset(const std::function<void()> &select_prest);
 
 #if ENABLE_ENVIRONMENT_MAP
     void init_environment_texture();
@@ -811,11 +829,15 @@ private:
     int start_next_slice();
 
     void _calib_pa_pattern(const Calib_Params& params);
+    void _calib_pa_pattern_gen_gcode();
     void _calib_pa_tower(const Calib_Params& params);
     void _calib_pa_select_added_objects();
 
     void cut_horizontal(size_t obj_idx, size_t instance_idx, double z, ModelObjectCutAttributes attributes);
 
+    // Auto-load missing vendor presets when loading 3MF files
+    int auto_load_missing_vendor_presets(PresetBundle* preset_bundle, DynamicPrintConfig& config, 
+                                        std::set<std::string>& modified_gcodes, const std::string& filename);
     friend class SuppressBackgroundProcessingUpdate;
     friend class PlaterDropTarget;
 };

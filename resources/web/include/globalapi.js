@@ -327,7 +327,7 @@ function clearCookie(name) {
 /*--------Studio WX Message-------*/
 function IsInSlicer()
 {
-	let bMatch=navigator.userAgent.match(  RegExp('BBL-Slicer','i') );
+	let bMatch=navigator.userAgent.match(  RegExp('ElegooSlicer','i') );
 	
 	return bMatch;
 }
@@ -409,7 +409,18 @@ function ExecuteDarkMode( DarkCssPath )
     let nMode=0;
 	let bDarkMode=navigator.userAgent.match(  RegExp('dark','i') );	
 	if( bDarkMode!=null )
+	{
+		if(document.documentElement)
+		{
+			document.documentElement.classList.add("dark");
+		}
 		nMode=1;
+	}else{
+		if(document.documentElement)
+		{
+			document.documentElement.classList.remove("dark");
+		}
+	}
 	
 	let nNow=CheckCssLinkExist(DarkCssPath);
 	if( nMode==0 )

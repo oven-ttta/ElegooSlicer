@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo TPU 95A @EN3 Series",
-    "inherits": "Elegoo TPU 95A @base",
+    "inherits": "Elegoo TPU @base",
     "from": "system",
     "setting_id": "ETPU95AEN3",
     "instantiation": "true",

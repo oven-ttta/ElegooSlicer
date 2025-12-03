@@ -15,7 +15,10 @@
         "16"
     ],
     "filament_vendor": [
-        "Elegoo"
+        "Generic"
+    ],
+    "filament_type": [
+        "PLA"
     ],
     "filament_start_gcode": [
         "; filament start gcode\n"

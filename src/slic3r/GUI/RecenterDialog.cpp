@@ -14,9 +14,6 @@ namespace Slic3r { namespace GUI {
 RecenterDialog::RecenterDialog(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
       : DPIDialog(parent, id, _L("Confirm"), pos, size, style)
 {
-    std::string icon_path = (boost::format("%1%/images/ElegooSlicerTitle.ico") % resources_dir()).str();
-    SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
-
     hint1 = _L("Please home all axes (click ");
     hint2 = _L(") to locate the toolhead's position. This prevents device moving beyond the printable boundary and causing equipment wear.");
 
@@ -34,10 +31,10 @@ RecenterDialog::RecenterDialog(wxWindow* parent, wxWindowID id, const wxString& 
     m_button_confirm->SetFont(Label::Body_14);
     m_button_confirm->SetMinSize(wxSize(-1, FromDIP(24)));
     m_button_confirm->SetCornerRadius(FromDIP(12));
-    StateColor confirm_btn_bg(std::pair<wxColour, int>(wxColour(51, 102, 153), StateColor::Hovered),
-        std::pair<wxColour, int>(wxColour(0, 120, 189), StateColor::Normal));
+    StateColor confirm_btn_bg(std::pair<wxColour, int>(wxColour(0, 86, 179), StateColor::Hovered),
+        std::pair<wxColour, int>(wxColour(22, 119, 255), StateColor::Normal));
     m_button_confirm->SetBackgroundColor(confirm_btn_bg);
-    m_button_confirm->SetBorderColor(wxColour(0, 120, 189));
+    m_button_confirm->SetBorderColor(wxColour(22, 119, 255));
     m_button_confirm->SetTextColor(*wxWHITE);
 
     m_button_close = new Button(this, _L("Close"));

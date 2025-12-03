@@ -14,7 +14,6 @@
 #include "libslic3r/PrintConfig.hpp"
 #include "libslic3r/Channel.hpp"
 #include "OctoPrint.hpp"
-#include "ElegooLink.hpp"
 #include "Duet.hpp"
 #include "FlashAir.hpp"
 #include "AstroBox.hpp"
@@ -27,6 +26,9 @@
 #include "Obico.hpp"
 #include "Flashforge.hpp"
 #include "SimplyPrint.hpp"
+#include "Elegoo/PrinterManager.hpp"
+#include "Elegoo/PrinterMmsManager.hpp"
+#include "libslic3r/PrinterNetworkInfo.hpp"
 
 namespace fs = boost::filesystem;
 using boost::optional;
@@ -50,10 +52,10 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
 
     if (tech == ptFFF) {
         const auto opt = config->option<ConfigOptionEnum<PrintHostType>>("host_type");
-        const auto host_type = opt != nullptr ? opt->value : htElegooLink;
+        const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
 
         switch (host_type) {
-            case htElegooLink: return new ElegooLink(config);
+            case htElegooLink: return new OctoPrint(config);
             case htOctoPrint: return new OctoPrint(config);
             case htDuet:      return new Duet(config);
             case htFlashAir:  return new FlashAir(config);
@@ -73,7 +75,73 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
         return new SL1Host(config);
     }
 }
-
+PrintHostType PrintHost::get_print_host_type(const DynamicPrintConfig &config)
+{
+    const auto opt = config.option<ConfigOptionEnum<PrintHostType>>("host_type");
+    const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
+    return host_type;
+}
+bool PrintHost::support_device_list_management(const DynamicPrintConfig &config)
+{
+    PrintHostType host_type = PrintHost::get_print_host_type(config);
+    std::vector<PrintHostType> support_device_list_management_host_types = {htElegooLink};
+    return std::find(support_device_list_management_host_types.begin(), support_device_list_management_host_types.end(), host_type) != support_device_list_management_host_types.end();
+}
+PrintHostType PrintHost::get_print_host_type(const std::string &host_type_str)
+{
+    if(host_type_str == "ElegooLink") {
+        return htElegooLink;
+    } else if(host_type_str == "OctoPrint") {
+        return htOctoPrint;
+    } else if(host_type_str == "PrusaLink") {
+        return htPrusaLink;
+    } else if(host_type_str == "PrusaConnect") {
+        return htPrusaConnect;
+    } else if(host_type_str == "Duet") {
+        return htDuet;
+    } else if(host_type_str == "FlashAir") {
+        return htFlashAir;
+    } else if(host_type_str == "AstroBox") {
+        return htAstroBox;
+    } else if(host_type_str == "Repetier") {
+        return htRepetier;
+    } else if(host_type_str == "MKS") {
+        return htMKS;
+    } else if(host_type_str == "ESP3D") {
+        return htESP3D;
+    } else if(host_type_str == "CrealityPrint") {
+        return htCrealityPrint;
+    } else if(host_type_str == "Obico") {
+        return htObico;
+    } else if(host_type_str == "Flashforge") {
+        return htFlashforge;
+    } else if(host_type_str == "SimplyPrint") {
+        return htSimplyPrint;
+    }
+    return htOctoPrint;
+}
+std::string PrintHost::get_print_host_type_str(const PrintHostType host_type)
+{
+    std::string host_type_str;
+    switch (host_type) {
+        case htElegooLink: host_type_str = "ElegooLink"; break;
+        case htOctoPrint: host_type_str = "OctoPrint"; break;
+        case htPrusaLink: host_type_str = "PrusaLink"; break;
+        case htPrusaConnect: host_type_str = "PrusaConnect"; break;
+        case htDuet: host_type_str = "Duet"; break;
+        case htFlashAir: host_type_str = "FlashAir"; break;
+        case htAstroBox: host_type_str = "AstroBox"; break;
+        case htRepetier: host_type_str = "Repetier"; break;
+        case htMKS: host_type_str = "MKS"; break;
+        case htESP3D: host_type_str = "ESP3D"; break;
+        case htCrealityPrint: host_type_str = "CrealityPrint"; break;
+        case htObico: host_type_str = "Obico"; break;
+        case htFlashforge: host_type_str = "Flashforge"; break;
+        case htSimplyPrint: host_type_str = "SimplyPrint"; break;
+        default: host_type_str = ""; break;
+    }
+    return host_type_str;
+}
 wxString PrintHost::format_error(const std::string &body, const std::string &error, unsigned status) const
 {
     if (status != 0) {
@@ -319,18 +387,68 @@ void PrintHostJobQueue::priv::remove_source()
 void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
 {
     emit_progress(0);   // Indicate the upload is starting
+    bool success = false;
+    std::string selectedPrinterId = "";
+    DynamicPrintConfig cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    if (PrintHost::support_device_list_management(cfg)) {
+        PrinterNetworkParams params;
+        params.filePath = the_job.upload_data.source_path.string();
+        params.fileName = the_job.upload_data.upload_path.string();
+        params.bedType = 0;
+        if(the_job.upload_data.extended_info.find("bedType") != the_job.upload_data.extended_info.end()) {
+            int bedType = std::stoi(the_job.upload_data.extended_info["bedType"]);
+            if(bedType == BedType::btPC) {
+                params.bedType = 1;
+            }
+        }
+        if(the_job.upload_data.extended_info.find("timeLapse") != the_job.upload_data.extended_info.end()) {
+            params.timeLapse = the_job.upload_data.extended_info["timeLapse"] == "true";
+        }
+        if(the_job.upload_data.extended_info.find("heatedBedLeveling") != the_job.upload_data.extended_info.end()) {
+            params.heatedBedLeveling = the_job.upload_data.extended_info["heatedBedLeveling"] == "true";
+        }
+        if(the_job.upload_data.extended_info.find("autoRefill") != the_job.upload_data.extended_info.end()) {
+            params.autoRefill = the_job.upload_data.extended_info["autoRefill"] == "true";
+        }
+        if(the_job.upload_data.extended_info.find("hasMms") != the_job.upload_data.extended_info.end()) {
+            params.hasMms = the_job.upload_data.extended_info["hasMms"] == "true";
+        }
 
-    bool success = the_job.printhost->upload(std::move(the_job.upload_data),
-        [this](Http::Progress progress, bool &cancel)   { this->progress_fn(std::move(progress), cancel); },
-        [this](wxString error)                          { this->error_fn(std::move(error)); },
-        [this](wxString tag, wxString host)             { this->info_fn(std::move(tag), std::move(host)); }
-    );
-
+        if(the_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+            params.uploadAndStartPrint = true;
+        }
+        if(the_job.upload_data.extended_info.find("selectedPrinterId") != the_job.upload_data.extended_info.end()) {
+            params.printerId = the_job.upload_data.extended_info["selectedPrinterId"];
+            selectedPrinterId = params.printerId;
+        }
+        if(the_job.upload_data.extended_info.find("filamentAmsMapping") != the_job.upload_data.extended_info.end()) {
+            nlohmann::json filamentAmsMapping = nlohmann::json::parse(the_job.upload_data.extended_info["filamentAmsMapping"]);
+            for(auto& filament : filamentAmsMapping) {
+                PrintFilamentMmsMapping printFilamentMmsMapping = convertJsonToPrintFilamentMmsMapping(filament);
+                params.filamentMmsMappingList.push_back(printFilamentMmsMapping);
+            }
+        }
+        params.uploadProgressFn = [this](uint64_t uploadedBytes, uint64_t totalBytes, bool& cancel) { 
+            Http::Progress progress(totalBytes, uploadedBytes, totalBytes, uploadedBytes, "");
+            this->progress_fn(std::move(progress), cancel);
+        };
+        params.errorFn = [this](const std::string& errorMsg) { 
+            this->error_fn(wxString::FromUTF8(errorMsg)); 
+        };
+        auto result = PrinterManager::getInstance()->upload(params);
+        success = result.isSuccess();
+    } else {
+        success = the_job.printhost->upload(
+            std::move(the_job.upload_data),
+            [this](Http::Progress progress, bool& cancel) { this->progress_fn(std::move(progress), cancel); },
+            [this](wxString error) { this->error_fn(std::move(error)); },
+            [this](wxString tag, wxString host) { this->info_fn(std::move(tag), std::move(host)); });
+    }
     if (success) {
         emit_progress(100);
         if (the_job.switch_to_device_tab) {
             const auto mainframe = GUI::wxGetApp().mainframe;
-            mainframe->request_select_tab(MainFrame::TabPosition::tpMonitor);
+            mainframe->request_select_tab(MainFrame::TabPosition::tpMonitor, selectedPrinterId);
         }
     }
 }

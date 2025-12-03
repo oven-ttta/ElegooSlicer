@@ -78,10 +78,13 @@ then
     exit 0
 fi
 
-DISTRIBUTION=$(awk -F= '/^ID=/ {print $2}' /etc/os-release)
-# treat ubuntu as debian
-if [ "${DISTRIBUTION}" == "ubuntu" ] || [ "${DISTRIBUTION}" == "linuxmint" ]
-then
+DISTRIBUTION=$(awk -F= '/^ID=/ {print $2}' /etc/os-release | tr -d '"')
+DISTRIBUTION_LIKE=$(awk -F= '/^ID_LIKE=/ {print $2}' /etc/os-release | tr -d '"')
+# Check for direct distribution match to Ubuntu/Debian
+if [ "${DISTRIBUTION}" == "ubuntu" ] || [ "${DISTRIBUTION}" == "linuxmint" ]; then
+    DISTRIBUTION="debian"
+# Check if distribution is Debian/Ubuntu-like based on ID_LIKE
+elif [[ "${DISTRIBUTION_LIKE}" == *"debian"* ]] || [[ "${DISTRIBUTION_LIKE}" == *"ubuntu"* ]]; then
     DISTRIBUTION="debian"
 fi
 if [ ! -f ./linux.d/${DISTRIBUTION} ]
@@ -156,9 +159,9 @@ then
     fi
     if [[ -n "${BUILD_DEBUG}" ]]
     then
-        BUILD_ARGS="${BUILD_ARGS} -DCMAKE_BUILD_TYPE=Debug -DBBL_INTERNAL_TESTING=1 -DELEGOO_TEST=1"
+        BUILD_ARGS="${BUILD_ARGS} -DCMAKE_BUILD_TYPE=Debug -DBBL_INTERNAL_TESTING=1 -DELEGOO_INTERNAL_TESTING=1"
     else
-        BUILD_ARGS="${BUILD_ARGS} -DBBL_RELEASE_TO_PUBLIC=1 -DBBL_INTERNAL_TESTING=0 -DELEGOO_TEST=0"
+        BUILD_ARGS="${BUILD_ARGS} -DBBL_RELEASE_TO_PUBLIC=1 -DBBL_INTERNAL_TESTING=0 -DELEGOO_INTERNAL_TESTING=0"
     fi
     echo -e "cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH="${PWD}/deps/build/destdir/usr/local" -DSLIC3R_STATIC=1 ${BUILD_ARGS}"
     cmake -S . -B build -G Ninja \

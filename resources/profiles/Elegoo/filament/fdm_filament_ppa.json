@@ -38,7 +38,7 @@
         "8"
     ],
     "filament_type": [
-        "PPA-CF"
+        "PPA"
     ],
     "hot_plate_temp": [
         "100"
@@ -81,5 +81,8 @@
     ],
     "textured_plate_temp_initial_layer": [
         "100"
+    ],
+    "filament_vendor": [
+        "Generic"
     ]
 }

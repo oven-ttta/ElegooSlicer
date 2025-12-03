@@ -7,7 +7,7 @@
 #include "Plater.hpp"
 #include "BitmapCache.hpp"
 #include "Camera.hpp"
-
+#include "AsyncMeshRaycasterBuilder.hpp"
 #include "libslic3r/BuildVolume.hpp"
 #include "libslic3r/ExtrusionEntity.hpp"
 #include "libslic3r/ExtrusionEntityCollection.hpp"
@@ -34,6 +34,12 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <Eigen/Dense>
+namespace Slic3r {
+    namespace GUI {
+    // global flag: whether to refresh raycasters (when async MeshRaycaster is ready)
+    std::atomic<bool> g_need_refresh_raycasters{false};
+} // namespace GUI
+} // namespace Slic3r
 
 #ifdef HAS_GLSAFE
 void glAssertRecentCallImpl(const char* file_name, unsigned int line, const char* function_name)
@@ -236,6 +242,15 @@ GLVolume::GLVolume(float r, float g, float b, float a)
     color = { r, g, b, a };
     set_render_color(color);
     mmuseg_ts = 0;
+    raycaster_token = std::make_shared<AsyncRaycasterToken>();
+    raycaster_token->volume.store(this, std::memory_order_release);
+}
+
+GLVolume::~GLVolume()
+{
+    if (raycaster_token) {
+        raycaster_token->volume.store(nullptr, std::memory_order_release);
+    }
 }
 
 
@@ -675,12 +690,13 @@ std::vector<int> GLVolumeCollection::load_object(
     int                      obj_idx,
     const std::vector<int>  &instance_idxs,
     const std::string       &color_by,
-    bool 					 opengl_initialized)
+    bool 					 opengl_initialized,
+    bool                    need_raycaster)
 {
     std::vector<int> volumes_idx;
     for (int volume_idx = 0; volume_idx < int(model_object->volumes.size()); ++volume_idx)
         for (int instance_idx : instance_idxs)
-            volumes_idx.emplace_back(this->GLVolumeCollection::load_object_volume(model_object, obj_idx, volume_idx, instance_idx, color_by, opengl_initialized));
+            volumes_idx.emplace_back(this->GLVolumeCollection::load_object_volume(model_object, obj_idx, volume_idx, instance_idx, color_by, opengl_initialized, false, false, need_raycaster));
     return volumes_idx;
 }
 
@@ -693,7 +709,8 @@ int GLVolumeCollection::load_object_volume(
     const std::string   &color_by,
     bool 				 opengl_initialized,
     bool                 in_assemble_view,
-    bool                 use_loaded_id)
+    bool                 use_loaded_id,
+    bool                 need_raycaster)
 {
     const ModelVolume   *model_volume = model_object->volumes[volume_idx];
     const int            extruder_id  = model_volume->extruder_id();
@@ -711,7 +728,40 @@ int GLVolumeCollection::load_object_volume(
     v.model.init_from(mesh, true);
 #else
     v.model.init_from(*mesh);
-    v.mesh_raycaster = std::make_unique<GUI::MeshRaycaster>(mesh);
+    if (need_raycaster) 
+    { 
+        // v.mesh_raycaster = std::make_unique<GUI::MeshRaycaster>(mesh); 
+        // submit async build task
+    v.raycaster_ready = false;
+    
+    // capture lifetime token to ensure callback safety
+    auto volume_token = v.raycaster_token;
+    volume_token->volume.store(&v, std::memory_order_release);
+    
+    v.async_build_task_id = Slic3r::GUI::AsyncMeshRaycasterBuilder::instance().submit_build_task(
+        mesh,
+        [volume_token](std::unique_ptr<GUI::MeshRaycaster> raycaster) {
+            if (!raycaster)
+                return;
+
+            // callback function: receive built raycaster in main thread
+            if (GLVolume* volume_ptr = volume_token->volume.load(std::memory_order_acquire)) {
+                volume_ptr->mesh_raycaster = std::move(raycaster);
+                volume_ptr->raycaster_ready = true;
+
+                BOOST_LOG_TRIVIAL(info) << "[Async] MeshRaycaster is ready (faces: " << (volume_ptr->mesh_raycaster ? volume_ptr->mesh_raycaster->get_aabb_mesh().indices().size() : 0) << ")";
+
+                // set global flag, notify to re-register raycasters
+                Slic3r::GUI::g_need_refresh_raycasters = true;
+            } else {
+                BOOST_LOG_TRIVIAL(debug) << "[Async] MeshRaycaster ready but owning volume already destroyed, dropping result.";
+            }
+        },
+        0  // priority: 0 means normal priority
+    );
+    
+    BOOST_LOG_TRIVIAL(info) << "[Async] Submitted async MeshRaycaster build task (Task ID: " << v.async_build_task_id << ")";
+    }
 #endif // ENABLE_SMOOTH_NORMALS
     v.composite_id = GLVolume::CompositeID(obj_idx, volume_idx, instance_idx);
 
@@ -769,6 +819,7 @@ void GLVolumeCollection::load_object_auxiliary(
         v.model.init_from(mesh);
         v.model.set_color((milestone == slaposPad) ? GLVolume::SLA_PAD_COLOR : GLVolume::SLA_SUPPORT_COLOR);
         v.mesh_raycaster = std::make_unique<GUI::MeshRaycaster>(std::make_shared<const TriangleMesh>(mesh));
+        v.raycaster_ready = true;
 #endif // ENABLE_SMOOTH_NORMALS
         v.composite_id = GLVolume::CompositeID(obj_idx, -int(milestone), (int)instance_idx.first);
         v.geometry_id = std::pair<size_t, size_t>(timestamp, model_instance.id().id);
@@ -821,6 +872,7 @@ int GLVolumeCollection::load_wipe_tower_preview(
     }
     v.model.init_from(wipe_tower_shell);
     v.mesh_raycaster = std::make_unique<GUI::MeshRaycaster>(std::make_shared<const TriangleMesh>(wipe_tower_shell));
+    v.raycaster_ready = true;
     v.set_convex_hull(wipe_tower_shell);
     v.set_volume_offset(Vec3d(pos_x, pos_y, 0.0));
     v.set_volume_rotation(Vec3d(0., 0., (M_PI / 180.) * rotation_angle));
@@ -893,8 +945,13 @@ int GLVolumeCollection::get_selection_support_threshold_angle(bool &enable_suppo
 }
 
 //BBS: add outline drawing logic
-void GLVolumeCollection::render(GLVolumeCollection::ERenderType type, bool disable_cullface, const Transform3d& view_matrix, const Transform3d& projection_matrix, const GUI::Size& cnv_size,
-    std::function<bool(const GLVolume&)> filter_func) const
+void GLVolumeCollection::render(GLVolumeCollection::ERenderType       type,
+                                bool                                  disable_cullface,
+                                const Transform3d &                   view_matrix,
+                                const Transform3d&                    projection_matrix,
+                                const GUI::Size&                      cnv_size,
+                                std::function<bool(const GLVolume &)> filter_func,
+                                bool                                  partly_inside_enable) const
 {
     GLVolumeWithIdAndZList to_render = volumes_to_render(volumes, type, view_matrix, filter_func);
     if (to_render.empty())
@@ -962,7 +1019,7 @@ void GLVolumeCollection::render(GLVolumeCollection::ERenderType type, bool disab
         //shader->set_uniform("print_volume.xy_data", m_render_volume.data);
         //shader->set_uniform("print_volume.z_data", m_render_volume.zs);
 
-        if (volume.first->partly_inside) {
+        if (volume.first->partly_inside && partly_inside_enable) {
             //only partly inside volume need to be painted with boundary check
             shader->set_uniform("print_volume.type", static_cast<int>(m_print_volume.type));
             shader->set_uniform("print_volume.xy_data", m_print_volume.data);
@@ -1075,14 +1132,15 @@ bool GLVolumeCollection::check_outside_state(const BuildVolume &build_volume, Mo
     {
         if (! volume->is_modifier && (volume->shader_outside_printer_detection_enabled || (! volume->is_wipe_tower && volume->composite_id.volume_id >= 0))) {
             BuildVolume::ObjectState state;
-            const BoundingBoxf3& bb = volume_bbox(*volume);
             if (volume_below(*volume))
                 state = BuildVolume::ObjectState::Below;
             else {
                 switch (plate_build_volume.type()) {
-                case BuildVolume_Type::Rectangle:
-                //FIXME this test does not evaluate collision of a build volume bounding box with non-convex objects.
+                case BuildVolume_Type::Rectangle: {
+                    //FIXME this test does not evaluate collision of a build volume bounding box with non-convex objects.
+                    const BoundingBoxf3& bb = volume_bbox(*volume);
                     state = plate_build_volume.volume_state_bbox(bb);
+                }
                     break;
                 case BuildVolume_Type::Circle:
                 case BuildVolume_Type::Convex:

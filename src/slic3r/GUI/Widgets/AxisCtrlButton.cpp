@@ -9,12 +9,12 @@ StateColor blank_bg(StateColor(std::make_pair(wxColour("#FFFFFF"), (int)StateCol
 static const wxColour BUTTON_BG_COL = wxColour("#EEEEEE");
 static const wxColour BUTTON_IN_BG_COL = wxColour("#CECECE");
 
-static const wxColour bd = wxColour(0, 120, 189);
+static const wxColour bd = wxColour(22, 119, 255);
 static const wxColour text_num_color = wxColour(0x898989);
 static const wxColour BUTTON_PRESS_COL = wxColour(172, 172, 172);
 static const double sqrt2 = std::sqrt(2);
 
-BEGIN_EVENT_TABLE(AxisCtrlButton, wxPanel)
+BEGIN_EVENT_TABLE(AxisCtrlButton, wxWindow)
 EVT_LEFT_DOWN(AxisCtrlButton::mouseDown)
 EVT_LEFT_UP(AxisCtrlButton::mouseReleased)
 EVT_MOTION(AxisCtrlButton::mouseMoving)

@@ -20,6 +20,7 @@ public:
     enum JobPrepareState {
         PREPARE_STATE_DEFAULT = 0,
         PREPARE_STATE_MENU = 1,
+        PREPARE_STATE_OUTSIDE_BED = 2,
     };
 
     // A controller interface that informs the job about cancellation and

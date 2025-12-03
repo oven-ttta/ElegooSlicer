@@ -23,7 +23,7 @@ namespace Slic3r { namespace GUI {
     m_printing_img = ScalableBitmap(this, "printer", 16);
     m_arrow_img    = ScalableBitmap(this, "monitor_arrow", 14);
 
-    m_none_printing_img = ScalableBitmap(this, "tab_monitor_active", 24);
+    m_none_printing_img = ScalableBitmap(this, "tab_monitor_active", 20); // ORCA match icon size with exact resolution to fix blurry icon
     m_none_arrow_img    = ScalableBitmap(this, "monitor_none_arrow", 14);
     m_none_add_img      = ScalableBitmap(this, "monitor_none_add", 14);
 
@@ -526,8 +526,8 @@ void SideTools::show_status(int status)
     else if ((status & (int)MonitorStatus::MONITOR_CONNECTING) != 0) {
         m_hyperlink->Hide();
         m_connection_info->SetLabel(_L("Connecting..."));
-        m_connection_info->SetBackgroundColor(0x0081D7);
-        m_connection_info->SetBorderColor(0x0081D7);
+        m_connection_info->SetBackgroundColor(0x1677ff);
+        m_connection_info->SetBorderColor(0x1677ff);
         m_connection_info->Show();
         m_more_button->Hide();
         m_side_error_panel->Hide();
