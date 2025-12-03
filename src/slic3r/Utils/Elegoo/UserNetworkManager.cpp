@@ -271,8 +271,8 @@ bool UserNetworkManager::updateUserInfo(const UserNetworkInfo& userInfo)
         if (mUserInfo.token != userInfo.token) {
             needNotify = true;
             BOOST_LOG_TRIVIAL(info) << __FUNCTION__
-                                    << boost::format(": user token updated, user id: %s, token: %s")
-                                           % userInfo.userId % userInfo.token;
+                                    << boost::format(": user token updated, user id: %s, token: %s...")
+                                           % userInfo.userId % userInfo.token.substr(0, 10);
         }
         if (mUserInfo.avatar != userInfo.avatar) {
             needNotify = true;
@@ -313,8 +313,8 @@ bool UserNetworkManager::updateUserInfoLoginStatus(const UserNetworkInfo& userIn
 
     if (mUserInfo.token != userInfo.token) {
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__
-                                << boost::format(": token is different, skip update login status, user id: %s, new token: %s, login status: %d")
-                                       % mUserInfo.userId % userInfo.token % loginStatus;
+                                << boost::format(": token is different, skip update login status, user id: %s, new token: %s..., login status: %d")
+                                       % mUserInfo.userId % userInfo.token.substr(0, 10) % loginStatus;
         return false;
     }
 
