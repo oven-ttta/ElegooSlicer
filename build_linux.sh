@@ -7,7 +7,7 @@ SCRIPT_PATH=$(dirname "$(readlink -f "${0}")")
 pushd "${SCRIPT_PATH}" > /dev/null
 
 function usage() {
-    echo "Usage: ./${SCRIPT_NAME} [-1][-b][-c][-d][-h][-i][-j N][-p][-r][-s][-t][-u][-l][-L]"
+    echo "Usage: ./${SCRIPT_NAME} [-1][-b][-c][-d][-h][-i][-j N][-p][-r][-s][-t][-u][-l][-L][-w][-e]"
     echo "   -1: limit builds to one core (where possible)"
     echo "   -j N: limit builds to N cores (where possible)"
     echo "   -b: build in debug mode"
@@ -15,23 +15,30 @@ function usage() {
     echo "   -C: enable ANSI-colored compile output (GNU/Clang only)"
     echo "   -d: download and build dependencies in ./deps/ (build prerequisite)"
     echo "   -h: prints this help text"
-    echo "   -i: build the Orca Slicer AppImage (optional)"
+    echo "   -i: build the Elegoo Slicer AppImage (optional)"
     echo "   -p: boost ccache hit rate by disabling precompiled headers (default: ON)"
     echo "   -r: skip RAM and disk checks (low RAM compiling)"
-    echo "   -s: build the Orca Slicer (optional)"
+    echo "   -s: build the Elegoo Slicer (optional)"
     echo "   -t: build tests (optional)"
     echo "   -u: install system dependencies (asks for sudo password; build prerequisite)"
     echo "   -l: use Clang instead of GCC (default: GCC)"
     echo "   -L: use ld.lld as linker (if available)"
+    echo "   -w: download web dependencies"
+    echo "   -e: test environment (for internal testing)"
     echo "For a first use, you want to './${SCRIPT_NAME} -u'"
     echo "   and then './${SCRIPT_NAME} -dsi'"
     echo "To build with tests: './${SCRIPT_NAME} -st' or './${SCRIPT_NAME} -dst'"
 }
 
+# Set default parallel jobs to 4 to avoid memory issues
+if [ -z "${CMAKE_BUILD_PARALLEL_LEVEL}" ]; then
+    export CMAKE_BUILD_PARALLEL_LEVEL=4
+fi
+
 SLIC3R_PRECOMPILED_HEADERS="ON"
 
 unset name
-while getopts ":1j:bcCdhiprstulL" opt ; do
+while getopts ":1j:bcCdhiprstulLwe" opt ; do
   case ${opt} in
     1 )
         export CMAKE_BUILD_PARALLEL_LEVEL=1
@@ -64,7 +71,7 @@ while getopts ":1j:bcCdhiprstulL" opt ; do
         SKIP_RAM_CHECK="1"
         ;;
     s )
-        BUILD_ORCA="1"
+        BUILD_ELEGOO="1"
         ;;
     t )
         BUILD_TESTS="1"
@@ -77,6 +84,12 @@ while getopts ":1j:bcCdhiprstulL" opt ; do
         ;;
     L )
         USE_LLD="1"
+        ;;
+    w )
+        DOWNLOAD_WEB="1"
+        ;;
+    e )
+        ELEGOO_INTERNAL_TESTING="1"
         ;;
     * )
 	echo "Unknown argument '${opt}', aborting."
@@ -98,14 +111,14 @@ function check_available_memory_and_disk() {
     MIN_DISK_KB=$((10 * 1024 * 1024))
 
     if [[ ${FREE_MEM_GB} -le ${MIN_MEM_GB} ]] ; then
-        echo -e "\nERROR: Orca Slicer Builder requires at least ${MIN_MEM_GB}G of 'available' mem (system has only ${FREE_MEM_GB}G available)"
+        echo -e "\nERROR: ElegooSlicer Builder requires at least ${MIN_MEM_GB}G of 'available' mem (system has only ${FREE_MEM_GB}G available)"
         echo && free --human && echo
         echo "Invoke with -r to skip RAM and disk checks."
         exit 2
     fi
 
     if [[ ${FREE_DISK_KB} -le ${MIN_DISK_KB} ]] ; then
-        echo -e "\nERROR: Orca Slicer Builder requires at least $(echo "${MIN_DISK_KB}" |awk '{ printf "%.1fG\n", $1/1024/1024; }') (system has only $(echo "${FREE_DISK_KB}" | awk '{ printf "%.1fG\n", $1/1024/1024; }') disk free)"
+        echo -e "\nERROR: ElegooSlicer Builder requires at least $(echo "${MIN_DISK_KB}" |awk '{ printf "%.1fG\n", $1/1024/1024; }') (system has only $(echo "${FREE_DISK_KB}" | awk '{ printf "%.1fG\n", $1/1024/1024; }') disk free)"
         echo && df --human-readable . && echo
         echo "Invoke with -r to skip ram and disk checks."
         exit 1
@@ -151,6 +164,35 @@ echo "Changing date in version..."
 }
 echo "done"
 
+# Download web dependencies if requested
+if [ "1" == "${DOWNLOAD_WEB}" ]; then
+    echo "============================================================================"
+    echo "                     Downloading Web Dependencies"
+    echo "============================================================================"
+    if [ "${ELEGOO_INTERNAL_TESTING}" == "1" ]; then
+        TEST_PARAM="test"
+        echo "[INFO] Downloading INTERNAL TESTING web dependencies..."
+    else
+        TEST_PARAM=""
+        echo "[INFO] Downloading RELEASE web dependencies..."
+    fi
+    echo
+
+    ./scripts/download_web_dep.sh ${TEST_PARAM}
+    if [ $? -ne 0 ]; then
+        echo
+        echo "[ERROR] Download web dependencies failed. Exiting."
+        exit 1
+    fi
+    echo
+    echo "[OK] Web dependencies downloaded successfully"
+    echo "============================================================================"
+    echo
+else
+    echo
+    echo "[INFO] Skipping web dependencies download, use '-w' parameter to enable"
+    echo
+fi
 
 if [[ -z "${SKIP_RAM_CHECK}" ]] ; then
     check_available_memory_and_disk
@@ -208,19 +250,19 @@ if [[ -n "${BUILD_DEPS}" ]] ; then
     cmake --build deps/build
 fi
 
-if [[ -n "${BUILD_ORCA}" ]] ; then
-    echo "Configuring OrcaSlicer..."
+if [[ -n "${BUILD_ELEGOO}" ]] ; then
+    echo "Configuring ElegooSlicer..."
     if [[ -n "${CLEAN_BUILD}" ]] ; then
         rm -fr build
     fi
-    read -r -a BUILD_ARGS <<< "${ORCA_EXTRA_BUILD_ARGS}"
+    read -r -a BUILD_ARGS <<< "${ELEGOO_EXTRA_BUILD_ARGS}"
     if [[ -n "${FOUND_GTK3_DEV}" ]] ; then
         BUILD_ARGS+=(-DSLIC3R_GTK=3)
     fi
     if [[ -n "${BUILD_DEBUG}" ]] ; then
-        BUILD_ARGS+=(-DCMAKE_BUILD_TYPE=Debug -DBBL_INTERNAL_TESTING=1)
+        BUILD_ARGS+=(-DCMAKE_BUILD_TYPE=Debug -DBBL_INTERNAL_TESTING=1 -DELEGOO_INTERNAL_TESTING=0)
     else
-        BUILD_ARGS+=(-DBBL_RELEASE_TO_PUBLIC=1 -DBBL_INTERNAL_TESTING=0)
+        BUILD_ARGS+=(-DBBL_RELEASE_TO_PUBLIC=1 -DBBL_INTERNAL_TESTING=0 -DELEGOO_INTERNAL_TESTING=0)
     fi
     if [[ -n "${BUILD_TESTS}" ]] ; then
         BUILD_ARGS+=(-DBUILD_TESTS=ON)
@@ -229,7 +271,7 @@ if [[ -n "${BUILD_ORCA}" ]] ; then
         BUILD_ARGS+=(-DORCA_UPDATER_SIG_KEY="${ORCA_UPDATER_SIG_KEY}")
     fi
 
-    echo "Configuring OrcaSlicer..."
+    echo "Configuring ElegooSlicer..."
     set -x
     cmake -S . -B build "${CMAKE_C_CXX_COMPILER_CLANG[@]}" "${CMAKE_LLD_LINKER_ARGS[@]}" -G "Ninja Multi-Config" \
 	  -DSLIC3R_PCH="${SLIC3R_PRECOMPILED_HEADERS}" \
@@ -240,27 +282,28 @@ if [[ -n "${BUILD_ORCA}" ]] ; then
 	  "${BUILD_ARGS[@]}"
     set +x
     echo "done"
-    echo "Building OrcaSlicer ..."
+    echo "Building ElegooSlicer ..."
     if [[ -n "${BUILD_DEBUG}" ]] ; then
-        cmake --build build --config Debug --target OrcaSlicer
+        cmake --build build --config Debug --target ElegooSlicer
     else
-        cmake --build build --config Release --target OrcaSlicer
+        cmake --build build --config Release --target ElegooSlicer
     fi
-    echo "Building OrcaSlicer_profile_validator .."
+    echo "Building ElegooSlicer_profile_validator .."
     if [[ -n "${BUILD_DEBUG}" ]] ; then
-        cmake --build build --config Debug --target OrcaSlicer_profile_validator
+        cmake --build build --config Debug --target ElegooSlicer_profile_validator
     else
-        cmake --build build --config Release --target OrcaSlicer_profile_validator
+        cmake --build build --config Release --target ElegooSlicer_profile_validator
     fi
     ./scripts/run_gettext.sh
     echo "done"
 fi
 
-if [[ -n "${BUILD_IMAGE}" || -n "${BUILD_ORCA}" ]] ; then
+if [[ -n "${BUILD_IMAGE}" || -n "${BUILD_ELEGOO}" ]] ; then
     pushd build > /dev/null
     echo "[9/9] Generating Linux app..."
     build_linux_image="./src/build_linux_image.sh"
     if [[ -e ${build_linux_image} ]] ; then
+        chmod +x ${build_linux_image}
         extra_script_args=""
         if [[ -n "${BUILD_IMAGE}" ]] ; then
             extra_script_args="-i"

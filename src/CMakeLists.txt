@@ -242,6 +242,21 @@ else ()
     else ()
         set(BIN_RESOURCES_DIR "${CMAKE_CURRENT_BINARY_DIR}/../resources")
     endif ()
+    
+    # Copy Agora libraries for Linux
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_custom_command(TARGET ElegooSlicer POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_PREFIX_PATH}/bin/libaosl.so"
+                "$<TARGET_FILE_DIR:ElegooSlicer>/"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_PREFIX_PATH}/bin/libagora_rtm_sdk.so"
+                "$<TARGET_FILE_DIR:ElegooSlicer>/"
+            COMMENT "Copying Agora shared libraries to build directory"
+            VERBATIM
+        )
+    endif()
+    
     if (CMAKE_MACOSX_BUNDLE)
         if (CMAKE_CONFIGURATION_TYPES)
             set(BIN_RESOURCES_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ElegooSlicer.app/Contents/Resources")
@@ -292,4 +307,14 @@ if (WIN32)
     install(FILES ${output_dlls_${build_type}} DESTINATION ".")
 else ()
     install(TARGETS ElegooSlicer RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR})
+    
+    # Install Agora shared libraries for Linux
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        if (EXISTS "${CMAKE_PREFIX_PATH}/bin/libaosl.so")
+            install(FILES "${CMAKE_PREFIX_PATH}/bin/libaosl.so" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+        endif()
+        if (EXISTS "${CMAKE_PREFIX_PATH}/bin/libagora_rtm_sdk.so")
+            install(FILES "${CMAKE_PREFIX_PATH}/bin/libagora_rtm_sdk.so" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+        endif()
+    endif()
 endif ()

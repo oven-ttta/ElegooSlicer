@@ -65,3 +65,14 @@ ExternalProject_Add_Step(dep_OpenSSL install_cmake_files
     COMMAND ${CMAKE_COMMAND} -E copy_directory openssl "${DESTDIR}${CMAKE_INSTALL_LIBDIR}/cmake/openssl"
     WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
 )
+
+# On x86_64 Linux, OpenSSL 3.x installs to lib64 by default, but we need it in lib
+# Copy the libraries from lib64 to lib if they exist
+if(NOT WIN32 AND NOT APPLE)
+    ExternalProject_Add_Step(dep_OpenSSL copy_lib64_to_lib
+        DEPENDEES install_cmake_files
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DESTDIR}/lib64/libssl.a" "${DESTDIR}/lib/libssl.a"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DESTDIR}/lib64/libcrypto.a" "${DESTDIR}/lib/libcrypto.a"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${DESTDIR}/lib64/pkgconfig" "${DESTDIR}/lib/pkgconfig"
+    )
+endif()

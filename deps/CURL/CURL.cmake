@@ -24,6 +24,7 @@ set(_curl_platform_flags
   -DUSE_MBEDTLS:BOOL=OFF
   -DUSE_LIBIDN2:BOOL=OFF
   -DCURL_USE_LIBPSL:BOOL=OFF
+  -DCURL_BROTLI:BOOL=OFF
 )
 
 if (WIN32)
@@ -78,10 +79,7 @@ elegooslicer_add_cmake_project(CURL
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  if(NOT OPENSSL_FOUND)
-    # (openssl may or may not be built)
-    add_dependencies(dep_CURL ${OPENSSL_PKG})
-  endif()
+  add_dependencies(dep_CURL ${OPENSSL_PKG})
 endif ()
 
 if (MSVC)

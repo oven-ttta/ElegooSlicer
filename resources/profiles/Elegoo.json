@@ -1237,8 +1237,8 @@
             "sub_path": "filament/ELEGOO_02_NOZZLE/Elegoo PC-FR @0.2 nozzle.json"
         },
         {
-            "name": "Elegoo PLA basic @0.2 nozzle",
-            "sub_path": "filament/ELEGOO_02_NOZZLE/Elegoo PLA basic @0.2 nozzle.json"
+            "name": "Elegoo PLA Basic @0.2 nozzle",
+            "sub_path": "filament/ELEGOO_02_NOZZLE/Elegoo PLA Basic @0.2 nozzle.json"
         },
         {
             "name": "Elegoo PETG Translucent @0.2 nozzle",
