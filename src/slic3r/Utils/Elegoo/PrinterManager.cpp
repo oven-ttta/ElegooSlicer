@@ -254,8 +254,10 @@ void PrinterManager::init()
      
     // connect status changed event
     PrinterNetworkEvent::getInstance()->connectStatusChanged.connect([this](const PrinterConnectStatusEvent& event) {
-        PrinterCache::getInstance()->updatePrinterConnectStatus(event.printerId, event.status);
-        // Printer connection status change handled by PrinterCache
+        // only update the connect status when the printer is disconnected
+        if(event.status != PRINTER_CONNECT_STATUS_CONNECTED) {
+            PrinterCache::getInstance()->updatePrinterConnectStatus(event.printerId, event.status);
+        }
     });
 
     // printer status changed event

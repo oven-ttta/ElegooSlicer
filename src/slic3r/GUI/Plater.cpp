@@ -9380,7 +9380,7 @@ void Plater::import_model_id(wxString download_info)
         }
         else {
             download_url = download_origin_url;
-            filename               = FileGet::filename_from_url(download_url.ToStdString());
+            filename               = wxString::FromUTF8(FileGet::filename_from_url(download_url.ToStdString()));
         }
 
     }
@@ -9511,7 +9511,7 @@ void Plater::import_model_id(wxString download_info)
                             filesize = progress.dltotal;
                             double megabytes = static_cast<double>(progress.dltotal) / (1024 * 1024);
                             //The maximum size of a 3mf file is 500mb
-                            if (megabytes > 500) {
+                            if (megabytes > 3 * 1024) {
                                 cont = false;
                                 size_limit = true;
                             }
@@ -9574,14 +9574,17 @@ void Plater::import_model_id(wxString download_info)
         BOOST_LOG_TRIVIAL(trace) << "import_model_id: target_path = " << target_path.string();
         /* load project */
         // Orca: If download is a zip file, treat it as if file has been drag and dropped on the plater
-        std::string ext = target_path.extension().string();
-        boost::to_lower(ext);
-        if (ext == ".zip")
-            this->load_files(wxArrayString(1, target_path.string()));
-        else if (ext == ".3mf")
-            this->load_project(target_path.wstring());
+        // Use wxString to properly handle Chinese characters in file path
+        wxString target_path_wx = from_path(target_path);
+        wxFileName fn(target_path_wx);
+        wxString ext = fn.GetExt();
+        ext.MakeLower();
+        if (ext == "zip")
+            this->load_files(wxArrayString(1, target_path_wx));
+        else if (ext == "3mf")
+            this->load_project(target_path_wx);
         else  // .stl and other formats
-            this->load_files(wxArrayString(1, target_path.string()));
+            this->load_files(wxArrayString(1, target_path_wx));
         /*BBS set project info after load project, project info is reset in load project */
         //p->project.project_model_id = model_id;
         //p->project.project_design_id = design_id;
