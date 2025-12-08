@@ -9442,9 +9442,13 @@ void Plater::import_model_id(wxString download_info)
             vecFiles.clear();
             wxString extension = fs::path(filename.wx_str()).extension().c_str();
 
-
-            //check file suffix
-            if (!extension.Lower().Contains(".3mf") && !extension.Lower().Contains(".stl")) {
+            std::vector<wxString> supported_extensions = {};
+#ifdef _WIN32
+            supported_extensions = {"zip", ".3mf", ".stp", ".step", ".stl", ".svg", ".obj", ".amf"};
+#else
+            supported_extensions = {"zip", ".3mf", ".stp", ".step", ".stl", ".svg", ".obj", ".amf", ".usd", ".abc", ".ply"};
+#endif
+            if (std::find(supported_extensions.begin(), supported_extensions.end(), extension.Lower()) == supported_extensions.end()) {
                 msg = _L("download failed, unknown file format.");
                 return;
             }
