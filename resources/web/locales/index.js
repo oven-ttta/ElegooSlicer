@@ -98,7 +98,9 @@ const langMessages = {
       "ok": "OK",
       "pleaseSelectPrinter": "Please select a printer",
       "bindingInProgress": "Binding in progress...",
-      "bindingInProgressTip": "If there's no response for a long time, please go to the printer to complete the binding confirmation."
+      "bindingInProgressTip": "If there's no response for a long time, please go to the printer to complete the binding confirmation.",
+      "alreadyBinded": "This printer is already binded",
+      "alreadyConnected": "This printer is already connected"
     },
     "manualForm": {
       "printerModel": "Printer Model",
@@ -312,7 +314,9 @@ const langMessages = {
       "ok": "确定",
       "pleaseSelectPrinter": "请选择一台打印机",
       "bindingInProgress": "正在绑定中...",
-      "bindingInProgressTip": "如果长时间未响应,请前往打印机完成绑定确认"
+      "bindingInProgressTip": "如果长时间未响应,请前往打印机完成绑定确认",
+      "alreadyBinded": "该打印机已绑定",
+      "alreadyConnected": "该打印机已连接"
     },
     "manualForm": {
       "printerModel": "打印机型号",

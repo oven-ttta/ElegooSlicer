@@ -181,6 +181,16 @@ const AddPrinterComponent = {
                     }
                     const printer = this.printers[this.selectedPrinterIdx];
 
+                    // Check if printer is already added
+                    if (printer.isAdded) {
+                        const statusKey = printer.networkType === 1 ? 'addPrinterDialog.alreadyBinded' : 'addPrinterDialog.alreadyConnected';
+                        ElementPlus.ElMessage({
+                            message: this.$t(statusKey),
+                            type: 'error',
+                        });
+                        return;
+                    }
+
                     // authMode === 2: requires access code
                     if (printer.authMode === 2 && (printer.accessCode === '' || printer.accessCode === null)) {
                         this.pendingAccessAuthPrinter = printer;
@@ -256,6 +266,16 @@ const AddPrinterComponent = {
 
         async connectPrinterAuth(printer) {
             try {
+                // Check if printer is already added
+                if (printer.isAdded) {
+                    const statusKey = printer.networkType === 1 ? 'addPrinterDialog.alreadyBinded' : 'addPrinterDialog.alreadyConnected';
+                    ElementPlus.ElMessage({
+                        message: this.$t(statusKey),
+                        type: 'error',
+                    });
+                    return;
+                }
+
                 // Check if this is PIN auth (networkType === 1)
                 const isCloudConnect = printer.networkType === 1;
 
