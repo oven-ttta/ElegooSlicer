@@ -1074,10 +1074,10 @@ void PresetUpdater::priv::sync_plugins(std::string http_url, std::string plugin_
     if (GUI::wxGetApp().is_running_on_arm64() && !NetworkAgent::use_legacy_network) {
         //set to arm64 for plugins
         std::map<std::string, std::string> current_headers = Slic3r::Http::get_extra_headers();
-        current_headers["X-BBL-OS-Type"] = "windows_arm";
+        current_headers["X-OS-Type"] = "windows_arm";
 
         Slic3r::Http::set_extra_headers(current_headers);
-        BOOST_LOG_TRIVIAL(info) << boost::format("set X-BBL-OS-Type to windows_arm");
+        BOOST_LOG_TRIVIAL(info) << boost::format("set X-OS-Type to windows_arm");
     }
 #endif
     try {
@@ -1094,10 +1094,10 @@ void PresetUpdater::priv::sync_plugins(std::string http_url, std::string plugin_
     if (GUI::wxGetApp().is_running_on_arm64() && !NetworkAgent::use_legacy_network) {
         //set back
         std::map<std::string, std::string> current_headers = Slic3r::Http::get_extra_headers();
-        current_headers["X-BBL-OS-Type"] = "windows";
+        current_headers["X-OS-Type"] = "windows";
 
         Slic3r::Http::set_extra_headers(current_headers);
-        BOOST_LOG_TRIVIAL(info) << boost::format("set X-BBL-OS-Type back to windows");
+        BOOST_LOG_TRIVIAL(info) << boost::format("set X-OS-Type back to windows");
     }
 #endif
 
