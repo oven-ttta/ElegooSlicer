@@ -201,9 +201,8 @@ void FileGet::priv::get_perform()
         m_evt_handler->QueueEvent(evt);
     }
 
-    boost::filesystem::path dest_path;
-    if (!extension.empty())
-        dest_path = m_dest_folder / m_filename;
+    // dest_path is always constructed from m_filename, which contains the full filename
+    boost::filesystem::path dest_path = m_dest_folder / m_filename;
 
     wxString temp_path_wstring(m_tmp_path.wstring());
 
@@ -358,11 +357,16 @@ void FileGet::priv::get_perform()
                      m_evt_handler->QueueEvent(evt);
                  }
                  safe_close();
-                 boost::filesystem::rename(m_tmp_path, dest_path);
-             } catch (const std::exception& /*e*/) {
+                 
+                 // Use rename_file for safer file moving (handles existing files on macOS)
+                 std::error_code rename_err = rename_file(m_tmp_path.string(), dest_path.string());
+                 if (rename_err) {
+                     throw std::runtime_error("failed to rename file: " + rename_err.message());
+                 }
+             } catch (const std::exception& e) {
                  safe_close();
                  wxCommandEvent* evt = new wxCommandEvent(EVT_DWNLDR_FILE_ERROR);
-                 evt->SetString("Failed to write and move.");
+                 evt->SetString("failed to write and move: " + std::string(e.what()));
                  evt->SetInt(m_id);
                  m_evt_handler->QueueEvent(evt);
                  return;
