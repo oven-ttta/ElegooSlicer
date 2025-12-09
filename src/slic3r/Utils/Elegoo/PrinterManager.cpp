@@ -817,6 +817,14 @@ void PrinterManager::refreshWanPrinters()
             return;
         }
         if(printersResult.code == PrinterNetworkErrorCode::NETWORK_ERROR) {
+            //update all wan printers to disconnected
+            std::vector<PrinterNetworkInfo> printerList = PrinterCache::getInstance()->getPrinters();
+            for (const auto& localPrinter : printerList) {
+                if (localPrinter.networkType != NETWORK_TYPE_WAN) {
+                    continue;
+                }
+                PrinterCache::getInstance()->updatePrinterConnectStatus(localPrinter.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
+            }            
             return;
         }
     }
