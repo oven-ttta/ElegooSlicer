@@ -1099,7 +1099,10 @@ void PrinterManager::monitorPrinterConnections()
                 continue;
             }
             if (printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED) {
-                continue;
+                if(getPrinterNetwork(printer.printerId)) {      
+                    continue;
+                }
+                PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
             }
             if (printer.printerStatus == PRINTER_STATUS_ID_NOT_MATCH || printer.printerStatus == PRINTER_STATUS_AUTH_ERROR) {
                 continue;
@@ -1160,7 +1163,10 @@ void PrinterManager::monitorWanPrinterConnections()
                 continue;
             }
             if (printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED) {
-                continue;
+                if(getPrinterNetwork(printer.printerId)) {      
+                    continue;
+                }
+                PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
             }
             if (printer.printerStatus == PRINTER_STATUS_ID_NOT_MATCH || printer.printerStatus == PRINTER_STATUS_AUTH_ERROR) {
                 continue;
