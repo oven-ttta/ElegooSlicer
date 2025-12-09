@@ -816,6 +816,9 @@ void PrinterManager::refreshWanPrinters()
         if (printersResult.code == PrinterNetworkErrorCode::USER_NETWORK_BUSY) {
             return;
         }
+        if(printersResult.code == PrinterNetworkErrorCode::NETWORK_ERROR) {
+            return;
+        }
     }
     // After binding succeeds in the add printer interface, online printers will be queried from IoT.
     // Both places executing cache addition will cause issues, so mutex lock is needed.
