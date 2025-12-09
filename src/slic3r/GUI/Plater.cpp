@@ -9365,29 +9365,9 @@ void Plater::import_model_id(wxString download_info)
 {
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << __LINE__ << " download info: " << download_info;
 
-    wxString download_origin_url = download_info;
-    wxString download_url;
-    wxString filename;
-    wxString separator = "&name=";
+    wxString download_url = download_info;
 
-    try
-    {
-        size_t namePos = download_info.Find(separator);
-        if (namePos != wxString::npos) {
-            download_url = download_info.Mid(0, namePos);
-            filename = download_info.Mid(namePos + separator.Length());
-
-        }
-        else {
-            download_url = download_origin_url;
-            filename               = wxString::FromUTF8(FileGet::filename_from_url(download_url.ToStdString()));
-        }
-
-    }
-    catch (const std::exception&)
-    {
-        //wxString sError = error.what();
-    }
+    wxString filename = wxString::FromUTF8(FileGet::filename_from_url(download_url.ToStdString()));
 
     bool download_ok = false;
     int retry_count = 0;
@@ -9515,7 +9495,7 @@ void Plater::import_model_id(wxString download_info)
                             filesize = progress.dltotal;
                             double megabytes = static_cast<double>(progress.dltotal) / (1024 * 1024);
                             //The maximum size of a 3mf file is 500mb
-                            if (megabytes > 3 * 1024) {
+                            if (megabytes > 500) {
                                 cont = false;
                                 size_limit = true;
                             }

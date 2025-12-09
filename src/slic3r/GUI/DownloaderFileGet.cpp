@@ -577,7 +577,7 @@ string FileGet::filename_from_url(const string& url)
     string content_disp_value;
 
     for (const auto& param : query_params) {
-        if (param.first == "filename" || param.first == "file_name") {
+        if (param.first == "filename" || param.first == "file_name" || param.first == "name") {
             string decoded_value = url_decode(param.second, true);
             // Replace directory separators with underscores to match browser behavior
             for (char& c : decoded_value) {
