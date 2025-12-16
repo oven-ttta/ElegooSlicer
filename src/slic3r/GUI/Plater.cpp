@@ -9424,10 +9424,10 @@ void Plater::import_model_id(wxString download_info)
             wxString extension = fs::path(filename.wx_str()).extension().c_str();
 
             std::vector<wxString> supported_extensions = {};
-#ifdef _WIN32
-            supported_extensions = {"zip", ".3mf", ".stp", ".step", ".stl", ".svg", ".obj", ".amf"};
+#ifdef __APPLE__
+            supported_extensions = {"zip", ".3mf", ".stl", ".oltp", ".stp", ".step", ".svg", ".amf", ".obj", ".usd", ".usda", ".usdc", ".usdz", ".abc", ".ply"};
 #else
-            supported_extensions = {"zip", ".3mf", ".stp", ".step", ".stl", ".svg", ".obj", ".amf", ".usd", ".abc", ".ply"};
+            supported_extensions = {"zip", ".3mf", ".stl", ".oltp", ".stp", ".step", ".svg", ".amf", ".obj"};
 #endif
             if (std::find(supported_extensions.begin(), supported_extensions.end(), extension.Lower()) == supported_extensions.end()) {
                 msg = _L("download failed, unknown file format.");
@@ -11143,7 +11143,11 @@ void ProjectDropDialog::on_dpi_changed(const wxRect& suggested_rect)
 //BBS: remove GCodeViewer as seperate APP logic
 bool Plater::load_files(const wxArrayString& filenames)
 {
-    const std::regex pattern_drop(".*[.](stp|step|stl|oltp|obj|amf|3mf|svg|zip)", std::regex::icase);
+#ifdef __APPLE__
+    const std::regex pattern_drop(".*[.](3mf|stl|oltp|stp|step|svg|amf|obj|usd|usda|usdc|usdz|abc|ply|zip)", std::regex::icase);
+#else
+    const std::regex pattern_drop(".*[.](3mf|stl|oltp|stp|step|svg|amf|obj|zip)", std::regex::icase);
+#endif
     const std::regex pattern_gcode_drop(".*[.](gcode|g)", std::regex::icase);
 
     std::vector<fs::path> normal_paths;
