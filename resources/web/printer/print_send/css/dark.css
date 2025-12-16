@@ -57,10 +57,14 @@ html.dark .tray-popover-card.disabled {
 }
 
 /* Icon color adjustments for better visibility */
-html.dark .stat-icon,
-html.dark .dropdown-icon,
-html.dark .dropdown-item-icon {
+html.dark .stat-icon {
   filter: brightness(1.2);
+}
+
+/* El-select adjustments for dark theme */
+html.dark .model-image,
+html.dark .bed-image {
+  filter: brightness(0.9) contrast(1.1);
 }
 
 /* Ensure proper contrast for images and icons */

@@ -97,12 +97,47 @@
   line-height: 24px;
   color: var(--text-contrast);
 }
+.el-select-dropdown__item.is-selected {
+   font-weight: normal;
+   background-color: var(--bg-active);
+}
+
+.model-description-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
 
 .model-description {
   font-size: 16px;
   font-weight: normal;
   line-height: 16px;
   color: var(--text-secondary);
+}
+
+/* ===== PRINTER STATUS ===== */
+.printer-status-dropdown,
+.printer-status-current {
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border: none;
+  border-radius: 10px;
+  min-width: 50px;
+  height: 20px;
+  outline: none;
+  cursor: default;
+  transition: background 0.2s, color 0.2s;
+  padding: 0px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.printer-status-current {
+  flex-shrink: 0;
 }
 
 .filament-title {

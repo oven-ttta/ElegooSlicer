@@ -188,7 +188,7 @@ const langMessages = {
       "cancel": "Cancel",
       "sync": "Sync",
       "failedToSyncFilament": "Failed to sync filament.",
-      "warningTips":"This project already contains filament data. Confirming sync will overwrite the existing settings."
+      "warningTips": "This project already contains filament data. Confirming sync will overwrite the existing settings."
     },
     "printSend": {
       "printer": "Printer",
@@ -211,9 +211,11 @@ const langMessages = {
       "filamentMapping": "Filament Mapping",
       "filamentTypeNotMatch": "Filament type not match",
       "printerModelNotMatch": "The selected printer does not match the gcode file. It may cause printing failure or even printer damage! It is recommended to re-slice or select the correct printer to start printing.",
-      "bedTypeNotMatch":"The selected bed type does not match the G-code File. Please confirm before starting the print.",
-      "printerNotConnected":"Printer is not connected"
-    
+      "bedTypeNotMatch": "The selected bed type does not match the G-code File. Please confirm before starting the print.",
+      "printerNotConnected": "Printer is not connected",
+      "print": "Print",
+      "printerBusyWarning": "The printer may not be able to start transmission/printing. Please select the printer again or refresh its status.",
+      "printCompleteWarning": "Please make sure the printer has been cleared out to avoid crashes or damage when starting a new print."
     }
   },
   zh_CN: {
@@ -263,7 +265,7 @@ const langMessages = {
       "canceled": "已取消",
       "selfChecking": "自检中",
       "autoLeveling": "自动调平中",
-      "pidCalibrating": "PID检测中", 
+      "pidCalibrating": "PID检测中",
       "resonanceTesting": "振纹优化中",
       "updating": "升级中",
       "fileCopying": "文件复制中",
@@ -407,7 +409,7 @@ const langMessages = {
       "cancel": "取消",
       "sync": "同步",
       "failedToSyncFilament": "同步耗材失败",
-      "warningTips":"当前项目的渲染区已经存在耗材信息，在确认同步后，已经应用的耗材信息将会被直接覆盖"
+      "warningTips": "当前项目的渲染区已经存在耗材信息，在确认同步后，已经应用的耗材信息将会被直接覆盖"
     },
     "printSend": {
       "printer": "打印机",
@@ -430,8 +432,11 @@ const langMessages = {
       "filamentMapping": "耗材映射",
       "filamentTypeNotMatch": "耗材类型不匹配",
       "printerModelNotMatch": "当前选中的打印机与gcode文件不匹配，可能会导致打印失败甚至打印机损坏！建议重新切片或者选择正确的打印机启动打印",
-      "bedTypeNotMatch":"当前选中的热床类型与Gcode文件不匹配，请确认后再启动打印",
-      "printerNotConnected":"打印机未连接"
+      "bedTypeNotMatch": "当前选中的热床类型与Gcode文件不匹配，请确认后再启动打印",
+      "printerNotConnected": "打印机未连接",
+      "print": "打印",
+      "printerBusyWarning": "当前打印机可能无法发起任务传输/打印，建议重新选择打印机或者刷新状态",
+      "printCompleteWarning": "请检查打印机是否已经清理干净，避免发起新打印时导致撞击或损坏"
     }
   }
 };

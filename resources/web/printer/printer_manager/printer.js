@@ -72,111 +72,30 @@ const PrinterManager = {
 
 
         canShowProgressText(printerStatus, connectStatus) {
-            return printerStatus === 1 || printerStatus === 2 || printerStatus === 3;
+            return PrinterStatusUtils.canShowProgressText(printerStatus, connectStatus);
         },
         getPrinterStatus(printerStatus, connectStatus) {
-            // If not connected, always show Offline
-            if (connectStatus === 0) {
-                return this.$t("printerManager.offline");
-            }
-
-            const statusMap = {
-                [-1]: this.$t("printerManager.offline"),
-                [0]: this.$t("printerManager.idle"),
-                [1]: this.$t("printerManager.printing"),
-                [2]: this.$t("printerManager.paused"),
-                [3]: this.$t("printerManager.pausing"),
-                [4]: this.$t("printerManager.canceled"),
-                [5]: this.$t("printerManager.selfChecking"),
-                [6]: this.$t("printerManager.autoLeveling"),
-                [7]: this.$t("printerManager.pidCalibrating"),
-                [8]: this.$t("printerManager.resonanceTesting"),
-                [9]: this.$t("printerManager.updating"),
-                [10]: this.$t("printerManager.fileCopying"),
-                [11]: this.$t("printerManager.fileTransferring"),
-                [12]: this.$t("printerManager.homing"),
-                [13]: this.$t("printerManager.preheating"),
-                [14]: this.$t("printerManager.filamentOperating"),
-                [15]: this.$t("printerManager.extruderOperating"),
-                [16]: this.$t("printerManager.printCompleted"),
-                [17]: this.$t("printerManager.rfidRecognizing"),
-                [18]: this.$t("printerManager.videoComposing"),
-                [19]: this.$t("printerManager.emergencyStop"),
-                [20]: this.$t("printerManager.powerLossRecovery"),
-                [21]: this.$t("printerManager.initializing"),
-                [998]: this.$t("printerManager.busy"),
-                [999]: this.$t("printerManager.error"),
-                [1000]: this.$t("printerManager.idNotMatch"),
-                [1001]: this.$t("printerManager.authError"),
-                [10000]: this.$t("printerManager.unknown")
-            };
-
-            return statusMap[printerStatus] || "";
+            return PrinterStatusUtils.getPrinterStatus(printerStatus, connectStatus, this.$t);
         },
 
         getPrinterStatusStyle(printerStatus, connectStatus) {
-            if (connectStatus === 0 || printerStatus === -1) {
-                return {
-                    color: 'var(--printer-status-offline-color)',
-                    backgroundColor: 'var(--printer-status-offline-bg)'
-                };
-            }
-            if (printerStatus === 16 || printerStatus === 0) {
-                return {
-                    color: 'var(--printer-status-success-color)',
-                    backgroundColor: 'var(--printer-status-success-bg)'
-                };
-            } else if (printerStatus === 999 || printerStatus === 998) {
-                return {
-                    color: 'var(--printer-status-error-color)',
-                    backgroundColor: 'var(--printer-status-error-bg)'
-                };
-            } else if (printerStatus === 1000 || printerStatus === 2 || printerStatus === 3 || printerStatus === 20) {
-                return {
-                    color: 'var(--printer-status-warning-color)',
-                    backgroundColor: 'var(--printer-status-warning-bg)'
-                };
-            } else {
-                return {
-                    color: 'var(--printer-status-primary-color)',
-                    backgroundColor: 'var(--printer-status-primary-bg)'
-                };
-            }
+            return PrinterStatusUtils.getPrinterStatusStyle(printerStatus, connectStatus);
         },
 
         shouldShowWarningIcon(printerStatus, connectStatus) {
-            return connectStatus === 0 && (printerStatus === 1000 || printerStatus === 1001);
+            return PrinterStatusUtils.shouldShowWarningIcon(printerStatus, connectStatus);
         },
 
         getWarningTooltip(printerStatus) {
-            if (printerStatus === 1000) {
-                return this.$t("printerManager.idNotMatch");
-            } else if (printerStatus === 1001) {
-                return this.$t("printerManager.authError");
-            }
-            return "";
+            return PrinterStatusUtils.getWarningTooltip(printerStatus, this.$t);
         },
 
         getPrinterProgress(printer) {
-            return (printer.printTask && typeof printer.printTask.progress === 'number') ? printer.printTask.progress : 0;
+            return PrinterStatusUtils.getPrinterProgress(printer);
         },
 
         getPrinterRemainingTime(printer) {
-            if (!printer.printTask) return '';
-
-            const { currentTime, totalTime, estimatedTime } = printer.printTask;
-
-            // If estimatedTime is provided, it already represents remaining seconds
-            const remainingTime = (typeof estimatedTime === 'number' && estimatedTime > 0)
-                ? estimatedTime
-                : Math.max(0, (totalTime || 0) - (currentTime || 0));
-
-            const hours = Math.floor(remainingTime / 3600);
-            const minutes = Math.floor((remainingTime % 3600) / 60);
-            const seconds = remainingTime % 60;
-            const pad = (n) => String(n).padStart(2, '0');
-
-            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            return PrinterStatusUtils.getPrinterRemainingTime(printer);
         },
 
         async handleRefresh() {

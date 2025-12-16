@@ -46,15 +46,13 @@ const PrintSendApp = {
             // Printer management
             printerList: [],
             curPrinter: null,
-            printerDropdownOpen: false,
 
             // Bed type management
             bedTypes: [
                 { value: 'btPTE', name: this.$t ? this.$t('printSend.texturedA') : 'Textured A', icon: 'img/bt_pte.png' },
                 { value: 'btPC', name: this.$t ? this.$t('printSend.smoothB') : 'Smooth B', icon: 'img/bt_pc.png' }
             ],
-            selectedBedTypeValue: 'btPTE',
-            bedDropdownOpen: false,
+            selectedBedType: null,
             hasMmsInfo: false,
             // Filament management
             currentPage: 1,
@@ -69,10 +67,6 @@ const PrintSendApp = {
     },
 
     computed: {
-
-        selectedBedType() {
-            return this.bedTypes.find(b => b.value === this.selectedBedTypeValue) || this.bedTypes[0];
-        },
 
         modelImageSrc() {
             return this.printInfo.thumbnail
@@ -111,7 +105,51 @@ const PrintSendApp = {
         },
 
         bedTypeNotMatch() {
-            return this.printInfo.uploadAndPrint && this.currentBedType !== this.selectedBedTypeValue && this.curPrinter.printCapabilities.supportsHeatedBedSwitching;
+            return this.printInfo.uploadAndPrint && this.selectedBedType && this.currentBedType !== this.selectedBedType.value && this.curPrinter.printCapabilities.supportsHeatedBedSwitching;
+        },
+
+        // Check if printer is busy (not idle and not print completed)
+        printerBusy() {
+            if (!this.curPrinter) return false;
+            const status = this.curPrinter.printerStatus;
+            if(this.curPrinter.connectStatus !== 1) return true;// If not connected, consider busy
+            // Status 0 = idle, Status 16 = print completed
+            // Any other status means the printer is busy
+            return status !== 0 && status !== 16;
+        },
+
+        // Check if printer is in print completed state
+        printerPrintCompleted() {
+            if (!this.curPrinter) return false;
+            // Status 16 = print completed
+            return this.curPrinter.printerStatus === 16;
+        },
+
+        // Computed property to generate error list
+        errorList() {
+            const errors = [];
+            
+            // Priority 1: Printer model mismatch
+            if (this.printerModelNotMatch) {
+                errors.push(this.$t('printSend.printerModelNotMatch'));
+            }
+            
+            // Priority 2: Bed type mismatch (only if printer model matches)
+            if (!this.printerModelNotMatch && this.bedTypeNotMatch) {
+                errors.push(this.$t('printSend.bedTypeNotMatch'));
+            }
+            
+            // Priority 3: Printer busy warning (non-idle and non-completed)
+            if (this.printerBusy) {
+                errors.push(this.$t('printSend.printerBusyWarning'));
+            }
+            
+            // Priority 4: Print completed warning (only if "Upload and Print" is checked)
+            if (this.printerPrintCompleted && this.printInfo.uploadAndPrint) {
+                errors.push(this.$t('printSend.printCompleteWarning'));
+            }
+            
+            return errors;
         }
     },
 
@@ -166,6 +204,11 @@ const PrintSendApp = {
                     printerId: this.curPrinter.printerId
                 };
                 const response = await this.ipcRequest('request_mms_info', params);
+                if(!response) {
+                    this.mmsInfo = null;
+                    this.printInfo.filamentList = [];
+                    return;
+                }
                 this.mmsInfo = response.mmsInfo || null;
                 this.printInfo.filamentList = response.mappedFilamentList || [];        
             } catch (error) {
@@ -213,14 +256,17 @@ const PrintSendApp = {
                 if (response && response.bedType) {
                     console.log("Current bed type:", response.bedType);
                     this.currentBedType = response.bedType;
-                    console.log("Selected bed type:", this.selectedBedTypeValue);
+                    console.log("Selected bed type:", this.selectedBedType ? this.selectedBedType.value : null);
                 }
             } catch (error) {
                 console.error('Failed to get current bed type:', error);
             }
         },
 
-        async refreshPrinterList() {
+        async refreshPrinterList(event, value) {
+            if (event) {
+                event.stopPropagation();
+            }
             await this.requestPrinterList();
         },
 
@@ -243,43 +289,6 @@ const PrintSendApp = {
             }
             this.curPrinter = selectedPrinter;
             await this.onPrinterChanged();
-        },
-
-        // Printer dropdown methods
-        togglePrinterDropdown() {
-            this.printerDropdownOpen = !this.printerDropdownOpen;
-            if (this.printerDropdownOpen) {
-                this.bedDropdownOpen = false;
-            }
-        },
-
-        closePrinterDropdown() {
-            this.printerDropdownOpen = false;
-        },
-
-        selectPrinter(printer) {
-            this.curPrinter = printer;
-            this.printerDropdownOpen = false;
-            this.onPrinterChanged();
-        },
-
-        // Bed type dropdown methods
-        toggleBedDropdown() {
-            this.bedDropdownOpen = !this.bedDropdownOpen;
-            if (this.bedDropdownOpen) {
-                this.printerDropdownOpen = false;
-            }
-        },
-
-        closeBedDropdown() {
-            this.bedDropdownOpen = false;
-        },
-
-        selectBedType(bedType) {
-            console.log("Selected bed type:", bedType);
-            this.selectedBedTypeValue = bedType.value;
-            this.bedDropdownOpen = false;
-            this.onBedTypeChanged(bedType.value);
         },
 
         // Model name editing
@@ -428,7 +437,7 @@ const PrintSendApp = {
             }             
             // Update task with current UI state
             this.printInfo.selectedPrinterId = this.curPrinter.printerId;
-            this.printInfo.bedType = this.selectedBedTypeValue;
+            this.printInfo.bedType = this.selectedBedType ? this.selectedBedType.value : 'btPTE';
 
             if (this.printInfo.uploadAndPrint && this.hasMmsInfo && !this.checkFilamentMapping()) {
                 this.showStatusTip(this.$t('printSend.someFilamentsNotMapped'));
@@ -477,6 +486,35 @@ const PrintSendApp = {
             }
         },
 
+        // Printer status display methods (using shared utilities)
+        canShowProgressText(printerStatus, connectStatus) {
+            return PrinterStatusUtils.canShowProgressText(printerStatus, connectStatus);
+        },
+
+        getPrinterStatus(printerStatus, connectStatus) {
+            return PrinterStatusUtils.getPrinterStatus(printerStatus, connectStatus, this.$t);
+        },
+
+        getPrinterStatusStyle(printerStatus, connectStatus) {
+            return PrinterStatusUtils.getPrinterStatusStyle(printerStatus, connectStatus);
+        },
+
+        shouldShowWarningIcon(printerStatus, connectStatus) {
+            return PrinterStatusUtils.shouldShowWarningIcon(printerStatus, connectStatus);
+        },
+
+        getWarningTooltip(printerStatus) {
+            return PrinterStatusUtils.getWarningTooltip(printerStatus, this.$t);
+        },
+
+        getPrinterProgress(printer) {
+            return PrinterStatusUtils.getPrinterProgress(printer);
+        },
+
+        getPrinterRemainingTime(printer) {
+            return PrinterStatusUtils.getPrinterRemainingTime(printer);
+        },
+
         // Event handlers called by external code
         async onPrinterChanged() {
             // Update bed types with current translations
@@ -490,10 +528,11 @@ const PrintSendApp = {
             if(this.curPrinter.systemCapabilities.supportsMultiFilament) {
                await this.requestMmsInfo();
             } 
-         
+         console.log("Printer changed to:", this.curPrinter);
             // Set bed type if provided
             if (this.printInfo.bedType) {
-                this.selectedBedTypeValue = this.printInfo.bedType;
+                const bedType = this.bedTypes.find(b => b.value === this.printInfo.bedType);
+                this.selectedBedType = bedType || this.bedTypes[0];
             }
 
             // Check for MMS info
@@ -514,6 +553,7 @@ const PrintSendApp = {
 
         onBedTypeChanged(bedType) {
             // Handle bed type change logic if needed
+            console.log("Selected bed type:", bedType);
         },
 
         refreshShowFilamentSection() {
@@ -529,6 +569,7 @@ const PrintSendApp = {
             { value: 'btPTE', name: this.$t('printSend.texturedA'), icon: 'img/bt_pte.png' },
             { value: 'btPC', name: this.$t('printSend.smoothB'), icon: 'img/bt_pc.png' }
         ];
+        this.selectedBedType = this.bedTypes[0];
 
         // Initialize the application
         this.init();

@@ -17,6 +17,7 @@
     <script src="../../locales/index.js"></script>
     <script type="text/javascript" src="../../utils/util.js"></script>
     <script src="../../utils/ipc.js"></script>
+    <script src="../printer-status-utils.js"></script>
     <script src="./img/filament.js"></script>
 </head>
 
@@ -58,67 +59,79 @@
                                 <div class="section-separator"></div>
                             </div>
                             <div class="dropdowns-container">
-                                <div class="dropdown" v-click-outside="closePrinterDropdown">
-                                    <div class="dropdown-header" :class="{ active: printerDropdownOpen }"
-                                        @click="togglePrinterDropdown">
-                                        <button class="printer-refresh-btn" @click.stop="refreshPrinterList">
-                                            <img src="img/refresh.svg" alt="Refresh" />
-                                        </button>
-                                        <img :src="(curPrinter && curPrinter.printerImg) || ''" alt=""
-                                            class="dropdown-icon" />
-                                        <div class="dropdown-content">
-                                            <div class="dropdown-title">{{ (curPrinter && curPrinter.printerName) ||
-                                                $t('printSend.noPrinter') }}</div>
-                                            <div class="dropdown-subtitle">{{ (curPrinter && (curPrinter.networkType===0
-                                                ? curPrinter.host : "SN: " + curPrinter.serialNumber)) ||
-                                                $t('printSend.pleaseConnectPrinter') }}</div>
-                                        </div>
-                                    </div>
-                                    <ul class="dropdown-menu" :hidden="!printerDropdownOpen">
-                                        <li v-for="printer in printerList" :key="printer.printerId"
-                                            class="dropdown-item"
-                                            :class="{ selected: printer.printerId === curPrinter.printerId }"
-                                            @click="selectPrinter(printer)">
-                                            <img :src="printer.printerImg" alt="" class="dropdown-item-icon" />
-                                            <div class="dropdown-item-content">
-                                                <div class="dropdown-item-title">{{ printer.printerName }}</div>
-                                                <div class="dropdown-item-subtitle">{{
-                                                    printer.networkType===0 ? printer.host : "SN: " +
-                                                    printer.serialNumber }}</div>
+                                <el-select v-model="curPrinter" class="printer-select" :show-arrow="false"
+                                    :placeholder="$t('printSend.pleaseConnectPrinter')" @change="onPrinterChanged"
+                                    value-key="printerId">
+                                    <template #label="{ value }">
+                                        <div class="model-container">
+                                            <span class="icon-button" @click="refreshPrinterList($event, value)">
+                                                <img width="18px" src="img/refresh.svg" alt="Refresh" />
+                                            </span>
+                                            <img :src="value.printerImg" class="model-image" alt="printer" />
+                                            <div class="model-details">
+                                                <span class="model-title">{{ value.printerName }}</span>
+                                                <div class="model-description-row">
+                                                    <span class="model-description">{{ value.networkType===0 ?
+                                                        value.host : "SN: " + value.serialNumber }}</span>
+                                                    <el-text class="printer-status-current"
+                                                        :style="getPrinterStatusStyle(value.printerStatus, value.connectStatus)"
+                                                        truncated>
+                                                        {{ getPrinterStatus(value.printerStatus, value.connectStatus) }}
+                                                    </el-text>
+                                                </div>
                                             </div>
-                                        </li>
-                                    </ul>
-                                </div>
+                                        </div>
+                                    </template>
+                                    <el-option v-for="item in printerList" :key="item.printerId" class="printer-option"
+                                        :value="item">
+                                        <div class="model-container">
+                                            <img :src="item.printerImg" class="model-image" alt="printer" />
+                                            <div class="model-details">
+                                                <span class="model-title">{{ item.printerName }}</span>
+                                                <div class="model-description-row">
+                                                    <span class="model-description">{{ item.networkType===0 ? item.host
+                                                        : "SN: " + item.serialNumber }}</span>
+                                                    <el-text class="printer-status-dropdown"
+                                                        :style="getPrinterStatusStyle(item.printerStatus, item.connectStatus)"
+                                                        truncated>
+                                                        {{ getPrinterStatus(item.printerStatus, item.connectStatus) }}
+                                                    </el-text>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </el-option>
+                                </el-select>
 
-                                <div class="dropdown bed-dropdown"
+                                <el-select v-model="selectedBedType" class="bed-select" :show-arrow="false"
+                                    :suffix-icon="null"
                                     v-if="curPrinter && curPrinter.printCapabilities.supportsHeatedBedSwitching"
-                                    v-click-outside="closeBedDropdown" :class="{ hidden: !showBedDropdown }">
-                                    <div class="dropdown-header" :class="{ active: bedDropdownOpen }"
-                                        @click="toggleBedDropdown">
-                                        <img :src="selectedBedType.icon" alt="" class="dropdown-icon" />
-                                        <div class="dropdown-content">
-                                            <div class="dropdown-title">{{ selectedBedType.name }}</div>
+                                    :class="{ hidden: !showBedDropdown }" @change="onBedTypeChanged">
+                                    <template #label="{ value }">
+                                        <div class="bed-container">
+                                            <el-tooltip :content="value.name" placement="top">
+                                                <img :src="value.icon" class="bed-image"
+                                                    style="width: 80px; height: 80px;" alt="bed" />
+                                            </el-tooltip>
                                         </div>
-                                    </div>
-                                    <ul class="dropdown-menu" :hidden="!bedDropdownOpen">
-                                        <li v-for="bedType in bedTypes" :key="bedType.value" class="dropdown-item"
-                                            :class="{ selected: bedType.value === selectedBedType.value }"
-                                            @click="selectBedType(bedType)">
-                                            <img :src="bedType.icon" alt="" class="dropdown-item-icon" />
-                                            <div class="dropdown-item-content">
-                                                <div class="dropdown-item-title">{{ bedType.name }}</div>
+                                    </template>
+                                    <el-option v-for="bedType in bedTypes" class="bed-option" :key="bedType.value"
+                                        :value="bedType">
+                                        <div class="bed-container">
+                                            <img :src="bedType.icon" class="bed-image" alt="bed" />
+                                            <div class="bed-info">
+                                                <span class="bed-title">{{ bedType.name }}</span>
                                             </div>
-                                        </li>
-                                    </ul>
-                                </div>
+                                        </div>
+                                    </el-option>
+                                </el-select>
                             </div>
                         </div>
-                        <div class="error-tips" v-show="printerModelNotMatch">{{$t('printSend.printerModelNotMatch')}}
-                        </div>
-                        <div class="error-tips" v-show="!printerModelNotMatch&&bedTypeNotMatch">
-                            {{$t('printSend.bedTypeNotMatch')}}</div>
                     </div>
                 </section>
+                <div class="error-tips" v-for="(error, index) in errorList" :key="index">
+                    <span v-if="errorList.length > 1">{{ index + 1 }}. {{ error }}</span>
+                    <span v-else>{{ error }}</span>
+                </div>
                 <section class="options-section">
                     <div class="options-separator"></div>
 
@@ -203,8 +216,7 @@
                                                 </div>
                                             </div>
                                             <div class="mms-popover-content">
-                                                <div v-for="mms in mmsInfo.mmsList" :key="mms.mmsId"
-                                                    class="mms-row">
+                                                <div v-for="mms in mmsInfo.mmsList" :key="mms.mmsId" class="mms-row">
                                                     <div class="tray-popover-content">
                                                         <div v-for="tray in mms.trayList" :key="tray.trayName"
                                                             class="tray-popover-card"
@@ -283,7 +295,7 @@
                 <button class="btn btn-secondary trans" @click="cancel" tid="cancel">{{ $t('printSend.cancel')
                     }}</button>
                 <button class="btn btn-primary trans" :disabled="!curPrinter" @click="upload" tid="upload">{{
-                    $t('printSend.upload') }}</button>
+                    printInfo.uploadAndPrint ? $t('printSend.print') : $t('printSend.upload') }}</button>
             </footer>
         </div>
     </div>

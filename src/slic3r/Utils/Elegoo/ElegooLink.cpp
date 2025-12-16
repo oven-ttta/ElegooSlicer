@@ -501,9 +501,13 @@ bool ElegooLink::isBusy(const std::string& printerId, PrinterStatus& status, int
         auto elinkResult = elink::ElegooLink::getInstance().getPrinterStatus({printerId});
         if (elinkResult.code == elink::ELINK_ERROR_CODE::SUCCESS) {
             const auto& statusData = elinkResult.value();
-            if (statusData.printerStatus.state == elink::PrinterState::IDLE) {
+            if (statusData.printerStatus.state == elink::PrinterState::IDLE ||
+                statusData.printerStatus.subState == elink::PrinterSubState::P_PRINTING_COMPLETED) {
                 isBusy = false;
                 status = PRINTER_STATUS_IDLE;
+                if(statusData.printerStatus.subState == elink::PrinterSubState::P_PRINTING_COMPLETED){
+                    status = PRINTER_STATUS_PRINT_COMPLETED;
+                }
                 break;
             } else {
                 status = parseElegooStatus(statusData.printerStatus.state, statusData.printerStatus.subState);

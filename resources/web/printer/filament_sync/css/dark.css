@@ -53,3 +53,10 @@ html.dark .filament-item-info {
 html.dark .filament-item-line {
   background: var(--border-primary);
 }
+
+/* ===== PRINTER STATUS (DARK THEME) ===== */
+html.dark .printer-status-dropdown,
+html.dark .printer-status-current {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}

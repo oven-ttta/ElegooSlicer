@@ -140,6 +140,15 @@ const FilamentSyncApp = {
             }
         },
 
+        // Printer status display methods
+        getPrinterStatus(printerStatus, connectStatus) {
+            return PrinterStatusUtils.getPrinterStatus(printerStatus, connectStatus, this.$t);
+        },
+
+        getPrinterStatusStyle(printerStatus, connectStatus) {
+            return PrinterStatusUtils.getPrinterStatusStyle(printerStatus, connectStatus);
+        },
+
         // Helper method to check if MMS has active filaments
         hasActiveFilaments() {
             // Check if printer and MMS info are available
