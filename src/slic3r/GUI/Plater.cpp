@@ -352,7 +352,7 @@ struct Sidebar::priv
     ScalableButton *  m_bpButton_del_filament;
     ScalableButton *  m_bpButton_ams_filament;
     ScalableButton *  m_bpButton_set_filament;
-    wxPanel* m_panel_filament_content;
+    wxScrolledWindow* m_panel_filament_content;
     wxScrolledWindow* m_scrolledWindow_filament_content;
     wxStaticLine* m_staticline2;
     wxPanel* m_panel_project_title;
@@ -1000,8 +1000,9 @@ Sidebar::Sidebar(Plater *parent)
     bSizer39->AddSpacer(FromDIP(SidebarProps::TitlebarMargin()));
 
     // add filament content
-    p->m_panel_filament_content = new wxPanel( p->scrolled, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    p->m_panel_filament_content = new wxScrolledWindow( p->scrolled, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxVSCROLL );
     p->m_panel_filament_content->SetBackgroundColour( wxColour( 255, 255, 255 ) );
+    p->m_panel_filament_content->SetScrollRate(0, 5);
 
     //wxBoxSizer* bSizer_filament_content;
     //bSizer_filament_content = new wxBoxSizer( wxHORIZONTAL );
@@ -1048,7 +1049,15 @@ Sidebar::Sidebar(Plater *parent)
     sizer_filaments2->Add(p->sizer_filaments, 0, wxEXPAND, 0);
     sizer_filaments2->AddSpacer(FromDIP(16));
     p->m_panel_filament_content->SetSizer(sizer_filaments2);
-    p->m_panel_filament_content->Layout();
+    
+    // Initialize scrolled window size based on initial content
+    p->m_panel_filament_content->FitInside();
+    wxSize virtualSize = p->m_panel_filament_content->GetVirtualSize();
+    int maxHeight = FromDIP(202);
+    int actualHeight = std::min(virtualSize.y, maxHeight);
+    p->m_panel_filament_content->SetMinSize(wxSize(-1, actualHeight));
+    p->m_panel_filament_content->SetMaxSize(wxSize(-1, maxHeight));
+    
     scrolled_sizer->Add(p->m_panel_filament_content, 0, wxEXPAND, 0);
     }
 
@@ -1672,6 +1681,23 @@ void Sidebar::on_filaments_change(size_t num_filaments)
             sizer->Hide(p->m_bpButton_del_filament); // ORCA: Hide delete filament button if there is only one filament
         }
     }
+
+    // Update scrolled window size based on content
+    // Reset constraints and force size recalculation
+    p->m_panel_filament_content->SetMinSize(wxSize(-1, 1));
+    p->m_panel_filament_content->SetMaxSize(wxSize(-1, -1));
+    m_scrolled_sizer->Layout();
+    
+    p->m_panel_filament_content->GetSizer()->Layout();
+    p->m_panel_filament_content->FitInside();
+    
+    wxSize virtualSize = p->m_panel_filament_content->GetVirtualSize();
+    int maxHeight = FromDIP(202);
+    int actualHeight = std::min(virtualSize.y, maxHeight);
+    
+    // Now set the new constraints
+    p->m_panel_filament_content->SetMinSize(wxSize(-1, actualHeight));
+    p->m_panel_filament_content->SetMaxSize(wxSize(-1, maxHeight));
 
     Layout();
     p->m_panel_filament_title->Refresh();
