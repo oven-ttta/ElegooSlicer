@@ -4026,7 +4026,8 @@ void GCodeProcessor::process_M6211(const GCodeReader::GCodeLine& line)
         }
     }
 
-    bool isFisrtExtrusion = (m_last_extruder_id == 0 && m_extruder_id == 0);
+    //If it is the same extruder changing filament, do not record the last extruder's flush volume, because in fact there is no filament change
+    bool isFisrtExtrusion = (m_last_extruder_id == 0 && m_extruder_id == 0) || extruder_id == m_extruder_id;
 
     process_T("T" + std::to_string(extruder_id));
 
