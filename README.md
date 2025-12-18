@@ -78,8 +78,7 @@ ElegooSlicer is an open-source slicer compatible with most FDM printers. Current
 - clangd  
   - Reason: improves C/C++ navigation performance in this project.  
   - Installation: install clangd via VS Code extension, or install it separately and configure environment variable, or set `clangd.path` in VS Code settings.  
-  - Usage: first build the project using `build_release_windows.bat`, then run `generate_clangd_config.bat` from the repository root to generate `compile_commands.json` for clangd (for example: `generate_clangd_config.bat debuginfo`).  
-  - Run `python scripts/setup_clangd_config.py .` to install recommended VS Code settings and `.clangd` configuration from `doc/vscode_settings/`.  
+  - Usage: first build the project using `build_release_windows.bat`, then run `generate_clangd_config.bat` from the repository root (for example: `generate_clangd_config.bat debuginfo`). This will generate `compile_commands.json` and automatically install recommended VS Code settings and `.clangd` configuration.  
   - Note: first-time navigation may take a few seconds while clangd is indexing the codebase.
 
 - AI assistant rules  
