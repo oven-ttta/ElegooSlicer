@@ -372,9 +372,6 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterName(const std::string& 
     UserNetworkInfo requestUserInfo  = UserNetworkManager::getInstance()->getUserInfo();
     auto            updateNameResult = printerNetwork->updatePrinterName(printerName);
     checkUserAuthStatus(printer.value(), updateNameResult, requestUserInfo);
-    if (updateNameResult.isSuccess() && printer.value().networkType == NETWORK_TYPE_WAN) {
-        refreshWanPrinters();
-    }
     if (!updateNameResult.isSuccess()) {
         BOOST_LOG_TRIVIAL(warning) << __FUNCTION__
                                    << boost::format(": update printer name failed, %s %s %s, error: %s") % printer.value().host %
