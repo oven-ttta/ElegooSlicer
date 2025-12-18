@@ -1,8 +1,3 @@
----
-type: agent-request
-description: 当用户提到 git、commit、push、merge、rebase、conflict 或代码提交时应用。包含 rebase 工作流、版本分支管理和提交消息格式。
----
-
 # Git 工作流
 
 ## 注意事项

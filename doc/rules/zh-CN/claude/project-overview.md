@@ -1,8 +1,3 @@
----
-type: always
-description: ElegooSlicer 项目架构、技术栈和开发概览
----
-
 # ElegooSlicer 项目概览
 
 ## 项目简介
@@ -165,4 +160,3 @@ GUI 开发
 - 性能基准：帮助捕获性能回归
 - 内存泄漏：对长时间运行的 GUI 应用很重要
 - 跨平台：发布前需要测试
-

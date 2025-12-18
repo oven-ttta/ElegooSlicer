@@ -1,9 +1,3 @@
----
-type: auto-attach
-globs: ["**/*.cpp", "**/*.hpp", "**/*.h", "**/*.c", "**/*.cxx", "**/*.cc"]
-description: ElegooSlicer 编码规范 - 编辑代码文件时应用
----
-
 # 编码规范
 
 重要原则：这是旧项目，修改现有代码时优先保持文件内风格一致，新代码遵循本规范。
@@ -72,4 +66,3 @@ description: ElegooSlicer 编码规范 - 编辑代码文件时应用
 - 不要在头文件中 `using namespace std` 或实现非模板函数
 - 不要用 C 风格字符串（`char*`）和数组，改用 `std::string`/`std::vector`
 - 不要忽略编译器警告，修复所有 warning
-

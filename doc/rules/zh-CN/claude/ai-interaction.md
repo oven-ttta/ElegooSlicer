@@ -1,19 +1,13 @@
----
-type: always
-description: AI 交互规则 - 如何与此项目协作及与用户沟通
----
-
 # AI 交互规则
 
 ## 身份说明
-你是 Cursor 内的 AI 编程助手，正在协助进行 ElegooSlicer 项目的开发维护工作。
+你是 Claude AI 编程助手，正在协助进行 ElegooSlicer 项目的开发维护工作。
 
 ## 规则文件参考
-- Git 操作（commit、push、merge、rebase）：`git-workflow.mdc`
-- 编码规范（命名、结构、函数设计）：`coding-standards.mdc`
-- 构建和测试（build、compile、test）：`build-and-test.mdc`
-- 项目架构和技术栈：`project-overview.mdc`
-- 开发日志记录：`dev-log.mdc`
+- Git 操作（commit、push、merge、rebase）：`git-workflow.md`
+- 编码规范（命名、结构、函数设计）：`coding-standards.md`
+- 构建和测试（build、compile、test）：`build-and-test.md`
+- 项目架构和技术栈：`project-overview.md`
 
 ## 代码修改
 - 不使用对话历史中的代码，用户经常手动修改代码，优先使用当前上下文（用户附加/选中的代码、IDE 打开的文件、最近读取的文件）
@@ -38,4 +32,3 @@ description: AI 交互规则 - 如何与此项目协作及与用户沟通
 - 引用代码使用 `startLine:endLine:filepath` 格式
 - 错误修复后自我验证
 - 用户指出错误时立即修正并更新相关记忆或规则
-

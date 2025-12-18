@@ -1,13 +1,8 @@
----
-type: agent-request
-description: 当用户提到 build、compile、test、CMake 或询问构建/测试时应用。包含构建命令和测试指南。
----
-
 # 构建和测试
 
 ## 构建命令
 
-### Windows 构建
+Windows 构建
 ```bash
 # 完整构建
 build_release_windows.bat
@@ -40,7 +35,7 @@ build_release_windows.bat dlweb
 build_release_windows.bat test
 ```
 
-### macOS 构建
+macOS 构建
 ```bash
 # 完整构建（依赖项和切片器）
 ./build_release_macos.sh
@@ -64,7 +59,7 @@ build_release_windows.bat test
 ./build_release_macos.sh -c Debug
 ```
 
-### Linux 构建
+Linux 构建
 ```bash
 # 完整构建（包含依赖项更新，需 sudo）
 sudo ./BuildLinux.sh -u
@@ -87,7 +82,7 @@ sudo ./BuildLinux.sh -u
 
 ## 开发环境配置
 
-### clangd 配置（Windows）
+clangd 配置（Windows）
 ```bash
 # 生成 compile_commands.json 并配置 clangd
 generate_clangd_config.bat
@@ -119,7 +114,7 @@ generate_clangd_config.bat test
 
 ## 常见构建选项
 
-### Windows
+Windows
 - `debug` - Debug 模式
 - `debuginfo` - RelWithDebInfo 模式（带调试符号）
 - `onlydeps` - 仅构建依赖项
@@ -131,7 +126,7 @@ generate_clangd_config.bat test
 - `test` - 内部测试版本
 - `sign` - 对二进制文件进行签名
 
-### macOS
+macOS
 - `-d` - 仅构建依赖项
 - `-s` - 仅构建切片器
 - `-x` - 使用 Ninja（推荐）
@@ -145,7 +140,7 @@ generate_clangd_config.bat test
 - `-1` - 单核构建
 - `-n` - 夜间构建
 
-### Linux
+Linux
 - `-u` - 更新依赖项（需 sudo）
 - `-d` - 仅构建依赖项
 - `-s` - 仅构建切片器

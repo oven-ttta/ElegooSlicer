@@ -205,10 +205,26 @@ if exist "%BUILD_DIR%\compile_commands.json" (
     echo [OK] Full path: %WP%\compile_commands.json
     echo ============================================================================
     echo.
+    
+    rem Setup clangd configuration using Python script
+    echo [INFO] Setting up clangd configuration...
+    python "%WP%\scripts\setup_clangd_config.py" "%WP%"
+    if errorlevel 1 (
+        echo [WARNING] Some configuration files may not be copied correctly
+    )
+    
+    echo.
+    echo ============================================================================
+    echo                          SETUP COMPLETE!
+    echo ============================================================================
+    echo.
     echo Next steps:
-    echo   1. Reload VSCode window (Ctrl+Shift+P ^> "Reload Window")
+    echo   1. Reload VSCode/Cursor window (Ctrl+Shift+P ^> "Reload Window")
     echo   2. Wait for clangd to index the project (check status bar)
     echo   3. Enjoy fast code navigation!
+    echo.
+    echo Note: If clangd extension is not installed, please install it from:
+    echo       Extensions ^> Search "clangd" ^> Install "clangd" by LLVM
     echo.
     exit /b 0
 ) else (

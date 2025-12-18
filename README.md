@@ -1,9 +1,9 @@
 
 <p align="center">
-    <a href="https://discord.gg/t5qJSrNk">
+    <a href="https://discord.com/invite/NkFzP96cMt">
         <img alt="Static Badge" src="https://img.shields.io/badge/Chat%20on%20Discord-%23FFF?style=flat&logo=discord&logoColor=white&color=%235563e9">
     </a>
-    <a href="https://discord.com/channels/969282195552346202/1068406354097737738/1314179666612850728">
+    <a href="https://discord.com/channels/969282195552346202/1370832511042850987">
         <img alt="Static Badge" src="https://img.shields.io/badge/BETA%20channel%20for%20FDM%20slicer-%23FFF?style=flat&logo=discord&logoColor=white&color=%23FF6000">
     </a>
     <a href="https://github.com/ELEGOO-3D/ElegooSlicer/issues">
@@ -13,7 +13,7 @@
 
 # About ElegooSlicer
 
-ElegooSlicer is an open-source slicer compatible with most FDM printers. Currently, ElegooSlicer is undergoing rapid iteration, with more features to be released soon. Please stay tuned for updates. We invite you to [join our Discord](https://discord.gg/t5qJSrNk) and follow the announcement to join the [BETA channel for FDM slicer](https://discord.com/channels/969282195552346202/1068406354097737738/1314179666612850728) to stay updated on the latest news about ELEGOO products and FDM slicer.
+ElegooSlicer is an open-source slicer compatible with most FDM printers. Currently, ElegooSlicer is undergoing rapid iteration, with more features to be released soon. Please stay tuned for updates. We invite you to [join our Discord](https://discord.com/invite/NkFzP96cMt) and follow the announcement to join the [BETA channel for FDM slicer](https://discord.com/channels/969282195552346202/1370832511042850987) to stay updated on the latest news about ELEGOO products and FDM slicer.
 
 
 # How to install
@@ -53,10 +53,10 @@ ElegooSlicer is an open-source slicer compatible with most FDM printers. Current
 
 # How to compile
 - Windows 64-bit  
-  - Tools needed: Visual Studio 2019, Cmake, git, git-lfs, Strawberry Perl.
-      - You will require cmake version 3.14 or later, which is available [on their website](https://cmake.org/download/).
+  - Tools needed: Visual Studio 2022, CMake, git, git-lfs, Strawberry Perl.
+      - You will require CMake version 3.13 or later (and below 4.0 on Windows), which is available [on their website](https://cmake.org/download/).
       - Strawberry Perl is [available on their GitHub repository](https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/).
-  - Run `build_release.bat` in `x64 Native Tools Command Prompt for VS 2019`
+  - Run `build_release_windows.bat` in `x64 Native Tools Command Prompt for VS 2022`
   - Note: Don't forget to run `git lfs pull` after cloning the repository to download tools on Windows
 
 - Mac 64-bit  
@@ -71,6 +71,19 @@ ElegooSlicer is an open-source slicer compatible with most FDM printers. Current
           - Run => Info tab => Build Configuration: `RelWithDebInfo`
           - Run => Options tab => Document Versions: uncheck `Allow debugging when browsing versions`
       - menu bar: Product => Run
+
+
+# Developer tools
+
+- clangd (Windows + VS Code)  
+  - Reason: improves C/C++ navigation performance in this project when using VS Code on Windows.  
+  - Usage: first build the project on Windows using `build_release_windows.bat`, then run `generate_clangd_config.bat` from the repository root to generate `compile_commands.json` for clangd (for example: `generate_clangd_config.bat debuginfo`).  
+  - Optional: run `python scripts/setup_clangd_config.py .` to install recommended VS Code settings and `.clangd` configuration from `doc/vscode_settings/`.
+
+- AI assistant rules  
+  - AI rule templates (for VS Code, Cursor, Claude, and both English/Chinese workflows) are stored under `doc/rules/<lang>/<ide_type>`.  
+  - Run `python scripts/setup_rules.py <ide_type> [lang] [workspace_path]` to install or update these rules.  
+    - Examples: `python scripts/setup_rules.py cursor cn`, `python scripts/setup_rules.py vscode en`, `python scripts/setup_rules.py claude cn`.
 
 
 # How to Report Issues
