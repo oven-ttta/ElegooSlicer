@@ -75,15 +75,17 @@ ElegooSlicer is an open-source slicer compatible with most FDM printers. Current
 
 # Developer tools
 
-- clangd (Windows + VS Code)  
-  - Reason: improves C/C++ navigation performance in this project when using VS Code on Windows.  
-  - Usage: first build the project on Windows using `build_release_windows.bat`, then run `generate_clangd_config.bat` from the repository root to generate `compile_commands.json` for clangd (for example: `generate_clangd_config.bat debuginfo`).  
-  - Optional: run `python scripts/setup_clangd_config.py .` to install recommended VS Code settings and `.clangd` configuration from `doc/vscode_settings/`.
+- clangd  
+  - Reason: improves C/C++ navigation performance in this project.  
+  - Installation: install clangd via VS Code extension, or install it separately and configure environment variable, or set `clangd.path` in VS Code settings.  
+  - Usage: first build the project using `build_release_windows.bat`, then run `generate_clangd_config.bat` from the repository root to generate `compile_commands.json` for clangd (for example: `generate_clangd_config.bat debuginfo`).  
+  - Run `python scripts/setup_clangd_config.py .` to install recommended VS Code settings and `.clangd` configuration from `doc/vscode_settings/`.  
+  - Note: first-time navigation may take a few seconds while clangd is indexing the codebase.
 
 - AI assistant rules  
   - AI rule templates (for VS Code, Cursor, Claude, and both English/Chinese workflows) are stored under `doc/rules/<lang>/<ide_type>`.  
   - Run `python scripts/setup_rules.py <ide_type> [lang] [workspace_path]` to install or update these rules.  
-    - Examples: `python scripts/setup_rules.py cursor cn`, `python scripts/setup_rules.py vscode en`, `python scripts/setup_rules.py claude cn`.
+  - Examples: `python scripts/setup_rules.py cursor cn`, `python scripts/setup_rules.py vscode en`, `python scripts/setup_rules.py claude cn`.
 
 - CMakePresets.json  
   - If you are developing in VS Code, you can copy `doc/vscode_settings/CMakePresets.json` to the repository root to enable CMake Tools extension auto-detection of build presets (configure and build with one click).  
