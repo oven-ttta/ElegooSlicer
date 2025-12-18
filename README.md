@@ -85,6 +85,9 @@ ElegooSlicer is an open-source slicer compatible with most FDM printers. Current
   - Run `python scripts/setup_rules.py <ide_type> [lang] [workspace_path]` to install or update these rules.  
     - Examples: `python scripts/setup_rules.py cursor cn`, `python scripts/setup_rules.py vscode en`, `python scripts/setup_rules.py claude cn`.
 
+- CMakePresets.json  
+  - If you are developing in VS Code, you can copy `doc/vscode_settings/CMakePresets.json` to the repository root to enable CMake Tools extension auto-detection of build presets (configure and build with one click).  
+  - Note: you must build dependencies first using `build_release_windows.bat` before using this preset, as it expects `deps/build-*/ElegooSlicer_dep/` to exist.
 
 # How to Report Issues
 
