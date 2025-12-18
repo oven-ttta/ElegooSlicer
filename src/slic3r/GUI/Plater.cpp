@@ -10278,6 +10278,8 @@ void Plater::calib_max_vol_speed(const Calib_Params& params)
     auto print_config = &wxGetApp().preset_bundle->prints.get_edited_preset().config;
     auto filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
     auto printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    if(model().objects.size() == 0)
+        return;
     auto obj = model().objects[0];
     auto& obj_cfg = obj->config;
 
