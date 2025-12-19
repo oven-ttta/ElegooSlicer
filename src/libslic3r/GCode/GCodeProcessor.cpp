@@ -4002,6 +4002,12 @@ void GCodeProcessor::process_M6211(const GCodeReader::GCodeLine& line)
     
     extruder_id = static_cast<int>(std::round(t));
 
+    float new_extruder_temp = 0.0f;
+    if (line.has_value('S', new_extruder_temp)) {
+        if (static_cast<size_t>(extruder_id) < m_extruder_temps.size())
+            m_extruder_temps[static_cast<size_t>(extruder_id)] = new_extruder_temp;
+    }
+
     // Calculate filament cross-section area
     const float filament_diameter = (static_cast<size_t>(extruder_id) < m_result.filament_diameters.size()) 
         ? m_result.filament_diameters[extruder_id] 
