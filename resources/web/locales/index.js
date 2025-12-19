@@ -131,11 +131,13 @@ const langMessages = {
       "pleaseSelectVendor": "Please select a vendor",
       "pleaseSelectPrinterModel": "Please select a printer model",
       "pleaseEnterPrinterName": "Please enter printer name",
-      "lengthShouldBe1To50": "Length should be 1 to 50 characters",
+      "lengthShouldBe1To20": "Length should be 1 to 20 characters",
+      "lengthShouldBe1To30": "Length should be 1 to 30 characters",
       "pleaseSelectHostType": "Please select host type",
       "pleaseSelectConnectionMethod": "Please select connection/binding method",
       "pleaseEnterHostNameIpUrl": "Please enter hostname, IP or URL",
-      "pleaseEnterPinCode": "Please enter PIN code"
+      "pleaseEnterPinCode": "Please enter PIN code",
+      "invalidPrinterName": "Contains invalid special characters"
     },
     "printerAccessAuth": {
       "enterAccessCode": "Please check the access code on the screen and enter it below to add the printer",
@@ -172,11 +174,13 @@ const langMessages = {
       "enterPrinterName": "Enter printer name",
       "enterHostIpUrl": "Enter host, IP or URL",
       "pleaseEnterPrinterName": "Please enter printer name",
-      "lengthShouldBe1To50": "Length should be 1 to 50 characters",
+      "lengthShouldBe1To20": "Length should be 1 to 20 characters",
+      "lengthShouldBe1To30": "Length should be 1 to 30 characters",
       "pleaseEnterHostNameIpUrl": "Please enter hostname, IP or URL",
       "confirmDeletePrinter": "Are you sure you want to delete this printer?",
       "pleaseEnterValidHostNameIpUrl": "Please enter a valid hostname, IP or URL.",
-      "serialNumber": "Serial Number"
+      "serialNumber": "Serial Number",
+      "invalidPrinterName": "Contains invalid special characters"
     },
     "printerSettingPhysical": {
     },
@@ -349,12 +353,14 @@ const langMessages = {
       "pleaseSelectVendor": "请选择厂商",
       "pleaseSelectPrinterModel": "请选择打印机型号",
       "pleaseEnterPrinterName": "请输入打印机名称",
-      "lengthShouldBe1To50": "长度应为1到50个字符",
+      "lengthShouldBe1To20": "长度应为1到20个字符",
+      "lengthShouldBe1To30": "长度应为1到30个字符",
       "pleaseSelectHostType": "请选择主机类型",
       "pleaseSelectConnectionMethod": "请选择连接/绑定方式",
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
       "pleaseEnterPinCode": "请输入PIN码",
-      "vendorCannotBeModified": "现有打印机无法修改厂商"
+      "vendorCannotBeModified": "现有打印机无法修改厂商",
+      "invalidPrinterName": "包含不允许的特殊字符"
     },
     "printerAccessAuth": {
       "enterAccessCode": "请查看屏幕上显示的访问码，并在下方输入框中填入，以完成添加",
@@ -391,11 +397,13 @@ const langMessages = {
       "enterPrinterName": "输入打印机名称",
       "enterHostIpUrl": "输入主机、IP或URL",
       "pleaseEnterPrinterName": "请输入打印机名称",
-      "lengthShouldBe1To50": "长度应为1到50个字符",
+      "lengthShouldBe1To20": "长度应为1到20个字符",
+      "lengthShouldBe1To30": "长度应为1到30个字符",
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
       "confirmDeletePrinter": "您确定要删除此打印机吗？",
       "pleaseEnterValidHostNameIpUrl": "请输入有效的主机名、IP地址或URL。",
-      "serialNumber": "序列号"
+      "serialNumber": "序列号",
+      "invalidPrinterName": "包含不允许的特殊字符"
     },
     "printerSettingPhysical": {
 

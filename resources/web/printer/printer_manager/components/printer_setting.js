@@ -36,7 +36,7 @@ const PrinterSettingTemplate = /*html*/
                                         @change="saveNameChanges"
                                         @keydown="onNameKeydown"
                                         :placeholder="$t('printerSetting.enterPrinterName')"
-                                        maxlength="50"
+                                        maxlength="30"
                                     >
                                         <template #suffix>
                                            <img src="./img/edit.svg" alt="Edit"/>
@@ -128,7 +128,28 @@ const PrinterSettingComponent = {
             formRules: {
                 printerName: [
                     { required: true, message: this.$t('printerSetting.pleaseEnterPrinterName'), trigger: 'change' },
-                    { min: 1, max: 50, message: this.$t('printerSetting.lengthShouldBe1To50'), trigger: 'change' }
+                    {
+                        validator: (rule, value, callback) => {
+                            if (!value || !value.trim()) {
+                                callback(new Error(this.$t('printerSetting.pleaseEnterPrinterName')));
+                                return;
+                            }
+                            const trimmedValue = value.trim();
+                            // Check length (1-30 characters)
+                            if (trimmedValue.length < 1 || trimmedValue.length > 30) {
+                                callback(new Error(this.$t('printerSetting.lengthShouldBe1To30')));
+                                return;
+                            }
+                            // Support all languages and specified special characters (including spaces)
+                            const nameRegex = /^[\p{L}\p{N} ・!@#$‰^&*()_+=\-`~\[\]{};:'",.\\s<>/?.|]+$/u;
+                            if (!nameRegex.test(trimmedValue)) {
+                                callback(new Error(this.$t('printerSetting.invalidPrinterName')));
+                                return;
+                            }
+                            callback();
+                        },
+                        trigger: 'change'
+                    }
                 ],
                 host: [
                     { required: true, message: this.$t('printerSetting.pleaseEnterHostNameIpUrl'), trigger: 'blur' },
