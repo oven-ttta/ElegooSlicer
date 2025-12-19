@@ -80,7 +80,7 @@
     "extruder_clearance_height_to_rod": "36",
     "extruder_clearance_height_to_lid": "140",
     "printer_settings_id": "Elegoo",
-    "disable_m73": "1",
+    "disable_m73": "0",
     "retraction_minimum_travel": [
         "2"
     ],
