@@ -863,12 +863,7 @@ void PrinterManager::refreshWanPrinters()
                 // // update the printer info if the printer is already exists
                 PrinterCache::getInstance()->updatePrinterField(localPrinter.printerId, [wanPrinter](PrinterNetworkInfo& cachedPrinter) {
                     if (cachedPrinter.printerName != wanPrinter.printerName) {
-                        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-                        // Only update printerName if more than 60 seconds have passed since addition,
-                        // as device info may not have been synced to IoT yet
-                        if (now - cachedPrinter.addTime >= 60) {
-                            cachedPrinter.printerName = wanPrinter.printerName;
-                        }
+                        cachedPrinter.printerName = wanPrinter.printerName;                        
                     }
                 });
                 break;
