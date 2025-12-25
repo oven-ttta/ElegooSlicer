@@ -573,6 +573,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
         PrinterNetworkInfo boundPrinterNetworkInfo = bindResult.data.value();
         // update the printer network info with the bound printer network info
         printerNetworkInfo.printerId = boundPrinterNetworkInfo.printerId;
+        printerNetworkInfo.serialNumber = boundPrinterNetworkInfo.serialNumber;
     }
     PrinterNetworkResult<bool> addResult = connectToPrinter(printerNetworkInfo, printerNetworkInfo.isPhysicalPrinter ? true : false);
     if (addResult.isSuccess()) {
