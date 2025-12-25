@@ -1,6 +1,6 @@
 {
     "name": "Volumic",
-    "version": "01.03.00.10",
+    "version": "01.03.00.11",
     "force_update": "1",
     "description": "VOLUMIC configurations",
     "machine_model_list": [
