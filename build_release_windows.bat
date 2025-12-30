@@ -61,10 +61,10 @@ if "%1"=="pack" (
 
     %WP%/tools/7z.exe a !PACK_NAME! ElegooSlicer_dep
     
-    if %ERRORLEVEL% neq 0 (
+    if !ERRORLEVEL! neq 0 (
         echo.
         echo [ERROR] Failed to pack dependencies
-        exit /b %ERRORLEVEL%
+        exit /b !ERRORLEVEL!
     )
     
     echo.
@@ -163,6 +163,7 @@ if exist "%folderPath%" (
 
 
 if "%dlweb%"=="ON" (
+    setlocal enabledelayedexpansion
     echo ----------------------------------------------------------------------------
     echo                     Downloading Web Dependencies
     echo ----------------------------------------------------------------------------
@@ -175,16 +176,18 @@ if "%dlweb%"=="ON" (
     )
     echo.
 
-    call scripts/download_web_dep.bat %TEST_PARAM%
-    if %ERRORLEVEL% neq 0 (
+    call scripts/download_web_dep.bat !TEST_PARAM!
+    if !ERRORLEVEL! neq 0 (
         echo.
         echo [ERROR] Download web dependencies failed. Exiting.
-        exit /b %ERRORLEVEL%
+        endlocal
+        exit /b !ERRORLEVEL!
     )
     echo.
     echo [OK] Web dependencies downloaded successfully
     echo ----------------------------------------------------------------------------
     echo.
+    endlocal
 ) else (
     echo.
     echo [INFO] Skipping web dependencies download use 'dlweb' parameter to enable
@@ -384,18 +387,18 @@ if "%sign%"=="ON" (
     
     echo [INFO] Signing elegoo-slicer.exe...
     %SIGNTOOL_PATH% --config %SIGN_CONFIG_PATH% --cmd sign -i .\ElegooSlicer\elegoo-slicer.exe -m 3 -r elegoo
-    if %ERRORLEVEL% neq 0 (
+    if !ERRORLEVEL! neq 0 (
         echo [ERROR] Failed to sign elegoo-slicer.exe. Exiting.
-        exit /b %ERRORLEVEL%
+        exit /b !ERRORLEVEL!
     )
     echo [OK] elegoo-slicer.exe signed successfully
     echo.
     
     echo [INFO] Signing ElegooSlicer.dll...
     %SIGNTOOL_PATH% --config %SIGN_CONFIG_PATH% --cmd sign -i .\ElegooSlicer\ElegooSlicer.dll -m 3 -r elegoo
-    if %ERRORLEVEL% neq 0 (
+    if !ERRORLEVEL! neq 0 (
         echo [ERROR] Failed to sign ElegooSlicer.dll. Exiting.
-        exit /b %ERRORLEVEL%
+        exit /b !ERRORLEVEL!
     )
     echo [OK] ElegooSlicer.dll signed successfully
     echo.
@@ -438,10 +441,10 @@ if "%sign%"=="ON" (
     echo.
     
     %SIGNTOOL_PATH% --config %SIGN_CONFIG_PATH% --cmd sign -i .\%INSTALL_NAME% -m 3 -r elegoo
-    if %ERRORLEVEL% neq 0 (
+    if !ERRORLEVEL! neq 0 (
         echo.
         echo [ERROR] Failed to sign installer. Exiting.
-        exit /b %ERRORLEVEL%
+        exit /b !ERRORLEVEL!
     )
     
     echo.

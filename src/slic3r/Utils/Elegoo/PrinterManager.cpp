@@ -254,8 +254,10 @@ void PrinterManager::init()
      
     // connect status changed event
     PrinterNetworkEvent::getInstance()->connectStatusChanged.connect([this](const PrinterConnectStatusEvent& event) {
-        PrinterCache::getInstance()->updatePrinterConnectStatus(event.printerId, event.status);
-        // Printer connection status change handled by PrinterCache
+        // only update the connect status when the printer is disconnected
+        if(event.status != PRINTER_CONNECT_STATUS_CONNECTED) {
+            PrinterCache::getInstance()->updatePrinterConnectStatus(event.printerId, event.status);
+        }
     });
 
     // printer status changed event
@@ -370,9 +372,6 @@ PrinterNetworkResult<bool> PrinterManager::updatePrinterName(const std::string& 
     UserNetworkInfo requestUserInfo  = UserNetworkManager::getInstance()->getUserInfo();
     auto            updateNameResult = printerNetwork->updatePrinterName(printerName);
     checkUserAuthStatus(printer.value(), updateNameResult, requestUserInfo);
-    if (updateNameResult.isSuccess() && printer.value().networkType == NETWORK_TYPE_WAN) {
-        refreshWanPrinters();
-    }
     if (!updateNameResult.isSuccess()) {
         BOOST_LOG_TRIVIAL(warning) << __FUNCTION__
                                    << boost::format(": update printer name failed, %s %s %s, error: %s") % printer.value().host %
@@ -574,6 +573,7 @@ PrinterNetworkResult<bool> PrinterManager::addPrinter(PrinterNetworkInfo& printe
         PrinterNetworkInfo boundPrinterNetworkInfo = bindResult.data.value();
         // update the printer network info with the bound printer network info
         printerNetworkInfo.printerId = boundPrinterNetworkInfo.printerId;
+        printerNetworkInfo.serialNumber = boundPrinterNetworkInfo.serialNumber;
     }
     PrinterNetworkResult<bool> addResult = connectToPrinter(printerNetworkInfo, printerNetworkInfo.isPhysicalPrinter ? true : false);
     if (addResult.isSuccess()) {
@@ -814,6 +814,17 @@ void PrinterManager::refreshWanPrinters()
         if (printersResult.code == PrinterNetworkErrorCode::USER_NETWORK_BUSY) {
             return;
         }
+        if(printersResult.code == PrinterNetworkErrorCode::NETWORK_ERROR) {
+            //update all wan printers to disconnected
+            std::vector<PrinterNetworkInfo> printerList = PrinterCache::getInstance()->getPrinters();
+            for (const auto& localPrinter : printerList) {
+                if (localPrinter.networkType != NETWORK_TYPE_WAN) {
+                    continue;
+                }
+                PrinterCache::getInstance()->updatePrinterConnectStatus(localPrinter.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
+            }            
+            return;
+        }
     }
     // After binding succeeds in the add printer interface, online printers will be queried from IoT.
     // Both places executing cache addition will cause issues, so mutex lock is needed.
@@ -853,12 +864,7 @@ void PrinterManager::refreshWanPrinters()
                 // // update the printer info if the printer is already exists
                 PrinterCache::getInstance()->updatePrinterField(localPrinter.printerId, [wanPrinter](PrinterNetworkInfo& cachedPrinter) {
                     if (cachedPrinter.printerName != wanPrinter.printerName) {
-                        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-                        // Only update printerName if more than 60 seconds have passed since addition,
-                        // as device info may not have been synced to IoT yet
-                        if (now - cachedPrinter.addTime >= 60) {
-                            cachedPrinter.printerName = wanPrinter.printerName;
-                        }
+                        cachedPrinter.printerName = wanPrinter.printerName;                        
                     }
                 });
                 break;
@@ -1097,7 +1103,10 @@ void PrinterManager::monitorPrinterConnections()
                 continue;
             }
             if (printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED) {
-                continue;
+                if(getPrinterNetwork(printer.printerId)) {      
+                    continue;
+                }
+                PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
             }
             if (printer.printerStatus == PRINTER_STATUS_ID_NOT_MATCH || printer.printerStatus == PRINTER_STATUS_AUTH_ERROR) {
                 continue;
@@ -1158,7 +1167,10 @@ void PrinterManager::monitorWanPrinterConnections()
                 continue;
             }
             if (printer.connectStatus == PRINTER_CONNECT_STATUS_CONNECTED) {
-                continue;
+                if(getPrinterNetwork(printer.printerId)) {      
+                    continue;
+                }
+                PrinterCache::getInstance()->updatePrinterConnectStatus(printer.printerId, PRINTER_CONNECT_STATUS_DISCONNECTED);
             }
             if (printer.printerStatus == PRINTER_STATUS_ID_NOT_MATCH || printer.printerStatus == PRINTER_STATUS_AUTH_ERROR) {
                 continue;

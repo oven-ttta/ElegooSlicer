@@ -17,6 +17,7 @@
     <script src="../../locales/index.js"></script>
     <script type="text/javascript" src="../../utils/util.js"></script>
     <script src="../../utils/ipc.js"></script>
+    <script src="../printer-status-utils.js"></script>
     <script src="./img/filament.js"></script>
 </head>
 
@@ -25,8 +26,8 @@
         <div class="filament-sync-container" style="display: none;" v-show="!isIniting">
             <div class="main">
                 <div v-if="printerList&&printerList.length >0">
-                    <el-select v-model="curPrinter" class="model-select" :show-arrow="false"
-                        :placeholder="$t('filamentSync.pleaseSelectPrinter')" @change="onPrinterChanged">
+                    <el-select v-model="curPrinter" class="model-select" :show-arrow="false" value-key="printerId"
+                        :placeholder="$t('filamentSync.pleaseSelectPrinter')"  @change="onPrinterChanged">
                         <template #label="{ value }">
                             <div class="model-container">
                                 <span class="icon-button" @click="refreshPrinterList($event, value)">
@@ -35,7 +36,11 @@
                                 <img :src="value.printerImg" class="model-image" alt="model" />
                                 <div class="model-info">
                                     <span class="model-title">{{ value.printerName }}</span>
-                                    <span class="model-description">{{value.networkType===0 ? value.host : "SN: " + value.serialNumber }}</span>
+                                    <div class="model-description-row">
+                                        <span class="model-description">{{value.networkType===0 ? value.host : "SN: " + value.serialNumber }}</span>
+                                        <span class="printer-status-current"
+                                            :style="getPrinterStatusStyle(value.printerStatus, value.connectStatus)">{{ getPrinterStatus(value.printerStatus, value.connectStatus) }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -45,7 +50,11 @@
                                 <img :src="item.printerImg" class="model-image" alt="model" />
                                 <div class="model-info">
                                     <span class="model-title">{{ item.printerName }}</span>
-                                    <span class="model-description">{{ item.networkType===0 ? item.host : "SN: " + item.serialNumber }}</span>
+                                    <div class="model-description-row">
+                                        <span class="model-description">{{ item.networkType===0 ? item.host : "SN: " + item.serialNumber }}</span>
+                                        <span class="printer-status-dropdown"
+                                            :style="getPrinterStatusStyle(item.printerStatus, item.connectStatus)">{{ getPrinterStatus(item.printerStatus, item.connectStatus) }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </el-option>

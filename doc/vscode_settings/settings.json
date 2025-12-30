@@ -1,0 +1,79 @@
+{
+    "C_Cpp.intelliSenseEngine": "disabled",
+    // "clangd.path": "C:\\Users\\Admin\\AppData\\Roaming\\Cursor\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\21.1.0\\clangd_21.1.0\\bin\\clangd.exe",
+    "clangd.arguments": [
+        "--clang-tidy=false",
+        "--header-insertion=never",
+        "--background-index",
+        "--completion-style=detailed",
+        "--limit-results=100",
+        "--pch-storage=memory",
+        "--all-scopes-completion",
+        "-j=8",
+        "--compile-commands-dir=${workspaceFolder}"
+    ],
+    "clangd.showDBChangedNotification": false,
+    "editor.inlayHints.enabled": "off",
+    // "editor.inlayHints.enabled": "offUnlessPressed",
+    "clangd.onConfigChanged": "restart",
+    "clangd.checkUpdates": false,
+    "clangd.fallbackFlags": [
+        "-std=c++17",
+        "-Wno-everything"
+    ],
+    "files.associations": {
+        "*.hpp": "cpp",
+        "*.cpp": "cpp",
+        "*.cxx": "cpp",
+        "*.cc": "cpp",
+        "*.hxx": "cpp",
+        "*.ipp": "cpp",
+        "*.tpp": "cpp",
+        "*.h": "c",
+        "*.mm": "objective-cpp"
+    },
+    "files.watcherExclude": {
+        "**/build/**": true,
+        "**/build-*/**": true,
+        // "**/deps/**": true,
+        // "**/deps_src/**": true,
+        "**/.git/**": true,
+        "**/.vs/**": true,
+        "**/node_modules/**": true,
+        "**/Testing/**": true,
+        "**/out/**": true,
+        "**/lib/**": true,
+        "**/.vscode-build/**": true,
+        "**/x64/**": true
+    },
+    "search.exclude": {
+        "**/build/**": true,
+        "**/build-*/**": true,
+        // "**/deps/**": true,
+        // "**/deps_src/**": true,
+        "**/.git/**": true,
+        "**/.vs/**": true,
+        "**/node_modules/**": true,
+        "**/Testing/**": true,
+        "**/out/**": true,
+        "**/lib/**": true,
+        "**/.vscode-build/**": true,
+        "**/x64/**": true
+    },
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/src/libslic3r",
+        "${workspaceFolder}/src/slic3r"
+    ],
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+    "editor.semanticHighlighting.enabled": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "clangd.semanticHighlighting": false,
+    "problems.visibility": false,
+    "files.autoGuessEncoding": true,
+    "[nsis]": {
+        "files.encoding": "gbk"
+    }
+}
+

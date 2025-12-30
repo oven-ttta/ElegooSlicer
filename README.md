@@ -53,10 +53,10 @@ ElegooSlicer is an open-source slicer compatible with most FDM printers. Current
 
 # How to compile
 - Windows 64-bit  
-  - Tools needed: Visual Studio 2019, Cmake, git, git-lfs, Strawberry Perl.
-      - You will require cmake version 3.14 or later, which is available [on their website](https://cmake.org/download/).
+  - Tools needed: Visual Studio 2022, CMake, git, git-lfs, Strawberry Perl.
+      - You will require CMake version 3.13 or later (and below 4.0 on Windows), which is available [on their website](https://cmake.org/download/).
       - Strawberry Perl is [available on their GitHub repository](https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/).
-  - Run `build_release.bat` in `x64 Native Tools Command Prompt for VS 2019`
+  - Run `build_release_windows.bat` in `x64 Native Tools Command Prompt for VS 2022`
   - Note: Don't forget to run `git lfs pull` after cloning the repository to download tools on Windows
 
 - Mac 64-bit  
@@ -72,6 +72,23 @@ ElegooSlicer is an open-source slicer compatible with most FDM printers. Current
           - Run => Options tab => Document Versions: uncheck `Allow debugging when browsing versions`
       - menu bar: Product => Run
 
+
+# Developer tools
+
+- clangd  
+  - Reason: improves C/C++ navigation performance in this project.  
+  - Installation: install clangd via VS Code extension, or install it separately and configure environment variable, or set `clangd.path` in VS Code settings.  
+  - Usage: first build the project using `build_release_windows.bat`, then run `generate_clangd_config.bat` from the repository root (for example: `generate_clangd_config.bat debuginfo`). This will generate `compile_commands.json` and automatically install recommended VS Code settings and `.clangd` configuration.  
+  - Note: first-time navigation may take a few seconds while clangd is indexing the codebase.
+
+- AI assistant rules  
+  - AI rule templates (for VS Code, Cursor, Claude, and both English/Chinese workflows) are stored under `doc/rules/<lang>/<ide_type>`.  
+  - Run `python scripts/setup_rules.py <ide_type> [lang] [workspace_path]` to install or update these rules.  
+  - Examples: `python scripts/setup_rules.py cursor cn`, `python scripts/setup_rules.py vscode en`, `python scripts/setup_rules.py claude cn`.
+
+- CMakePresets.json  
+  - If you are developing in VS Code, you can copy `doc/vscode_settings/CMakePresets.json` to the repository root to enable CMake Tools extension auto-detection of build presets (configure and build with one click).  
+  - Note: you must build dependencies first using `build_release_windows.bat` before using this preset, as it expects `deps/build-*/ElegooSlicer_dep/` to exist.
 
 # How to Report Issues
 

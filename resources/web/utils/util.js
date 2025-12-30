@@ -14,12 +14,29 @@ function isValidURL(url) {
 }
 
 function disableRightClickMenu() {
-    // 只在非开发模式下禁用右键菜单
+    // Disable right-click menu only in non-dev mode
     const isDev = GetQueryString("dev") === "true";
-    
+
     if (!isDev) {
         document.addEventListener('contextmenu', (e) => {
             e.preventDefault();
         });
     }
 }
+
+function isDevMode() {
+    return GetQueryString("dev") === "true";
+}
+
+function suppressConsoleInNonDevMode() {
+    try {
+        if (!isDevMode()) {
+            // Suppress console output in non-dev mode
+            console.log = function () { };
+            console.info = function () { };
+        }
+    } catch (e) {
+        console.error("suppressConsoleInNonDevMode error:", e);
+    }
+}
+suppressConsoleInNonDevMode();

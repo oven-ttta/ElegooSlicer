@@ -297,7 +297,7 @@ bool PresetUpdater::priv::get_file(const std::string &url, const fs::path &targe
                 error);
         })
         .on_complete([&](std::string body, unsigned /* http_status */) {
-            fs::fstream file(tmp_path, std::ios::out | std::ios::binary | std::ios::trunc);
+            boost::nowide::ofstream file(tmp_path.string(), std::ios::out | std::ios::binary | std::ios::trunc);
             file.write(body.c_str(), body.size());
             file.close();
             fs::rename(tmp_path, target_path);
@@ -344,7 +344,8 @@ bool PresetUpdater::priv::extract_file(const fs::path &source_path, const fs::pa
             }
             try
             {
-                res = mz_zip_reader_extract_to_file(&archive, stat.m_file_index, dest_file.c_str(), 0);
+                std::string dest_file_encoded = encode_path(dest_file.c_str());
+                res = mz_zip_reader_extract_to_file(&archive, stat.m_file_index, dest_file_encoded.c_str(), 0);
                 if (!res) {
                     BOOST_LOG_TRIVIAL(error) << "[ElegooSlicer Updater]extract file "<<stat.m_filename<<" to dest "<<dest_file<<" failed";
                     close_zip_reader(&archive);
@@ -1074,10 +1075,10 @@ void PresetUpdater::priv::sync_plugins(std::string http_url, std::string plugin_
     if (GUI::wxGetApp().is_running_on_arm64() && !NetworkAgent::use_legacy_network) {
         //set to arm64 for plugins
         std::map<std::string, std::string> current_headers = Slic3r::Http::get_extra_headers();
-        current_headers["X-BBL-OS-Type"] = "windows_arm";
+        current_headers["X-OS-Type"] = "windows_arm";
 
         Slic3r::Http::set_extra_headers(current_headers);
-        BOOST_LOG_TRIVIAL(info) << boost::format("set X-BBL-OS-Type to windows_arm");
+        BOOST_LOG_TRIVIAL(info) << boost::format("set X-OS-Type to windows_arm");
     }
 #endif
     try {
@@ -1094,10 +1095,10 @@ void PresetUpdater::priv::sync_plugins(std::string http_url, std::string plugin_
     if (GUI::wxGetApp().is_running_on_arm64() && !NetworkAgent::use_legacy_network) {
         //set back
         std::map<std::string, std::string> current_headers = Slic3r::Http::get_extra_headers();
-        current_headers["X-BBL-OS-Type"] = "windows";
+        current_headers["X-OS-Type"] = "windows";
 
         Slic3r::Http::set_extra_headers(current_headers);
-        BOOST_LOG_TRIVIAL(info) << boost::format("set X-BBL-OS-Type back to windows");
+        BOOST_LOG_TRIVIAL(info) << boost::format("set X-OS-Type back to windows");
     }
 #endif
 

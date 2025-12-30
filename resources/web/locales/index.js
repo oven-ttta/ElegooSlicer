@@ -98,7 +98,9 @@ const langMessages = {
       "ok": "OK",
       "pleaseSelectPrinter": "Please select a printer",
       "bindingInProgress": "Binding in progress...",
-      "bindingInProgressTip": "If there's no response for a long time, please go to the printer to complete the binding confirmation."
+      "bindingInProgressTip": "If there's no response for a long time, please go to the printer to complete the binding confirmation.",
+      "alreadyBinded": "This printer is already binded",
+      "alreadyConnected": "This printer is already connected"
     },
     "manualForm": {
       "printerModel": "Printer Model",
@@ -129,11 +131,13 @@ const langMessages = {
       "pleaseSelectVendor": "Please select a vendor",
       "pleaseSelectPrinterModel": "Please select a printer model",
       "pleaseEnterPrinterName": "Please enter printer name",
-      "lengthShouldBe1To50": "Length should be 1 to 50 characters",
+      "lengthShouldBe1To20": "Length should be 1 to 20 characters",
+      "lengthShouldBe1To30": "Length should be 1 to 30 characters",
       "pleaseSelectHostType": "Please select host type",
       "pleaseSelectConnectionMethod": "Please select connection/binding method",
       "pleaseEnterHostNameIpUrl": "Please enter hostname, IP or URL",
-      "pleaseEnterPinCode": "Please enter PIN code"
+      "pleaseEnterPinCode": "Please enter PIN code",
+      "invalidPrinterName": "Contains invalid special characters"
     },
     "printerAccessAuth": {
       "enterAccessCode": "Please check the access code on the screen and enter it below to add the printer",
@@ -170,11 +174,13 @@ const langMessages = {
       "enterPrinterName": "Enter printer name",
       "enterHostIpUrl": "Enter host, IP or URL",
       "pleaseEnterPrinterName": "Please enter printer name",
-      "lengthShouldBe1To50": "Length should be 1 to 50 characters",
+      "lengthShouldBe1To20": "Length should be 1 to 20 characters",
+      "lengthShouldBe1To30": "Length should be 1 to 30 characters",
       "pleaseEnterHostNameIpUrl": "Please enter hostname, IP or URL",
       "confirmDeletePrinter": "Are you sure you want to delete this printer?",
       "pleaseEnterValidHostNameIpUrl": "Please enter a valid hostname, IP or URL.",
-      "serialNumber": "Serial Number"
+      "serialNumber": "Serial Number",
+      "invalidPrinterName": "Contains invalid special characters"
     },
     "printerSettingPhysical": {
     },
@@ -186,7 +192,7 @@ const langMessages = {
       "cancel": "Cancel",
       "sync": "Sync",
       "failedToSyncFilament": "Failed to sync filament.",
-      "warningTips":"This project already contains filament data. Confirming sync will overwrite the existing settings."
+      "warningTips": "This project already contains filament data. Confirming sync will overwrite the existing settings."
     },
     "printSend": {
       "printer": "Printer",
@@ -209,9 +215,11 @@ const langMessages = {
       "filamentMapping": "Filament Mapping",
       "filamentTypeNotMatch": "Filament type not match",
       "printerModelNotMatch": "The selected printer does not match the gcode file. It may cause printing failure or even printer damage! It is recommended to re-slice or select the correct printer to start printing.",
-      "bedTypeNotMatch":"The selected bed type does not match the G-code File. Please confirm before starting the print.",
-      "printerNotConnected":"Printer is not connected"
-    
+      "bedTypeNotMatch": "The selected bed type does not match the G-code File. Please confirm before starting the print.",
+      "printerNotConnected": "Printer is not connected",
+      "print": "Print",
+      "printerBusyWarning": "The printer may not be able to start transmission/printing. Please select the printer again or refresh its status.",
+      "printCompleteWarning": "Please make sure the printer has been cleared out to avoid crashes or damage when starting a new print."
     }
   },
   zh_CN: {
@@ -261,7 +269,7 @@ const langMessages = {
       "canceled": "已取消",
       "selfChecking": "自检中",
       "autoLeveling": "自动调平中",
-      "pidCalibrating": "PID检测中", 
+      "pidCalibrating": "PID检测中",
       "resonanceTesting": "振纹优化中",
       "updating": "升级中",
       "fileCopying": "文件复制中",
@@ -312,7 +320,9 @@ const langMessages = {
       "ok": "确定",
       "pleaseSelectPrinter": "请选择一台打印机",
       "bindingInProgress": "正在绑定中...",
-      "bindingInProgressTip": "如果长时间未响应,请前往打印机完成绑定确认"
+      "bindingInProgressTip": "如果长时间未响应,请前往打印机完成绑定确认",
+      "alreadyBinded": "该打印机已绑定",
+      "alreadyConnected": "该打印机已连接"
     },
     "manualForm": {
       "printerModel": "打印机型号",
@@ -343,12 +353,14 @@ const langMessages = {
       "pleaseSelectVendor": "请选择厂商",
       "pleaseSelectPrinterModel": "请选择打印机型号",
       "pleaseEnterPrinterName": "请输入打印机名称",
-      "lengthShouldBe1To50": "长度应为1到50个字符",
+      "lengthShouldBe1To20": "长度应为1到20个字符",
+      "lengthShouldBe1To30": "长度应为1到30个字符",
       "pleaseSelectHostType": "请选择主机类型",
       "pleaseSelectConnectionMethod": "请选择连接/绑定方式",
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
       "pleaseEnterPinCode": "请输入PIN码",
-      "vendorCannotBeModified": "现有打印机无法修改厂商"
+      "vendorCannotBeModified": "现有打印机无法修改厂商",
+      "invalidPrinterName": "包含不允许的特殊字符"
     },
     "printerAccessAuth": {
       "enterAccessCode": "请查看屏幕上显示的访问码，并在下方输入框中填入，以完成添加",
@@ -385,11 +397,13 @@ const langMessages = {
       "enterPrinterName": "输入打印机名称",
       "enterHostIpUrl": "输入主机、IP或URL",
       "pleaseEnterPrinterName": "请输入打印机名称",
-      "lengthShouldBe1To50": "长度应为1到50个字符",
+      "lengthShouldBe1To20": "长度应为1到20个字符",
+      "lengthShouldBe1To30": "长度应为1到30个字符",
       "pleaseEnterHostNameIpUrl": "请输入主机名、IP或URL",
       "confirmDeletePrinter": "您确定要删除此打印机吗？",
       "pleaseEnterValidHostNameIpUrl": "请输入有效的主机名、IP地址或URL。",
-      "serialNumber": "序列号"
+      "serialNumber": "序列号",
+      "invalidPrinterName": "包含不允许的特殊字符"
     },
     "printerSettingPhysical": {
 
@@ -403,7 +417,7 @@ const langMessages = {
       "cancel": "取消",
       "sync": "同步",
       "failedToSyncFilament": "同步耗材失败",
-      "warningTips":"当前项目的渲染区已经存在耗材信息，在确认同步后，已经应用的耗材信息将会被直接覆盖"
+      "warningTips": "当前项目的渲染区已经存在耗材信息，在确认同步后，已经应用的耗材信息将会被直接覆盖"
     },
     "printSend": {
       "printer": "打印机",
@@ -426,8 +440,11 @@ const langMessages = {
       "filamentMapping": "耗材映射",
       "filamentTypeNotMatch": "耗材类型不匹配",
       "printerModelNotMatch": "当前选中的打印机与gcode文件不匹配，可能会导致打印失败甚至打印机损坏！建议重新切片或者选择正确的打印机启动打印",
-      "bedTypeNotMatch":"当前选中的热床类型与Gcode文件不匹配，请确认后再启动打印",
-      "printerNotConnected":"打印机未连接"
+      "bedTypeNotMatch": "当前选中的热床类型与Gcode文件不匹配，请确认后再启动打印",
+      "printerNotConnected": "打印机未连接",
+      "print": "打印",
+      "printerBusyWarning": "当前打印机可能无法发起任务传输/打印，建议重新选择打印机或者刷新状态",
+      "printCompleteWarning": "请检查打印机是否已经清理干净，避免发起新打印时导致撞击或损坏"
     }
   }
 };

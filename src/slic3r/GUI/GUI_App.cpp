@@ -1238,10 +1238,10 @@ int GUI_App::download_plugin(std::string name, std::string package_name, Install
     if (is_running_on_arm64() && !NetworkAgent::use_legacy_network) {
         //set to arm64 for plugins
         std::map<std::string, std::string> current_headers = Slic3r::Http::get_extra_headers();
-        current_headers["X-BBL-OS-Type"] = "windows_arm";
+        current_headers["X-OS-Type"] = "windows_arm";
 
         Slic3r::Http::set_extra_headers(current_headers);
-        BOOST_LOG_TRIVIAL(info) << boost::format("download_plugin: set X-BBL-OS-Type to windows_arm");
+        BOOST_LOG_TRIVIAL(info) << boost::format("download_plugin: set X-OS-Type to windows_arm");
     }
 #endif
 
@@ -1306,10 +1306,10 @@ int GUI_App::download_plugin(std::string name, std::string package_name, Install
     if (is_running_on_arm64() && !NetworkAgent::use_legacy_network) {
         //set back
         std::map<std::string, std::string> current_headers = Slic3r::Http::get_extra_headers();
-        current_headers["X-BBL-OS-Type"] = "windows";
+        current_headers["X-OS-Type"] = "windows";
 
         Slic3r::Http::set_extra_headers(current_headers);
-        BOOST_LOG_TRIVIAL(info) << boost::format("download_plugin: set X-BBL-OS-Type back to windows");
+        BOOST_LOG_TRIVIAL(info) << boost::format("download_plugin: set X-OS-Type back to windows");
     }
 #endif
 
@@ -2098,27 +2098,27 @@ void GUI_App::copy_older_config()
 std::map<std::string, std::string> GUI_App::get_extra_header()
 {
     std::map<std::string, std::string> extra_headers;
-    extra_headers.insert(std::make_pair("X-BBL-Client-Type", "slicer"));
-    extra_headers.insert(std::make_pair("X-BBL-Client-Name", SLIC3R_APP_NAME));
-    extra_headers.insert(std::make_pair("X-BBL-Client-Version", VersionInfo::convert_full_version(SLIC3R_VERSION)));
+    extra_headers.insert(std::make_pair("X-Client-Type", "slicer"));
+    extra_headers.insert(std::make_pair("X-Client-Name", SLIC3R_APP_NAME));
+    extra_headers.insert(std::make_pair("X-Client-Version", VersionInfo::convert_full_version(SLIC3R_VERSION)));
 #if defined(__WINDOWS__)
 #ifdef _M_X64
-    extra_headers.insert(std::make_pair("X-BBL-OS-Type", "windows"));
+    extra_headers.insert(std::make_pair("X-OS-Type", "windows"));
 #else
-    extra_headers.insert(std::make_pair("X-BBL-OS-Type", "windows_arm"));
+    extra_headers.insert(std::make_pair("X-OS-Type", "windows_arm"));
 #endif
 #elif defined(__APPLE__)
-    extra_headers.insert(std::make_pair("X-BBL-OS-Type", "macos"));
+    extra_headers.insert(std::make_pair("X-OS-Type", "macos"));
 #elif defined(__LINUX__)
-    extra_headers.insert(std::make_pair("X-BBL-OS-Type", "linux"));
+    extra_headers.insert(std::make_pair("X-OS-Type", "linux"));
 #endif
     int major = 0, minor = 0, micro = 0;
     wxGetOsVersion(&major, &minor, &micro);
     std::string os_version = (boost::format("%1%.%2%.%3%") % major % minor % micro).str();
-    extra_headers.insert(std::make_pair("X-BBL-OS-Version", os_version));
+    extra_headers.insert(std::make_pair("X-OS-Version", os_version));
     if (app_config)
-        extra_headers.insert(std::make_pair("X-BBL-Device-ID", app_config->get("slicer_uuid")));
-    extra_headers.insert(std::make_pair("X-BBL-Language", convert_studio_language_to_api(into_u8(current_language_code_safe()))));
+        extra_headers.insert(std::make_pair("X-Device-ID", app_config->get("slicer_uuid")));
+    extra_headers.insert(std::make_pair("X-Language", convert_studio_language_to_api(into_u8(current_language_code_safe()))));
     return extra_headers;
 }
 
@@ -4314,6 +4314,9 @@ void GUI_App::check_message()
     AppConfig* app_config = wxGetApp().app_config;
     auto lastMessageVersion = app_config->get_last_pop_message_version();
     auto       message_check_url = app_config->message_check_url();
+    if(message_check_url.empty()) {
+        return;
+    }
     std::string locale_name = app_config->getSystemLocale();
     const auto language = app_config->get("language");
     Http::get(message_check_url)

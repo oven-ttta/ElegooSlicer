@@ -1,0 +1,32 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "Visual Studio Community 2022 Release - amd64",
+            "displayName": "Visual Studio Community 2022 Release - amd64",
+            "description": "Using compilers for Visual Studio 17 2022 (x64 architecture)",
+            "generator": "Visual Studio 17 2022",
+            "architecture": "x64",
+            "binaryDir": "${sourceDir}/build-dbginfo",
+            "cacheVariables": {
+                "BBL_RELEASE_TO_PUBLIC":"1",
+                "CMAKE_INSTALL_PREFIX":"./ElegooSlicer",
+                "WIN10SDK_PATH":"C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22621.0",
+                "CMAKE_PREFIX_PATH":"${sourceDir}/deps/build-dbginfo/ElegooSlicer_dep/usr/local",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ELEGOO_INTERNAL_TESTING":"0"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Visual Studio Community 2022 Release - amd64",
+            "displayName": "Visual Studio Community 2022 Release - amd64",
+            "description": "Using compilers for Visual Studio 17 2022 (x64 architecture)",
+            "configurePreset": "Visual Studio Community 2022 Release - amd64",
+            "configuration": "RelWithDebInfo",
+            "jobs": 8,
+            "nativeToolOptions": ["-m"]
+        }
+    ]
+}

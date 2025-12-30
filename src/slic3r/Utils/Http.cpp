@@ -254,6 +254,18 @@ int Http::priv::xfercb(void *userp, curl_off_t dltotal, curl_off_t dlnow, curl_o
 
 	if (self->progressfn) {
 		curl_off_t actual_dltotal = dltotal;
+		static thread_local int zero_progress_count = 0;
+		if (dlnow > 0 || dltotal > 0 || ulnow > 0 || ultotal > 0) {
+			zero_progress_count = 0;
+		} else {
+			zero_progress_count++;
+			if (zero_progress_count % 100 == 0 && zero_progress_count <= 1000) {
+				BOOST_LOG_TRIVIAL(warning) << "HTTP transfer stalled: dltotal=" << dltotal 
+					<< ", dlnow=" << dlnow 
+					<< ", ultotal=" << ultotal 
+					<< ", ulnow=" << ulnow;
+			}
+		}
 		
 		// When dltotal is 0 but we're downloading, try to get file size from headers
 		// This handles the case where server sends both Content-Length and Transfer-Encoding: chunked
@@ -368,8 +380,11 @@ size_t Http::priv::headers_cb(char *buffer, size_t size, size_t nitems, void *us
 {
 	auto self = static_cast<priv*>(userp);
 
+	// Always save headers for logging and Content-Length parsing
+	self->headers.append(buffer, nitems * size);
+	
+	// Call user callback if set
 	if (self->headerfn) {
-        self->headers.append(buffer, nitems * size);
 		self->headerfn(self->headers);
 	}
 	return nitems * size;
@@ -475,6 +490,9 @@ void Http::priv::set_del_body(const std::string& body)
 
 void Http::priv::set_range(const std::string& range)
 {
+	if (range.empty())
+		return;
+	BOOST_LOG_TRIVIAL(warning) << "Resume download from byte: " << range;
 	::curl_easy_setopt(curl, CURLOPT_RANGE, range.c_str());
 }
 
@@ -494,6 +512,26 @@ std::string Http::priv::body_size_error()
 
 void Http::priv::http_perform()
 {
+	// Clear previous request data
+	headers.clear();
+	buffer.clear();
+	
+	char* url_ptr = nullptr;
+	::curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url_ptr);
+	if (url_ptr) {
+		BOOST_LOG_TRIVIAL(warning) << "HTTP Request: " << url_ptr;
+	}
+	
+	// Log request headers
+	if (headerlist) {
+		BOOST_LOG_TRIVIAL(warning) << "Request Headers:";
+		curl_slist* current = headerlist;
+		while (current) {
+			BOOST_LOG_TRIVIAL(warning) << "  " << current->data;
+			current = current->next;
+		}
+	}
+	
 	::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	::curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
 	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
@@ -537,6 +575,35 @@ void Http::priv::http_perform()
 	CURLcode res = ::curl_easy_perform(curl);
 
     putFile.reset();
+	
+	long http_status = 0;
+	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
+	
+	char* effective_url = nullptr;
+	::curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
+	
+	// Log response
+	BOOST_LOG_TRIVIAL(warning) << "HTTP Response: Status=" << http_status << ", Size=" << buffer.size();
+	
+	// Log response headers
+	if (!headers.empty()) {
+		BOOST_LOG_TRIVIAL(warning) << "Response Headers:";
+		std::istringstream header_stream(headers);
+		std::string line;
+		while (std::getline(header_stream, line)) {
+			if (!line.empty() && line != "\r") {
+				if (line.back() == '\r') {
+					line.pop_back();
+				}
+				BOOST_LOG_TRIVIAL(warning) << "  " << line;
+			}
+		}
+	}
+	
+	// Log error if request failed
+	if (res != CURLE_OK) {
+		BOOST_LOG_TRIVIAL(warning) << "HTTP request failed: " << ::curl_easy_strerror(res) << " (code: " << res << ")";
+	}
 
 	if (res != CURLE_OK) {
 		if (res == CURLE_ABORTED_BY_CALLBACK) {
@@ -556,9 +623,6 @@ void Http::priv::http_perform()
 			if (errorfn) { errorfn(std::move(buffer), curl_error(res), 0); }
 		};
 	} else {
-		long http_status = 0;
-		::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
-
 		//BBS check success http status code
 		if (http_status >= 200 && http_status < 300) {
 			if (completefn) { completefn(std::move(buffer), http_status); }

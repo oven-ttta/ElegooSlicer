@@ -68,7 +68,7 @@ const ManualFormTemplate = /*html*/
                             type="text"
                             v-model="formData.printerName"
                             :placeholder="formData.printerModel"
-                            maxlength="50"
+                            maxlength="30"
                             required
                             @keydown="onPrinterNameKeydown"
                         />
@@ -218,7 +218,25 @@ const ManualFormComponent = {
     data() {
         return {
             // Priority printer models list (in order)
-            priorityModels: ['Elegoo Centauri Carbon 2','Elegoo Centauri Carbon'],
+            priorityModels: [
+                'Elegoo Centauri Carbon 2',
+                'Elegoo Centauri Carbon',
+                'Elegoo Centauri',
+                'Elegoo OrangeStorm Giga',
+                'Elegoo Neptune 4 Max',
+                'Elegoo Neptune 4 Plus',
+                'Elegoo Neptune 4 Pro',
+                'Elegoo Neptune 4',
+                'Elegoo Neptune 3 Max',
+                'Elegoo Neptune 3 Plus',
+                'Elegoo Neptune 3 Pro',
+                'Elegoo Neptune 3',
+                'Elegoo Neptune 2S',
+                'Elegoo Neptune 2D',
+                'Elegoo Neptune 2',
+                'Elegoo Neptune',
+                'Elegoo Neptune X'
+            ],
             formData: {
                 vendor: '',
                 printerModel: '',
@@ -240,6 +258,32 @@ const ManualFormComponent = {
                 ],
                 printerModel: [
                     { required: true, message: this.$t('manualForm.pleaseSelectPrinterModel'), trigger: 'change' }
+                ],
+                printerName: [
+                    // { required: true, message: this.$t('manualForm.pleaseEnterPrinterName'), trigger: 'change' },
+                    {
+                        validator: (rule, value, callback) => {
+                            const trimmedValue = value.trim();
+                            // Allow empty (will use model as default name)
+                            if (trimmedValue.length === 0) {
+                                callback();
+                                return;
+                            }
+                            // Check length (1-30 characters)
+                            if (trimmedValue.length > 30) {
+                                callback(new Error(this.$t('manualForm.lengthShouldBe1To30')));
+                                return;
+                            }
+                            // Support all languages and specified special characters (including spaces)
+                            const nameRegex = /^[\p{L}\p{N} ・!@#$‰^&*()_+=\-`~\[\]{};:'",.\\s<>/?.|]+$/u;
+                            if (!nameRegex.test(trimmedValue)) {
+                                callback(new Error(this.$t('manualForm.invalidPrinterName')));
+                                return;
+                            }
+                            callback();
+                        },
+                        trigger: 'change'
+                    }
                 ],
                 hostType: [
                     {
@@ -425,7 +469,7 @@ const ManualFormComponent = {
                         ...model,
                         supportWanNetwork: !!model.supportWanNetwork
                     }));
-                    
+
                     // Sort models by priority
                     this.availableModels = this.sortModelsByPriority(models);
 

@@ -46,12 +46,23 @@ if "%LAN_WEB_URL%"=="" (
 )
 
 echo Download %LAN_WEB_URL%
+echo.
 
-curl -L -H "Authorization: Bearer %GIT_TOKEN%" -o "%LAN_WEB_NAME%.zip" "%LAN_WEB_URL%"
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: Download LAN web failed. Exiting.
-    exit /b %ERRORLEVEL%
+curl -f -L -H "Authorization: Bearer %GIT_TOKEN%" -o "%LAN_WEB_NAME%.zip" "%LAN_WEB_URL%"
+if !ERRORLEVEL! neq 0 (
+    echo ERROR: Download LAN web failed. HTTP error or network issue.
+    exit /b 1
 )
+
+REM Check if file size is reasonable (should be larger than 1KB)
+for %%A in ("%LAN_WEB_NAME%.zip") do set FILE_SIZE=%%~zA
+if !FILE_SIZE! lss 1024 (
+    echo ERROR: Downloaded file is too small ^(!FILE_SIZE! bytes^). Download may have failed.
+    del "%LAN_WEB_NAME%.zip" 2>nul
+    exit /b 1
+)
+
+echo Download completed: !FILE_SIZE! bytes
 echo Extract %LAN_WEB_NAME%.zip
 
 if exist "%LAN_WEB_PATH%" (
@@ -66,10 +77,11 @@ if exist "%LAN_WEB_PATH%" (
     echo Folder %LAN_WEB_PATH% does not exist.
 )
 
-powershell -Command "Expand-Archive -Path '%LAN_WEB_NAME%.zip' -DestinationPath '%LAN_WEB_PATH%' -Force"
+powershell -Command "$ErrorActionPreference='Stop'; try { Expand-Archive -Path '%LAN_WEB_NAME%.zip' -DestinationPath '%LAN_WEB_PATH%' -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
 if !ERRORLEVEL! neq 0 (
-    echo ERROR: Failed to extract %LAN_WEB_NAME%.zip. Exiting.
-    exit /b !ERRORLEVEL!
+    echo ERROR: Failed to extract %LAN_WEB_NAME%.zip. The file may be corrupted.
+    del "%LAN_WEB_NAME%.zip" 2>nul
+    exit /b 1
 )
 
 del "%LAN_WEB_NAME%.zip"
@@ -86,11 +98,23 @@ if "%CLOUD_WEB_URL%"=="" (
 )
 
 echo Download %CLOUD_WEB_URL%
-curl -L -H "Authorization: Bearer %GIT_TOKEN%" -o "%CLOUD_WEB_NAME%.zip" "%CLOUD_WEB_URL%"
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: Download CLOUD web failed. Exiting.
-    exit /b %ERRORLEVEL%
+echo.
+
+curl -f -L -H "Authorization: Bearer %GIT_TOKEN%" -o "%CLOUD_WEB_NAME%.zip" "%CLOUD_WEB_URL%"
+if !ERRORLEVEL! neq 0 (
+    echo ERROR: Download CLOUD web failed. HTTP error or network issue.
+    exit /b 1
 )
+
+REM Check if file size is reasonable (should be larger than 1KB)
+for %%A in ("%CLOUD_WEB_NAME%.zip") do set FILE_SIZE=%%~zA
+if !FILE_SIZE! lss 1024 (
+    echo ERROR: Downloaded file is too small ^(!FILE_SIZE! bytes^). Download may have failed.
+    del "%CLOUD_WEB_NAME%.zip" 2>nul
+    exit /b 1
+)
+
+echo Download completed: !FILE_SIZE! bytes
 echo Extract %CLOUD_WEB_NAME%.zip
 if exist "%CLOUD_WEB_PATH%" (
     REM Delete the folder and all its contents
@@ -104,10 +128,11 @@ if exist "%CLOUD_WEB_PATH%" (
     echo Folder %CLOUD_WEB_PATH% does not exist.
 )
 
-powershell -Command "Expand-Archive -Path '%CLOUD_WEB_NAME%.zip' -DestinationPath '%CLOUD_WEB_PATH%' -Force"
+powershell -Command "$ErrorActionPreference='Stop'; try { Expand-Archive -Path '%CLOUD_WEB_NAME%.zip' -DestinationPath '%CLOUD_WEB_PATH%' -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
 if !ERRORLEVEL! neq 0 (
-    echo ERROR: Failed to extract %CLOUD_WEB_NAME%.zip. Exiting.
-    exit /b !ERRORLEVEL!
+    echo ERROR: Failed to extract %CLOUD_WEB_NAME%.zip. The file may be corrupted.
+    del "%CLOUD_WEB_NAME%.zip" 2>nul
+    exit /b 1
 )
 
 del "%CLOUD_WEB_NAME%.zip"

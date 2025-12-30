@@ -132,7 +132,17 @@ void WebviewIPCManager::onWebviewDestroy(wxEvent& event){
 }
 void WebviewIPCManager::onScriptMessage(wxWebViewEvent& event){
     wxString message = event.GetString();
-    wxLogMessage("Received message: %s", message);
+    
+    // Throttle frequent request_printer_list messages: log every 100th request
+    if (message.Find("\"method\":\"request_printer_list\"") != wxNOT_FOUND) {
+        if (m_printerListRequestCount % 100 == 0) {
+            wxLogMessage("Received message: %s", message);
+        }
+        m_printerListRequestCount++;
+    } else {
+        wxLogMessage("Received message: %s", message);
+    }
+    
     onMessageReceived(message.ToUTF8().data());
 }
 void WebviewIPCManager::onMessageReceived(const std::string& message) {

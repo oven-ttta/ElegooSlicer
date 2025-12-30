@@ -20,6 +20,7 @@ local-lib
 /src/TAGS
 /.vscode/
 /.vscode
+/.cursor/
 build-linux/*
 deps/build*/*
 **/.DS_Store
@@ -38,6 +39,7 @@ src/ElegooSlicer-doc/
 **/.flatpak-builder/
 resources/profiles/user/default
 CMakePresets.json
+!doc/vscode_settings/CMakePresets.json
 compile_commands.json
 *.env
 *.code-workspace
@@ -47,3 +49,5 @@ deps_src/build/
 resources/plugins/
 work/
 example/
+.clangd
+dev_log/

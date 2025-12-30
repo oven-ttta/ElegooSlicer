@@ -216,6 +216,7 @@ void PrinterCache::updatePrinterAttributesByNotify(const std::string& printerId,
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         it->second.lastActiveTime = now;
         it->second.firmwareVersion = printerInfo.firmwareVersion;
+        it->second.printerName = printerInfo.printerName;
     }
 }
 

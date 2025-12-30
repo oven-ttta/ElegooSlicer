@@ -197,6 +197,9 @@ private:
     std::thread m_timeoutThread;
     std::atomic<bool> m_running;
     
+    // Log throttling for frequent messages
+    std::atomic<uint64_t> m_printerListRequestCount{0};
+    
     // Message serialization/deserialization
     std::string serializeMessage(const json& message);
     json parseMessage(const std::string& jsonStr);

@@ -352,7 +352,7 @@ struct Sidebar::priv
     ScalableButton *  m_bpButton_del_filament;
     ScalableButton *  m_bpButton_ams_filament;
     ScalableButton *  m_bpButton_set_filament;
-    wxPanel* m_panel_filament_content;
+    wxScrolledWindow* m_panel_filament_content;
     wxScrolledWindow* m_scrolledWindow_filament_content;
     wxStaticLine* m_staticline2;
     wxPanel* m_panel_project_title;
@@ -1000,8 +1000,9 @@ Sidebar::Sidebar(Plater *parent)
     bSizer39->AddSpacer(FromDIP(SidebarProps::TitlebarMargin()));
 
     // add filament content
-    p->m_panel_filament_content = new wxPanel( p->scrolled, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    p->m_panel_filament_content = new wxScrolledWindow( p->scrolled, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxVSCROLL );
     p->m_panel_filament_content->SetBackgroundColour( wxColour( 255, 255, 255 ) );
+    p->m_panel_filament_content->SetScrollRate(0, 5);
 
     //wxBoxSizer* bSizer_filament_content;
     //bSizer_filament_content = new wxBoxSizer( wxHORIZONTAL );
@@ -1048,7 +1049,15 @@ Sidebar::Sidebar(Plater *parent)
     sizer_filaments2->Add(p->sizer_filaments, 0, wxEXPAND, 0);
     sizer_filaments2->AddSpacer(FromDIP(16));
     p->m_panel_filament_content->SetSizer(sizer_filaments2);
-    p->m_panel_filament_content->Layout();
+    
+    // Initialize scrolled window size based on initial content
+    p->m_panel_filament_content->FitInside();
+    wxSize virtualSize = p->m_panel_filament_content->GetVirtualSize();
+    int maxHeight = FromDIP(202);
+    int actualHeight = std::min(virtualSize.y, maxHeight);
+    p->m_panel_filament_content->SetMinSize(wxSize(-1, actualHeight));
+    p->m_panel_filament_content->SetMaxSize(wxSize(-1, maxHeight));
+    
     scrolled_sizer->Add(p->m_panel_filament_content, 0, wxEXPAND, 0);
     }
 
@@ -1673,6 +1682,23 @@ void Sidebar::on_filaments_change(size_t num_filaments)
         }
     }
 
+    // Update scrolled window size based on content
+    // Reset constraints and force size recalculation
+    p->m_panel_filament_content->SetMinSize(wxSize(-1, 1));
+    p->m_panel_filament_content->SetMaxSize(wxSize(-1, -1));
+    m_scrolled_sizer->Layout();
+    
+    p->m_panel_filament_content->GetSizer()->Layout();
+    p->m_panel_filament_content->FitInside();
+    
+    wxSize virtualSize = p->m_panel_filament_content->GetVirtualSize();
+    int maxHeight = FromDIP(202);
+    int actualHeight = std::min(virtualSize.y, maxHeight);
+    
+    // Now set the new constraints
+    p->m_panel_filament_content->SetMinSize(wxSize(-1, actualHeight));
+    p->m_panel_filament_content->SetMaxSize(wxSize(-1, maxHeight));
+
     Layout();
     p->m_panel_filament_title->Refresh();
     update_ui_from_settings();
@@ -1803,6 +1829,7 @@ bool Sidebar::load_mms_list()
             filament_config.set_key_value("filament_type", new ConfigOptionStrings{ tray.filamentType });
             filament_config.set_key_value("filament_name", new ConfigOptionStrings{ tray.filamentName });
             filament_config.set_key_value("filament_colour", new ConfigOptionStrings{tray.filamentColor});
+            filament_config.set_key_value("tray_name", new ConfigOptionStrings{ tray.trayName });
             filament_config.set_key_value("filament_preset_name", new ConfigOptionStrings{ tray.filamentPresetName });
             filament_config.set_key_value("filament_multi_colors", new ConfigOptionStrings{});
             filament_config.opt<ConfigOptionStrings>("filament_multi_colors")->values.push_back(tray.filamentColor);
@@ -9365,29 +9392,9 @@ void Plater::import_model_id(wxString download_info)
 {
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__ << __LINE__ << " download info: " << download_info;
 
-    wxString download_origin_url = download_info;
-    wxString download_url;
-    wxString filename;
-    wxString separator = "&name=";
+    wxString download_url = download_info;
 
-    try
-    {
-        size_t namePos = download_info.Find(separator);
-        if (namePos != wxString::npos) {
-            download_url = download_info.Mid(0, namePos);
-            filename = download_info.Mid(namePos + separator.Length());
-
-        }
-        else {
-            download_url = download_origin_url;
-            filename               = FileGet::filename_from_url(download_url.ToStdString());
-        }
-
-    }
-    catch (const std::exception&)
-    {
-        //wxString sError = error.what();
-    }
+    wxString filename = wxString::FromUTF8(FileGet::filename_from_url(download_url.ToStdString()));
 
     bool download_ok = false;
     int retry_count = 0;
@@ -9442,9 +9449,13 @@ void Plater::import_model_id(wxString download_info)
             vecFiles.clear();
             wxString extension = fs::path(filename.wx_str()).extension().c_str();
 
-
-            //check file suffix
-            if (!extension.Lower().Contains(".3mf") && !extension.Lower().Contains(".stl")) {
+            std::vector<wxString> supported_extensions = {};
+#ifdef __APPLE__
+            supported_extensions = {"zip", ".3mf", ".stl", ".oltp", ".stp", ".step", ".svg", ".amf", ".obj", ".usd", ".usda", ".usdc", ".usdz", ".abc", ".ply"};
+#else
+            supported_extensions = {"zip", ".3mf", ".stl", ".oltp", ".stp", ".step", ".svg", ".amf", ".obj"};
+#endif
+            if (std::find(supported_extensions.begin(), supported_extensions.end(), extension.Lower()) == supported_extensions.end()) {
                 msg = _L("download failed, unknown file format.");
                 return;
             }
@@ -9574,14 +9585,17 @@ void Plater::import_model_id(wxString download_info)
         BOOST_LOG_TRIVIAL(trace) << "import_model_id: target_path = " << target_path.string();
         /* load project */
         // Orca: If download is a zip file, treat it as if file has been drag and dropped on the plater
-        std::string ext = target_path.extension().string();
-        boost::to_lower(ext);
-        if (ext == ".zip")
-            this->load_files(wxArrayString(1, target_path.string()));
-        else if (ext == ".3mf")
-            this->load_project(target_path.wstring());
+        // Use wxString to properly handle Chinese characters in file path
+        wxString target_path_wx = from_path(target_path);
+        wxFileName fn(target_path_wx);
+        wxString ext = fn.GetExt();
+        ext.MakeLower();
+        if (ext == "zip")
+            this->load_files(wxArrayString(1, target_path_wx));
+        else if (ext == "3mf")
+            this->load_project(target_path_wx);
         else  // .stl and other formats
-            this->load_files(wxArrayString(1, target_path.string()));
+            this->load_files(wxArrayString(1, target_path_wx));
         /*BBS set project info after load project, project info is reset in load project */
         //p->project.project_model_id = model_id;
         //p->project.project_design_id = design_id;
@@ -10264,6 +10278,8 @@ void Plater::calib_max_vol_speed(const Calib_Params& params)
     auto print_config = &wxGetApp().preset_bundle->prints.get_edited_preset().config;
     auto filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
     auto printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    if(model().objects.size() == 0)
+        return;
     auto obj = model().objects[0];
     auto& obj_cfg = obj->config;
 
@@ -11155,7 +11171,11 @@ void ProjectDropDialog::on_dpi_changed(const wxRect& suggested_rect)
 //BBS: remove GCodeViewer as seperate APP logic
 bool Plater::load_files(const wxArrayString& filenames)
 {
-    const std::regex pattern_drop(".*[.](stp|step|stl|oltp|obj|amf|3mf|svg|zip)", std::regex::icase);
+#ifdef __APPLE__
+    const std::regex pattern_drop(".*[.](3mf|stl|oltp|stp|step|svg|amf|obj|usd|usda|usdc|usdz|abc|ply|zip)", std::regex::icase);
+#else
+    const std::regex pattern_drop(".*[.](3mf|stl|oltp|stp|step|svg|amf|obj|zip)", std::regex::icase);
+#endif
     const std::regex pattern_gcode_drop(".*[.](gcode|g)", std::regex::icase);
 
     std::vector<fs::path> normal_paths;
