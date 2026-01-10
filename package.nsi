@@ -174,15 +174,8 @@ FunctionEnd
 Function .onInit
   SetRegView 64
 
-  ; Auto-detect language based on system locale
-  System::Call 'Kernel32::GetUserDefaultUILanguage() i.r0'
-  ${If} $0 == ${LANG_THAI}
-      StrCpy $LANGUAGE ${LANG_THAI}
-  ${ElseIf} $0 == ${LANG_CHINESE_SIMPLIFIED}
-      StrCpy $LANGUAGE ${LANG_CHINESE_SIMPLIFIED}
-  ${Else}
-      StrCpy $LANGUAGE ${LANG_ENGLISH}
-  ${EndIf}
+  ; Set Thai language
+  StrCpy $LANGUAGE ${LANG_THAI}
 
   ReadRegStr $UNINSTALL_PROG ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY} "UninstallString"
   ReadRegStr $OLD_VER ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY} "DisplayVersion"
@@ -255,14 +248,8 @@ Section Uninstall
 SectionEnd
 
 Function un.onInit
-  System::Call 'Kernel32::GetUserDefaultUILanguage() i.r0'
-  ${If} $0 == ${LANG_THAI}
-      StrCpy $LANGUAGE ${LANG_THAI}
-  ${ElseIf} $0 == ${LANG_CHINESE_SIMPLIFIED}
-      StrCpy $LANGUAGE ${LANG_CHINESE_SIMPLIFIED}
-  ${Else}
-      StrCpy $LANGUAGE ${LANG_ENGLISH}
-  ${EndIf}
+  ; Set Thai language
+  StrCpy $LANGUAGE ${LANG_THAI}
 
   nsProcess::_FindProcess "elegoo-slicer.exe"
   Pop $R0

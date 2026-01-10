@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"D:\\\\ElegooSlicer\" log --oneline -1 HEAD)",
+      "Bash(git -C \"D:\\\\ElegooSlicer\" log --oneline -1 v1.1.8.2)",
+      "Bash(git -C \"D:\\\\ElegooSlicer\" rev-list --left-right --count:*)",
+      "Bash(git -C \"D:\\\\ElegooSlicer\" merge-base --is-ancestor v1.1.8.2 HEAD)",
+      "Bash(git -C \"D:\\\\ElegooSlicer\" log --oneline v1.1.8.2..HEAD)",
+      "Bash(git -C \"D:\\\\ElegooSlicer\" rev-list:*)",
+      "Bash(git -C \"D:\\\\ElegooSlicer\" log --oneline upstream/main..HEAD)"
+    ]
+  }
+}
