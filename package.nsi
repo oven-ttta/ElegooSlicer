@@ -1,14 +1,13 @@
-; ∏√Ω≈±æ π”√ HM VNISEdit Ω≈±æ±‡º≠∆˜œÚµº≤˙…˙
+; NSIS Installer Script for ElegooSlicer
+; Supports: English, Chinese Simplified, Thai
+
 !define LIBRARY_X64
-; ∞≤◊∞≥Ã–Ú≥ı º∂®“Â≥£¡ø
 !define PRODUCT_NAME "ElegooSlicer"
 !define PRODUCT_PUBLISHER "Shenzhen Elegoo Technology Co.,Ltd"
-;!define PRODUCT_WEB_SITE "https://www.elegoo.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\elegoo-slicer.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_STARTMENU_REGVAL "NSIS:StartMenuDir"
-
 
 !define PRODUCT_UNINST_KEY_32 "Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
@@ -18,68 +17,69 @@ VIProductVersion "${PRODUCT_VERSION}"
 VIAddVersionKey "ProductName" "ElegooSlicer"
 VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
 VIAddVersionKey "ProductVersion" "${PRODUCT_VERSION}"
-VIAddVersionKey "CompanyName" "Shenzhen Elegoo Technology Co., Ltd" 
+VIAddVersionKey "CompanyName" "Shenzhen Elegoo Technology Co., Ltd"
 VIAddVersionKey "FileDescription" "ElegooSlicer"
 VIAddVersionKey "LegalCopyright" ""
 
-; ------ MUI œ÷¥˙ΩÁ√Ê∂®“Â (1.67 ∞Ê±æ“‘…œºÊ»›) ------
+; ------ MUI Modern UI ------
 !include "MUI.nsh"
 !include "nsProcess.nsh"
 !include "WordFunc.nsh"
 
-; MUI ‘§∂®“Â≥£¡ø
+; MUI Settings
 !define MUI_ABORTWARNING
 !define MUI_ICON ".\resources\images\ElegooSlicer.ico"
 !define MUI_UNICON ".\resources\images\ElegooSlicer.ico"
 
-; ”Ô—‘—°‘Ò¥∞ø⁄≥£¡ø…Ë÷√
+; Language selection dialog settings
 !define MUI_LANGDLL_REGISTRY_ROOT "${PRODUCT_UNINST_ROOT_KEY}"
 !define MUI_LANGDLL_REGISTRY_KEY "${PRODUCT_UNINST_KEY}"
 !define MUI_LANGDLL_REGISTRY_VALUENAME "NSIS:Language"
 
-; ª∂”≠“≥√Ê
+; Welcome page
 !insertmacro MUI_PAGE_WELCOME
-; –Ìø…–≠“È“≥√Ê
+; License page
 !define MUI_LICENSEPAGE_CHECKBOX
 !insertmacro MUI_PAGE_LICENSE ".\LICENSE.txt"
-; ∞≤◊∞ƒø¬º—°‘Ò“≥√Ê
+; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
-; ø™ º≤Àµ•…Ë÷√“≥√Ê
+; Start menu page
 var ICONS_GROUP
-;!define MUI_STARTMENUPAGE_NODISABLE
 !define MUI_STARTMENUPAGE_DEFAULTFOLDER "ElegooSlicer"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${PRODUCT_UNINST_ROOT_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "${PRODUCT_UNINST_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${PRODUCT_STARTMENU_REGVAL}"
 
-; ∞≤◊∞ΩÁ√Ê∞¸∫¨µƒ”Ô—‘…Ë÷√
+; Language IDs
 !define LANG_ENGLISH 1033
 !define LANG_CHINESE_SIMPLIFIED 2052
+!define LANG_THAI 1054
 
+; Start menu checkbox text
 LangString MUI_STARTMENUPAGE_TEXT ${LANG_ENGLISH} "Do not create shortcuts"
-LangString MUI_STARTMENUPAGE_TEXT ${LANG_CHINESE_SIMPLIFIED} "≤ª¥¥Ω®øÏΩ›∑Ω Ω"
+LangString MUI_STARTMENUPAGE_TEXT ${LANG_CHINESE_SIMPLIFIED} "Do not create shortcuts"
+LangString MUI_STARTMENUPAGE_TEXT ${LANG_THAI} "‡πÑ‡∏°‡πà‡∏ï‡πâ‡∏≠‡∏á‡∏™‡∏£‡πâ‡∏≤‡∏á‡∏ó‡∏≤‡∏á‡∏•‡∏±‡∏î"
 
 !define MUI_STARTMENUPAGE_TEXT_CHECKBOX $(MUI_STARTMENUPAGE_TEXT)
 !insertmacro MUI_PAGE_STARTMENU Application $ICONS_GROUP
-; ∞≤◊∞π˝≥Ã“≥√Ê
+; Install files page
 !insertmacro MUI_PAGE_INSTFILES
-; ∞≤◊∞ÕÍ≥…“≥√Ê
+; Finish page
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_FUNCTION "RunMainApp"
 !insertmacro MUI_PAGE_FINISH
 
-; ∞≤◊∞–∂‘ÿπ˝≥Ã“≥√Ê
+; Uninstaller pages
 !insertmacro MUI_UNPAGE_INSTFILES
 
-
+; Languages
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "SimpChinese"
+!insertmacro MUI_LANGUAGE "Thai"
 
-
-; ∞≤◊∞‘§ Õ∑≈Œƒº˛
+; Reserve files
 !insertmacro MUI_RESERVEFILE_LANGDLL
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-; ------ MUI œ÷¥˙ΩÁ√Ê∂®“ÂΩ· ¯ ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile ".\build\ElegooSlicer_Windows_Installer_V${PRODUCT_VERSION}.exe"
@@ -89,19 +89,18 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 Section "MainSection" SEC01
-
   ${WordFind} "$INSTDIR" "ElegooSlicer" "E+1{" $R0
   IfErrors notfound end
   notfound:
-	StrCpy $INSTDIR $INSTDIR\ElegooSlicer	
+    StrCpy $INSTDIR $INSTDIR\ElegooSlicer
   end:
 
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  
+
   File /r "${INSTALL_PATH}\*.*"
-  
-  ; ¥¥Ω®ø™ º≤Àµ•øÏΩ›∑Ω Ω
+
+  ; Create start menu shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe"
@@ -111,8 +110,6 @@ SectionEnd
 
 Section -AdditionalIcons
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-  ;WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
-  ;CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
@@ -124,12 +121,10 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\Uninstall.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\elegoo-slicer.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
-  ;WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
 
-
-#-- ∏˘æ› NSIS Ω≈±æ±‡º≠πÊ‘Ú£¨À˘”– Function «¯∂Œ±ÿ–Î∑≈÷√‘⁄ Section «¯∂Œ÷Æ∫Û±‡–¥£¨“‘±‹√‚∞≤◊∞≥Ã–Ú≥ˆœ÷Œ¥ø…‘§÷™µƒŒ Ã‚°£--#
+; Variables
 Var UNINSTALL_PROG
 Var OLD_VER
 Var UNINSTALL_PROG_32
@@ -139,24 +134,38 @@ Var OLD_PATH
 Var VER_INFO
 Var UNINSTALL_PATH
 
-; ∂®“Â”Ô—‘◊÷∑˚¥Æ
+; Localized strings - Uninstall success
 LangString TXT_UNINSTALL_SUCCESS ${LANG_ENGLISH} "$(^Name) has been successfully removed from your computer."
-LangString TXT_UNINSTALL_SUCCESS ${LANG_CHINESE_SIMPLIFIED} "$(^Name) “—≥…π¶¥”ƒ˙µƒº∆À„ª˙÷–…æ≥˝°£"
+LangString TXT_UNINSTALL_SUCCESS ${LANG_CHINESE_SIMPLIFIED} "$(^Name) has been successfully removed from your computer."
+LangString TXT_UNINSTALL_SUCCESS ${LANG_THAI} "$(^Name) ‡∏ñ‡∏π‡∏Å‡∏ñ‡∏≠‡∏ô‡∏Å‡∏≤‡∏£‡∏ï‡∏¥‡∏î‡∏ï‡∏±‡πâ‡∏á‡∏à‡∏≤‡∏Å‡∏Ñ‡∏≠‡∏°‡∏û‡∏¥‡∏ß‡πÄ‡∏ï‡∏≠‡∏£‡πå‡∏Ç‡∏≠‡∏á‡∏Ñ‡∏∏‡∏ì‡πÄ‡∏£‡∏µ‡∏¢‡∏ö‡∏£‡πâ‡∏≠‡∏¢‡πÅ‡∏•‡πâ‡∏ß"
+
+; Localized strings - Program running (install)
+LangString TXT_PROG_RUNNING ${LANG_ENGLISH} "The installer has detected that ${PRODUCT_NAME} is running.$\nClick 'OK' to force close ${PRODUCT_NAME} and continue the installation.$\nClick 'Cancel' to exit the installer."
+LangString TXT_PROG_RUNNING ${LANG_CHINESE_SIMPLIFIED} "The installer has detected that ${PRODUCT_NAME} is running.$\nClick 'OK' to force close ${PRODUCT_NAME} and continue the installation.$\nClick 'Cancel' to exit the installer."
+LangString TXT_PROG_RUNNING ${LANG_THAI} "‡∏ï‡∏±‡∏ß‡∏ï‡∏¥‡∏î‡∏ï‡∏±‡πâ‡∏á‡∏ï‡∏£‡∏ß‡∏à‡∏û‡∏ö‡∏ß‡πà‡∏≤ ${PRODUCT_NAME} ‡∏Å‡∏≥‡∏•‡∏±‡∏á‡∏ó‡∏≥‡∏á‡∏≤‡∏ô‡∏≠‡∏¢‡∏π‡πà$\n‡∏Ñ‡∏•‡∏¥‡∏Å '‡∏ï‡∏Å‡∏•‡∏á' ‡πÄ‡∏û‡∏∑‡πà‡∏≠‡∏ö‡∏±‡∏á‡∏Ñ‡∏±‡∏ö‡∏õ‡∏¥‡∏î‡πÅ‡∏•‡∏∞‡∏î‡∏≥‡πÄ‡∏ô‡∏¥‡∏ô‡∏Å‡∏≤‡∏£‡∏ï‡∏¥‡∏î‡∏ï‡∏±‡πâ‡∏á‡∏ï‡πà‡∏≠$\n‡∏Ñ‡∏•‡∏¥‡∏Å '‡∏¢‡∏Å‡πÄ‡∏•‡∏¥‡∏Å' ‡πÄ‡∏û‡∏∑‡πà‡∏≠‡∏≠‡∏≠‡∏Å‡∏à‡∏≤‡∏Å‡∏ï‡∏±‡∏ß‡∏ï‡∏¥‡∏î‡∏ï‡∏±‡πâ‡∏á"
+
+; Localized strings - Old version detected
+LangString TXT_OLD_VERSION ${LANG_ENGLISH} "Detected version $VER_INFO. Do you want to uninstall it and continue with the installation?"
+LangString TXT_OLD_VERSION ${LANG_CHINESE_SIMPLIFIED} "Detected version $VER_INFO. Do you want to uninstall it and continue with the installation?"
+LangString TXT_OLD_VERSION ${LANG_THAI} "‡∏û‡∏ö‡πÄ‡∏ß‡∏≠‡∏£‡πå‡∏ä‡∏±‡∏ô $VER_INFO ‡∏Ñ‡∏∏‡∏ì‡∏ï‡πâ‡∏≠‡∏á‡∏Å‡∏≤‡∏£‡∏ñ‡∏≠‡∏ô‡∏Å‡∏≤‡∏£‡∏ï‡∏¥‡∏î‡∏ï‡∏±‡πâ‡∏á‡πÅ‡∏•‡∏∞‡∏î‡∏≥‡πÄ‡∏ô‡∏¥‡∏ô‡∏Å‡∏≤‡∏£‡∏ï‡∏¥‡∏î‡∏ï‡∏±‡πâ‡∏á‡∏ï‡πà‡∏≠‡∏´‡∏£‡∏∑‡∏≠‡πÑ‡∏°‡πà?"
+
+; Localized strings - Confirm uninstall
+LangString TXT_CONFIRM_UNINSTALL ${LANG_ENGLISH} "Do you really want to completely remove $(^Name)?"
+LangString TXT_CONFIRM_UNINSTALL ${LANG_CHINESE_SIMPLIFIED} "Do you really want to completely remove $(^Name)?"
+LangString TXT_CONFIRM_UNINSTALL ${LANG_THAI} "‡∏Ñ‡∏∏‡∏ì‡πÅ‡∏ô‡πà‡πÉ‡∏à‡∏´‡∏£‡∏∑‡∏≠‡πÑ‡∏°‡πà‡∏ß‡πà‡∏≤‡∏ï‡πâ‡∏≠‡∏á‡∏Å‡∏≤‡∏£‡∏ñ‡∏≠‡∏ô‡∏Å‡∏≤‡∏£‡∏ï‡∏¥‡∏î‡∏ï‡∏±‡πâ‡∏á $(^Name) ‡∏ó‡∏±‡πâ‡∏á‡∏´‡∏°‡∏î?"
 
 
 Function UninstallOldVersion
-  ; ÷¥–––∂‘ÿ 	
-  Exch $0 
+  Exch $0
   ${If} $0 != ""
     ${WordReplace} "$0" "$\"" "" "+" $0
     StrCpy $UNINSTALL_PATH $0
-	StrCpy $OLD_PATH $0 -13	
-	ExecWait '"$UNINSTALL_PATH" /S _?=$OLD_PATH' $0
-	DetailPrint "Uninstall.exe returned $0"
-	Delete "$UNINSTALL_PATH"
-	RMDir /r $OLD_PATH
-	;æ…∞Ê±æ◊¿√ÊøÏΩ›∑Ω Ω∑≈‘⁄¡Àpublicœ¬ ƒ¨»œµƒ–∂‘ÿ≥Ã–ÚŒﬁ∑®…æ≥˝µÙ
-	ReadRegStr $PUBLIC_DESKTOP_PATH HKLM "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common Desktop"
+    StrCpy $OLD_PATH $0 -13
+    ExecWait '"$UNINSTALL_PATH" /S _?=$OLD_PATH' $0
+    DetailPrint "Uninstall.exe returned $0"
+    Delete "$UNINSTALL_PATH"
+    RMDir /r $OLD_PATH
+    ReadRegStr $PUBLIC_DESKTOP_PATH HKLM "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common Desktop"
     Delete "$PUBLIC_DESKTOP_PATH\ElegooSlicer.lnk"
   ${EndIf}
 FunctionEnd
@@ -164,9 +173,12 @@ FunctionEnd
 
 Function .onInit
   SetRegView 64
-  ;!insertmacro MUI_LANGDLL_DISPLAY 
+
+  ; Auto-detect language based on system locale
   System::Call 'Kernel32::GetUserDefaultUILanguage() i.r0'
-  ${If} $0 == ${LANG_CHINESE_SIMPLIFIED}
+  ${If} $0 == ${LANG_THAI}
+      StrCpy $LANGUAGE ${LANG_THAI}
+  ${ElseIf} $0 == ${LANG_CHINESE_SIMPLIFIED}
       StrCpy $LANGUAGE ${LANG_CHINESE_SIMPLIFIED}
   ${Else}
       StrCpy $LANGUAGE ${LANG_ENGLISH}
@@ -175,65 +187,55 @@ Function .onInit
   ReadRegStr $UNINSTALL_PROG ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY} "UninstallString"
   ReadRegStr $OLD_VER ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY} "DisplayVersion"
   ReadRegStr $UNINSTALL_PROG_32 ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY_32} "UninstallString"
-  ReadRegStr $OLD_VER_32 ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY_32} "DisplayVersion"    
+  ReadRegStr $OLD_VER_32 ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY_32} "DisplayVersion"
 
   nsProcess::_FindProcess "elegoo-slicer.exe"
-  Pop $R0 
+  Pop $R0
   ${If} $R0 == 0
-    ;‘⁄∞≤◊∞∫Õ–∂‘ÿµƒ≥ı ºªØ÷–LangStringªπŒ¥∏˘æ›”Ô—‘¿‡–Õº”‘ÿ£¨∂ØÃ¨≈–∂œ¥¶¿Ì
-	${If} $LANGUAGE == ${LANG_ENGLISH}
-	  MessageBox MB_OKCANCEL|MB_ICONSTOP "The installer has detected that ${PRODUCT_NAME} is running.$\nClick 'OK' to force close ${PRODUCT_NAME} and continue the installation.Click 'Cancel' to exit the installer." /SD IDOK IDOK kill_and_continue IDCANCEL abort_install
-	${Else}
-	  MessageBox MB_OKCANCEL|MB_ICONSTOP "∞≤◊∞≥Ã–ÚºÏ≤‚µΩ ${PRODUCT_NAME} ’˝‘⁄‘À––°£ «∑Ò“™«ø÷∆πÿ±’À¸≤¢ºÃ–¯∞≤◊∞?$\nµ„ª˜ '»∑»œ' «ø÷∆πÿ±’≤¢ºÃ–¯∞≤◊∞£¨µ„ª˜ '»°œ˚' ÕÀ≥ˆ∞≤◊∞≥Ã–Ú°£" /SD IDOK IDOK kill_and_continue IDCANCEL abort_install
-	${EndIf} 
-  ${EndIf} 
-  
+    MessageBox MB_OKCANCEL|MB_ICONSTOP $(TXT_PROG_RUNNING) /SD IDOK IDOK kill_and_continue IDCANCEL abort_install
+  ${EndIf}
+
   StrCpy $VER_INFO ""
-  
+
   ${If} $UNINSTALL_PROG != ""
     StrCpy $VER_INFO $OLD_VER
-  ${ElseIf} $UNINSTALL_PROG_32 != ""	
-	StrCpy $VER_INFO $OLD_VER_32
+  ${ElseIf} $UNINSTALL_PROG_32 != ""
+    StrCpy $VER_INFO $OLD_VER_32
   ${Else}
     goto done
-  ${EndIf} 
-   	
-  ${If} $LANGUAGE == ${LANG_ENGLISH}
-	MessageBox MB_YESNO|MB_ICONQUESTION "Detected version $VER_INFO. Do you want to uninstall it and continue with the installation?" /SD IDYES IDYES uninstall_old_version IDNO abort_install
-  ${Else}
-    MessageBox MB_YESNO|MB_ICONQUESTION "ºÏ≤‚µΩ∞Ê±æ $VER_INFO°£ «∑Ò“™–∂‘ÿÀ¸≤¢ºÃ–¯∞≤◊∞?" /SD IDYES IDYES uninstall_old_version IDNO abort_install
   ${EndIf}
-  
+
+  MessageBox MB_YESNO|MB_ICONQUESTION $(TXT_OLD_VERSION) /SD IDYES IDYES uninstall_old_version IDNO abort_install
+
   abort_install:
     Abort
-	
+
   kill_and_continue:
     nsProcess::_KillProcess "elegoo-slicer.exe"
     Pop $R0
-	Sleep 1000 
-	goto uninstall_old_version 
-	
-  uninstall_old_version:  
+    Sleep 1000
+    goto uninstall_old_version
+
+  uninstall_old_version:
     Push $UNINSTALL_PROG
     Call UninstallOldVersion
-	Push $UNINSTALL_PROG_32
-    Call UninstallOldVersion 
-	${If} $OLD_PATH != ""
-	  StrCpy $INSTDIR $OLD_PATH
-	${EndIf}
-	
+    Push $UNINSTALL_PROG_32
+    Call UninstallOldVersion
+    ${If} $OLD_PATH != ""
+      StrCpy $INSTDIR $OLD_PATH
+    ${EndIf}
+
   done:
-	
+
 FunctionEnd
 
 Function RunMainApp
- ;  π”√ System::Call “‘∆’Õ®»®œﬁ‘À––≥Ã–Ú
   System::Call 'shell32::ShellExecute(i 0, t"open", t"explorer.exe", t" /e,elegoo-slicer.exe", t"$INSTDIR\\", i 0)'
 FunctionEnd
 
-/******************************
- *  “‘œ¬ «∞≤◊∞≥Ã–Úµƒ–∂‘ÿ≤ø∑÷  *
- ******************************/
+;*********************************
+;  Uninstaller Section
+;*********************************
 
 Section Uninstall
   SetRegView 64
@@ -249,52 +251,42 @@ Section Uninstall
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   SetAutoClose true
-  
-SectionEnd
 
-#-- ∏˘æ› NSIS Ω≈±æ±‡º≠πÊ‘Ú£¨À˘”– Function «¯∂Œ±ÿ–Î∑≈÷√‘⁄ Section «¯∂Œ÷Æ∫Û±‡–¥£¨“‘±‹√‚∞≤◊∞≥Ã–Ú≥ˆœ÷Œ¥ø…‘§÷™µƒŒ Ã‚°£--#
+SectionEnd
 
 Function un.onInit
   System::Call 'Kernel32::GetUserDefaultUILanguage() i.r0'
-  ${If} $0 == ${LANG_CHINESE_SIMPLIFIED}
+  ${If} $0 == ${LANG_THAI}
+      StrCpy $LANGUAGE ${LANG_THAI}
+  ${ElseIf} $0 == ${LANG_CHINESE_SIMPLIFIED}
       StrCpy $LANGUAGE ${LANG_CHINESE_SIMPLIFIED}
   ${Else}
       StrCpy $LANGUAGE ${LANG_ENGLISH}
   ${EndIf}
-  ;!insertmacro MUI_UNGETLANGUAGE
-  ;‘⁄un.onInit ÷–÷ªƒ‹µ˜”√un∫Ø ˝£¨‘⁄onInit÷–Œﬁ∑®µ˜”√un£¨À˘“‘ºÏ≤‚’˝‘⁄Ω¯––µƒºÏ≤‚ ∏˜◊‘ µœ÷
+
   nsProcess::_FindProcess "elegoo-slicer.exe"
   Pop $R0
   ${If} $R0 = 0
-  	${If} $LANGUAGE == ${LANG_ENGLISH}
-	  MessageBox MB_OKCANCEL|MB_ICONSTOP "The installer has detected that ${PRODUCT_NAME} is running.$\nClick 'OK' to force close ${PRODUCT_NAME} and continue the installation.$\nClick 'Cancel' to exit the installer." /SD IDOK IDOK kill_and_continue IDCANCEL abort_install
-	${Else}
-	  MessageBox MB_OKCANCEL|MB_ICONSTOP "∞≤◊∞≥Ã–ÚºÏ≤‚µΩ ${PRODUCT_NAME} ’˝‘⁄‘À––°£ «∑Ò“™«ø÷∆πÿ±’À¸≤¢ºÃ–¯∞≤◊∞?$\nµ„ª˜ '»∑»œ' «ø÷∆πÿ±’≤¢ºÃ–¯∞≤◊∞£¨µ„ª˜ '»°œ˚' ÕÀ≥ˆ∞≤◊∞≥Ã–Ú°£" /SD IDOK IDOK kill_and_continue IDCANCEL abort_install
-	${EndIf} 
-  ${EndIf} 
-  Goto done 
+    MessageBox MB_OKCANCEL|MB_ICONSTOP $(TXT_PROG_RUNNING) /SD IDOK IDOK kill_and_continue IDCANCEL abort_install
+  ${EndIf}
+  Goto done
 
   abort_install:
-    Abort 
+    Abort
 
   kill_and_continue:
     nsProcess::_KillProcess "elegoo-slicer.exe"
     Pop $R0
-    Sleep 1000 
+    Sleep 1000
 
   done:
-	${If} $LANGUAGE == ${LANG_ENGLISH}
-	  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Do you really want to completely remove $(^Name)?" /SD IDYES IDYES continue_uninstall IDNO abort_uninstall
-	${Else}
-	  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "ƒ˙»∑∂®“™ÕÍ»´–∂‘ÿ $(^Name) ¬£ø" /SD IDYES IDYES continue_uninstall IDNO abort_uninstall
-	${EndIf} 
-
+    MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 $(TXT_CONFIRM_UNINSTALL) /SD IDYES IDYES continue_uninstall IDNO abort_uninstall
 
   abort_uninstall:
     Abort
-  
+
   continue_uninstall:
-   
+
 FunctionEnd
 
 
@@ -302,4 +294,3 @@ Function un.onUninstSuccess
   HideWindow
   MessageBox MB_ICONINFORMATION|MB_OK $(TXT_UNINSTALL_SUCCESS) /SD IDOK
 FunctionEnd
-
