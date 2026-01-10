@@ -50,16 +50,10 @@ namespace Slic3r {
 static const std::string VERSION_CHECK_URL_STABLE = "https://api.github.com/repos/ELEGOO-3D/ElegooSlicer/releases/latest";
 static const std::string VERSION_CHECK_URL = "https://api.github.com/repos/ELEGOO-3D/ElegooSlicer/releases";
 
-//DEV TEST PROD
-#if ELEGOO_TEST
-static const std::string PROFILE_UPDATE_URL = "";
-static const std::string ELEGOO_UPDATE_URL_STABLE = "";
-static const std::string MESSAGE_CHECK_URL = "";
-#else
+//DEV TEST PROD - Production URLs
 static const std::string PROFILE_UPDATE_URL = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer_profiles";
 static const std::string ELEGOO_UPDATE_URL_STABLE = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer/update_config.json";
 static const std::string MESSAGE_CHECK_URL = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer/message.json";
-#endif
 
 
 static const std::string MODELS_STR = "models";
@@ -1376,11 +1370,7 @@ std::string AppConfig::profile_update_url() const
     auto from_settings = get("profile_update_url");
     profile_update_url = from_settings.empty() ? PROFILE_UPDATE_URL : from_settings;
 
-    #if ELEGOO_TEST
-        profile_update_url = profile_update_url + "/elegoo.ota.profiles." + version_str + ".test.json";
-    #else   
-        profile_update_url = profile_update_url + "/elegoo.ota.profiles." + version_str + ".json";
-    #endif
+    profile_update_url = profile_update_url + "/elegoo.ota.profiles." + version_str + ".json";
 
     return profile_update_url;
 }
