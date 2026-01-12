@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo PETG PRO @EN3 Series",
-    "inherits": "Elegoo PETG PRO @base",
+    "inherits": "Elegoo PETG @base",
     "from": "system",
     "setting_id": "EPETGPROEN3",
     "instantiation": "true",
@@ -20,6 +20,9 @@
     "fan_min_speed": [
         "50"
     ],
+    "overhang_fan_threshold": [
+		"50%"
+	],
     "compatible_printers": [
         "Elegoo Neptune 3 Pro 0.4 nozzle",
         "Elegoo Neptune 3 Pro 0.6 nozzle",

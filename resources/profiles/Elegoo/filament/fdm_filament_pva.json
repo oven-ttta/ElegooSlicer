@@ -90,5 +90,8 @@
     ],
     "filament_end_gcode": [
         "; filament end gcode \n"
+    ],
+    "filament_vendor": [
+        "Generic"
     ]
 }

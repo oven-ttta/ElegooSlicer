@@ -7,7 +7,7 @@
   "setting_id": "PEOSG06030",
   "instantiation": "true",
   "default_acceleration": "3000",
-  "filename_format": "EOGiga1_{nozzle_diameter[0]}_{input_filename_base}_{filament_type[0]}{layer_height}_{print_time}.gcode",
+  "filename_format": "EOGiga1_{nozzle_diameter[0]}_{input_filename_base}_{filament_name}_{layer_height}_{print_time}.gcode",
   "initial_layer_acceleration": "1000",
   "is_custom_defined": "0",
   "make_overhang_printable_angle": "90",

@@ -15,7 +15,6 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/nowide/cenv.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree_fwd.hpp>
@@ -36,7 +35,6 @@
 #ifdef __APPLE__
     #include <CoreFoundation/CoreFoundation.h>
 #endif
-
 #define USE_JSON_CONFIG
 
 using namespace nlohmann;
@@ -50,12 +48,18 @@ namespace Slic3r {
 static const std::string VERSION_CHECK_URL_STABLE = "https://api.github.com/repos/ELEGOO-3D/ElegooSlicer/releases/latest";
 static const std::string VERSION_CHECK_URL = "https://api.github.com/repos/ELEGOO-3D/ElegooSlicer/releases";
 
-//DEV TEST PROD - Production URLs
+//DEV TEST PROD
+#if ELEGOO_INTERNAL_TESTING
+static const std::string PROFILE_UPDATE_URL = "";
+static const std::string MESSAGE_CHECK_URL = "";
+#else
 static const std::string PROFILE_UPDATE_URL = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer_profiles";
-static const std::string ELEGOO_UPDATE_URL_STABLE = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer/update_config.json";
 static const std::string MESSAGE_CHECK_URL = "https://elegoo-downloads.oss-us-west-1.aliyuncs.com/software/ElegooSlicer/message.json";
+#endif
 
 
+// static const std::string VERSION_CHECK_URL = "https://check-version.orcaslicer.com/latest";
+// static const std::string PROFILE_UPDATE_URL = "https://api.github.com/repos/OrcaSlicer/orcaslicer-profiles/releases/tags";
 static const std::string MODELS_STR = "models";
 
 const std::string AppConfig::SECTION_FILAMENTS = "filaments";
@@ -129,11 +133,6 @@ void AppConfig::set_defaults()
             set_bool("background_processing", false);
 #endif
 
-#ifdef SUPPORT_SHOW_DROP_PROJECT
-        if (get("show_drop_project_dialog").empty())
-            set_bool("show_drop_project_dialog", true);
-#endif
-
         if (get("drop_project_action").empty())
             set_bool("drop_project_action", true);
 
@@ -190,14 +189,23 @@ void AppConfig::set_defaults()
     if (get("use_perspective_camera").empty())
         set_bool("use_perspective_camera", true);
 
+    if (get("auto_perspective").empty())
+        set_bool("auto_perspective", false);
+
     if (get("use_free_camera").empty())
         set_bool("use_free_camera", false);
 
     if (get("camera_navigation_style").empty())
         set("camera_navigation_style", "0");
 
+    if (get("swap_mouse_buttons").empty())
+        set_bool("swap_mouse_buttons", false);
+
     if (get("reverse_mouse_wheel_zoom").empty())
         set_bool("reverse_mouse_wheel_zoom", false);
+
+    if (get("camera_orbit_mult").empty())
+        set("camera_orbit_mult", "1.0");
 
     if (get("zoom_to_mouse").empty())
         set_bool("zoom_to_mouse", false);
@@ -216,7 +224,7 @@ void AppConfig::set_defaults()
         set_bool("show_3d_navigator", true);
 
     if (get("show_outline").empty())
-        set_bool("show_outline", false);
+        set_bool("show_outline", true);
 
 #ifdef _WIN32
 
@@ -269,6 +277,9 @@ void AppConfig::set_defaults()
     if (get("stealth_mode").empty()) {
         set_bool("stealth_mode", false);
     }
+    if (get("legacy_networking").empty()) {
+        set_bool("legacy_networking", true);
+    }
 
     if(get("check_stable_update_only").empty()) {
         set_bool("check_stable_update_only", false);
@@ -304,7 +315,7 @@ void AppConfig::set_defaults()
     }
 
     if (get("remember_printer_config").empty()) {
-        set_bool("remember_printer_config", true);
+        set_bool("remember_printer_config", false);
     }
 
     if (get("auto_calculate_when_filament_change").empty()){
@@ -362,9 +373,17 @@ void AppConfig::set_defaults()
     if (get("mouse_wheel").empty()) {
         set("mouse_wheel", "0");
     }
-    
+
+    if (get(SETTING_PROJECT_LOAD_BEHAVIOUR).empty()) {
+        set(SETTING_PROJECT_LOAD_BEHAVIOUR, OPTION_PROJECT_LOAD_BEHAVIOUR_ASK_WHEN_RELEVANT);
+    }
+
     if (get("max_recent_count").empty()) {
         set("max_recent_count", "18");
+    }
+
+    if (get("recent_models").empty()) {
+        set("recent_models", "0");
     }
 
     // if (get("staff_pick_switch").empty()) {
@@ -420,6 +439,17 @@ void AppConfig::set_defaults()
     }
     if (get("print", "timelapse").empty()) {
         set_str("print", "timelapse", "1");
+    }
+
+    if (get("enable_step_mesh_setting").empty()) {
+        set_bool("enable_step_mesh_setting", true);
+    }
+    if (get("linear_defletion", "angle_defletion").empty()) {
+        set("linear_defletion", "0.003");
+        set("angle_defletion", "0.5");
+    }
+    if (get("is_split_compound").empty()) {
+        set_bool("is_split_compound", false);
     }
 
     // Remove legacy window positions/sizes
@@ -622,6 +652,19 @@ std::string AppConfig::load()
                 for (auto& j_model : it.value()) {
                     m_printer_settings[j_model["machine"].get<std::string>()] = j_model;
                 }
+            } else if (it.key() == "local_machines") {
+                for (auto m = it.value().begin(); m != it.value().end(); ++m) {
+                    const auto&    p = m.value();
+                    BBLocalMachine local_machine;
+                    local_machine.dev_id = m.key();
+                    if (p.contains("dev_name"))
+                        local_machine.dev_name = p["dev_name"].get<std::string>();
+                    if (p.contains("dev_ip"))
+                        local_machine.dev_ip = p["dev_ip"].get<std::string>();
+                    if (p.contains("printer_type"))
+                        local_machine.printer_type = p["printer_type"].get<std::string>();
+                    m_local_machines[local_machine.dev_id] = local_machine;
+                }
             } else {
                 if (it.value().is_object()) {
                     for (auto iter = it.value().begin(); iter != it.value().end(); iter++) {
@@ -798,6 +841,14 @@ void AppConfig::save()
     for (const auto& preset : m_printer_settings) {
         j["elegoo_presets"].push_back(preset.second);
     }
+    for (const auto& local_machine : m_local_machines) {
+        json m_json;
+        m_json["dev_name"]         = local_machine.second.dev_name;
+        m_json["dev_ip"]           = local_machine.second.dev_ip;
+        m_json["printer_type"]     = local_machine.second.printer_type;
+
+        j["local_machines"][local_machine.first] = m_json;
+    }
     boost::nowide::ofstream c;
     c.open(path_pid, std::ios::out | std::ios::trunc);
     c << std::setw(4) << j << std::endl;
@@ -806,10 +857,14 @@ void AppConfig::save()
     // WIN32 specific: The final "rename_file()" call is not safe in case of an application crash, there is no atomic "rename file" API
     // provided by Windows (sic!). Therefore we save a MD5 checksum to be able to verify file corruption. In addition,
     // we save the config file into a backup first before moving it to the final destination.
-    c << appconfig_md5_hash_line({j.dump(4)});
+    c << appconfig_md5_hash_line(j.dump(4));
 #endif
 
     c.close();
+    if (c.fail()) {
+      BOOST_LOG_TRIVIAL(error) << "Failed to write new configuration to " << path_pid << "; aborting attempt to overwrite original configuration";
+      return;
+    }
 
 #ifdef WIN32
     // Make a backup of the configuration file before copying it to the final destination.
@@ -1015,6 +1070,10 @@ void AppConfig::save()
     c << appconfig_md5_hash_line(config_str);
 #endif
     c.close();
+    if (c.fail()) {
+      BOOST_LOG_TRIVIAL(error) << "Failed to write new configuration to " << path_pid << "; aborting attempt to overwrite original configuration";
+      return;
+    }
 
 #ifdef WIN32
     // Make a backup of the configuration file before copying it to the final destination.
@@ -1231,7 +1290,7 @@ void AppConfig::update_last_backup_dir(const std::string& dir)
     this->save();
 }
 
-std::string AppConfig::get_region()
+std::string AppConfig::get_region() const
 {
 // #if BBL_RELEASE_TO_PUBLIC
     return this->get("region");
@@ -1250,7 +1309,7 @@ std::string AppConfig::get_region()
 // #endif
 }
 
-std::string AppConfig::get_country_code()
+std::string AppConfig::get_country_code() const
 {
     std::string region = get_region();
 // #if !BBL_RELEASE_TO_PUBLIC
@@ -1344,10 +1403,12 @@ std::string AppConfig::config_path()
     return path;
 }
 
-std::string AppConfig::version_check_url(bool stable_only/* = false*/) const
+std::string AppConfig::version_check_url() const
 {
-    auto from_settings = get("version_check_url");
-    return from_settings.empty() ? ELEGOO_UPDATE_URL_STABLE : from_settings; //stable_only ? VERSION_CHECK_URL_STABLE : VERSION_CHECK_URL : from_settings;
+    const std::string from_settings = get("version_check_url");
+    std::string url;
+    url = from_settings.empty() ? url : from_settings;
+    return url;
 }
 
 std::string AppConfig::profile_update_url() const
@@ -1370,7 +1431,11 @@ std::string AppConfig::profile_update_url() const
     auto from_settings = get("profile_update_url");
     profile_update_url = from_settings.empty() ? PROFILE_UPDATE_URL : from_settings;
 
-    profile_update_url = profile_update_url + "/elegoo.ota.profiles." + version_str + ".json";
+    #if ELEGOO_INTERNAL_TESTING
+        profile_update_url = profile_update_url + "/elegoo.ota.profiles." + version_str + ".test.json";
+    #else   
+        profile_update_url = profile_update_url + "/elegoo.ota.profiles." + version_str + ".json";
+    #endif
 
     return profile_update_url;
 }

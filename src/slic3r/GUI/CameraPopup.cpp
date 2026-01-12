@@ -100,8 +100,8 @@ CameraPopup::CameraPopup(wxWindow *parent)
 
     // custom IP camera
     m_custom_camera_input_confirm = new Button(m_panel, _L("Enable"));
-    m_custom_camera_input_confirm->SetBackgroundColor(wxColour(51, 102, 153));
-    m_custom_camera_input_confirm->SetBorderColor(wxColour(51, 102, 153));
+    m_custom_camera_input_confirm->SetBackgroundColor(wxColour(0, 86, 179));
+    m_custom_camera_input_confirm->SetBorderColor(wxColour(0, 86, 179));
     m_custom_camera_input_confirm->SetTextColor(wxColour(0xFFFFFE));
     m_custom_camera_input_confirm->SetFont(Label::Body_14);
     m_custom_camera_input_confirm->SetMinSize(wxSize(FromDIP(90), FromDIP(30)));
@@ -204,7 +204,7 @@ void CameraPopup::handle_camera_source_change()
 void CameraPopup::set_custom_cam_button_state(bool state)
 {
     m_custom_camera_enabled = state;
-    auto stateColour = state ? wxColour(170, 0, 0) : wxColour(51, 102, 153);
+    auto stateColour = state ? wxColour(170, 0, 0) : wxColour(0, 86, 179);
     auto stateText = state ? "Disable" : "Enable";
     m_custom_camera_input_confirm->SetBackgroundColor(stateColour);
     m_custom_camera_input_confirm->SetBorderColor(stateColour);
@@ -406,9 +406,9 @@ void CameraPopup::update(bool vcamera_streaming)
 wxString CameraPopup::to_resolution_label_string(CameraResolution resolution) {
     switch (resolution) {
     case RESOLUTION_720P:
-        return _L("720p");
+        return "720p";
     case RESOLUTION_1080P:
-        return _L("1080p");
+        return "1080p";
     default:
         return "";
     }

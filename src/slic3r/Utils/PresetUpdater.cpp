@@ -233,7 +233,7 @@ struct PresetUpdater::priv
     bool get_cached_plugins_version(std::string &cached_version, bool& force);
 
 	//BBS: refine preset update logic
-	bool install_bundles_rsrc(std::vector<std::string> bundles, bool snapshot) const;
+	bool install_bundles_rsrc(const std::vector<std::string>& bundles, bool snapshot) const;
 	void check_installed_vendor_profiles() const;
     Updates get_printer_config_updates(bool update = false) const;
 	Updates get_config_updates(const Semver& old_slic3r_version) const;
@@ -297,7 +297,7 @@ bool PresetUpdater::priv::get_file(const std::string &url, const fs::path &targe
                 error);
         })
         .on_complete([&](std::string body, unsigned /* http_status */) {
-            fs::fstream file(tmp_path, std::ios::out | std::ios::binary | std::ios::trunc);
+            boost::nowide::ofstream file(tmp_path.string(), std::ios::out | std::ios::binary | std::ios::trunc);
             file.write(body.c_str(), body.size());
             file.close();
             fs::rename(tmp_path, target_path);
@@ -344,7 +344,8 @@ bool PresetUpdater::priv::extract_file(const fs::path &source_path, const fs::pa
             }
             try
             {
-                res = mz_zip_reader_extract_to_file(&archive, stat.m_file_index, dest_file.c_str(), 0);
+                std::string dest_file_encoded = encode_path(dest_file.c_str());
+                res = mz_zip_reader_extract_to_file(&archive, stat.m_file_index, dest_file_encoded.c_str(), 0);
                 if (!res) {
                     BOOST_LOG_TRIVIAL(error) << "[ElegooSlicer Updater]extract file "<<stat.m_filename<<" to dest "<<dest_file<<" failed";
                     close_zip_reader(&archive);
@@ -976,7 +977,7 @@ void PresetUpdater::priv::sync_plugins(std::string http_url, std::string plugin_
         BOOST_LOG_TRIVIAL(info) << "non need to sync plugins for there is no plugins currently.";
         return;
     }
-    std::string curr_version = SLIC3R_VERSION;
+    std::string curr_version = NetworkAgent::use_legacy_network ? BAMBU_NETWORK_AGENT_VERSION_LEGACY : BAMBU_NETWORK_AGENT_VERSION;
     std::string using_version = curr_version.substr(0, 9) + "00";
 
     std::string cached_version;
@@ -1070,6 +1071,16 @@ void PresetUpdater::priv::sync_plugins(std::string http_url, std::string plugin_
         }
     }
 
+#if defined(__WINDOWS__)
+    if (GUI::wxGetApp().is_running_on_arm64() && !NetworkAgent::use_legacy_network) {
+        //set to arm64 for plugins
+        std::map<std::string, std::string> current_headers = Slic3r::Http::get_extra_headers();
+        current_headers["X-OS-Type"] = "windows_arm";
+
+        Slic3r::Http::set_extra_headers(current_headers);
+        BOOST_LOG_TRIVIAL(info) << boost::format("set X-OS-Type to windows_arm");
+    }
+#endif
     try {
         std::map<std::string, Resource> resources
         {
@@ -1080,6 +1091,16 @@ void PresetUpdater::priv::sync_plugins(std::string http_url, std::string plugin_
     catch (std::exception& e) {
         BOOST_LOG_TRIVIAL(warning) << format("[ElegooSlicer Updater] sync_plugins: %1%", e.what());
     }
+#if defined(__WINDOWS__)
+    if (GUI::wxGetApp().is_running_on_arm64() && !NetworkAgent::use_legacy_network) {
+        //set back
+        std::map<std::string, std::string> current_headers = Slic3r::Http::get_extra_headers();
+        current_headers["X-OS-Type"] = "windows";
+
+        Slic3r::Http::set_extra_headers(current_headers);
+        BOOST_LOG_TRIVIAL(info) << boost::format("set X-OS-Type back to windows");
+    }
+#endif
 
     bool result = get_cached_plugins_version(cached_version, force_upgrade);
     if (result) {
@@ -1169,7 +1190,7 @@ void PresetUpdater::priv::sync_printer_config(std::string http_url)
     }
 }
 
-bool PresetUpdater::priv::install_bundles_rsrc(std::vector<std::string> bundles, bool snapshot) const
+bool PresetUpdater::priv::install_bundles_rsrc(const std::vector<std::string>& bundles, bool snapshot) const
 {
 	Updates updates;
 
@@ -1198,8 +1219,7 @@ bool PresetUpdater::priv::install_bundles_rsrc(std::vector<std::string> bundles,
 }
 
 
-//BBS: refine preset update logic
-// Install indicies from resources. Only installs those that are either missing or older than in resources.
+// Orca: copy/update the vendor profiles from resource to system folder
 void PresetUpdater::priv::check_installed_vendor_profiles() const
 {
     BOOST_LOG_TRIVIAL(info) << "[ElegooSlicer Updater]:Checking whether the profile from resource is newer";
@@ -1207,8 +1227,9 @@ void PresetUpdater::priv::check_installed_vendor_profiles() const
     AppConfig *app_config = GUI::wxGetApp().app_config;
     const auto enabled_vendors = app_config->vendors();
 
-    //BBS: refine the init check logic
-    std::vector<std::string> bundles;
+    std::set<std::string> bundles;
+    // Orca: always install filament library
+    bundles.insert(PresetBundle::ORCA_FILAMENT_LIBRARY);
     for (auto &dir_entry : boost::filesystem::directory_iterator(rsrc_path)) {
         const auto &path = dir_entry.path();
         std::string file_path = path.string();
@@ -1217,9 +1238,13 @@ void PresetUpdater::priv::check_installed_vendor_profiles() const
             std::string vendor_name = path.filename().string();
             // Remove the .json suffix.
             vendor_name.erase(vendor_name.size() - 5);
+            if (bundles.find(vendor_name) != bundles.end())continue;
+
+            const auto is_vendor_enabled = (vendor_name == PresetBundle::ORCA_DEFAULT_BUNDLE) // always update configs from resource to vendor for ORCA_DEFAULT_BUNDLE
+                                           || (enabled_vendors.find(vendor_name) != enabled_vendors.end());
             if (enabled_config_update) {
                 if ( fs::exists(path_in_vendor)) {
-                    if (enabled_vendors.find(vendor_name) != enabled_vendors.end()) {
+                    if (is_vendor_enabled) {
                         Semver resource_ver = get_version_from_json(file_path);
                         Semver vendor_ver = get_version_from_json(path_in_vendor.string());
 
@@ -1227,7 +1252,7 @@ void PresetUpdater::priv::check_installed_vendor_profiles() const
 
                         if (!version_match || (vendor_ver < resource_ver)) {
                             BOOST_LOG_TRIVIAL(info) << "[ElegooSlicer Updater]:found vendor "<<vendor_name<<" newer version "<<resource_ver.to_string() <<" from resource, old version "<<vendor_ver.to_string();
-                            bundles.push_back(vendor_name);
+                            bundles.insert(vendor_name);
                         }
                     }
                     else {
@@ -1238,18 +1263,19 @@ void PresetUpdater::priv::check_installed_vendor_profiles() const
                             fs::remove_all(path_of_vendor);
                     }
                 }
-                else if ((vendor_name == PresetBundle::BBL_BUNDLE) || (enabled_vendors.find(vendor_name) != enabled_vendors.end())) {//if vendor has no file, copy it from resource for BBL
-                    bundles.push_back(vendor_name);
+                else if (is_vendor_enabled) {
+                    bundles.insert(vendor_name);
                 }
             }
-            else if ((vendor_name == PresetBundle::BBL_BUNDLE) || (enabled_vendors.find(vendor_name) != enabled_vendors.end())) { //always update configs from resource to vendor for BBL
-                bundles.push_back(vendor_name);
+            else if (is_vendor_enabled) {
+                bundles.insert(vendor_name);
             }
         }
     }
 
-    if (bundles.size() > 0)
-        install_bundles_rsrc(bundles, false);
+    if (bundles.size() > 0) {
+        install_bundles_rsrc(std::vector(bundles.begin(), bundles.end()), false);
+    }
 }
 
 Updates PresetUpdater::priv::get_printer_config_updates(bool update) const

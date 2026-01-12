@@ -1,6 +1,8 @@
 #include "Http.hpp"
 
 #include <cstdlib>
+#include <cctype>
+#include <algorithm>
 #include <functional>
 #include <thread>
 #include <deque>
@@ -9,6 +11,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/nowide/fstream.hpp>
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 
@@ -190,17 +193,13 @@ Http::priv::priv(const std::string &url)
 	::curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_MAX_TLSv1_2);
 #endif
 	::curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-	::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	// ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	// ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
 	// https://everything.curl.dev/http/post/expect100.html
 	// remove the Expect: header, it will add a second delay to each request,
 	// if the file is uploaded in packets, it will cause the upload time to be longer
 	headerlist = curl_slist_append(headerlist, "Expect:");
-
-    //// Set the debug proxy
-    //curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888");
-
 }
 
 Http::priv::~priv()
@@ -218,7 +217,7 @@ bool Http::priv::ca_file_supported(::CURL *curl)
 
 	if (curl == nullptr) { return res; }
 
-#if LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 48
+#if LIBCURL_VERSION_MAJOR > 7 || (LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 48)
 	::curl_tlssessioninfo *tls;
 	if (::curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &tls) == CURLE_OK) {
 		if (tls->backend == CURLSSLBACKEND_SCHANNEL || tls->backend == CURLSSLBACKEND_DARWINSSL) {
@@ -254,11 +253,91 @@ int Http::priv::xfercb(void *userp, curl_off_t dltotal, curl_off_t dlnow, curl_o
 	bool cb_cancel = false;
 
 	if (self->progressfn) {
-		double speed;
-        curl_easy_getinfo(self->curl, CURLINFO_SPEED_UPLOAD, &speed);
-		if (speed > 0.01)
-			speed = speed;
-		Progress progress(dltotal, dlnow, ultotal, ulnow, self->buffer, speed);
+		curl_off_t actual_dltotal = dltotal;
+		static thread_local int zero_progress_count = 0;
+		if (dlnow > 0 || dltotal > 0 || ulnow > 0 || ultotal > 0) {
+			zero_progress_count = 0;
+		} else {
+			zero_progress_count++;
+			if (zero_progress_count % 100 == 0 && zero_progress_count <= 1000) {
+				BOOST_LOG_TRIVIAL(warning) << "HTTP transfer stalled: dltotal=" << dltotal 
+					<< ", dlnow=" << dlnow 
+					<< ", ultotal=" << ultotal 
+					<< ", ulnow=" << ulnow;
+			}
+		}
+		
+		// When dltotal is 0 but we're downloading, try to get file size from headers
+		// This handles the case where server sends both Content-Length and Transfer-Encoding: chunked
+		// (non-compliant but common), causing curl to ignore Content-Length per HTTP/1.1 spec
+		if (dltotal == 0 && dlnow > 0 && !self->headers.empty()) {
+			// First try curl's API
+			curl_off_t content_length = -1;
+			if (curl_easy_getinfo(self->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &content_length) == CURLE_OK) {
+				if (content_length > 0) {
+					actual_dltotal = content_length;
+				}
+			}
+			
+			// If still 0, parse Content-Length from response headers manually
+			if (actual_dltotal == 0) {
+				std::string headers_lower = self->headers;
+				std::transform(headers_lower.begin(), headers_lower.end(), headers_lower.begin(), ::tolower);
+				
+				// Try Content-Length first
+				size_t length_pos = headers_lower.find("content-length:");
+				if (length_pos != std::string::npos) {
+					size_t start = length_pos + 15;
+					while (start < headers_lower.length() && (headers_lower[start] == ' ' || headers_lower[start] == '\t')) {
+						start++;
+					}
+					size_t line_end = headers_lower.find_first_of("\r\n", start);
+					if (line_end == std::string::npos) {
+						line_end = headers_lower.length();
+					}
+					std::string length_str = self->headers.substr(start, line_end - start);
+					char* end_ptr = nullptr;
+					curl_off_t total_size = std::strtoll(length_str.c_str(), &end_ptr, 10);
+					if (end_ptr != length_str.c_str() && total_size > 0) {
+						actual_dltotal = total_size;
+					}
+				} else {
+					// Try Content-Range as fallback (for Range requests)
+					size_t range_pos = headers_lower.find("content-range:");
+					if (range_pos != std::string::npos) {
+						size_t start = range_pos + 13;
+						while (start < headers_lower.length() && (headers_lower[start] == ' ' || headers_lower[start] == '\t')) {
+							start++;
+						}
+						size_t slash_pos = headers_lower.find('/', start);
+						if (slash_pos != std::string::npos) {
+							size_t end = slash_pos + 1;
+							while (end < headers_lower.length() && (headers_lower[end] == ' ' || headers_lower[end] == '\t')) {
+								end++;
+							}
+							size_t line_end = headers_lower.find_first_of("\r\n", end);
+							if (line_end == std::string::npos) {
+								line_end = headers_lower.length();
+							}
+							std::string total_str = self->headers.substr(end, line_end - end);
+							char* end_ptr = nullptr;
+							curl_off_t total_size = std::strtoll(total_str.c_str(), &end_ptr, 10);
+							if (end_ptr != total_str.c_str() && total_size > 0) {
+								actual_dltotal = total_size;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		double speed = 0.0;
+		if (actual_dltotal > 0 || dlnow > 0) {
+			curl_easy_getinfo(self->curl, CURLINFO_SPEED_DOWNLOAD, &speed);
+		} else if (ultotal > 0 || ulnow > 0) {
+			curl_easy_getinfo(self->curl, CURLINFO_SPEED_UPLOAD, &speed);
+		}
+		Progress progress(actual_dltotal, dlnow, ultotal, ulnow, self->buffer, speed);
 		self->progressfn(progress, cb_cancel);
 	}
 
@@ -301,8 +380,11 @@ size_t Http::priv::headers_cb(char *buffer, size_t size, size_t nitems, void *us
 {
 	auto self = static_cast<priv*>(userp);
 
+	// Always save headers for logging and Content-Length parsing
+	self->headers.append(buffer, nitems * size);
+	
+	// Call user callback if set
 	if (self->headerfn) {
-        self->headers.append(buffer, nitems * size);
 		self->headerfn(self->headers);
 	}
 	return nitems * size;
@@ -379,7 +461,7 @@ void Http::priv::mime_form_add_file(const char* name, const char* path)
 //FIXME may throw! Is the caller aware of it?
 void Http::priv::set_post_body(const fs::path &path)
 {
-	std::ifstream file(path.string());
+	boost::nowide::ifstream file(path.string());
 	std::string file_content { std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>() };
 	postfields = std::move(file_content);
 }
@@ -408,6 +490,9 @@ void Http::priv::set_del_body(const std::string& body)
 
 void Http::priv::set_range(const std::string& range)
 {
+	if (range.empty())
+		return;
+	BOOST_LOG_TRIVIAL(warning) << "Resume download from byte: " << range;
 	::curl_easy_setopt(curl, CURLOPT_RANGE, range.c_str());
 }
 
@@ -427,6 +512,26 @@ std::string Http::priv::body_size_error()
 
 void Http::priv::http_perform()
 {
+	// Clear previous request data
+	headers.clear();
+	buffer.clear();
+	
+	char* url_ptr = nullptr;
+	::curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url_ptr);
+	if (url_ptr) {
+		BOOST_LOG_TRIVIAL(warning) << "HTTP Request: " << url_ptr;
+	}
+	
+	// Log request headers
+	if (headerlist) {
+		BOOST_LOG_TRIVIAL(warning) << "Request Headers:";
+		curl_slist* current = headerlist;
+		while (current) {
+			BOOST_LOG_TRIVIAL(warning) << "  " << current->data;
+			current = current->next;
+		}
+	}
+	
 	::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	::curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
 	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
@@ -437,7 +542,7 @@ void Http::priv::http_perform()
 	::curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, headers_cb);
 
 	::curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-#if LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 32
+#if (LIBCURL_VERSION_MAJOR == 7 && LIBCURL_VERSION_MINOR >= 32) || LIBCURL_VERSION_MAJOR > 7
 	::curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xfercb);
 	::curl_easy_setopt(curl, CURLOPT_XFERINFODATA, static_cast<void*>(this));
 #ifndef _WIN32
@@ -470,6 +575,35 @@ void Http::priv::http_perform()
 	CURLcode res = ::curl_easy_perform(curl);
 
     putFile.reset();
+	
+	long http_status = 0;
+	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
+	
+	char* effective_url = nullptr;
+	::curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
+	
+	// Log response
+	BOOST_LOG_TRIVIAL(warning) << "HTTP Response: Status=" << http_status << ", Size=" << buffer.size();
+	
+	// Log response headers
+	if (!headers.empty()) {
+		BOOST_LOG_TRIVIAL(warning) << "Response Headers:";
+		std::istringstream header_stream(headers);
+		std::string line;
+		while (std::getline(header_stream, line)) {
+			if (!line.empty() && line != "\r") {
+				if (line.back() == '\r') {
+					line.pop_back();
+				}
+				BOOST_LOG_TRIVIAL(warning) << "  " << line;
+			}
+		}
+	}
+	
+	// Log error if request failed
+	if (res != CURLE_OK) {
+		BOOST_LOG_TRIVIAL(warning) << "HTTP request failed: " << ::curl_easy_strerror(res) << " (code: " << res << ")";
+	}
 
 	if (res != CURLE_OK) {
 		if (res == CURLE_ABORTED_BY_CALLBACK) {
@@ -489,9 +623,6 @@ void Http::priv::http_perform()
 			if (errorfn) { errorfn(std::move(buffer), curl_error(res), 0); }
 		};
 	} else {
-		long http_status = 0;
-		::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
-
 		//BBS check success http status code
 		if (http_status >= 200 && http_status < 300) {
 			if (completefn) { completefn(std::move(buffer), http_status); }
@@ -670,7 +801,7 @@ Http& Http::form_add_file(const std::string &name, const fs::path &path, const s
 }
 
 #ifdef WIN32
-// Tells libcurl to ignore certificate revocation checks in case of missing or offline distribution points for those SSL backends where such behavior is present. 
+// Tells libcurl to ignore certificate revocation checks in case of missing or offline distribution points for those SSL backends where such behavior is present.
 // This option is only supported for Schannel (the native Windows SSL library).
 Http& Http::ssl_revoke_best_effort(bool set)
 {
@@ -806,6 +937,12 @@ void Http::set_extra_headers(std::map<std::string, std::string> headers)
 {
     std::lock_guard<std::mutex> l(g_mutex);
 	extra_headers.swap(headers);
+}
+
+std::map<std::string, std::string> Http::get_extra_headers()
+{
+    std::lock_guard<std::mutex> l(g_mutex);
+    return extra_headers;
 }
 
 bool Http::ca_file_supported()

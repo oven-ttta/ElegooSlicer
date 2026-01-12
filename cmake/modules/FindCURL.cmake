@@ -108,4 +108,10 @@ if(CURL_FOUND)
         IMPORTED_LOCATION_DEBUG "${CURL_LIBRARY_DEBUG}")
     endif()
   endif()
+  
+  # Create alias for libcurl_static to match CURL's official CMake config
+  # This is needed when depending libraries export references to CURL::libcurl_static
+  if(NOT TARGET CURL::libcurl_static)
+    add_library(CURL::libcurl_static ALIAS CURL::libcurl)
+  endif()
 endif()

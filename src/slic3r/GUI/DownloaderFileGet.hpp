@@ -23,7 +23,7 @@ public:
 	void cancel();
 	void pause();
 	void resume();
-	static std::string	escape_url(const std::string& url);
+	static std::string	unescape_url(const std::string& url);
     static std::string  filename_from_url(const std::string& url);
 	static bool			is_subdomain(const std::string& url, const std::string& domain);
 private:

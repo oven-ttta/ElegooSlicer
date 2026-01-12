@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo PLA Matte @EN3 Series",
-    "inherits": "Elegoo PLA Matte @base",
+    "inherits": "Elegoo PLA @base",
     "from": "system",
     "setting_id": "EPLAMEN3",
     "instantiation": "true",

@@ -49,6 +49,10 @@ class ArrangeJob : public Job
 
     ArrangePolygon prepare_arrange_polygon(void* instance);
 
+    // Port from BambuStudio update_objects_position optimization
+    void prepare_outside_plate();
+    
+
 protected:
 
     void check_unprintable();

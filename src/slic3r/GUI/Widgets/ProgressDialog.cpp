@@ -243,9 +243,7 @@ bool ProgressDialog::Create(const wxString &title, const wxString &message, int 
 
     if (HasPDFlag(wxPD_CAN_ABORT)) {
         m_button_cancel = new Button(this, _L("Cancel"));
-        m_button_cancel->SetTextColor(PROGRESSDIALOG_GREY_700);
-        m_button_cancel->SetMinSize(PROGRESSDIALOG_CANCEL_BUTTON_SIZE);
-        m_button_cancel->SetCornerRadius(PROGRESSDIALOG_CANCEL_BUTTON_SIZE.y / 2);
+        m_button_cancel->SetStyle(ButtonStyle::Regular, ButtonType::Choice);
         m_button_cancel->Bind(wxEVT_LEFT_DOWN, [this](wxMouseEvent &event) {
             if (m_state == Finished) {
                 event.Skip();
@@ -357,7 +355,7 @@ bool ProgressDialog::Create(const wxString &title, const wxString &message, int 
     //     wxStaticBitmap *m_bitmatAbort = new wxStaticBitmap(m_btnAbort, wxID_ANY, wxBitmap(icon_path, wxBITMAP_TYPE_ANY), wxDefaultPosition, wxSize(52, 24), 0);
     //     wxStaticText *textAbort = new wxStaticText(m_btnAbort, wxID_ANY, _T("Cancel"), wxPoint(5, 3), wxSize(42, 19));
     //     textAbort->SetBa
-    //     ckgroundColour(wxColor(0, 120, 189));
+    //     ckgroundColour(wxColor(22, 119, 255));
     //     textAbort->SetForegroundColour(DESIGN_RESOUTION_DEF_BK_COLOR);
     //
     //     textAbort->Bind(wxEVT_LEFT_DOWN, [this](wxMouseEvent &event) {

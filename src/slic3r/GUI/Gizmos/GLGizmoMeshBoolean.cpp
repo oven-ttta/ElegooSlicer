@@ -14,6 +14,11 @@
 namespace Slic3r {
 namespace GUI {
 
+#define BUTTON_BG_COL {0.086f, 0.466f, 1.0f, 1.0f}
+#define BUTTON_BG_HOVERED_COL    {0.0f, 0.337f, 0.702f, 1.0f}
+#define BUTTON_BG_ACTIVE_COL     {0.0f, 0.337f, 0.702f, 1.0f}
+#define PRIMARY_COL_VEC3 {0.086f, 0.466f, 1.0f}
+
 static const std::string warning_text = _u8L("Unable to perform boolean operation on selected parts");
 
 GLGizmoMeshBoolean::GLGizmoMeshBoolean(GLCanvas3D& parent, const std::string& icon_filename, unsigned int sprite_id)
@@ -153,7 +158,7 @@ void GLGizmoMeshBoolean::on_render()
     }
 
     ColorRGB src_color = { 1.0f, 1.0f, 1.0f };
-    ColorRGB tool_color = {0.0f, 150.0f / 255.0f, 136.0f / 255.0f};
+    ColorRGB tool_color = PRIMARY_COL_VEC3;
     m_parent.get_selection().render_bounding_box(src_bb, src_color, m_parent.get_scale());
     m_parent.get_selection().render_bounding_box(tool_bb, tool_color, m_parent.get_scale());
 }
@@ -221,13 +226,13 @@ void GLGizmoMeshBoolean::on_render_input_window(float x, float y, float bottom_l
 
         if (selected || hovered) {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_Button, { 0, 150.0f / 255.0f, 136.0f / 255.0f, 1.0f });
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0, 150.0f / 255.0f, 136.0f / 255.0f, 1.0f });
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 150.0f / 255.0f, 136.0f / 255.0f, 1.0f });
+            ImGui::PushStyleColor(ImGuiCol_Button, BUTTON_BG_COL);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, BUTTON_BG_ACTIVE_COL);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, BUTTON_BG_HOVERED_COL);
         }
         else {
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0, 150.0f / 255.0f, 136.0f / 255.0f, 1.0f });
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 150.0f / 255.0f, 136.0f / 255.0f, 1.0f });
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, BUTTON_BG_ACTIVE_COL);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, BUTTON_BG_HOVERED_COL);
         }
 
         bool res = ImGui::Button(label.c_str(), size_arg);

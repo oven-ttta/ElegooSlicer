@@ -72,5 +72,8 @@
     ],
     "textured_plate_temp_initial_layer": [
         "110"
+    ],
+    "filament_vendor": [
+        "Generic"
     ]
 }

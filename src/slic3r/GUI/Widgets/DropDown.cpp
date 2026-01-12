@@ -39,7 +39,7 @@ DropDown::DropDown(std::vector<wxString> &texts,
     , state_handler(this)
     , border_color(0xDBDBDB)
     , text_color(0x363636)
-    , selector_border_color(std::make_pair(0x0081D7, (int) StateColor::Hovered),
+    , selector_border_color(std::make_pair(0x1677ff, (int) StateColor::Hovered),
         std::make_pair(*wxWHITE, (int) StateColor::Normal))
     , selector_background_color(std::make_pair(0xBFCFE1, (int) StateColor::Checked), // ORCA updated background color for checked item
         std::make_pair(*wxWHITE, (int) StateColor::Normal))

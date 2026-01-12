@@ -1,7 +1,7 @@
 {
     "type": "filament",
     "name": "Elegoo PLA Silk @EN4 Series",
-    "inherits": "Elegoo PLA Silk @base",
+    "inherits": "Elegoo PLA @base",
     "from": "system",
     "setting_id": "EPLASEN4",
     "instantiation": "true",
@@ -28,6 +28,15 @@
     ],
     "textured_plate_temp_initial_layer": [
         "65"
+    ],
+    "filament_density": [
+        "1.32"
+    ],
+    "nozzle_temperature": [
+        "230"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "230"
     ],
     "compatible_printers": [
         "Elegoo Neptune 4 0.4 nozzle",

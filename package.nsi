@@ -2,6 +2,10 @@
 ; Supports: English, Chinese Simplified, Thai
 
 !define LIBRARY_X64
+
+; request admin rights for all users installation
+RequestExecutionLevel admin
+
 !define PRODUCT_NAME "ElegooSlicer"
 !define PRODUCT_PUBLISHER "Shenzhen Elegoo Technology Co.,Ltd"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\elegoo-slicer.exe"
@@ -89,6 +93,9 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 Section "MainSection" SEC01
+  ; set shell context to all users
+  SetShellVarContext all
+
   ${WordFind} "$INSTDIR" "ElegooSlicer" "E+1{" $R0
   IfErrors notfound end
   notfound:
@@ -103,8 +110,8 @@ Section "MainSection" SEC01
   ; Create start menu shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe"
-  CreateShortCut "$DESKTOP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe" "" "$INSTDIR\resources\images\ElegooSlicer.ico" 0
+  CreateShortCut "$DESKTOP\ElegooSlicer.lnk" "$INSTDIR\elegoo-slicer.exe" "" "$INSTDIR\resources\images\ElegooSlicer.ico" 0
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
@@ -172,6 +179,8 @@ FunctionEnd
 
 
 Function .onInit
+  ; set shell context to all users
+  SetShellVarContext all
   SetRegView 64
 
   ; Set Thai language
@@ -231,6 +240,8 @@ FunctionEnd
 ;*********************************
 
 Section Uninstall
+  ; set shell context to all users for uninstallation
+  SetShellVarContext all
   SetRegView 64
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
@@ -248,9 +259,22 @@ Section Uninstall
 SectionEnd
 
 Function un.onInit
+<<<<<<< HEAD
   ; Set Thai language
   StrCpy $LANGUAGE ${LANG_THAI}
 
+=======
+  ; set shell context to all users for uninstallation
+  SetShellVarContext all
+  System::Call 'Kernel32::GetUserDefaultUILanguage() i.r0'
+  ${If} $0 == ${LANG_CHINESE_SIMPLIFIED}
+      StrCpy $LANGUAGE ${LANG_CHINESE_SIMPLIFIED}
+  ${Else}
+      StrCpy $LANGUAGE ${LANG_ENGLISH}
+  ${EndIf}
+  ;!insertmacro MUI_UNGETLANGUAGE
+  ;��un.onInit ��ֻ�ܵ���un��������onInit���޷�����un�����Լ�����ڽ��еļ�� ����ʵ��
+>>>>>>> d288d4e8f35fa052ecfb9b2e1eed21d7bc5c70e1
   nsProcess::_FindProcess "elegoo-slicer.exe"
   Pop $R0
   ${If} $R0 = 0

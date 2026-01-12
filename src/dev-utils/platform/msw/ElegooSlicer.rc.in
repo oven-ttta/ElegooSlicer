@@ -1,0 +1,25 @@
+1 VERSIONINFO
+FILEVERSION @ELEGOO_VERSION_MAJOR@,@ELEGOO_VERSION_MINOR@,@ELEGOO_VERSION_PATCH@,@ELEGOO_VERSION_TWEAK@
+PRODUCTVERSION @ELEGOO_VERSION_MAJOR@,@ELEGOO_VERSION_MINOR@,@ELEGOO_VERSION_PATCH@,@ELEGOO_VERSION_TWEAK@
+{
+ BLOCK "StringFileInfo"
+ {
+  BLOCK "040904E4"
+  {
+   VALUE "CompanyName", "Shenzhen Elegoo Technology Co.,Ltd"
+   VALUE "FileDescription", "@SLIC3R_APP_NAME@"
+   VALUE "FileVersion", "@ELEGOOSLICER_VERSION@"
+   VALUE "ProductName", "@SLIC3R_APP_NAME@"
+   VALUE "ProductVersion", "@ELEGOOSLICER_VERSION@"
+   VALUE "InternalName", "@SLIC3R_APP_NAME@"
+   VALUE "LegalCopyright", "Copyright (C) 2025 ELEGOO All Rights Reserved."
+   VALUE "OriginalFilename", "elegoo-slicer.exe"
+  }
+ }
+ BLOCK "VarFileInfo"
+ {
+   VALUE "Translation", 0x409, 1252
+ }
+}
+2 ICON "@SLIC3R_RESOURCES_DIR@/images/ElegooSlicer.ico"
+1 24 "ElegooSlicer.manifest" 

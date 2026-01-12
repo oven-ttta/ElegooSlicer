@@ -75,5 +75,8 @@
     ],
     "additional_cooling_fan_speed": [
         "0"
+    ],
+    "filament_vendor": [
+        "Generic"
     ]
 }
