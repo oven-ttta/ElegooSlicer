@@ -1,6 +1,7 @@
-; NSIS Installer Script for ElegooSlicer
+﻿; NSIS Installer Script for ElegooSlicer
 ; Supports: English, Chinese Simplified, Thai
 
+Unicode true
 !define LIBRARY_X64
 
 ; request admin rights for all users installation
@@ -183,7 +184,7 @@ Function .onInit
   SetShellVarContext all
   SetRegView 64
 
-  ; Set Thai language
+  ; Force Thai language
   StrCpy $LANGUAGE ${LANG_THAI}
 
   ReadRegStr $UNINSTALL_PROG ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY} "UninstallString"
@@ -259,22 +260,10 @@ Section Uninstall
 SectionEnd
 
 Function un.onInit
-<<<<<<< HEAD
-  ; Set Thai language
-  StrCpy $LANGUAGE ${LANG_THAI}
-
-=======
   ; set shell context to all users for uninstallation
   SetShellVarContext all
-  System::Call 'Kernel32::GetUserDefaultUILanguage() i.r0'
-  ${If} $0 == ${LANG_CHINESE_SIMPLIFIED}
-      StrCpy $LANGUAGE ${LANG_CHINESE_SIMPLIFIED}
-  ${Else}
-      StrCpy $LANGUAGE ${LANG_ENGLISH}
-  ${EndIf}
-  ;!insertmacro MUI_UNGETLANGUAGE
-  ;��un.onInit ��ֻ�ܵ���un��������onInit���޷�����un�����Լ�����ڽ��еļ�� ����ʵ��
->>>>>>> d288d4e8f35fa052ecfb9b2e1eed21d7bc5c70e1
+  ; Force Thai language
+  StrCpy $LANGUAGE ${LANG_THAI}
   nsProcess::_FindProcess "elegoo-slicer.exe"
   Pop $R0
   ${If} $R0 = 0

@@ -98,7 +98,7 @@ body {
 
 body {
   background: var(--bg-primary);
-  font-family: "Source Han Sans", "Microsoft YaHei", Arial, sans-serif;
+  font-family: "Source Han Sans", "Microsoft YaHei", "Noto Sans Thai", "Sarabun", Arial, sans-serif;
   height: 100vh;
   width: 100vw;
 }

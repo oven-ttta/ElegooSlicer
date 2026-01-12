@@ -127,6 +127,8 @@ std::string INetworkHelper::getLanguage() {
         language = "tr";
     } else if (language == "CS") {
         language = "cs";
+    } else if (language == "TH") {
+        language = "th";
     } else {
         language = "en";
     }

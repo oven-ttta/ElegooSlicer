@@ -7,7 +7,7 @@ echo ==========================================
 echo.
 
 REM Set version
-set PRODUCT_VERSION=1.1.8.0
+set PRODUCT_VERSION=1.3.0.11
 set INSTALL_PATH=%~dp0build\package
 
 REM Check if NSIS is installed

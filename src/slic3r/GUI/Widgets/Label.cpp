@@ -22,6 +22,10 @@ wxFont Label::sysFont(int size, bool bold)
     if (wxLocale::GetSystemLanguage() == wxLANGUAGE_KOREAN) {
         face = "NanumGothic";
     }
+    // Check if the current locale is Thai
+    else if (wxLocale::GetSystemLanguage() == wxLANGUAGE_THAI) {
+        face = "Noto Sans Thai";
+    }
 
     wxFont font{size, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, bold ? wxFONTWEIGHT_BOLD : wxFONTWEIGHT_NORMAL, false, face};
     font.SetFaceName(face);
@@ -79,6 +83,13 @@ void Label::initSysFont()
     result = wxFont::AddPrivateFont(font_path);
     // BOOST_LOG_TRIVIAL(info) << boost::format("add font of NanumGothic-Bold returns %1%")%result;
     printf("add font of NanumGothic-Bold returns %d\n", result);
+    // Adding NotoSansThai Regular and Bold for Thai language support
+    font_path = wxString::FromUTF8(resource_path + "/fonts/NotoSansThai-Regular.ttf");
+    result = wxFont::AddPrivateFont(font_path);
+    printf("add font of NotoSansThai-Regular returns %d\n", result);
+    font_path = wxString::FromUTF8(resource_path + "/fonts/NotoSansThai-Bold.ttf");
+    result = wxFont::AddPrivateFont(font_path);
+    printf("add font of NotoSansThai-Bold returns %d\n", result);
 #endif
     Head_48 = Label::sysFont(48, true);
     Head_32 = Label::sysFont(32, true);

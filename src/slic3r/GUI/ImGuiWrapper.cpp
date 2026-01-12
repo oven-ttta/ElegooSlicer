@@ -2686,11 +2686,16 @@ void ImGuiWrapper::init_font(bool compress)
     //https://github.com/ocornut/imgui/issues/220
 
     // Orca: temp fix for Korean font
+    // ElegooSlicer: added Thai font support with merge mode
     auto font_name_regular = "HarmonyOS_Sans_SC_Regular.ttf";
     auto font_name_bold = "HarmonyOS_Sans_SC_Bold.ttf";
+    bool need_thai_merge = false;
     if(m_glyph_ranges == ImGui::GetIO().Fonts->GetGlyphRangesKorean()) {
         font_name_regular = "NanumGothic-Regular.ttf";
         font_name_bold = "NanumGothic-Bold.ttf";
+    } else if(m_glyph_ranges == ImGui::GetIO().Fonts->GetGlyphRangesThai()) {
+        // For Thai, use HarmonyOS as base font and merge Thai font
+        need_thai_merge = true;
     }
     default_font = io.Fonts->AddFontFromFileTTF((Slic3r::resources_dir() + "/fonts/" + font_name_regular).c_str(), m_font_size, &cfg, ranges.Data);
     if (default_font == nullptr) {
@@ -2700,10 +2705,26 @@ void ImGuiWrapper::init_font(bool compress)
         }
     }
 
+    // Merge Thai font if needed
+    if (need_thai_merge) {
+        ImFontConfig thai_cfg = ImFontConfig();
+        thai_cfg.MergeMode = true;
+        thai_cfg.OversampleH = thai_cfg.OversampleV = 1;
+        io.Fonts->AddFontFromFileTTF((Slic3r::resources_dir() + "/fonts/NotoSansThai-Regular.ttf").c_str(), m_font_size, &thai_cfg, ImGui::GetIO().Fonts->GetGlyphRangesThai());
+    }
+
     bold_font        = io.Fonts->AddFontFromFileTTF((Slic3r::resources_dir() + "/fonts/" + font_name_bold).c_str(), m_font_size, &cfg, ranges.Data);
     if (bold_font == nullptr) {
         bold_font = io.Fonts->AddFontDefault();
         if (bold_font == nullptr) { throw Slic3r::RuntimeError("ImGui: Could not load deafult font"); }
+    }
+
+    // Merge Thai bold font if needed
+    if (need_thai_merge) {
+        ImFontConfig thai_cfg = ImFontConfig();
+        thai_cfg.MergeMode = true;
+        thai_cfg.OversampleH = thai_cfg.OversampleV = 1;
+        io.Fonts->AddFontFromFileTTF((Slic3r::resources_dir() + "/fonts/NotoSansThai-Bold.ttf").c_str(), m_font_size, &thai_cfg, ImGui::GetIO().Fonts->GetGlyphRangesThai());
     }
 
 #ifdef _WIN32

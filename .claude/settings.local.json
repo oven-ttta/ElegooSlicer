@@ -7,7 +7,27 @@
       "Bash(git -C \"D:\\\\ElegooSlicer\" merge-base --is-ancestor v1.1.8.2 HEAD)",
       "Bash(git -C \"D:\\\\ElegooSlicer\" log --oneline v1.1.8.2..HEAD)",
       "Bash(git -C \"D:\\\\ElegooSlicer\" rev-list:*)",
-      "Bash(git -C \"D:\\\\ElegooSlicer\" log --oneline upstream/main..HEAD)"
+      "Bash(git -C \"D:\\\\ElegooSlicer\" log --oneline upstream/main..HEAD)",
+      "Bash(git -C \"D:\\\\ElegooSlicer\" status)",
+      "Bash(git -C \"D:\\\\ElegooSlicer\" status --porcelain \"download-page/\")",
+      "Bash(git -C:*)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)",
+      "Bash(python fix_thai_translations.py:*)",
+      "Bash(python:*)",
+      "Bash(cmake:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:scontent.fnak3-1.fna.fbcdn.net)",
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(msgfmt:*)",
+      "Bash(msgattrib:*)",
+      "Bash(msgcmp:*)",
+      "Bash(msgmerge:*)",
+      "Bash(start \"\" \"D:\\\\ElegooSlicer\\\\build\\\\src\\\\Release\\\\elegoo-slicer.exe\")",
+      "Bash(vercel --prod:*)"
     ]
   }
 }
