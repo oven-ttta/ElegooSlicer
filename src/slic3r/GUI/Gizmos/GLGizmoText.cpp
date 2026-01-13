@@ -47,7 +47,7 @@ static std::vector<std::string> font_black_list = {
 #endif
 };
 
-static const wxFontEncoding font_encoding = wxFontEncoding::wxFONTENCODING_SYSTEM;
+static const wxFontEncoding font_encoding = wxFontEncoding::wxFONTENCODING_UNICODE;
 
 #ifdef _WIN32
 static bool load_hfont(void *hfont, DWORD &dwTable, DWORD &dwOffset, size_t &size, HDC hdc = nullptr)
@@ -144,6 +144,18 @@ std::vector<std::string> init_face_names()
     for (auto iter = font_black_list.begin(); iter != font_black_list.end(); ++iter) {
         valid_font_names.erase(std::remove(valid_font_names.begin(), valid_font_names.end(), *iter), valid_font_names.end());
     }
+
+    // Add bundled fonts from OCCT fonts map (includes Thai and other fonts from resources)
+    std::map<std::string, std::string> occt_fonts = get_occt_fonts_maps();
+    for (const auto& font_pair : occt_fonts) {
+        // Check if font is not already in the list
+        if (std::find(valid_font_names.begin(), valid_font_names.end(), font_pair.first) == valid_font_names.end()) {
+            valid_font_names.push_back(font_pair.first);
+        }
+    }
+
+    // Sort the final list
+    std::sort(valid_font_names.begin(), valid_font_names.end());
 
     return valid_font_names;
 }

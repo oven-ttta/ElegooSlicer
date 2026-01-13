@@ -57,31 +57,11 @@ std::vector<std::string> init_occt_fonts()
     g_occt_fonts_maps.clear();
 
     BOOST_LOG_TRIVIAL(info) << "init_occt_fonts start";
-
-    // Add bundled fonts from resources directory for all platforms
-    std::string fonts_dir = Slic3r::resources_dir() + "/fonts/";
-
-    // HarmonyOS Sans SC (Chinese)
-    g_occt_fonts_maps.insert(std::make_pair("HarmonyOS Sans SC", fonts_dir + "HarmonyOS_Sans_SC_Regular.ttf"));
-
-    // Thai fonts
-    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai", fonts_dir + "NotoSansThai-Regular.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Bold", fonts_dir + "NotoSansThai-Bold.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Light", fonts_dir + "NotoSansThai-Light.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Medium", fonts_dir + "NotoSansThai-Medium.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("TH Sarabun New", fonts_dir + "THSarabunNew.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("TH Sarabun New Bold", fonts_dir + "THSarabunNew-Bold.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("Sarabun", fonts_dir + "Sarabun-Regular.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("Kanit", fonts_dir + "Kanit-Regular.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("Prompt", fonts_dir + "Prompt-Regular.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("Mitr", fonts_dir + "Mitr-Regular.ttf"));
-
-    // Korean fonts
-    g_occt_fonts_maps.insert(std::make_pair("Noto Sans KR", fonts_dir + "NotoSansKR-Regular.ttf"));
-    g_occt_fonts_maps.insert(std::make_pair("Nanum Gothic", fonts_dir + "NanumGothic-Regular.ttf"));
-
-    BOOST_LOG_TRIVIAL(info) << "Added bundled fonts from resources directory";
-
+#ifdef __APPLE__
+    //from resource
+    stdFontNames.push_back("HarmonyOS Sans SC");
+    g_occt_fonts_maps.insert(std::make_pair("HarmoneyOS Sans SC", Slic3r::resources_dir() + "/fonts/" + "HarmonyOS_Sans_SC_Regular.ttf"));
+#endif
     for (auto afn : availFontNames) {
 #ifdef __APPLE__
         if(afn->String().StartsWith("."))
