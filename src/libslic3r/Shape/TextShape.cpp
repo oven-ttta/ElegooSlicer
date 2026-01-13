@@ -64,17 +64,69 @@ std::vector<std::string> init_occt_fonts()
     // HarmonyOS Sans SC (Chinese)
     g_occt_fonts_maps.insert(std::make_pair("HarmonyOS Sans SC", fonts_dir + "HarmonyOS_Sans_SC_Regular.ttf"));
 
-    // Thai fonts
+    // Thai fonts - Noto Sans Thai family
     g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai", fonts_dir + "NotoSansThai-Regular.ttf"));
     g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Bold", fonts_dir + "NotoSansThai-Bold.ttf"));
     g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Light", fonts_dir + "NotoSansThai-Light.ttf"));
     g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Medium", fonts_dir + "NotoSansThai-Medium.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Black", fonts_dir + "NotoSansThai-Black.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Thin", fonts_dir + "NotoSansThai-Thin.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraLight", fonts_dir + "NotoSansThai-ExtraLight.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiBold", fonts_dir + "NotoSansThai-SemiBold.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraBold", fonts_dir + "NotoSansThai-ExtraBold.ttf"));
+
+    // Noto Sans Thai Condensed variants
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed", fonts_dir + "NotoSansThai-Condensed.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed Bold", fonts_dir + "NotoSansThai-CondensedBold.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed Light", fonts_dir + "NotoSansThai-CondensedLight.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed Medium", fonts_dir + "NotoSansThai-CondensedMedium.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed Black", fonts_dir + "NotoSansThai-CondensedBlack.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed Thin", fonts_dir + "NotoSansThai-CondensedThin.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed ExtraLight", fonts_dir + "NotoSansThai-CondensedExtraLight.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed SemiBold", fonts_dir + "NotoSansThai-CondensedSemiBold.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai Condensed ExtraBold", fonts_dir + "NotoSansThai-CondensedExtraBold.ttf"));
+
+    // Noto Sans Thai SemiCondensed variants
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed", fonts_dir + "NotoSansThai-SemiCondensed.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed Bold", fonts_dir + "NotoSansThai-SemiCondensedBold.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed Light", fonts_dir + "NotoSansThai-SemiCondensedLight.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed Medium", fonts_dir + "NotoSansThai-SemiCondensedMedium.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed Black", fonts_dir + "NotoSansThai-SemiCondensedBlack.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed Thin", fonts_dir + "NotoSansThai-SemiCondensedThin.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed ExtraLight", fonts_dir + "NotoSansThai-SemiCondensedExtraLight.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed SemiBold", fonts_dir + "NotoSansThai-SemiCondensedSemiBold.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai SemiCondensed ExtraBold", fonts_dir + "NotoSansThai-SemiCondensedExtraBold.ttf"));
+
+    // Noto Sans Thai ExtraCondensed variants
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed", fonts_dir + "NotoSansThai-ExtraCondensed.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed Bold", fonts_dir + "NotoSansThai-ExtraCondensedBold.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed Light", fonts_dir + "NotoSansThai-ExtraCondensedLight.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed Medium", fonts_dir + "NotoSansThai-ExtraCondensedMedium.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed Black", fonts_dir + "NotoSansThai-ExtraCondensedBlack.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed Thin", fonts_dir + "NotoSansThai-ExtraCondensedThin.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed ExtraLight", fonts_dir + "NotoSansThai-ExtraCondensedExtraLight.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed SemiBold", fonts_dir + "NotoSansThai-ExtraCondensedSemiBold.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Noto Sans Thai ExtraCondensed ExtraBold", fonts_dir + "NotoSansThai-ExtraCondensedExtraBold.ttf"));
+
+    // Thai fonts - TH Sarabun New
     g_occt_fonts_maps.insert(std::make_pair("TH Sarabun New", fonts_dir + "THSarabunNew.ttf"));
     g_occt_fonts_maps.insert(std::make_pair("TH Sarabun New Bold", fonts_dir + "THSarabunNew-Bold.ttf"));
+
+    // Thai fonts - Sarabun
     g_occt_fonts_maps.insert(std::make_pair("Sarabun", fonts_dir + "Sarabun-Regular.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Sarabun Bold", fonts_dir + "Sarabun-Bold.ttf"));
+
+    // Thai fonts - Kanit
     g_occt_fonts_maps.insert(std::make_pair("Kanit", fonts_dir + "Kanit-Regular.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Kanit Bold", fonts_dir + "Kanit-Bold.ttf"));
+
+    // Thai fonts - Prompt
     g_occt_fonts_maps.insert(std::make_pair("Prompt", fonts_dir + "Prompt-Regular.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Prompt Bold", fonts_dir + "Prompt-Bold.ttf"));
+
+    // Thai fonts - Mitr
     g_occt_fonts_maps.insert(std::make_pair("Mitr", fonts_dir + "Mitr-Regular.ttf"));
+    g_occt_fonts_maps.insert(std::make_pair("Mitr Bold", fonts_dir + "Mitr-Bold.ttf"));
 
     // Korean fonts
     g_occt_fonts_maps.insert(std::make_pair("Noto Sans KR", fonts_dir + "NotoSansKR-Regular.ttf"));
