@@ -27,7 +27,18 @@
       "Bash(msgcmp:*)",
       "Bash(msgmerge:*)",
       "Bash(start \"\" \"D:\\\\ElegooSlicer\\\\build\\\\src\\\\Release\\\\elegoo-slicer.exe\")",
-      "Bash(vercel --prod:*)"
+      "Bash(vercel --prod:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd /c \"cd /d D:\\\\ElegooSlicer && \"\"C:\\\\Program Files \\(x86\\)\\\\NSIS\\\\makensis.exe\"\" /DPRODUCT_VERSION=1.3.0.11 /DINSTALL_PATH=D:\\\\ElegooSlicer\\\\build\\\\package package.nsi\")",
+      "Bash(cmd /c \"\"\"C:\\\\Program Files \\(x86\\)\\\\NSIS\\\\makensis.exe\"\" /DPRODUCT_VERSION=1.3.0.11 \"\"/DINSTALL_PATH=D:\\\\ElegooSlicer\\\\build\\\\package\"\" \"\"D:\\\\ElegooSlicer\\\\package.nsi\"\"\")",
+      "Bash(\"C:/Program Files \\(x86\\)/NSIS/makensis.exe\" /DPRODUCT_VERSION=1.3.0.11 \"/DINSTALL_PATH=D:/ElegooSlicer/build/package\" \"D:/ElegooSlicer/package.nsi\")",
+      "Bash(MSYS_NO_PATHCONV=1 \"C:/Program Files \\(x86\\)/NSIS/makensis.exe\":*)",
+      "Bash(powershell -Command:*)",
+      "Bash(where:*)",
+      "WebFetch(domain:console-minio.ovenx.shop)",
+      "Bash(\"D:/ElegooSlicer/mc.exe\" alias set ovenx https://minio.ovenx.shop admin admin12345)",
+      "Bash(\"D:/ElegooSlicer/mc.exe\" ls ovenx/elegooslicer/releases/)",
+      "Bash(\"D:/ElegooSlicer/mc.exe\" cp:*)"
     ]
   }
 }
