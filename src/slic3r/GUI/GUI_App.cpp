@@ -75,6 +75,7 @@
 #include "Plater.hpp"
 #include "GLCanvas3D.hpp"
 #include "GeneratedConfig.hpp"
+#include "GPU/GPUSlicingBridge.hpp"
 
 #include "../Utils/PresetUpdater.hpp"
 #include "../Utils/PrintHost.hpp"
@@ -877,6 +878,12 @@ void GUI_App::post_init()
             plater_->canvas3D()->init();
 
             BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ", finished init canvas3D";
+
+            // Initialize GPU slicing bridge after OpenGL context is ready
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ", initializing GPU slicing bridge";
+            init_gpu_slicing_bridge();
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ", finished GPU slicing bridge initialization";
+
             wxGetApp().imgui()->new_frame();
 
             BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << ", finished init imgui frame";
@@ -2196,6 +2203,9 @@ bool GUI_App::OnInit()
 
 int GUI_App::OnExit()
 {
+    // Shutdown GPU slicing bridge
+    shutdown_gpu_slicing_bridge();
+
     stop_sync_user_preset();
 
     if (m_device_manager) {

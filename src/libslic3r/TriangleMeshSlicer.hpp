@@ -5,8 +5,40 @@
 #include <vector>
 #include "Polygon.hpp"
 #include "ExPolygon.hpp"
+#include "TriangleMesh.hpp"
 
 namespace Slic3r {
+
+// GPU Slicing result - intersection lines per slice with edge connectivity info
+struct GPUIntersectionResult {
+    Point a;
+    Point b;
+    int a_id { -1 };       // Vertex ID if endpoint is at a mesh vertex, -1 otherwise
+    int b_id { -1 };       // Vertex ID if endpoint is at a mesh vertex, -1 otherwise
+    int edge_a_id { -1 };  // Edge ID if endpoint is on edge interior, -1 otherwise
+    int edge_b_id { -1 };  // Edge ID if endpoint is on edge interior, -1 otherwise
+};
+using GPUIntersectionLines = std::vector<GPUIntersectionResult>;
+
+// GPU Slicing callback type - returns intersection lines with edge connectivity
+// This allows the existing make_loops algorithm to chain lines into polygons
+// face_edge_ids: Pre-computed edge IDs for each triangle (from its_face_edge_ids)
+// Returns empty vector if GPU slicing is not available or fails
+using GPUSlicingCallback = std::function<std::vector<GPUIntersectionLines>(
+    const indexed_triangle_set& mesh,
+    const std::vector<float>& zs,
+    const Transform3d& trafo,
+    const std::vector<Vec3i32>& face_edge_ids
+)>;
+
+// Set the GPU slicing callback (called from GUI layer)
+void set_gpu_slicing_callback(GPUSlicingCallback callback);
+
+// Check if GPU slicing is enabled
+bool is_gpu_slicing_enabled();
+
+// Force enable/disable GPU slicing
+void set_gpu_slicing_enabled(bool enabled);
 
 struct MeshSlicingParams
 {

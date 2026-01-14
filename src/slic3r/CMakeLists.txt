@@ -177,6 +177,10 @@ set(SLIC3R_GUI_SOURCES
     GUI/GLShader.hpp
     GUI/GPUColorPicker.cpp
     GUI/GPUColorPicker.hpp
+    GUI/GPU/GPUMeshSlicer.cpp
+    GUI/GPU/GPUMeshSlicer.hpp
+    GUI/GPU/GPUSlicingBridge.cpp
+    GUI/GPU/GPUSlicingBridge.hpp
     GUI/GLShadersManager.cpp
     GUI/GLShadersManager.hpp
     GUI/GLTexture.cpp

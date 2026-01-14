@@ -41,6 +41,30 @@
 #endif
 
 namespace Slic3r {
+
+// GPU Slicing callback mechanism
+static GPUSlicingCallback s_gpu_slicing_callback = nullptr;
+static bool s_gpu_slicing_enabled = true; // Enabled by default
+
+void set_gpu_slicing_callback(GPUSlicingCallback callback)
+{
+    s_gpu_slicing_callback = callback;
+    if (callback) {
+        BOOST_LOG_TRIVIAL(info) << "GPU Slicing: Callback registered";
+    }
+}
+
+bool is_gpu_slicing_enabled()
+{
+    return s_gpu_slicing_enabled && s_gpu_slicing_callback != nullptr;
+}
+
+void set_gpu_slicing_enabled(bool enabled)
+{
+    s_gpu_slicing_enabled = enabled;
+    BOOST_LOG_TRIVIAL(info) << "GPU Slicing: " << (enabled ? "Enabled" : "Disabled");
+}
+
 const float epson = 1e-3;
 bool is_equal(float lh, float rh)
 {
@@ -1869,7 +1893,7 @@ std::vector<Polygons> slice_mesh(
     std::function<void()>             throw_on_cancel)
 {
     BOOST_LOG_TRIVIAL(debug) << "slice_mesh to polygons";
-       
+
     std::vector<IntersectionLines> lines;
 
     {
@@ -1878,22 +1902,59 @@ std::vector<Polygons> slice_mesh(
         // However facets_edges assigns a single edge ID to two triangles only, thus when factoring facets_edges out, one will have
         // to make sure that no code relies on it.
         std::vector<Vec3i32> face_edge_ids = its_face_edge_ids(mesh);
-        if (zs.size() <= 1) {
-            // It likely is not worthwile to copy the vertices. Apply the transformation in place.
-            if (is_identity(params.trafo)) {
-                lines = slice_make_lines(
-                    mesh.vertices, [](const Vec3f &p) { return Vec3f(scaled<float>(p.x()), scaled<float>(p.y()), p.z()); }, 
-                    mesh.indices, face_edge_ids, zs, throw_on_cancel);
+
+        // Try GPU slicing if enabled and callback is set
+        bool gpu_slicing_done = false;
+        BOOST_LOG_TRIVIAL(warning) << "slice_mesh: GPU slicing enabled=" << is_gpu_slicing_enabled()
+                                    << ", callback set=" << (s_gpu_slicing_callback ? "yes" : "no");
+        if (is_gpu_slicing_enabled() && s_gpu_slicing_callback) {
+            BOOST_LOG_TRIVIAL(warning) << "slice_mesh: Attempting GPU slicing for " << mesh.indices.size() << " triangles, " << zs.size() << " slices";
+
+            std::vector<GPUIntersectionLines> gpu_lines = s_gpu_slicing_callback(mesh, zs, params.trafo, face_edge_ids);
+
+            if (!gpu_lines.empty() && gpu_lines.size() == zs.size()) {
+                // Convert GPUIntersectionLines to IntersectionLines
+                lines.resize(zs.size());
+                for (size_t slice_idx = 0; slice_idx < gpu_lines.size(); ++slice_idx) {
+                    IntersectionLines& slice_lines = lines[slice_idx];
+                    slice_lines.reserve(gpu_lines[slice_idx].size());
+                    for (const GPUIntersectionResult& gpu_line : gpu_lines[slice_idx]) {
+                        IntersectionLine il;
+                        il.a = gpu_line.a;
+                        il.b = gpu_line.b;
+                        il.a_id = gpu_line.a_id;
+                        il.b_id = gpu_line.b_id;
+                        il.edge_a_id = gpu_line.edge_a_id;
+                        il.edge_b_id = gpu_line.edge_b_id;
+                        slice_lines.emplace_back(std::move(il));
+                    }
+                }
+                gpu_slicing_done = true;
+                BOOST_LOG_TRIVIAL(warning) << "slice_mesh: GPU slicing completed successfully with " << lines.size() << " slices";
             } else {
-                // Transform the vertices, scale up in XY, not in Z.
-                Transform3f tf = make_trafo_for_slicing(params.trafo);
-                lines = slice_make_lines(mesh.vertices, [tf](const Vec3f &p) { return tf * p; }, mesh.indices, face_edge_ids, zs, throw_on_cancel);
+                BOOST_LOG_TRIVIAL(warning) << "slice_mesh: GPU slicing returned empty/invalid results, falling back to CPU";
             }
-        } else {
-            // Copy and scale vertices in XY, don't scale in Z. Possibly apply the transformation.
-            lines = slice_make_lines(
-                transform_mesh_vertices_for_slicing(mesh, params.trafo), 
-                [](const Vec3f &p) { return p; },  mesh.indices, face_edge_ids, zs, throw_on_cancel);
+        }
+
+        // Fall back to CPU slicing if GPU slicing was not done
+        if (!gpu_slicing_done) {
+            if (zs.size() <= 1) {
+                // It likely is not worthwile to copy the vertices. Apply the transformation in place.
+                if (is_identity(params.trafo)) {
+                    lines = slice_make_lines(
+                        mesh.vertices, [](const Vec3f &p) { return Vec3f(scaled<float>(p.x()), scaled<float>(p.y()), p.z()); },
+                        mesh.indices, face_edge_ids, zs, throw_on_cancel);
+                } else {
+                    // Transform the vertices, scale up in XY, not in Z.
+                    Transform3f tf = make_trafo_for_slicing(params.trafo);
+                    lines = slice_make_lines(mesh.vertices, [tf](const Vec3f &p) { return tf * p; }, mesh.indices, face_edge_ids, zs, throw_on_cancel);
+                }
+            } else {
+                // Copy and scale vertices in XY, don't scale in Z. Possibly apply the transformation.
+                lines = slice_make_lines(
+                    transform_mesh_vertices_for_slicing(mesh, params.trafo),
+                    [](const Vec3f &p) { return p; },  mesh.indices, face_edge_ids, zs, throw_on_cancel);
+            }
         }
     }
 

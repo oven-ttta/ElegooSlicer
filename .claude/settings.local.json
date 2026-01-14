@@ -38,7 +38,9 @@
       "WebFetch(domain:console-minio.ovenx.shop)",
       "Bash(\"D:/ElegooSlicer/mc.exe\" alias set ovenx https://minio.ovenx.shop admin admin12345)",
       "Bash(\"D:/ElegooSlicer/mc.exe\" ls ovenx/elegooslicer/releases/)",
-      "Bash(\"D:/ElegooSlicer/mc.exe\" cp:*)"
+      "Bash(\"D:/ElegooSlicer/mc.exe\" cp:*)",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(ping:*)"
     ]
   }
 }

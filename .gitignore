@@ -51,3 +51,4 @@ work/
 example/
 .clangd
 dev_log/
+.claude/settings.local.json

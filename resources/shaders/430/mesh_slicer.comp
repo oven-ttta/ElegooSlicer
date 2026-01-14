@@ -1,0 +1,212 @@
+#version 430 core
+
+// Work group size - 256 threads per group
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+// ============================================================================
+// Data Structures
+// ============================================================================
+
+// Input vertex data (vec4 for alignment, w unused)
+layout(std430, binding = 0) readonly buffer VertexBuffer {
+    vec4 vertices[];
+};
+
+// Triangle indices (ivec4 for alignment, w unused)
+layout(std430, binding = 1) readonly buffer IndexBuffer {
+    ivec4 indices[];
+};
+
+// Slice Z heights (sorted ascending)
+layout(std430, binding = 2) readonly buffer SliceZBuffer {
+    float slice_zs[];
+};
+
+// Output intersection lines
+// Each line: (ax, ay, bx, by, slice_id, triangle_id, edge_flags, padding)
+layout(std430, binding = 3) buffer OutputBuffer {
+    vec4 intersections[];  // Packed as 2 vec4s per intersection
+};
+
+// Atomic counter for output index
+layout(std430, binding = 4) buffer CounterBuffer {
+    uint intersection_counts[];  // Per-slice intersection count
+};
+
+// ============================================================================
+// Uniforms
+// ============================================================================
+uniform mat4 u_transform;
+uniform int u_num_triangles;
+uniform int u_num_slices;
+uniform int u_max_intersections;
+uniform float u_scale_xy;  // SCALING_FACTOR for coordinate conversion
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+// Binary search to find first slice >= min_z
+int lower_bound_slice(float min_z) {
+    int left = 0;
+    int right = u_num_slices;
+    while (left < right) {
+        int mid = (left + right) / 2;
+        if (slice_zs[mid] < min_z) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    return left;
+}
+
+// Binary search to find first slice > max_z
+int upper_bound_slice(float max_z) {
+    int left = 0;
+    int right = u_num_slices;
+    while (left < right) {
+        int mid = (left + right) / 2;
+        if (slice_zs[mid] <= max_z) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    return left;
+}
+
+// Calculate intersection point on edge at given Z
+vec2 edge_intersection(vec3 v1, vec3 v2, float z) {
+    float t = (z - v1.z) / (v2.z - v1.z);
+    float x = v1.x + t * (v2.x - v1.x);
+    float y = v1.y + t * (v2.y - v1.y);
+    return vec2(x, y);
+}
+
+// Check if value is between a and b (inclusive)
+bool between(float val, float a, float b) {
+    float min_val = min(a, b);
+    float max_val = max(a, b);
+    return val >= min_val && val <= max_val;
+}
+
+// ============================================================================
+// Main Compute Shader
+// ============================================================================
+void main() {
+    uint triangle_id = gl_GlobalInvocationID.x;
+
+    // Bounds check
+    if (triangle_id >= u_num_triangles) {
+        return;
+    }
+
+    // Load triangle indices
+    ivec3 idx = indices[triangle_id].xyz;
+
+    // Load and transform vertices
+    vec4 v0_raw = vertices[idx.x];
+    vec4 v1_raw = vertices[idx.y];
+    vec4 v2_raw = vertices[idx.z];
+
+    // Apply transformation matrix
+    vec4 v0_transformed = u_transform * vec4(v0_raw.xyz, 1.0);
+    vec4 v1_transformed = u_transform * vec4(v1_raw.xyz, 1.0);
+    vec4 v2_transformed = u_transform * vec4(v2_raw.xyz, 1.0);
+
+    // Extract transformed positions
+    vec3 v0 = v0_transformed.xyz;
+    vec3 v1 = v1_transformed.xyz;
+    vec3 v2 = v2_transformed.xyz;
+
+    // Scale XY coordinates (keep Z unscaled for layer heights)
+    v0.xy *= u_scale_xy;
+    v1.xy *= u_scale_xy;
+    v2.xy *= u_scale_xy;
+
+    // Calculate Z bounds of triangle
+    float min_z = min(v0.z, min(v1.z, v2.z));
+    float max_z = max(v0.z, max(v1.z, v2.z));
+
+    // Find slice range that intersects this triangle
+    int first_slice = lower_bound_slice(min_z);
+    int last_slice = upper_bound_slice(max_z);
+
+    // Skip if no slices intersect
+    if (first_slice >= last_slice) {
+        return;
+    }
+
+    // Process each intersecting slice
+    for (int slice_idx = first_slice; slice_idx < last_slice; slice_idx++) {
+        float slice_z = slice_zs[slice_idx];
+
+        // Collect intersection points (max 2 for a triangle)
+        vec2 points[2];
+        int num_points = 0;
+        int edge_flags = 0;  // Bit flags for which edges intersect
+
+        // Edge 0: v0 -> v1
+        if (between(slice_z, v0.z, v1.z) && v0.z != v1.z) {
+            points[num_points] = edge_intersection(v0, v1, slice_z);
+            edge_flags |= (1 << 0);
+            num_points++;
+        }
+
+        // Edge 1: v1 -> v2
+        if (num_points < 2 && between(slice_z, v1.z, v2.z) && v1.z != v2.z) {
+            points[num_points] = edge_intersection(v1, v2, slice_z);
+            edge_flags |= (1 << 1);
+            num_points++;
+        }
+
+        // Edge 2: v2 -> v0
+        if (num_points < 2 && between(slice_z, v2.z, v0.z) && v2.z != v0.z) {
+            points[num_points] = edge_intersection(v2, v0, slice_z);
+            edge_flags |= (1 << 2);
+            num_points++;
+        }
+
+        // Handle vertex-on-plane cases
+        float eps = 1e-6;
+        if (num_points < 2 && abs(v0.z - slice_z) < eps) {
+            points[num_points] = v0.xy;
+            edge_flags |= (1 << 3);  // v0 on plane
+            num_points++;
+        }
+        if (num_points < 2 && abs(v1.z - slice_z) < eps) {
+            points[num_points] = v1.xy;
+            edge_flags |= (1 << 4);  // v1 on plane
+            num_points++;
+        }
+        if (num_points < 2 && abs(v2.z - slice_z) < eps) {
+            points[num_points] = v2.xy;
+            edge_flags |= (1 << 5);  // v2 on plane
+            num_points++;
+        }
+
+        // Only output if we have exactly 2 intersection points (a line segment)
+        if (num_points == 2) {
+            // Atomic increment to get output slot
+            uint output_idx = atomicAdd(intersection_counts[slice_idx], 1);
+
+            // Check bounds
+            if (output_idx < u_max_intersections) {
+                // Calculate global output index
+                uint global_idx = uint(slice_idx) * uint(u_max_intersections) + output_idx;
+
+                // Write intersection line (2 vec4s per intersection)
+                // vec4 0: (ax, ay, bx, by)
+                // vec4 1: (slice_id, triangle_id, edge_flags, reserved)
+                intersections[global_idx * 2] = vec4(points[0], points[1]);
+                intersections[global_idx * 2 + 1] = vec4(
+                    float(slice_idx),
+                    float(triangle_id),
+                    float(edge_flags),
+                    0.0
+                );
+            }
+        }
+    }
+}

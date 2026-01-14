@@ -16,6 +16,8 @@
 #include "Widgets/ComboBox.hpp"
 #include "Widgets/RadioBox.hpp"
 #include "Widgets/TextInput.hpp"
+#include "GPU/GPUSlicingBridge.hpp"
+#include "libslic3r/TriangleMeshSlicer.hpp"
 #include <wx/listimpl.cpp>
 #include <wx/display.h>
 #include <map>
@@ -829,6 +831,13 @@ wxBoxSizer *PreferencesDialog::create_item_checkbox(wxString title, wxWindow *pa
             }
         }
 
+        // GPU Slicing toggle
+        if (param == "use_gpu_slicing") {
+            bool use_gpu = app_config->get_bool("use_gpu_slicing");
+            set_gpu_slicing_enabled(use_gpu);
+            BOOST_LOG_TRIVIAL(info) << "GPU Slicing preference changed: " << (use_gpu ? "enabled" : "disabled");
+        }
+
         // webview  dump_vedio
         if (param == "internal_developer_mode") {
             m_internal_developer_mode_def = app_config->get("internal_developer_mode");
@@ -1362,6 +1371,15 @@ wxWindow* PreferencesDialog::create_general_page()
 
     sizer_page->Add(title_downloads, 0, wxTOP| wxEXPAND, FromDIP(20));
     sizer_page->Add(item_downloads, 0, wxEXPAND, FromDIP(3));
+
+    // GPU Slicing Performance section
+    auto title_performance = create_item_title(_L("Performance"), page, _L("Performance settings for slicing"));
+    auto item_gpu_slicing = create_item_checkbox(_L("Use GPU for slicing"), page,
+        _L("Enable GPU acceleration for slicing. This reduces CPU and RAM usage by offloading mesh intersection calculations to the GPU. Recommended for large models."),
+        50, "use_gpu_slicing");
+
+    sizer_page->Add(title_performance, 0, wxTOP | wxEXPAND, FromDIP(20));
+    sizer_page->Add(item_gpu_slicing, 0, wxTOP, FromDIP(3));
 
 #ifdef _WIN32
     sizer_page->Add(title_darkmode, 0, wxTOP | wxEXPAND, FromDIP(20));
